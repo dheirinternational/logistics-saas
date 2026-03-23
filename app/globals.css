@@ -9,6 +9,10 @@
     --color-dark: #000;
     --color-light: #FFF;
     
+    /* Text colors */
+    --color-primary-text: #000;
+    --color-secondary-text: #FFF;
+
     /*Padding*/
     --spacing-body: 16px;
 }
