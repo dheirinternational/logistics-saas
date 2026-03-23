@@ -34,3 +34,18 @@
 button{
   @apply active:scale-95 cursor-pointer transition-all ease-out duration-600
 }
+
+.dark{
+
+      /* Theme colors */
+    --color-primary: #101418;
+    --color-accent-red: #f26430;
+    --color-accent-blue: #005eff;
+    --color-dark: #ffffff;
+    --color-light: #000000;
+    
+    /* Text colors */
+    --color-primary-text: #ffffff;
+    --color-secondary-text: #000000;
+
+}

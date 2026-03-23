@@ -1,14 +1,16 @@
-// import { IconType } from "react-icons"
+import { IconType } from "react-icons"
+import { MdDashboard } from "react-icons/md"
 
-// type NavLink = {
-//     name: string
-//     path: string
-//     logo: IconType
-// } 
+export type NavLink = {
+    name: string
+    path: string
+    logo: IconType
+} 
 
-// const navLinks: NavLink[] = [
-//     {
-//         name: "Dashboard",
-//         path: ""
-//     }
-// ] 
+export const navLinks: NavLink[] = [
+    {
+        name: "Dashboard",
+        path: "/admin",
+        logo: MdDashboard
+    }
+] 

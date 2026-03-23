@@ -1,13 +1,15 @@
 "use client"
 import Link from "next/link"
 import { useState } from "react"
+import NavLink from "./NavLink"
+import { navLinks } from "@/components_map_definitions/NavigationLinks"
 
 export const Header = () => {
 
     const [isMenuActive, setIsMenuActive] = useState(false)
 
     return(
-        <header className="h-14 px-body flex items-center justify-between border-b border-dark/20">
+        <header className="h-14 px-body flex items-center justify-between border-b border-dark/20 relative z-80">
             <Link href={`/`} className="">
                 .logo
             </Link>            
@@ -23,10 +25,11 @@ export const Header = () => {
                         ${isMenuActive ? "-rotate-45" : ""}    
                     `}/>
                 </button>
-                <div className={`bg-accent-red fixed h-screen min-h-dvh w-60 top-0  transition-set
+
+                <div className={`bg-accent-red fixed h-screen min-h-dvh w-40 top-0 transition-set pt-10
                     ${isMenuActive ? "left-0" : "-left-full "}    
                 `}>
-
+                    {navLinks.map( (link, i) => <NavLink key={i} {...link}/> )}
                 </div>
             </div>
         </header>

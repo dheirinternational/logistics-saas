@@ -1,11 +1,17 @@
+import PendingAlerts from '@/components/PendingAlerts'
+import QuickActionsBtn from '@/components/QuickActionsBtn'
+import RecentActivity from '@/components/RecentActivity'
+import RecentShipmentCard from '@/components/RecentShipmentCard'
+import RevenueSnapshot from '@/components/RevenueSnapshot'
+import StatusStatCard from '@/components/StatusStatCard'
 import { NextPage } from 'next'
 
 const Page: NextPage = () => {
   return (
-    <div className='max-h-full h-full p-body space-y-4'>
+    <div className='max-h-[calc(100dvh-56px)] h-[calc(100dvh-56px)] overflow-y-auto p-body space-y-4'>
 
         {/* System Snapshot */}
-        <div className='bg-accent-blue p-4 rounded-lg text-secondary-text relative'>
+        <div className='bg-accent-blue p-4 rounded-lg text-white relative'>
             <span className=' text-xs'>
                 System Snapshot
             </span>
@@ -25,7 +31,7 @@ const Page: NextPage = () => {
         <div>
             <div className='flex justify-between items-center'>
                 <h2 className='font-bold text-sm'>
-                    STATS
+                    STATS <span className='text-[10px]'>(today)</span>
                 </h2>
                 <button className='text-xs font-bold'>
                     See all
@@ -33,8 +39,103 @@ const Page: NextPage = () => {
             </div>
 
             {/* STATS Components Ctn */}
-            <div className='flex'>
+            <div className='flex my-body space-x-2 overflow-x-auto'>
+                <StatusStatCard />
+                <StatusStatCard />
+                <StatusStatCard />
+                <StatusStatCard />
+            </div>
+        </div>
 
+        {/* QuicK actions */}
+
+        <div className='p-body bg-light rounded-lg space-y-body'>
+            <div className='flex justify-between'>
+                <h2 className='text-sm font-bold'>
+                    Quick Actions
+                </h2>
+                {/* ? <button className='text-xs'>See all</button> */}
+            </div>
+
+            {/* Actions button container */}
+            <div className='flex justify-center gap-3'>
+                <QuickActionsBtn />
+                <QuickActionsBtn />
+                <QuickActionsBtn />
+                <QuickActionsBtn />
+            </div>
+        </div>
+
+        {/* View Recent Shipments */}
+        <div className='p-body bg-light rounded-lg space-y-body'>
+            <div className='flex justify-between items-center'>
+                <h2 className='text-sm font-bold'>
+                    Recent Shipments
+                </h2>
+                <button className='text-xs'>
+                    see all
+                </button>
+            </div>
+            <div className='h-70 max-h-70 space-y-2 overflow-auto'>
+                <RecentShipmentCard />
+                <RecentShipmentCard />
+                <RecentShipmentCard />
+                <RecentShipmentCard />
+                <RecentShipmentCard />
+            </div>
+        </div>
+
+        {/* STATUS OVERVIEW */}
+
+        <div className='p-body bg-light rounded-lg space-y-body'>
+            <h2 className='text-sm font-bold'>
+                Status Overview
+            </h2>
+            <div>
+                chart
+            </div>
+        </div>
+
+        {/* Recent Activity */}
+
+        <div className='p-body bg-light rounded-lg space-y-body'>
+            <h2 className='text-sm font-bold'>
+                Recent Activity
+            </h2>
+
+            <div className=' h-25 max-h-25 overflow-y-auto pl-[8.5px] relative space-y-2.5'>
+                <div className='absolute h-full w-0 border-l border-accent-red/80 left-3 z-10 '/>
+                <RecentActivity />
+                <RecentActivity />
+                <RecentActivity />
+                <RecentActivity />
+                <RecentActivity />
+            </div>
+        </div>
+
+        <div className='p-body bg-light rounded-lg space-y-body'> 
+            <h2 className='text-sm font-bold'>
+                Pending Alerts
+            </h2>
+            <div className='space-y-2 h-47 max-h-47 min-h-47 overflow-y-scroll'>
+                <PendingAlerts/>
+                <PendingAlerts/>
+                <PendingAlerts/>
+                <PendingAlerts/>
+                <PendingAlerts/>
+                <PendingAlerts/>
+                <PendingAlerts/>
+            </div>
+        </div>
+
+        <div className='p-body bg-light rounded-lg space-y-body'>  
+            <h2 className='text-sm font-bold'>
+                Revenue Snapshot
+            </h2>
+            <div className='flex gap-2'>
+                <RevenueSnapshot />
+                <RevenueSnapshot />
+                <RevenueSnapshot />
             </div>
         </div>
 
