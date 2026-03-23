@@ -1,4 +1,6 @@
 import { IconType } from "react-icons"
+import { FaUser } from "react-icons/fa"
+import { LuPackage } from "react-icons/lu"
 import { MdDashboard } from "react-icons/md"
 
 export type NavLink = {
@@ -12,5 +14,15 @@ export const navLinks: NavLink[] = [
         name: "Dashboard",
         path: "/admin",
         logo: MdDashboard
+    },
+    {
+        name: "Shipments",
+        path: "/admin/shipments",
+        logo: LuPackage
+    },
+    {
+        name: "Users",
+        path: "/admin/users",
+        logo: FaUser
     }
 ] 

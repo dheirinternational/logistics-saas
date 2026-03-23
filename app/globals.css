@@ -35,6 +35,10 @@ button{
   @apply active:scale-95 cursor-pointer transition-all ease-out duration-600
 }
 
+a{
+  @apply active:scale-95 cursor-pointer transition-all ease-out duration-600
+}
+
 .dark{
 
       /* Theme colors */
