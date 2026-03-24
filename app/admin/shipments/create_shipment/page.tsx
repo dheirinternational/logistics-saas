@@ -1,4 +1,4 @@
-import CreateShipments from '@/components/shipments/CreateShipments'
+import CreateShipments from '@/components/admin/shipments/CreateShipments'
 import { NextPage } from 'next'
 
 const Page: NextPage = () => {

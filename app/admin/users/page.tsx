@@ -1,5 +1,5 @@
-import StatusStatCard from '@/components/StatusStatCard'
-import SearchComponent from '@/components/users/SearchComponent'
+import StatusStatCard from '@/components/admin/StatusStatCard'
+import SearchComponent from '@/components/admin/users/SearchComponent'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { FaPlus } from 'react-icons/fa'

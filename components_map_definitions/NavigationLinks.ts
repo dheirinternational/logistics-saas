@@ -1,5 +1,6 @@
 import { IconType } from "react-icons"
 import { FaUser, FaWarehouse } from "react-icons/fa"
+import { FaShop, FaUsers } from "react-icons/fa6"
 import { LuPackage } from "react-icons/lu"
 import { MdDashboard } from "react-icons/md"
 
@@ -26,8 +27,18 @@ export const navLinks: NavLink[] = [
         logo: FaUser
     },
     {
+        name: "Staff",
+        path: "/admin/staff",
+        logo: FaUsers
+    },
+    {
         name: "Warehouses",
         path: "/admin/warehouses",
         logo: FaWarehouse
+    },
+    {
+        name: "Marketplace",
+        path: "/admin/marketplace",
+        logo: FaShop
     },
 ] 

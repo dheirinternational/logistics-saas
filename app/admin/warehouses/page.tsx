@@ -1,4 +1,4 @@
-import SearchComponent from '@/components/warehouse/SearchComponent'
+import SearchComponent from '@/components/admin/warehouse/SearchComponent'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { FaPlus } from 'react-icons/fa'

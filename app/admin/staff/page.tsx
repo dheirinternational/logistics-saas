@@ -1,31 +1,21 @@
-import SearchComponent from '@/components/admin/shipments/SearchComponent'
+import SearchComponent from '@/components/admin/staff/SearchComponent'
 import StatusStatCard from '@/components/admin/StatusStatCard'
 import { NextPage } from 'next'
-import Link from 'next/link'
-import { FaPlus } from 'react-icons/fa'
 
 const Page: NextPage = () => {
-  return <div className='space-y-body p-body'>
+  return <div className='space-y-body'>
     <div className='p-4 bg-accent-red rounded-lg text-white'>
         <span className='text-xs opacity-80'>
             Admin/Operations
         </span>
         <h1 className='font-bold mt-4 mb-2 text-xl'>
-            Manage Shipments
+            Manage Staff
         </h1>
         <div>
             <p className='text-[10px] opacity-70'>
-                Monitor, filter, and manage all outgoing shipments from one control deck.
+                Manage Staff assignment and details.
             </p>
         </div>
-    </div>
-
-    {/* ADD SHIPMENT BUTTON */}
-    <div className='bg-light rounded-lg '>
-        <Link href={'/admin/shipments/create_shipment'} className='rounded-lg border border-dark/20 flex w-full items-center justify-center gap-3 text-sm py-3 font-bold'>
-            <FaPlus/>
-            Create Shipment
-        </Link>
     </div>
 
     {/* STATUS CARDS */}
@@ -37,20 +27,19 @@ const Page: NextPage = () => {
             <StatusStatCard />
             <StatusStatCard />
             <StatusStatCard />
-            <StatusStatCard />
         </div>
     </div>
 
-    {/* SEARCH COMPONENT  */}
+    {/* Search Form */}
     <SearchComponent />
 
     {/* Table */}
     <div className='bg-light p-body rounded-lg'>
         <h2 className='text-sm font-bold'>
-            Shipment Records
+            Staffs
         </h2>
         <p className='text-xs mt-2 opacity-70'>
-            A live overview of all shipments in the system.
+            A list of all Staffs in the system.
         </p>
         <div>
             Table

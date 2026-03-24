@@ -1,9 +1,9 @@
-import PendingAlerts from '@/components/PendingAlerts'
-import QuickActionsBtn from '@/components/QuickActionsBtn'
-import RecentActivity from '@/components/RecentActivity'
-import RecentShipmentCard from '@/components/RecentShipmentCard'
-import RevenueSnapshot from '@/components/RevenueSnapshot'
-import StatusStatCard from '@/components/StatusStatCard'
+import PendingAlerts from '@/components/admin/PendingAlerts'
+import QuickActionsBtn from '@/components/admin/QuickActionsBtn'
+import RecentActivity from '@/components/admin/RecentActivity'
+import RecentShipmentCard from '@/components/admin/RecentShipmentCard'
+import RevenueSnapshot from '@/components/admin/RevenueSnapshot'
+import StatusStatCard from '@/components/admin/StatusStatCard'
 import { NextPage } from 'next'
 
 const Page: NextPage = () => {

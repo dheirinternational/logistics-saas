@@ -1,4 +1,4 @@
-import AddWarehouse from '@/components/warehouse/AddWarehouse'
+import AddWarehouse from '@/components/admin/warehouse/AddWarehouse'
 import { NextPage } from 'next'
 
 const Page: NextPage = ({}) => {
