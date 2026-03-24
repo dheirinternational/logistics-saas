@@ -12,6 +12,9 @@ const Page: NextPage = () => {
         </h1>
     </div>
 
+    <hr className='border border-dark/20 my-8'/>
+
+
     {/* FORM */}
     <CreateShipments/>
   </div>

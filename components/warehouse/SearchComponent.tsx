@@ -1,18 +1,16 @@
 "use client"
 
 import { FormEvent, useState } from "react"
-import InputComponent from "./InputComponent"
+import InputComponent from "../shipments/InputComponent"
 
 type FilterParams = {
     search: string, 
-    status: string, 
-    warehouse: string,
 }
 
 
 const SearchComponent = () => {
 
-    const [filterParams, setFilterParams] = useState<FilterParams>({search: "", status: "", warehouse: ""})
+    const [filterParams, setFilterParams] = useState<FilterParams>({search: ""})
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -22,8 +20,6 @@ const SearchComponent = () => {
     <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col gap-4'>
         <InputComponent name="search" title="Search" type="text" state={filterParams} setState={setFilterParams}/>
         {filterParams.search}
-        <InputComponent name="status" title="Status" type="text" state={filterParams} setState={setFilterParams}/>
-        <InputComponent name="warehouse" title="Warehouse" type="text" state={filterParams} setState={setFilterParams}/>
         
         {/* Btns */}
         <div className="space-x-2 mt-5">

@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react"
 import InputComponent from "../shipments/InputComponent"
 
-export type FilterParams = {
+type FilterParams = {
     search: string, 
     role: string, 
 }

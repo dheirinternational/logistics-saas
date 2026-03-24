@@ -1,3 +1,5 @@
+import { ProductStatus, ProductVisibility } from "./statusTypes"
+
 export type User = {
     id: string // unique
     firstName: string
@@ -115,4 +117,42 @@ export type Country = {
     id: string // unique
     name: string 
     country: string 
+}
+
+export type Product = {
+    id: string // unique
+    slug: string // unique
+    name: string
+    description?: string
+    category_id?: string
+    price: number
+    discountPrice?: number
+    costPrice?: number
+    stock_quantity: number
+    weight: number
+    length: number
+    width: number
+    height: number
+    status: ProductStatus
+    visibility: ProductVisibility
+    isFeatured: boolean
+    createdBy: string
+    updatedBy: string
+    createdAt: string
+    updatedAt: string 
+}
+
+export type ProductCategory = {
+    id: string, // unique
+    name: string,
+    slug: string, // unique
+    created_at: string
+}
+
+export type ProductImage = {
+    id: string // unique
+    productId: string // (FK -> Proudtc)
+    imageUrl: string // unique
+    altText: string
+    createdAt: string
 }
