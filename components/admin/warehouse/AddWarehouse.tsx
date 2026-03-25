@@ -14,6 +14,8 @@ const AddWarehouse = () => {
         location: "",
         capacity: "",
         managerId: "",
+        type: "local",
+        phone: "",
     })
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -24,8 +26,10 @@ const AddWarehouse = () => {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <InputComponent name="name" type="text" title="Warehouse Name" state={userValues} setState={setUserValues}/>
         <InputComponent name="location" type="text" title="Location" state={userValues} setState={setUserValues}/>
-        <InputComponent name="capacity" type="number" title="Capacity" state={userValues} setState={setUserValues}/>
-        <InputComponent name="managerId" type="number" title="Manager ID" state={userValues} setState={setUserValues}/>
+        <InputComponent name="capacity" type="text" title="Capacity" state={userValues} setState={setUserValues}/>
+        <InputComponent name="managerId" type="text" title="Manager ID" state={userValues} setState={setUserValues}/>
+        <InputComponent name="type" type="text" title="Type" state={userValues} setState={setUserValues}/>
+        <InputComponent name="phone" type="tel" title="Phone" state={userValues} setState={setUserValues}/>
         <div className="">
             <button className="flex items-center justify-center gap-1 bg-accent-blue px-4 py-3 rounded-lg mt-4 float-right">
                 <IoCreate/>

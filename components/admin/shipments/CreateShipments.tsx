@@ -10,11 +10,10 @@ type ShipmentValues = Omit<Shipment, "id" | "status" | "createdAt" | "trackingNu
 const CreateShipments = () => {
 
     const [shipmentValues, setShipmentValues] = useState<ShipmentValues>({
-        customerId: "",
-        originAddressId: "",
-        destinationAddressId: "",
-        carrierId: "",
-        warehouseId: "",
+        customerCode: "",
+        originWarehouseId: "",
+        destinationWarehouseId: "",
+        shippingMethod: "air",
         totalCost: 0, 
     })
 
@@ -24,12 +23,10 @@ const CreateShipments = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <InputComponent name="customerId" type="number" title="Customer" state={shipmentValues} setState={setShipmentValues}/>
-        {shipmentValues.customerId}
-        <InputComponent name="originAddressId" type="number" title="Origin Address" state={shipmentValues} setState={setShipmentValues}/>
-        <InputComponent name="destinationAddressId" type="number" title="Destination Address" state={shipmentValues} setState={setShipmentValues}/>
-        <InputComponent name="carrierId" type="number" title="Carrier" state={shipmentValues} setState={setShipmentValues}/>
-        <InputComponent name="warehouseId" type="number" title="Warehouse" state={shipmentValues} setState={setShipmentValues}/>
+        <InputComponent name="customerCode" type="text" title="Customer Code" state={shipmentValues} setState={setShipmentValues}/>
+        <InputComponent name="originWarehouseId" type="text" title="Origin Warehouse ID" state={shipmentValues} setState={setShipmentValues}/>
+        <InputComponent name="destinationWarehouseId" type="text" title="Destination Warehouse ID" state={shipmentValues} setState={setShipmentValues}/>
+        <InputComponent name="shippingMethod" type="text" title="Shipping Method" state={shipmentValues} setState={setShipmentValues}/>
         <InputComponent name="totalCost" type="number" title="Total Cost" state={shipmentValues} setState={setShipmentValues}/>
         <div className="">
             <button className="flex items-center justify-center gap-1 bg-accent-blue px-4 py-3 rounded-lg mt-4 float-right">

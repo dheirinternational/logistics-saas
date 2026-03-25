@@ -26,7 +26,6 @@ const CreateUser = () => {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <InputComponent name="firstName" type="text" title="First Name" state={userValues} setState={setUserValues}/>
         <InputComponent name="lastName" type="text" title="Last Name" state={userValues} setState={setUserValues}/>
-        {userValues.lastName}
         <InputComponent name="email" type="email" title="Email" state={userValues} setState={setUserValues}/>
         <InputComponent name="password" type="password" title="Password" state={userValues} setState={setUserValues}/>
         <InputComponent name="phone" type="tel" title="Phone" state={userValues} setState={setUserValues}/>
