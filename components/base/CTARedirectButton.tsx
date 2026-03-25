@@ -10,14 +10,14 @@ export type CTARedirectButton = {
 const CTARedirectButton = ({title, path, icon: Icon}: CTARedirectButton) => {
   return (
     <Link 
-    href={"/"} 
-    className="flex flex-col items-center w-fit gap-2"
+    href={path} 
+    className="flex flex-col items-center w-21 gap-2 max-w-25"
     >
-        <div className="bg-accent-red p-2 w-fit rounded-lg">
-        <Icon className="text-2xl"/>
+        <div className="bg-accent-red p-3 w-fit rounded-lg">
+            <Icon className="text-2xl text-white"/>
         </div>
-        <span className="text-xs">
-        Request Mail
+        <span className="text-[10px] text-center">
+            {title}
         </span>
     </Link>
   )

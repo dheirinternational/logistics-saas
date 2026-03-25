@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   allowedDevOrigins: ['10.226.44.56'],
+   images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      }
+    ],
+  },
 };
 
 export default nextConfig;
