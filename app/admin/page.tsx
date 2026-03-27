@@ -37,7 +37,7 @@ const Page: NextPage = () => {
                     See all
                 </button>
             </div>
-
+            
             {/* STATS Components Ctn */}
             <div className='flex my-body space-x-2 overflow-x-auto'>
                 <StatusStatCard />

@@ -1,3 +1,4 @@
+import { ShippingType } from "./miscallaneous"
 import { ProductStatus, ProductVisibility } from "./statusTypes"
 
 export type User = {
@@ -37,7 +38,7 @@ export type Shipment = {
     originWarehouseId: string // FK -> Warehouse(id)
     destinationWarehouseId: string  // FK -> Warehouse(id) 
     status: "shipped" | "in_transit" | "arrived_nigeria" | "pending_payment" | "delivered"
-    shippingMethod: "air" | "sea"
+    shippingMethod: ShippingType
 
     totalCost: number
     createdAt: string
@@ -50,9 +51,6 @@ export type Package = {
     customerCode: string // Fk -> Customers(code)
     warehouseId: string // Fk -> Warehouses(id)
     actualWeight: number
-    length?: number
-    width?: number
-    height?: number
     photos?: string[]
     condition?: "good" | "damaged"
     status: "stored" | "ready_to_ship" | "assigned_to_shipment"
@@ -66,7 +64,7 @@ export type Warehouse = {
     location: string  // FK -> Address(id)
     capacity: string
     managerId: string  // (FK -> staff)
-    type: "air" | "sea" | "local"
+    type: ShippingType | "local"
     phone: string
 }
 
@@ -123,7 +121,7 @@ export type ShippingRequest = {
     user_id: string  // Fk -> Users(id)
     customerCode: string //  Fk -> Customers(code)
     packageIds: string[]
-    method: "air" | "sea"
+    method: ShippingType
     status: "peding" | "approved"
     createdAt: string
 }

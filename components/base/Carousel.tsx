@@ -68,6 +68,7 @@ const Carousel = () => {
                     <Image 
                     src={"https://picsum.photos/400/300"}
                     alt="Carousel Image"
+                    loading="eager"
                     fill
                     />
 
