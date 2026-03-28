@@ -28,7 +28,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
         setState(prev => ({...prev, [key]: value})) 
     }
 
-    const handleClick = (e: MouseEvent, buttonValue: InputSafe ) => {
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>, buttonValue: InputSafe ) => {
         setState( prev => ({...prev, [name]: buttonValue}) )     
         setIsDropDownActive(false)   
     }
