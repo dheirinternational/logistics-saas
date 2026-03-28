@@ -10,7 +10,7 @@ const Page: NextPage = ({}) => {
       <Carousel />
 
       {/* CTA Redirect */}
-      <div className="p-body bg-light/20 flex flex-wrap gap-6 justify-center">
+      <div className="p-body bg-light/90 flex flex-wrap gap-6 justify-center">
         {ctaButtonsProps.map( (button, i) => 
         <CTARedirectButton key={i} {...button} /> 
         )}
@@ -79,7 +79,7 @@ const Page: NextPage = ({}) => {
           </div>
         </div>
       </div>
-      <div className="p-body bg-light/30 min-h-160">
+      <div className="p-body min-h-160 bg-light/90">
         <h2 className="tracking-wide font-semibold text-accent-red">
           FAQ
         </h2>

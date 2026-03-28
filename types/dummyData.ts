@@ -128,6 +128,7 @@ export const dummyShipments: Shipment[] = [
 export const dummyPackages: Package[] = [
   {
     id: "p1",
+    packageName: "Electronics",
     incoming_package_id: "ip1",
     userId: "u1",
     customerCode: "KRC2530",
@@ -138,6 +139,76 @@ export const dummyPackages: Package[] = [
     status: "stored",
     shipmentId: null,
     createdAt: "2023-04-15T10:00:00Z"
+  },
+  {
+    id: "p2",
+    packageName: "Clothing",
+    incoming_package_id: "ip2",
+    userId: "u2",
+    customerCode: "KRC2531",
+    warehouseId: "w1",
+    actualWeight: 1.2,
+    photos: ["https://example.com/photo3.jpg", "https://example.com/photo4.jpg"],
+    condition: "good",
+    status: "stored",
+    shipmentId: null,
+    createdAt: "2023-04-16T11:30:00Z"
+  },
+  {
+    id: "p3",
+    packageName: "Books",
+    incoming_package_id: "ip3",
+    userId: "u3",
+    customerCode: "KRC2532",
+    warehouseId: "w3",
+    actualWeight: 3.0,
+    photos: ["https://example.com/photo5.jpg"],
+    condition: "good",
+    status: "stored",
+    shipmentId: null,
+    createdAt: "2023-04-17T09:15:00Z"
+  },
+  {
+    id: "p4",
+    packageName: "Cosmetics",
+    incoming_package_id: "ip4",
+    userId: "u1",
+    customerCode: "KRC2530",
+    warehouseId: "w2",
+    actualWeight: 0.8,
+    photos: ["https://example.com/photo6.jpg", "https://example.com/photo7.jpg"],
+    condition: "good",
+    status: "stored",
+    shipmentId: null,
+    createdAt: "2023-04-18T14:45:00Z"
+  },
+  {
+    id: "p5",
+    packageName: "Shoes",
+    incoming_package_id: "ip5",
+    userId: "u4",
+    customerCode: "KRC2533",
+    warehouseId: "w1",
+    actualWeight: 2.0,
+    photos: ["https://example.com/photo8.jpg"],
+    condition: "good",
+    status: "stored",
+    shipmentId: null,
+    createdAt: "2023-04-19T16:20:00Z"
+  },
+  {
+    id: "p6",
+    packageName: "Accessories",
+    incoming_package_id: "ip6",
+    userId: "u2",
+    customerCode: "KRC2531",
+    warehouseId: "w3",
+    actualWeight: 1.5,
+    photos: ["https://example.com/photo9.jpg", "https://example.com/photo10.jpg"],
+    condition: "good",
+    status: "stored",
+    shipmentId: null,
+    createdAt: "2023-04-20T12:10:00Z"
   }
 ];
 

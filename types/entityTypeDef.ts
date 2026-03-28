@@ -47,6 +47,7 @@ export type Shipment = {
 export type Package = {
     id: string // unique
     incoming_package_id: string  // FK -> IncomingPackage(id)
+    packageName: string
     userId: string  // Fk -> Users(id)
     customerCode: string // Fk -> Customers(code)
     warehouseId: string // Fk -> Warehouses(id)

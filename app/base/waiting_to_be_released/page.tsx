@@ -1,23 +1,13 @@
 "use client"
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
-import RequestMailProduct from '@/components/base/RequestMailProduct'
-import { dummyPackages, dummyWarehouses } from '@/types/dummyData'
-import { Package } from '@/types/entityTypeDef'
+import { dummyShippingRequests } from '@/types/dummyData'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
 
 const Page: NextPage = () => {
-
-    const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
-
-    const [filterValues, setFilterValues] = useState({
-        warehouseId: dummyWarehouses[0].name,
-        incomingTrackingId: "" 
-    })
 
     const router = useRouter()
 
@@ -32,14 +22,15 @@ const Page: NextPage = () => {
                 Go Back
             </span>
         </button>
-        <h1 className='font-semibold'>
-            Request Mail
+        <h1 className='font-semibold text-xs'>
+            Pending Shipment Approval
         </h1>
         <Link href={"/base/profile"} className='flex-1 flex justify-end'>
             <FaUser/>
         </Link>
     </div>
-    <div className='bg-white p-4 flex flex-col gap-2'> 
+
+    {/* <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='w-40 -mt-2'>
             <InputComponent
             name='warehouseId'
@@ -57,36 +48,45 @@ const Page: NextPage = () => {
             type='text'
             state={filterValues}
             setState={setFilterValues}
-            placeHolder='Tracking Id...'
+            placeHolder='Product Id/Product Name...'
             />
             <button className='h-full px-4 py-2 bg-accent-red text-white mt-2 rounded'>
                 Search
             </button>
         </div>
-    </div>
+    </div> */}
 
-    <div className='bg-light px-4 py-2'>
-        <span className='text-xs'>
-            Selected Packages: <span className='text-accent-red font-bold text-sm'>{selectedPackages.length}</span> 
-        </span>
-    </div>
-
-    <div className='bg-light p-4 min-h-68 h-68 max-h-68 space-y-2 overflow-y-scroll'>
+    <div className='bg-light p-4 min-h-150'>
         {
-            dummyPackages.length < 1 && 
+            dummyShippingRequests.length < 1 && 
             <p className='text-xs italic'>
-                ...There are no incoming packages
+                ...You have not made a shipping request 
             </p>
         }
-        {dummyPackages.map( packag => 
-            <RequestMailProduct key={packag.id} prop={packag} handlePackage={setSelectedPackages}/>   
-        )}
-    </div>
+        
+        <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
+            <div className='flex items-center justify-between'>
+                <p className='text-lg'>
+                    {dummyShippingRequests[0].method}
+                </p>
+                <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
+                    <span className='text-[10px] text-accent-blue block'>
+                        {dummyShippingRequests[0].status}
+                    </span>
+                </div>
+            </div>
 
-    <div className='p-body'>
-        <button className='bg-accent-red text-white w-full text-sm py-3 rounded'>
-            Request Shipment
-        </button>
+            <div className='text-xs flex'>
+                
+                <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20'>
+                    Packages No: {dummyShippingRequests[0].packageIds.length}
+                </p>
+
+                <p className='flex-1 whitespace-nowrap flex justify-end'>
+                    {dummyShippingRequests[0].createdAt.slice(0, 10)}
+                </p>
+            </div>
+        </div>
     </div>
   </div>
 }
