@@ -68,8 +68,8 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
 
         </label>
         {select && 
-        <div className={`bg-light shadow shadow-dark/20 rounded-b overflow-hidden transition-set absolute w-full z-60
-        ${isDropDownActive ? "h-16 max-h-16" : "max-h-0 h-0 pointer-events-none"}
+        <div className={`bg-light shadow shadow-dark/20 rounded-b transition-set absolute w-full z-60
+        ${isDropDownActive ? "h-16 max-h-16 overflow-auto" : "max-h-0 h-0 pointer-events-none overflow-hidden"}
         `}>
             {selectValues.length > 0 && selectValues.map( (btn, i) => 
                 <button

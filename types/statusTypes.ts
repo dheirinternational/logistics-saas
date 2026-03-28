@@ -9,3 +9,9 @@ export type ProductVisibility =
     | "public"
     | "private"
     | "hidden";
+
+export type PaymentStatus = 
+  | "pending"
+  | "paid"
+  | "failed"
+  | "abandoned"

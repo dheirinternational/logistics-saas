@@ -58,12 +58,12 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
     {
         title: "Signed For",
         icon: MdLocalShipping,
-        path: "/"
+        path: "/base/orders_shipped"
     },
     {
         title: "Order Payment",
         icon: MdPayment,
-        path: "/"
+        path: "/base/shipments_payments"
     },
 ]
 

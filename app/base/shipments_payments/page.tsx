@@ -1,11 +1,25 @@
 "use client"
-import { dummyShippingRequests } from '@/types/dummyData'
+
+import InputComponent from '@/components/admin/shipments/InputComponent'
+import { dummyPayments } from '@/types/dummyData'
+import { PaymentStatus } from '@/types/statusTypes'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
 
-const Page: NextPage = () => {
+const Page: NextPage = ({}) => {
+
+    type Filter = {
+        trackingId: string
+        status: PaymentStatus | ""
+    }
+
+    const [filterValues, setFilterValues] = useState<Filter>({
+        trackingId: "",
+        status: ""
+    })
 
     const router = useRouter()
 
@@ -21,14 +35,14 @@ const Page: NextPage = () => {
             </span>
         </button>
         <h1 className='font-semibold text-xs'>
-            Pending Shipment Approval
+            Shipment Payment
         </h1>
         <Link href={"/base/profile"} className='flex-1 flex justify-end'>
             <FaUser/>
         </Link>
     </div>
 
-    {/* <div className='bg-white p-4 flex flex-col gap-2'> 
+    <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='w-40 -mt-2'>
             <InputComponent
             name='warehouseId'
@@ -37,7 +51,7 @@ const Page: NextPage = () => {
             setState={setFilterValues}
             readonly
             select
-            selectValues={dummyWarehouses.map( x => x.name)}
+            selectValues={["pending", "paid", "failed", "abandoned"]}
             />
         </div>
         <div className='flex items-center text-xs gap-1 -mt-2'>
@@ -46,17 +60,18 @@ const Page: NextPage = () => {
             type='text'
             state={filterValues}
             setState={setFilterValues}
-            placeHolder='Product Id/Product Name...'
+            placeHolder='Tracking Number Id...'
             />
             <button className='h-full px-4 py-2 bg-accent-red text-white mt-2 rounded'>
                 Search
             </button>
         </div>
-    </div> */}
+
+    </div>
 
     <div className='bg-light p-4 min-h-150'>
         {
-            dummyShippingRequests.length < 1 && 
+            dummyPayments.length < 1 && 
             <p className='text-xs italic'>
                 ...You have not made a shipping request 
             </p>
@@ -65,11 +80,11 @@ const Page: NextPage = () => {
         <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
             <div className='flex items-center justify-between'>
                 <p className='text-lg'>
-                    {dummyShippingRequests[0].method}
+                    {dummyPayments[0].transactionRef}
                 </p>
                 <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
                     <span className='text-[10px] text-accent-blue block'>
-                        {dummyShippingRequests[0].status}
+                        {dummyPayments[0].status}
                     </span>
                 </div>
             </div>
@@ -77,15 +92,20 @@ const Page: NextPage = () => {
             <div className='text-xs flex'>
                 
                 <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20'>
-                    Packages No: {dummyShippingRequests[0].packageIds.length}
+                   Amount: ${dummyPayments[0].amount}K
+                </p>
+
+                <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20 px-2'>
+                   method: {dummyPayments[0].paymentMethod}
                 </p>
 
                 <p className='flex-1 whitespace-nowrap flex justify-end'>
-                    {dummyShippingRequests[0].createdAt.slice(0, 10)}
+                    {dummyPayments[0].createdAt.slice(0, 10)}
                 </p>
             </div>
         </div>
     </div>
+
   </div>
 }
 
