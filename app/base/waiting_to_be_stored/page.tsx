@@ -70,8 +70,38 @@ const Page: NextPage = ({}) => {
         </span>
     </div>
 
-    <div className=''>
+    <div className='bg-light p-4 min-h-100'>
+        {
+            dummyIncomingPackages.length < 1 && 
+            <p className='text-xs italic'>
+                ...There are no incoming packages
+            </p>
+        }
+        
+        <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
+            <div className='flex items-center justify-between'>
+                <p className='text-lg'>
+                    {incomingPackage.declaredItemName}
+                </p>
+                <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
+                    <span className='text-[10px] text-accent-blue block'>
+                        expected
+                    </span>
+                </div>
+            </div>
 
+            <div className='text-xs flex'>
+                <p className='text-xs flex-1 whitespace-nowrap border-r border-dark/20'>
+                    Track: {incomingPackage.incomingTrackingNumber}
+                </p>
+                <p className='flex-1 whitespace-nowrap flex justify-center border-r border-dark/20'>
+                    {incomingPackage.warehouseId}
+                </p>
+                <p className='flex-1 whitespace-nowrap flex justify-end'>
+                    {incomingPackage.createdAt.slice(0, 10)}
+                </p>
+            </div>
+        </div>
     </div>
   </div>
 }

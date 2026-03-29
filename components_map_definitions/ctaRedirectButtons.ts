@@ -10,12 +10,12 @@ export const ctaButtonsProps: CTARedirectButton[] = [
     {
         title: "Request Mail",
         icon: FaShippingFast,
-        path: "/"
+        path: "/base/request_mail"
     },
     {
         title: "Warehouse Address",
         icon: FaMapLocationDot,
-        path: "/"
+        path: "/base/warehouse_address"
     },
     {
         title: "Inspection and Verification",
