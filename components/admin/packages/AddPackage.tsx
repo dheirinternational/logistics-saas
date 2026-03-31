@@ -10,13 +10,13 @@ type PackageValues = Omit<Package, "id" | "createdAt" | "trackingNumber" | "ship
 
 const AddPackage = () => {
 
-    const [packageValues, setPackageValues] = useState<PackageValues>({
-        packageName: "",
-        actualWeight: 0,
-        photos: [],
-        condition: "good",
-        status: "stored",
-    })
+    // const [packageValues, setPackageValues] = useState<PackageValues>({
+    //     packageName: "",
+    //     actualWeight: 0,
+    //     photos: [],
+    //     condition: "good",
+    //     status: "stored",
+    // })
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -24,10 +24,10 @@ const AddPackage = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <InputComponent name="packageName" type="text" title="Package Name" state={packageValues} setState={setPackageValues}/>
-        <InputComponent name="actualWeight" type="number" title="Actual Weight of product" state={packageValues} setState={setPackageValues}/>
+        {/* <InputComponent name="packageName" type="text" title="Package Name" state={packageValues} setState={setPackageValues}/>
+        <InputComponent name="actualWeight" type="number" title="Actual Weight of product" state={packageValues} setState={setPackageValues}/> */}
         {/* Photos <InputComponent name="destinationWarehouseId" type="text" title="Destination Warehouse ID" state={packageValues} setState={setPackageValues}/> */}
-        <InputComponent 
+        {/* <InputComponent 
         name="condition" 
         type="text" 
         title="Shipping Method" 
@@ -55,7 +55,7 @@ const AddPackage = () => {
                     Create
                 </p>
             </button>
-        </div>
+        </div> */}
     </form>
   )
 }

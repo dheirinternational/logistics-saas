@@ -9,31 +9,31 @@ interface ProductCardProps extends Product {
 }
 
 const ProductCard = (props: ProductCardProps) => {
-  const { name, price, discountPrice, stock_quantity, images, id } = props
-  const mainImage = images?.[0]?.imageUrl || "https://picsum.photos/400/300"
+  const { name, price, discount_price, stock_quantity, images, id } = props
+  const mainImage = images?.[0]?.image_url || "https://picsum.photos/400/300"
 
   return (
     <Link href={`/base/marketplace/${id}`} className="relative">
         <figure className="w-27 h-27 bg-red-500 rounded relative overflow-hidden ">
             <Image
             src={mainImage}
-            alt={images?.[0]?.altText || "Product Image"}
+            alt={images?.[0]?.alt_text || "Product Image"}
             loading="eager"
             fill
             className="overflow-hidden object-cover"
             />
         </figure>
 
-        {discountPrice && discountPrice < price && (
+        {discount_price && discount_price < price && (
           <span className="block w-fit bg-[#ffebcf] p-px px-1 rounded absolute top-0 right-0 text-accent-red">
-              -{Math.round(((price - discountPrice) / price) * 100)}%
+              -{Math.round(((price - discount_price) / price) * 100)}%
           </span>
         )}
         <p className="text-[10px] mt-2">
             {name}
         </p>
         <p className="text-lg font-semibold">
-            # {discountPrice || price}k
+            # {discount_price || price}k
         </p>
         <p className="text-[10px] line-clamp-1 text-ellipsis">
             {stock_quantity} units left

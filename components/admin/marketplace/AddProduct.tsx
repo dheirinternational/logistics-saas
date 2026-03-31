@@ -9,22 +9,22 @@ type ProductValues = Omit<Product, "id" | "status" | "slug" | "createdAt" | "cre
 
 const AddProduct = () => {
 
-    const [productValues, setProductValues] = useState<ProductValues>({
-        name: "",
-        description: "",
-        categoryId: "",
-        price: 0,
-        discountPrice: 0,
-        costPrice: 0,
-        stock_quantity: 0,
-        low_stock_threshold: 0,
-        weight: 0,
-        length: 0,
-        width: 0,
-        height: 0,
-        visibility: "public",
-        isFeatured: "",
-    })
+    // const [productValues, setProductValues] = useState<ProductValues>({
+    //     name: "",
+    //     description: "",
+    //     categoryId: "",
+    //     price: 0,
+    //     discountPrice: 0,
+    //     costPrice: 0,
+    //     stock_quantity: 0,
+    //     low_stock_threshold: 0,
+    //     weight: 0,
+    //     length: 0,
+    //     width: 0,
+    //     height: 0,
+    //     visibility: "public",
+    //     isFeatured: "",
+    // })
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -32,7 +32,7 @@ const AddProduct = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <InputComponent name="name" type="text" title="Product Name" state={productValues} setState={setProductValues}/>
+        {/* <InputComponent name="name" type="text" title="Product Name" state={productValues} setState={setProductValues}/>
         <InputComponent name="description" type="text" title="Description (Optional)" state={productValues} setState={setProductValues}/>
         <InputComponent name="categoryId" type="text" title="Category ID (Optional)" state={productValues} setState={setProductValues}/>
         <InputComponent name="price" type="number" title="Price" state={productValues} setState={setProductValues}/>
@@ -54,7 +54,7 @@ const AddProduct = () => {
                     Add
                 </p>
             </button>
-        </div>
+        </div> */}
     </form>
   )
 }

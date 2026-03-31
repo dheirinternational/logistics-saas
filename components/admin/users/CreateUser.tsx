@@ -9,14 +9,14 @@ type UserValues = Omit<User, "id" | "created_at">
 
 const CreateUser = () => {
 
-    const [userValues, setUserValues] = useState<UserValues>({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        role: "",
-        phone: "", 
-    })
+    // const [userValues, setUserValues] = useState<UserValues>({
+    //     firstName: "",
+    //     lastName: "",
+    //     email: "",
+    //     password: "",
+    //     role: "",
+    //     phone: "", 
+    // })
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -24,7 +24,7 @@ const CreateUser = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <InputComponent name="firstName" type="text" title="First Name" state={userValues} setState={setUserValues}/>
+        {/* <InputComponent name="firstName" type="text" title="First Name" state={userValues} setState={setUserValues}/>
         <InputComponent name="lastName" type="text" title="Last Name" state={userValues} setState={setUserValues}/>
         <InputComponent name="email" type="email" title="Email" state={userValues} setState={setUserValues}/>
         <InputComponent name="password" type="password" title="Password" state={userValues} setState={setUserValues}/>
@@ -37,7 +37,7 @@ const CreateUser = () => {
                     Add
                 </p>
             </button>
-        </div>
+        </div> */}
     </form>
   )
 }

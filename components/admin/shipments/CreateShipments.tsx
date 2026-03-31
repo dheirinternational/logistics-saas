@@ -9,13 +9,13 @@ type ShipmentValues = Omit<Shipment, "id" | "status" | "createdAt" | "trackingNu
 
 const CreateShipments = () => {
 
-    const [shipmentValues, setShipmentValues] = useState<ShipmentValues>({
-        customerCode: "",
-        originWarehouseId: "",
-        destinationWarehouseId: "",
-        shippingMethod: "air",
-        totalCost: 0, 
-    })
+    // const [shipmentValues, setShipmentValues] = useState<ShipmentValues>({
+    //     customerCode: "",
+    //     originWarehouseId: "",
+    //     destinationWarehouseId: "",
+    //     shippingMethod: "air",
+    //     totalCost: 0, 
+    // })
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -23,7 +23,7 @@ const CreateShipments = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <InputComponent name="customerCode" type="text" title="Customer Code" state={shipmentValues} setState={setShipmentValues}/>
+        {/* <InputComponent name="customerCode" type="text" title="Customer Code" state={shipmentValues} setState={setShipmentValues}/>
         <InputComponent name="originWarehouseId" type="text" title="Origin Warehouse ID" state={shipmentValues} setState={setShipmentValues}/>
         <InputComponent name="destinationWarehouseId" type="text" title="Destination Warehouse ID" state={shipmentValues} setState={setShipmentValues}/>
         <InputComponent name="shippingMethod" type="text" title="Shipping Method" state={shipmentValues} setState={setShipmentValues}/>
@@ -35,7 +35,7 @@ const CreateShipments = () => {
                     Create
                 </p>
             </button>
-        </div>
+        </div> */}
     </form>
   )
 }
