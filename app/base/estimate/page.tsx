@@ -43,7 +43,7 @@ const Page: NextPage = ({}) => {
                 setState={setCalculateParameters}
                 readonly
                 select
-                selectValues={shippingTypeValues}
+                // selectValues={shippingTypeValues}
                 />
             </div>
         </div>
