@@ -4,9 +4,7 @@ import CheckoutCartCard from '@/components/base/marketplace/CheckoutCartCard'
 import Header from '@/components/base/marketplace/Header'
 import { useCartStore } from '@/store/cartStore'
 import { NextPage } from 'next'
-import Image from 'next/image'
 import { useEffect } from 'react'
-import { FaMinus, FaPlus } from 'react-icons/fa'
 
 const Page: NextPage = () => {
 
@@ -17,7 +15,7 @@ const Page: NextPage = () => {
         
         for(let i = 0; i < cart.length; i++){
 
-            const price = cart[i].discountPrice ? cart[i].discountPrice : cart[i].price
+            const price = cart[i].discount_price ? cart[i].discount_price : cart[i].price
             initializedTotalPrice += price || 0
         }
 
