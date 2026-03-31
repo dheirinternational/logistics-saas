@@ -2,7 +2,7 @@ import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request, { params }: {params: {id: string}}){
+export async function GET(request: Request, { params }: {params: Promise<{id: string}>}){
     try{
         const session = await getSession();
 
@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: {params: {id: string}}){
             );
         }
 
-        const {id} = params
+        const {id} = await params
 
         const res = await pool.query(`
             SELECT * FROM warehouses
