@@ -1,10 +1,30 @@
 import CTARedirectButton from '@/components/base/CTARedirectButton'
 import ProfileMenu from '@/components/base/ProfileMenu'
+import LogoutButton from '@/components/base/LogoutButton'
 import { profileCtaButtonsProps, profileMenuCtaButtonsProps } from '@/components_map_definitions/ctaRedirectButtons'
+import { pool } from '@/lib/db/db'
+import { getSession } from '@/lib/db/session'
 import { NextPage } from 'next'
 import { FaUser } from 'react-icons/fa'
 import { HiSpeakerWave } from 'react-icons/hi2'
-const Page: NextPage = ({}) => {
+
+
+const Page: NextPage = async() => {
+
+    const session = await getSession()
+    const userId = session.user_id
+    console.log(userId)
+
+    const data = await pool.query(`
+        SELECT u.first_name, u.last_name, c.code 
+        FROM users u
+        JOIN customers c ON u.id = c.user_id
+        WHERE u.id = $1
+    `, [userId])
+
+    const userData = data.rows[0]
+    console.log(userData)
+
   return <div className='w-full h-full space-y-3'>
     {/* Profile */}
 
@@ -15,11 +35,11 @@ const Page: NextPage = ({}) => {
             </figure>
             <div className='flex items-start flex-col justify-center gap-2'>
                 <span className='text-white font-semibold'>
-                    Umar Sulaiman
+                    {userData.first_name}{userData.last_name}
                 </span>
                 <div className='w-fit py-xs px-4 bg-white rounded-full'>
                     <span className='text-xs'>
-                        Member Code: KRC8729 
+                        Member Code: {userData.code}
                     </span>
                 </div>
             </div>
@@ -51,8 +71,9 @@ const Page: NextPage = ({}) => {
         {profileMenuCtaButtonsProps.map((link, i) => 
         <ProfileMenu key={i} {...link}/>
         )}
+        <LogoutButton />
     </div>
-
+        
   </div>
 }
 

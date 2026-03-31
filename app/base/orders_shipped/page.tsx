@@ -11,7 +11,7 @@ import { FaChevronLeft, FaUser } from 'react-icons/fa'
 const Page: NextPage = () => {
 
     const [filterValues, setFilterValues] = useState({
-        incomingTrackingId: "" 
+        incoming_tracking_id: "" 
     })
 
     const dummy = dummyShipments
@@ -40,7 +40,7 @@ const Page: NextPage = () => {
     <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='flex items-center text-xs gap-1 -mt-2'>
             <InputComponent
-            name='incomingTrackingId'
+            name='incoming_tracking_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
@@ -69,7 +69,7 @@ const Page: NextPage = () => {
         <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
             <div className='flex items-center justify-between'>
                 <p className='text-lg'>
-                    {dummy[0].trackingNumber}
+                    {dummy[0].tracking_number}
                 </p>
                 <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
                     <span className='text-[10px] text-accent-blue block'>
@@ -85,7 +85,7 @@ const Page: NextPage = () => {
                 </p>
 
                 <p className='flex-1 whitespace-nowrap flex justify-end'>
-                    {dummy[0].createdAt.slice(0, 10)}
+                    {dummy[0].created_at.slice(0, 10)}
                 </p>
             </div>
         </div>

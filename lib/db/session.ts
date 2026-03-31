@@ -1,0 +1,95 @@
+import { cookies } from "next/headers";
+import { randomUUID } from "crypto";
+import { pool } from "./db";
+import { redirect } from "next/navigation";
+
+const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "session"
+const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 4
+
+export async function createSession(userId: number, userRole: string = "customer"){
+    const sessionId = randomUUID()
+    const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
+
+    await pool.query(`
+        INSERT INTO sessions (id, user_id, expires_at, user_role)
+        VALUES ($1, $2, $3, $4)
+    `,
+    [sessionId, userId, expiresAt, userRole]
+    )
+
+    const cookieStore = await cookies()
+
+    cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        expires: expiresAt,
+        path: "/"
+    })
+
+    return {sessionId, expiresAt}
+}
+
+// GET SESSION
+
+export async function getSession(){
+    const cookieStore = await cookies()
+    const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
+
+    if (!sessionId) return null
+    const result = await pool.query(`
+        SELECT sessions.id, sessions.user_id, sessions.expires_at, users.email, users.role FROM sessions
+        JOIN users ON users.id = sessions.user_id
+        WHERE sessions.id = $1
+        LIMIT 1
+    `,
+    [sessionId])
+
+    const session = result.rows[0];
+
+    if(!session) {
+        return null;
+    }
+
+    const expired = new Date(session.expires_at).getTime() < Date.now()
+
+    if(expired) {
+        await pool.query(`
+            DELETE FROM sessions where id = $1            
+        `, [sessionId])
+
+        cookieStore.set(SESSION_COOKIE_NAME, "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            expires: new Date(0),
+            path: "/"
+        })
+        return null
+    }
+
+    return session;
+}
+
+
+
+export async function deleteSession(){
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
+
+    if(sessionId){
+        await pool.query(`
+            DELETE FROM sessions WHERE id = $1
+        `, [sessionId])
+    }
+
+    cookieStore.set(SESSION_COOKIE_NAME, "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", 
+        sameSite: "lax",
+        expires: new Date(0),
+        path: '/'
+    })
+
+    redirect("/auth/login")
+}

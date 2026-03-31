@@ -1,18 +1,18 @@
-"use client"
+import { handleRedirect } from "@/lib/redirect/handleRedirect"
+import { getSession } from "@/lib/db/session"
 
-import { useUserStore } from "@/store/userStore";
-import { redirect } from "next/navigation";
+export default async function Home() {
 
-export default function Home() {
-  const { role } = useUserStore()
+  const session = await getSession()
+  
+  console.log(session)
 
-  if(role === "customer"){
-    redirect('/base')
+  if (!session) {
+    handleRedirect(null)
+    return null
   }
 
-  if(role === "admin"){
-    redirect('/admin')
-  }
+  handleRedirect(session.role)
 
-  return 
+  return null
 }

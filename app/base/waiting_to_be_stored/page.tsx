@@ -6,14 +6,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
 import { dummyIncomingPackages } from '@/types/dummyData'
-import { dummyWarehouses } from '@/types/dummyData'
 import { useState } from 'react'
 
 const Page: NextPage = ({}) => {
 
     const [filterValues, setFilterValues] = useState({
-        warehouseId: dummyWarehouses[0].name,
-        incomingTrackingId: "" 
+        warehouse_id: "",
+        incoming_tracking_id: "" 
     })
     const router = useRouter()
 
@@ -41,18 +40,18 @@ const Page: NextPage = ({}) => {
     <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='w-40 -mt-2'>
             <InputComponent
-            name='warehouseId'
+            name='warehouse_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
             readonly
             select
-            selectValues={dummyWarehouses.map( x => x.name)}
+            // selectValues={dummyWarehouses.map( x => x.name)}
             />
         </div>
         <div className='flex items-center text-xs gap-1 -mt-2'>
             <InputComponent
-            name='incomingTrackingId'
+            name='incoming_tracking_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
@@ -81,7 +80,7 @@ const Page: NextPage = ({}) => {
         <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
             <div className='flex items-center justify-between'>
                 <p className='text-lg'>
-                    {incomingPackage.declaredItemName}
+                    {incomingPackage.declared_item_name}
                 </p>
                 <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
                     <span className='text-[10px] text-accent-blue block'>
@@ -92,13 +91,13 @@ const Page: NextPage = ({}) => {
 
             <div className='text-xs flex'>
                 <p className='text-xs flex-1 whitespace-nowrap border-r border-dark/20'>
-                    Track: {incomingPackage.incomingTrackingNumber}
+                    Track: {incomingPackage.incoming_tracking_number}
                 </p>
                 <p className='flex-1 whitespace-nowrap flex justify-center border-r border-dark/20'>
-                    {incomingPackage.warehouseId}
+                    {incomingPackage.warehouse_id}
                 </p>
                 <p className='flex-1 whitespace-nowrap flex justify-end'>
-                    {incomingPackage.createdAt.slice(0, 10)}
+                    {incomingPackage.created_at.slice(0, 10)}
                 </p>
             </div>
         </div>

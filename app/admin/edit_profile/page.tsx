@@ -1,0 +1,258 @@
+"use client"
+
+import InputComponent from '@/components/admin/shipments/InputComponent'
+import { User } from '@/types/entityTypeDef'
+import { NextPage } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { FormEvent, useEffect, useState } from 'react'
+import { FaCamera, FaChevronLeft, FaUser } from 'react-icons/fa'
+import { ClipLoader, PulseLoader } from 'react-spinners'
+
+
+type BasicDetails = Omit<User, "id" | "password" | "role" | "created_at" | "email">
+
+const Page: NextPage = () => {
+
+    const [isEditButtonActive, setIsEditButtonActive] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [isEditLoading, setIsEditLoading] = useState(false)
+    const [error, setError] = useState("")
+    const [user, setUser] = useState<null | User>(null)
+
+    const [userDetails, setUserDetails] = useState<BasicDetails>({
+        first_name: "",
+        last_name: "",
+        phone: ""
+    })
+
+    const [email, setEmail] = useState({
+        email: ""
+    })
+
+    const [password, setPassword] = useState({
+        password: ""
+    })
+
+    // Fetch User Related Data ------------------------------------------------ 
+
+    const fetchData = async () => {
+        try{
+            const res = await fetch("/api/users/my-data", {
+                method: "GET",
+                credentials: "include",
+                cache: "no-cache"
+            })
+
+            if(!res.ok){
+                throw new Error("Failed to fetch User")
+            }
+
+            const data = await res.json()
+            const fetchedUser = data.user
+            setUser(fetchedUser)
+            setUserDetails({
+                first_name: fetchedUser.first_name,
+                last_name: fetchedUser.last_name,
+                phone: fetchedUser.phone
+            })
+
+            setEmail({email: fetchedUser.email})
+        }
+        catch(err){
+            setError(err instanceof Error ? err.message : "Something Went wrong")
+        }
+        finally{
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        console.log(user, userDetails)
+    }, [user, userDetails])
+    
+    useEffect(() => {
+        fetchData()
+    }, [])
+
+    useEffect(() => {
+        if (!user) return
+
+        if (
+            userDetails.first_name !== user.first_name ||
+            userDetails.last_name !== user.last_name ||
+            userDetails.phone !== user.phone
+        ) {
+            setIsEditButtonActive(true)
+        } 
+        else {
+            setIsEditButtonActive(false)
+        }
+    }, [user, userDetails])
+
+
+
+    // ------------------------------------------------------------------------
+    
+
+    const router = useRouter()
+
+    // ------------------------------------------------------------------------
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        setIsEditLoading(true)
+        const formData = new FormData(e.currentTarget)
+        const data = Object.fromEntries(formData)
+
+        try{
+            const res = await fetch("/api/users/my-data", {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+
+            if(!res.ok){
+                throw new Error("Failed to update profile")
+            }
+
+            const result = await res.json()
+            if(result.success){
+                router.refresh()
+                setIsEditButtonActive(false)
+            }
+        }
+        catch(err){
+            setError(err instanceof Error ? err.message : "Something went wrong")
+        }
+        finally{
+            setIsEditLoading(false)
+        }
+    }
+
+
+  return <div className='h-full w-full'>
+    {
+    isLoading ? <PulseLoader color='#00F' size={50} /> :
+    <>
+        <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
+            <button 
+            className='flex gap-2 flex-1 justify-start'
+            onClick={() => {router.back()}}
+            >
+                <FaChevronLeft />
+                <span className='text-xs font-semiboldd'>
+                    Go Back
+                </span>
+            </button>
+            <Link href={"/base/profile"} className='flex-1 flex justify-end'>
+                <FaUser />
+            </Link>
+        </div>
+
+        <div className='p-body bg-light mt-2 text-sm space-y-4'>
+            <div className='relative w-fit h-fit mx-auto space-y-2'>
+                <figure className='w-31 h-31 bg-red-300 rounded-full mx-auto relative overflow-hidden'>
+                    <Image
+                    src={"https://i.pravatar.cc/150?img=3"}
+                    alt='User Profile'
+                    fill
+                    />
+                </figure>
+                <div className='h-10 w-10 absolute bg-dark/60 rounded-full bottom-0 right-0 flex center-items' > 
+                    <FaCamera className='text-secondary-text'/>
+                </div>
+            </div>
+
+            {/* Details */}
+            <form className='w-full px-4 mt-4 space-y-2' onSubmit={handleSubmit}>
+                <div className='flex gap-2'>
+                    <InputComponent 
+                    name='first_name'
+                    state={userDetails}
+                    setState={setUserDetails}
+                    title='First Name'
+                    type='text'
+                    />
+
+                    <InputComponent 
+                    name='last_name'
+                    state={userDetails}
+                    setState={setUserDetails}
+                    title='Last Name'
+                    type='text'
+                    />
+                </div>
+                <div className='flex gap-2 items-end'>
+                    <InputComponent 
+                    name='phone'
+                    state={userDetails}
+                    setState={setUserDetails}
+                    title='Phone'
+                    type='text'
+                    />
+
+                    <button className='w-full bg-accent-red text-white py-2 h-10 rounded disabled:opacity-10'
+                    disabled={!isEditButtonActive || isEditLoading}
+                    >
+                        {isEditLoading ? <ClipLoader color='#fff' size={15}/> : "Edit Profile"}
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+        <div className='bg-light p-body mt-2 space-y-3'>
+            <div className='flex justify-between items-end'>
+                <div className='w-50'>
+                    <InputComponent 
+                    name='email'
+                    state={email}
+                    setState={setEmail}
+                    title='Email'
+                    type='email'
+                    readonly
+                    />
+                </div>
+
+                <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
+                    Change Email
+                </button>
+            </div>
+
+            <div className='flex justify-between items-end'>
+                <div className='w-50'>
+                    <InputComponent 
+                    name='password'
+                    state={password}
+                    setState={setPassword}
+                    title='Password'
+                    type='password'
+                    readonly
+                    />
+                </div>
+
+                <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
+                    Change Password
+                </button>
+            </div>
+        </div>
+
+        <div className='bg-light p-body mt-2 flex justify-between items-center'>
+            <p className='text-red-500 text-xs'>
+                Delete my Account
+            </p>
+            <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
+                Delete Account
+            </button>
+        </div>
+    </>}
+  </div>
+}
+
+export default Page

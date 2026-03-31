@@ -29,7 +29,7 @@ const RequestMailProduct = ({prop, handlePackage}: {prop:Package, handlePackage:
     >
             <div className='flex items-center justify-between'>
                 <p className='text-lg'>
-                    {prop.packageName}
+                    {prop.package_name}
                 </p>
                 <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
                     <span className='text-[10px] text-accent-blue block'>
@@ -43,10 +43,10 @@ const RequestMailProduct = ({prop, handlePackage}: {prop:Package, handlePackage:
                     Track: {prop.id}
                 </p>
                 <p className='flex-1 whitespace-nowrap flex justify-center border-r border-dark/20'>
-                    {prop.warehouseId}
+                    {prop.warehouse_id}
                 </p>
                 <p className='flex-1 whitespace-nowrap flex justify-end'>
-                    {prop.createdAt.slice(0, 10)}
+                    {prop.created_at.slice(0, 10)}
                 </p>
             </div>
         </div>

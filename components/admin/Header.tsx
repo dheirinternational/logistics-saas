@@ -29,7 +29,12 @@ export const Header = () => {
                 <div className={`bg-accent-red fixed h-screen min-h-dvh w-40 top-0 transition-set pt-10
                     ${isMenuActive ? "left-0" : "-left-full "}    
                 `}>
-                    {navLinks.map( (link, i) => <NavLink key={i} {...link}/> )}
+                    {navLinks.map( (link, i) => {
+
+                        const obj = {...link, setState: setIsMenuActive}
+
+                        return <NavLink key={i} {...obj}  />
+                    })}
                 </div>
             </div>
         </header>

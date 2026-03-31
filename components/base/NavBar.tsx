@@ -22,7 +22,7 @@ const NavBar = () => {
         }, 
         {
             icon: FaShop,
-            path: "/base/shop"
+            path: "/base/marketplace"
         }, 
         {
             icon: FaCalculator,
@@ -35,7 +35,7 @@ const NavBar = () => {
     ] 
 
   return (
-    <div className="fixed bottom-0 left-0 h-18 w-full border-t border-dark/20 bg-light">
+    <div className="fixed z-1000 bottom-0 left-0 h-18 w-full border-t border-dark/20 bg-light">
         <nav className="h-full w-fit mx-auto flex justify-center items-center text-xl relative gap-6">
             
             

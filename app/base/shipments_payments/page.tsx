@@ -45,18 +45,18 @@ const Page: NextPage = ({}) => {
     <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='w-40 -mt-2'>
             <InputComponent
-            name='warehouseId'
+            name='warehouse_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
             readonly
             select
-            selectValues={["pending", "paid", "failed", "abandoned"]}
+            // selectValues={["pending", "paid", "failed", "abandoned"]}
             />
         </div>
         <div className='flex items-center text-xs gap-1 -mt-2'>
             <InputComponent
-            name='incomingTrackingId'
+            name='incoming_tracking_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
@@ -80,7 +80,7 @@ const Page: NextPage = ({}) => {
         <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
             <div className='flex items-center justify-between'>
                 <p className='text-lg'>
-                    {dummyPayments[0].transactionRef}
+                    {dummyPayments[0].transaction_ref}
                 </p>
                 <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
                     <span className='text-[10px] text-accent-blue block'>
@@ -96,11 +96,11 @@ const Page: NextPage = ({}) => {
                 </p>
 
                 <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20 px-2'>
-                   method: {dummyPayments[0].paymentMethod}
+                   method: {dummyPayments[0].payment_method}
                 </p>
 
                 <p className='flex-1 whitespace-nowrap flex justify-end'>
-                    {dummyPayments[0].createdAt.slice(0, 10)}
+                    {dummyPayments[0].created_at.slice(0, 10)}
                 </p>
             </div>
         </div>

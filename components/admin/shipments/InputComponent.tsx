@@ -1,8 +1,10 @@
+"use client"
+
 import { ChangeEvent, Dispatch, HTMLInputTypeAttribute, SetStateAction, useRef, useState } from "react"
 import { FaChevronDown } from "react-icons/fa"
 
 type InputSafe = string | number | readonly string[] | undefined
-
+type SelectButton = {name: string, value: InputSafe}
 type InputProps<T extends Record<string, InputSafe>> = {
     title?: string
     name: string
@@ -11,13 +13,14 @@ type InputProps<T extends Record<string, InputSafe>> = {
     setState: Dispatch<SetStateAction<T>>
     readonly?: boolean
     select?: boolean
-    selectValues?: InputSafe[]
+    selectValues?: SelectButton[]
     unit?: string
     placeHolder?: string
     textarea?: boolean
+    required?: boolean
 }
 
-const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, type, state, setState, readonly, select, selectValues=[], unit, placeHolder, textarea}: InputProps<T>) => {
+const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, type, state, setState, readonly, select, selectValues=[], unit, placeHolder, textarea, required}: InputProps<T>) => {
 
     const [isDropDownActive, setIsDropDownActive] = useState(false)
     const inputRef = useRef(null) 
@@ -44,17 +47,24 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
                 ref={inputRef}
                 type={type}
                 name={name}
-                className="w-full mt-2 outline-0 border border-dark/40 rounded px-3 py-2 bg-light/60 focus:border-dark"
-                value={state[key]}
+                className={`w-full mt-2 outline-0 border border-dark/40 rounded px-3 py-2 focus:border-dark 
+                ${!readonly ? "bg-light/60" : "bg-dark/10 outline-0 focus:outline-0"}    
+                `}
+                value={state[key] ?? ""}
                 onChange={handleChange}
                 readOnly={readonly}
                 placeholder={placeHolder}
+                required={required}
                 />
             </>}
 
             {/* Customized select element */}
-            {select && <button 
-            className="absolute right-2 p-2 top-2.75"
+            {select && 
+            <button 
+            type={"button"}
+            className={`absolute right-2 p-2 
+            ${!title ? "top-2.75" : "top-6.5"}    
+            `}
             onClick={(e) => {
                 setIsDropDownActive(!isDropDownActive)
             }}
@@ -73,13 +83,14 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
         `}>
             {selectValues.length > 0 && selectValues.map( (btn, i) => 
                 <button
+                type={"button"}
                 key={i}
                 className="text-xs block w-full text-left border-b border-b-dark/20 py-2 px-3"
                 onClick={(e) => {
-                    handleClick(e, btn)
+                    handleClick(e, btn.value)
                 }}            
                 >
-                    {btn?.toString().toWellFormed()}
+                    {btn?.name?.toString().toWellFormed()}
                 </button>
             )}
         </div>}
@@ -92,7 +103,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
                 name={name}
                 placeholder={placeHolder}
                 className="w-full h-26 mt-2 outline-0 border border-dark/40 rounded px-3 py-2 bg-light/60 focus:border-dark text-sm resize-none"
-                value={state[key]}
+                value={state[key] ?? ""}
                 onChange={handleChange}
                 >
                 </textarea>

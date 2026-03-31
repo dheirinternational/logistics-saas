@@ -3,6 +3,7 @@ import CTARedirectButton from '@/components/base/CTARedirectButton'
 import FAQ from '@/components/base/FAQ'
 import { ctaButtonsProps } from '@/components_map_definitions/ctaRedirectButtons'
 import { NextPage } from 'next'
+import Link from 'next/link'
 
 const Page: NextPage = ({}) => {
   return <>
@@ -38,9 +39,9 @@ const Page: NextPage = ({}) => {
             </p>
 
             <div className="flex gap-4">
-              <button className="px-5 py-2.5 bg-accent-blue text-white rounded-lg text-sm font-medium hover:bg-accent-blue/70 transition">
+              <Link href={"/base/add_package"} className="px-5 py-2.5 bg-accent-blue text-white rounded-lg text-sm font-medium hover:bg-accent-blue/70 transition">
                 Get Started
-              </button>
+              </Link>
               
             </div>
           </div>

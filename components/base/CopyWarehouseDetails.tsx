@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { FaCheck } from "react-icons/fa"
 
-const CopyWarehouseDetails = () => {
+const CopyWarehouseDetails = ({text, title} : {text: string, title: string}) => {
 
     const [isCopied, setIsCopied] = useState(false)
 
@@ -17,7 +17,7 @@ const CopyWarehouseDetails = () => {
 
     const handleCopy = async () => {
         try{
-            await navigator.clipboard.writeText("Copied text")
+            await navigator.clipboard.writeText(text)
             setIsCopied(true)
         }
         catch(err){
@@ -26,9 +26,9 @@ const CopyWarehouseDetails = () => {
     }
 
   return (
-    <div className="text-sm flex items-center justify-between">
+    <div className="text-sm flex items-center justify-between flex-wrap gap-3">
         <p className="">
-            Recipent: lorem lorem
+            <span className="font-semibold">{title}:</span> {text}
         </p>
         <button 
         className="text-xs w-16 h-7 bg-accent-red text-secondary-text rounded-full justify-center flex items-center disabled:bg-accent-red/40"

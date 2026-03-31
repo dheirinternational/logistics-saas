@@ -1,12 +1,12 @@
+import { Timestamp } from "next/dist/server/lib/cache-handlers/types"
 import { ShippingType } from "./miscallaneous"
 import { ProductStatus, ProductVisibility } from "./statusTypes"
 
 export type User = {
     id: string // unique
-    firstName: string
-    lastName: string
+    first_name: string
+    last_name: string
     email: string // unique
-    password: string
     role: string
     phone: string // unique
     created_at: string
@@ -19,7 +19,7 @@ export type Admin = {
 
 export type Staff = {
     id: string // unique
-    userId: string // FK -> Users(id)
+    user_id: string // FK -> Users(id)
     position: string | null
     // department_id: string | null
     status: null
@@ -27,51 +27,42 @@ export type Staff = {
 
 export type Customer = {
     id: string
-    userId: string // FK -> Users(id)
+    user_id: string // FK -> Users(id)
     code: string // unique e.g KRC2530 
 }
 
 export type Shipment = {
     id: string // unique
-    trackingNumber: string // unique
-    customerCode: string // FK -> Customer(code)
-    originWarehouseId: string // FK -> Warehouse(id)
-    destinationWarehouseId: string  // FK -> Warehouse(id) 
+    tracking_number: string // unique
+    customer_code: string // FK -> Customer(code)
+    origin_warehouse_id: string // FK -> Warehouse(id)
+    destination_warehouse_id: string  // FK -> Warehouse(id) 
     status: "shipped" | "in_transit" | "arrived_nigeria" | "pending_payment" | "delivered"
-    shippingMethod: ShippingType
+    shipping_method: ShippingType
 
-    totalCost: number
-    createdAt: string
+    total_cost: number
+    created_at: string
 }
 
 export type Package = {
     id: string // unique
     incoming_package_id: string  // FK -> IncomingPackage(id)
-    packageName: string
-    userId: string  // Fk -> Users(id)
-    customerCode: string // Fk -> Customers(code)
-    warehouseId: string // Fk -> Warehouses(id)
-    actualWeight: number
+    package_name: string
+    user_id: string  // Fk -> Users(id)
+    customer_code: string // Fk -> Customers(code)
+    warehouse_id: string // Fk -> Warehouses(id)
+    actual_weight: number
     photos?: string[]
     condition?: "good" | "damaged"
     status: "stored" | "ready_to_ship" | "assigned_to_shipment"
-    shipmentId: null | string  // FK -> Shipments(id)
-    createdAt: string
+    shipment_id: null | string  // FK -> Shipments(id)
+    created_at: string
 }
 
 export type Warehouse = {
     id: string // unique
     name: string 
-    location: string  // FK -> Address(id)
-    capacity: string
-    managerId: string  // (FK -> staff)
-    type: ShippingType | "local"
-    phone: string
-}
-
-export type Address = {
-    id: string  // u
-    recipentName: null | string
+    recipient_name: null | string
     phone: null | string
     country: string
     province? : string | null
@@ -79,52 +70,69 @@ export type Address = {
     district?: string | null
     street: string | null
     building: string | null 
-    postalCode: string 
+    postal_code: string 
+    created_at: string
+    capacity: string
+    manager_id: string  // (FK -> staff)
+    type: ShippingType | "local"
+}
+
+export type Address = {
+    id: string  // u
+    recipient_name: null | string
+    phone: null | string
+    country: string
+    province? : string | null
+    city: string
+    district?: string | null
+    street: string | null
+    building: string | null 
+    postal_code: string 
     created_at: string
 }
 
 export type Payment = {
     id: string // unique
-    shipmentId: string // (FK -> Shipments(id))
-    customerCode: string  // (Fk -> Customers(id))
+    shipment_id: string // (FK -> Shipments(id))
+    customer_code: string  // (Fk -> Customers(id))
     amount: number
-    paymentMethod: "bank_transfer" | "card" | "cash"
+    payment_method: "bank_transfer" | "card" | "cash"
     status: "successful" | "pending" | "failed"
-    transactionRef: string
-    paidAt: string
-    createdAt: string
+    transaction_ref: string
+    paid_at: string
+    created_at: string
 }
 
 export type StaffAssignment = {
     id: string
-    staffId: string  // Fk -> Staffs(id)
-    shipmentId: string  // Fk -> Shipments(id)
+    staff_id: string  // Fk -> Staffs(id)
+    shipment_id: string  // Fk -> Shipments(id)
     role: string
-    assignedAt: string
+    assigned_at: string
 }
 
 
 export type IncomingPackage = {
     id: string // u
-    userId: string 
-    customerCode: string  // Fk -> Customer(code)
-    incomingTrackingNumber: string
-    warehouseId: string
+    user_id: string 
+    customer_code: string  // Fk -> Customer(code)
+    incoming_tracking_number: string
+    warehouse_id: string
     status: "expected" | "received" | "processed" | "cancelled" 
-    declaredItemName: string
-    declaredItemQuantity: number
-    declaredItemWeight: number 
-    createdAt: string
+    declared_item_name: string
+    declared_item_quantity: number
+    declared_item_weight: number 
+    created_at: string
 }
 
 export type ShippingRequest = {
     id: string // u
     user_id: string  // Fk -> Users(id)
-    customerCode: string //  Fk -> Customers(code)
-    packageIds: string[]
+    customer_code: string //  Fk -> Customers(code)
+    package_ids: string[]
     method: ShippingType
     status: "peding" | "approved"
-    createdAt: string
+    created_at: string
 }
 
 // Processed means it's been converted to processed
@@ -138,7 +146,7 @@ export type ShippingRequest = {
 
 export type TrackingEvent = {
     id: string // unique
-    shipmentId: string // (Fk -> shipment)
+    shipment_id: string // (Fk -> shipment)
     status: string
     location: string
     timestamp: string
@@ -148,41 +156,42 @@ export type TrackingEvent = {
 export type Carrier = {
     id: string
     name: string
-    contactInfo: string
-    trackingApi: string
+    contact_info: string
+    tracking_api: string
 }
 
 export type PricingRule = {
     id: string // unique
-    basePrice: number
-    pricePerKg: number
-    pricePerKm: number
+    base_price: number
+    price_per_kg: number
+    price_per_km: number
     region: string
-    carrierId: string // (FK -> shipment)
+    carrier_id: string // (FK -> shipment)
 }
 
 export type Notification = {
     id: string // unique
-    userId: string // (Fk -> User)
+    user_id: string // (Fk -> User)
     title: string
     message: string
     read: boolean
-    createdAt: string
+    created_at: string
 }
 
 export type ActivityLog = {
     id: string // unique
-    userId: string // (FK -> User)
+    user_id: string // (FK -> User)
     action: string
     entity: string
-    entityId: string
-    timeStamp: string
+    entity_id: string
+    time_stamp: string
 }
 
 export type Country = {
     id: string // unique
+    iso: string // unique 
     name: string 
-    country: string 
+    created_at: Timestamp
 }
 
 export type Product = {
@@ -190,10 +199,10 @@ export type Product = {
     slug: string // unique
     name: string
     description?: string
-    categoryId?: string
+    category_id?: string
     price: number
-    discountPrice?: number
-    costPrice?: number
+    discount_price?: number | null
+    cost_price?: number
     stock_quantity: number
     low_stock_threshold: number
     weight: number
@@ -202,11 +211,11 @@ export type Product = {
     height: number
     status: ProductStatus
     visibility: ProductVisibility
-    isFeatured: string
-    createdBy: string
-    updatedBy: string
-    createdAt: string
-    updatedAt: string 
+    is_featured: string
+    created_by: string
+    updated_by: string
+    created_at: string
+    updated_at: string 
 }
 
 export type ProductCategory = {
@@ -218,8 +227,8 @@ export type ProductCategory = {
 
 export type ProductImage = {
     id: string // unique
-    productId: string // (FK -> Proudtc)
-    imageUrl: string // unique
-    altText: string
-    createdAt: string
+    product_id: string // (FK -> Proudtc)
+    image_url: string // unique
+    alt_text: string
+    created_at: string
 }

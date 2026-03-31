@@ -2,7 +2,7 @@
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
 import RequestMailProduct from '@/components/base/RequestMailProduct'
-import { dummyPackages, dummyWarehouses } from '@/types/dummyData'
+import { dummyPackages } from '@/types/dummyData'
 import { Package } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'
@@ -15,8 +15,8 @@ const Page: NextPage = () => {
     const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
 
     const [filterValues, setFilterValues] = useState({
-        warehouseId: dummyWarehouses[0].name,
-        incomingTrackingId: "" 
+        warehouse_id: "",
+        incoming_tracking_id: "" 
     })
 
     const router = useRouter()
@@ -42,18 +42,18 @@ const Page: NextPage = () => {
     <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='w-40 -mt-2'>
             <InputComponent
-            name='warehouseId'
+            name='warehouse_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
             readonly
             select
-            selectValues={dummyWarehouses.map( x => x.name)}
+            // selectValues={["Warehouse one", "warehouse 2"]}
             />
         </div>
         <div className='flex items-center text-xs gap-1 -mt-2'>
             <InputComponent
-            name='incomingTrackingId'
+            name='incoming_tracking_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}

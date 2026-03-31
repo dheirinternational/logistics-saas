@@ -5,18 +5,62 @@ import { FaChevronLeft, FaUser } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import InputComponent from '@/components/admin/shipments/InputComponent'
-import { useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
+import { Warehouse } from '@/types/entityTypeDef'
 
 const Page: NextPage = () => {
 
     const router = useRouter()
     const [packageInformation, setPackageInformation] = useState({
-        trackingNumber: "",
-        warehouseId: "Warehouse One",
-        declaredItemName: "",
-        declaredQuantity: 1,
-        personalNote: ""
+        incoming_tracking_number: "",
+        warehouse_id: 1,
+        declared_item_name: "",
+        declared_item_quantity: 1,
+        customer_note: "",
+        status: "expected"
     })
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        try{
+            const res = fetch("/api/incoming-packages", {
+                method: "POST",
+                headers: {
+                    "Content_Type" : "application/json" 
+                },
+                credentials: "include",
+                body: JSON.stringify(packageInformation)
+            })
+        }
+        catch(err){
+
+        }
+    }
+
+    const fetchWarehousedata = async () => {
+        try{
+            const res = await fetch("/api/warehouses", {
+                method: "GET",
+                credentials: "include"
+            })
+
+            if(!res.ok){
+                throw new Error("Error fetching warehouse data")
+            }
+
+            const data = await res.json()
+
+            setWarehouses(data.data)
+        }
+        catch(err){
+
+        }
+    }
+
+    useEffect(() => {
+        fetchWarehousedata()
+    }, [])
 
   return <div className='h-full w-full space-y-body'>
     <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
@@ -36,67 +80,72 @@ const Page: NextPage = () => {
             <FaUser/>
         </Link>
     </div>
+    <form onSubmit={handleSubmit}>
+        <div className='bg-white p-4 flex flex-col gap-2'>
+            <div className='flex gap-2'>
+                <div className='w-1/2'>
+                    <InputComponent 
+                    name='warehouse_id'
+                    type='text'
+                    state={packageInformation}
+                    setState={setPackageInformation}
+                    readonly
+                    select
+                    selectValues={warehouses.map( x => ({name: x.name, value: x.id}))}
+                    required
+                    />
+                </div>
+                
+                <div className='w-1/2'>
+                    <InputComponent 
+                    name='declared_item_quantity'
+                    type='number'
+                    state={packageInformation}
+                    setState={setPackageInformation}
+                    placeHolder='Quantity'
+                    required
+                    />        
+                </div>
+            </div>
 
-    <div className='bg-white p-4 flex flex-col gap-2'>
-        
-        <div className='flex gap-2'>
-            <div className='w-1/2'>
-                <InputComponent 
-                name='warehouseId'
-                type='text'
-                state={packageInformation}
-                setState={setPackageInformation}
-                readonly
-                select
-                selectValues={["Warehouse One", "Warehouse Two"]}
-                />
-            </div>
+            <InputComponent 
+            name='declared_item_name'
+            type='text'
+            state={packageInformation}
+            setState={setPackageInformation}
+            placeHolder='Input Package Name...'
+            required
+            />
+
+            <InputComponent 
+            name='incoming_tracking_number'
+            type='text'
+            state={packageInformation}
+            setState={setPackageInformation}
+            placeHolder='Input Tracking Number...'
+            required
             
-            <div className='w-1/2'>
-                <InputComponent 
-                name='declaredQuantity'
-                type='number'
-                state={packageInformation}
-                setState={setPackageInformation}
-                placeHolder='Quantity'
-                />        
-            </div>
+            />
+        </div>
+        
+        <div className='bg-white p-4 flex flex-col gap-2'>
+            <InputComponent 
+            title='Customer Personal Note'
+            name='customer_note'
+            type='text'
+            state={packageInformation}
+            setState={setPackageInformation}
+            placeHolder='customer personal note...'
+            textarea
+            />
         </div>
 
-        <InputComponent 
-        name='declaredItemName'
-        type='text'
-        state={packageInformation}
-        setState={setPackageInformation}
-        placeHolder='Input Package Name...'
-        />
-
-        <InputComponent 
-        name='trackingNumber'
-        type='text'
-        state={packageInformation}
-        setState={setPackageInformation}
-        placeHolder='Input Tracking Number...'
-        />
-    </div>
-    
-    <div className='bg-white p-4 flex flex-col gap-2'>
-        <InputComponent 
-        title='Customer Personal Note'
-        name='personalNote'
-        type='text'
-        state={packageInformation}
-        setState={setPackageInformation}
-        placeHolder='customer personal note...'
-        textarea
-        />
-    </div>
-
-    <div className='p-body'>
-        <button className='bg-accent-red text-white text-xs py-3 w-full rounded'>
-            Submit
-        </button>
-    </div>
+        <div className='p-body'>
+            <button className='bg-accent-red text-white text-xs py-3 w-full rounded'>
+                Submit
+            </button>
+        </div>
+    </form>
   </div>
 }
 

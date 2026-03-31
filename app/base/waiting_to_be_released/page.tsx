@@ -31,7 +31,7 @@ const Page: NextPage = () => {
     {/* <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='w-40 -mt-2'>
             <InputComponent
-            name='warehouseId'
+            name='warehouse_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
@@ -42,7 +42,7 @@ const Page: NextPage = () => {
         </div>
         <div className='flex items-center text-xs gap-1 -mt-2'>
             <InputComponent
-            name='incomingTrackingId'
+            name='incoming_tracking_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
@@ -77,11 +77,11 @@ const Page: NextPage = () => {
             <div className='text-xs flex'>
                 
                 <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20'>
-                    Packages No: {dummyShippingRequests[0].packageIds.length}
+                    Packages No: {dummyShippingRequests[0].package_ids.length}
                 </p>
 
                 <p className='flex-1 whitespace-nowrap flex justify-end'>
-                    {dummyShippingRequests[0].createdAt.slice(0, 10)}
+                    {dummyShippingRequests[0].created_at.slice(0, 10)}
                 </p>
             </div>
         </div>
