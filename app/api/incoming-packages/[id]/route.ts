@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 // }
 
 
-export async function GET({params}: {params: Promise<{id: string}>}){
+export async function GET(){
     try{
         const session = await getSession()
         
