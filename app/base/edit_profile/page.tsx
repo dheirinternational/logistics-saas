@@ -28,6 +28,10 @@ const Page: NextPage = () => {
         phone: ""
     })
 
+    useEffect(() => {
+        console.log(userDetails)
+    }, [userDetails])
+
     const [email, setEmail] = useState({
         email: ""
     })
@@ -51,7 +55,7 @@ const Page: NextPage = () => {
             }
 
             const data = await res.json()
-            const fetchedUser = data.user
+            const fetchedUser = data.data
             setUser(fetchedUser)
             setUserDetails({
                 first_name: fetchedUser.first_name,
