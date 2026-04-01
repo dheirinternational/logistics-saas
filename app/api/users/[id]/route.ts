@@ -3,7 +3,7 @@ import { getSession } from "@/lib/db/session";
 import { NextResponse } from "next/server";
 
 
-export async function GET(response: Response, {params}: {params: Promise<{id: string}>}){
+export async function GET(request: Request, {params}: {params: Promise<{id: string}>}){
     try{
         const session = await getSession()
 
