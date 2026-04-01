@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from 'react'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
-import { ClipLoader } from 'react-spinners'
+import { BeatLoader, ClipLoader } from 'react-spinners'
 
 export default function Page() {
 
@@ -55,8 +55,9 @@ export default function Page() {
   return (
     <div className='h-full w-full space-y-1 '>
         {
-        loading ? <div className='h-full w-full center-items'>
-            <ClipLoader color='#00f' size={30}/>
+        loading ? 
+        <div className='flex h-full w-full center-items'>
+            <BeatLoader color='#f26430' size={15} speedMultiplier={0.5}/>
         </div> :
         <>
             <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
@@ -97,7 +98,8 @@ export default function Page() {
                     setState={setFilterValues}
                     readonly
                     select
-                    // selectValues={warehouses.map((x) => x.name)}
+                    selectValues={warehouses.map((x) => ({name: x.name, value: x.id}))}
+                    overshadow
                     />
                 </div>
             </div>

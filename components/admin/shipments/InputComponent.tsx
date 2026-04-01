@@ -1,6 +1,6 @@
 "use client"
 
-import { ChangeEvent, Dispatch, HTMLInputTypeAttribute, SetStateAction, useRef, useState } from "react"
+import { ChangeEvent, Dispatch, HTMLInputTypeAttribute, SetStateAction, useEffect, useRef, useState } from "react"
 import { FaChevronDown } from "react-icons/fa"
 
 type InputSafe = string | number | readonly string[] | undefined
@@ -18,11 +18,15 @@ type InputProps<T extends Record<string, InputSafe>> = {
     placeHolder?: string
     textarea?: boolean
     required?: boolean
+    overshadow?: boolean
 }
 
-const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, type, state, setState, readonly, select, selectValues=[], unit, placeHolder, textarea, required}: InputProps<T>) => {
+
+
+const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, type, state, setState, readonly, select, selectValues=[], unit, placeHolder, textarea, required, overshadow}: InputProps<T>) => {
 
     const [isDropDownActive, setIsDropDownActive] = useState(false)
+    const [overshadowText, setOvershadowText] = useState("")
     const inputRef = useRef(null) 
 
     const key = name as keyof T
@@ -58,6 +62,12 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
                 />
             </>}
 
+            {overshadow && 
+                <div className=" w-[70%] top-2.5 h-[90%] left-3 absolute flex items-center pointer-events-none bg-[#e5e5e5] outline-0">
+                    {overshadowText}
+                </div>
+            }
+
             {/* Customized select element */}
             {select && 
             <button 
@@ -88,6 +98,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
                 className="text-xs block w-full text-left border-b border-b-dark/20 py-2 px-3"
                 onClick={(e) => {
                     handleClick(e, btn.value)
+                    setOvershadowText(btn.name)
                 }}            
                 >
                     {btn?.name?.toString().toWellFormed()}

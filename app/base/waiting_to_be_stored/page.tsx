@@ -6,7 +6,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
 import { dummyIncomingPackages } from '@/types/dummyData'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { IncomingPackage, Package } from '@/types/entityTypeDef'
+import { toast } from 'react-toastify'
+import { BeatLoader } from 'react-spinners'
 
 const Page: NextPage = ({}) => {
 
@@ -14,9 +17,46 @@ const Page: NextPage = ({}) => {
         warehouse_id: "",
         incoming_tracking_id: "" 
     })
+    const [packages, setPackages] = useState<IncomingPackage[]>([])
+    const [loading, setLoading] = useState(true)
     const router = useRouter()
 
-    const incomingPackage = dummyIncomingPackages[0]
+    
+    useEffect(() => {
+        const fetchPackages = async () => {
+            try{
+
+                const userRes = await fetch(`/api/auth/me`, {
+                    method: "GET",
+                    credentials: "include"
+                })
+
+                const user = await userRes.json()
+
+                const res = await fetch(`/api/incoming-packages/${user.user_id}`, {
+                    method: "GET",
+                    credentials: "include"
+                })
+                
+                const result = await res.json()
+    
+                if(!res.ok){
+                    toast.error(result?.message)
+                }
+    
+                setPackages(result.data)
+            }
+            catch(err){
+                console.error(err)
+            }
+            finally{
+                setLoading(false)
+            }
+        }
+
+        fetchPackages()
+    }, [])
+    
 
   return <div className='h-full w-full space-y-1'>
     <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
@@ -65,43 +105,55 @@ const Page: NextPage = ({}) => {
     </div>
     <div className='bg-light px-4 py-2'>
         <span className='text-xs'>
-            Total: <span className='text-accent-red font-bold text-sm'>{dummyIncomingPackages.length}</span> incoming Packgages
+            Total: <span className='text-accent-red font-bold text-sm'>{packages?.length || 0}</span> incoming Packgages
         </span>
     </div>
 
-    <div className='bg-light p-4 min-h-100'>
-        {
-            dummyIncomingPackages.length < 1 && 
-            <p className='text-xs italic'>
-                ...There are no incoming packages
-            </p>
-        }
-        
-        <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
-            <div className='flex items-center justify-between'>
-                <p className='text-lg'>
-                    {incomingPackage.declared_item_name}
+    {
+        loading ? 
+        <div className='flex justify-center py-10'>
+            <BeatLoader color='#f26430' size={12} speedMultiplier={0.5}/>
+        </div> :
+        <div className='bg-light p-4 min-h-100 gap-y-3'>
+            {
+                dummyIncomingPackages.length < 1 && 
+                <p className='text-xs italic'>
+                    ...There are no incoming packages
                 </p>
-                <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
-                    <span className='text-[10px] text-accent-blue block'>
-                        expected
-                    </span>
-                </div>
-            </div>
+            }
+            
+            {
+                packages.map( x => 
+                    <div
+                    key={x.id} 
+                    className='border border-dark/20 p-4 py-3 space-y-2 rounded mb-3'>
+                        <div className='flex items-center justify-between'>
+                            <p className='text-lg'>
+                                {x.declared_item_name}
+                            </p>
+                            <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
+                                <span className='text-[10px] text-accent-blue block'>
+                                    expected
+                                </span>
+                            </div>
+                        </div>
 
-            <div className='text-xs flex'>
-                <p className='text-xs flex-1 whitespace-nowrap border-r border-dark/20'>
-                    Track: {incomingPackage.incoming_tracking_number}
-                </p>
-                <p className='flex-1 whitespace-nowrap flex justify-center border-r border-dark/20'>
-                    {incomingPackage.warehouse_id}
-                </p>
-                <p className='flex-1 whitespace-nowrap flex justify-end'>
-                    {incomingPackage.created_at.slice(0, 10)}
-                </p>
-            </div>
+                        <div className='text-xs flex'>
+                            <p className='text-xs flex-1 whitespace-nowrap border-r border-dark/20'>
+                                Track: {x.incoming_tracking_number}
+                            </p>
+                            <p className='flex-1 whitespace-nowrap flex justify-center border-r border-dark/20'>
+                                {x.warehouse_id}
+                            </p>
+                            <p className='flex-1 whitespace-nowrap flex justify-end'>
+                                {x.created_at.slice(0, 10)}
+                            </p>
+                        </div>
+                    </div>
+                )
+            }
         </div>
-    </div>
+    }
   </div>
 }
 

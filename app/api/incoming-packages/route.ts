@@ -4,13 +4,13 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request){
     try{
-        const session = await getSession();
-
+        const session = await getSession()
+        
         if (!session) {
-            return NextResponse.json(
-                { success: false, message: "Unauthorized" },
-                { status: 401 }
-            );
+            return NextResponse.json({
+                success: false,
+                message: "Unauthorized"
+            }, {status: 401})
         }
 
         const body = await request.json()
@@ -54,3 +54,40 @@ export async function POST(request: Request){
         }, {status: 500})
     }
 }
+
+
+export async function GET(){
+    try{
+        const session = await getSession()
+        
+        if (!session) {
+            return NextResponse.json({
+                success: false,
+                message: "Unauthorized"
+            }, {status: 401})
+        }
+
+        if(session.role !== "admin"){
+            return NextResponse.json({
+                success: false,
+                message: "Forbidden"
+            }, {status: 403})
+        }
+
+        const res = await pool.query(`
+            SELECT * FROM incoming_packages   
+        `)
+
+        return NextResponse.json({
+            success: true,
+            data: res.rows
+        })
+    }
+    catch(err){
+        console.error("Error getting Incoming Packages", err)
+        return NextResponse.json({
+            success: false,
+            message: "Something went wrong"
+        })
+    }
+} 

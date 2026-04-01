@@ -1,7 +1,6 @@
 "use client"
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
-import { dummyUsers } from '@/types/dummyData'
 import { User } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Image from 'next/image'
@@ -9,7 +8,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
 import { FaCamera, FaChevronLeft, FaUser } from 'react-icons/fa'
-import { ClipLoader, PulseLoader } from 'react-spinners'
+import { BeatLoader } from 'react-spinners'
+import { toast } from 'react-toastify'
 
 
 type BasicDetails = Omit<User, "id" | "password" | "role" | "created_at" | "email">
@@ -118,18 +118,21 @@ const Page: NextPage = () => {
                 body: JSON.stringify(data)
             })
 
+            const result = await res.json()
+
             if(!res.ok){
-                throw new Error("Failed to update profile")
+                toast.error(result.error)
+                return
             }
 
-            const result = await res.json()
             if(result.success){
+                toast.success("Profile successfully updated")
                 router.refresh()
                 setIsEditButtonActive(false)
             }
         }
         catch(err){
-            setError(err instanceof Error ? err.message : "Something went wrong")
+            toast.error(err instanceof Error ? err.message : "Something went wrong")
         }
         finally{
             setIsEditLoading(false)
@@ -139,7 +142,10 @@ const Page: NextPage = () => {
 
   return <div className='h-full w-full'>
     {
-    isLoading ? <PulseLoader color='#00F' size={50} /> :
+    isLoading ? 
+    <div className='flex h-full w-full center-items'>
+        <BeatLoader color='#f26430' size={15} speedMultiplier={0.5}/>
+    </div> :
     <>
         <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
             <button 
@@ -204,7 +210,7 @@ const Page: NextPage = () => {
                     <button className='w-full bg-accent-red text-white py-2 h-10 rounded disabled:opacity-10'
                     disabled={!isEditButtonActive || isEditLoading}
                     >
-                        {isEditLoading ? <ClipLoader color='#fff' size={15}/> : "Edit Profile"}
+                        {isEditLoading ? <BeatLoader color='#fff' size={15}/> : "Edit Profile"}
                     </button>
                 </div>
             </form>

@@ -7,6 +7,8 @@ import Link from 'next/link'
 import InputComponent from '@/components/admin/shipments/InputComponent'
 import { FormEvent, useEffect, useState } from 'react'
 import { Warehouse } from '@/types/entityTypeDef'
+import { toast } from 'react-toastify'
+import { BeatLoader } from 'react-spinners'
 
 const Page: NextPage = () => {
 
@@ -20,21 +22,43 @@ const Page: NextPage = () => {
         status: "expected"
     })
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+    const [isSubmiting, setIsSubmitting] = useState(false)
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setIsSubmitting(true)
         try{
-            const res = fetch("/api/incoming-packages", {
+            const res = await fetch("/api/incoming-packages", {
                 method: "POST",
                 headers: {
-                    "Content_Type" : "application/json" 
+                    "Content-Type": "application/json" 
                 },
                 credentials: "include",
                 body: JSON.stringify(packageInformation)
+            });
+
+            const result = await res.json()
+
+            if (!res.ok) {
+                toast.error(result?.message)
+                return;
+            }
+            
+            toast.success(`Successfully Added ${packageInformation.declared_item_name}`)
+            setPackageInformation({
+                incoming_tracking_number: "",
+                warehouse_id: 1,
+                declared_item_name: "",
+                declared_item_quantity: 1,
+                customer_note: "",
+                status: "expected"
             })
         }
         catch(err){
-
+            console.error(err)
+        }
+        finally{
+            setIsSubmitting(false)
         }
     }
 
@@ -54,7 +78,7 @@ const Page: NextPage = () => {
             setWarehouses(data.data)
         }
         catch(err){
-
+            console.error(err)
         }
     }
 
@@ -93,6 +117,7 @@ const Page: NextPage = () => {
                     select
                     selectValues={warehouses.map( x => ({name: x.name, value: x.id}))}
                     required
+                    overshadow
                     />
                 </div>
                 
@@ -141,8 +166,14 @@ const Page: NextPage = () => {
         </div>
 
         <div className='p-body'>
-            <button className='bg-accent-red text-white text-xs py-3 w-full rounded'>
-                Submit
+            <button 
+            className='bg-accent-red text-white text-xs py-3 w-full rounded disabled:opacity-70'
+            disabled={isSubmiting}
+            >
+                {
+                    isSubmiting ?
+                    <BeatLoader color='#FFF' speedMultiplier={0.5} size={10}/> : "Submit"
+                }
             </button>
         </div>
     </form>

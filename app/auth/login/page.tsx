@@ -6,6 +6,8 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
 import { FaTruck } from 'react-icons/fa'
+import { toast } from 'react-toastify'
+import { BeatLoader, ClipLoader, RiseLoader } from 'react-spinners'
 
 const Page: NextPage = () => {
     const router = useRouter()
@@ -63,14 +65,18 @@ const Page: NextPage = () => {
             const result = await res.json()
 
             if(!res.ok){
+                toast.error(result.error)
                 setError(result.error || "Login failed")
                 return
             }
 
+            toast.success("Succesfully logged In")
+
             await handleSession()
         }
         catch(err){
-            setError("An error occurred. Please try again.")
+            toast.error("An error occurred. Please try again.")
+            console.error(err)
         }
         finally{
             setIsLoading(false)
@@ -111,8 +117,8 @@ const Page: NextPage = () => {
                 />
             </div>
             <div>
-                <button className='w-full bg-accent-blue text-white mt-6 py-2 rounded'>
-                    Log in
+                <button className='w-full bg-accent-blue text-white mt-6 py-2 rounded text-sm'>
+                    {isLoading ? <BeatLoader color='#FFF' size={10} /> : "Log in"}
                 </button>
             </div>
         </form>
