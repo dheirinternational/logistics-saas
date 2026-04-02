@@ -1,4 +1,4 @@
-import StatusStatCard from '@/components/admin/StatusStatCard'
+import StatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import SearchComponent from '@/components/admin/users/SearchComponent'
 import { NextPage } from 'next'
 import Link from 'next/link'

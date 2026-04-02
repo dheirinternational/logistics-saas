@@ -28,10 +28,6 @@ const Page: NextPage = () => {
         phone: ""
     })
 
-    useEffect(() => {
-        console.log(userDetails)
-    }, [userDetails])
-
     const [email, setEmail] = useState({
         email: ""
     })
@@ -72,10 +68,6 @@ const Page: NextPage = () => {
             setIsLoading(false)
         }
     }
-
-    useEffect(() => {
-        console.log(user, userDetails)
-    }, [user, userDetails])
     
     useEffect(() => {
         fetchData()

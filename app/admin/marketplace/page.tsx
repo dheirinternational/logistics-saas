@@ -1,5 +1,5 @@
 import SearchComponent from '@/components/admin/marketplace/SearchComponent'
-import StatusStatCard from '@/components/admin/StatusStatCard'
+import StatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { FaPlus } from 'react-icons/fa'

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChangeEvent, Dispatch, HTMLInputTypeAttribute, SetStateAction, useEffect, useRef, useState } from "react"
+import { ChangeEvent, Dispatch, HTMLInputTypeAttribute, SetStateAction, useRef, useState } from "react"
 import { FaChevronDown } from "react-icons/fa"
 
 type InputSafe = string | number | readonly string[] | undefined
@@ -51,7 +51,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
                 ref={inputRef}
                 type={type}
                 name={name}
-                className={`w-full mt-2 outline-0 border border-dark/40 rounded px-3 py-2 focus:border-dark 
+                className={`w-full ${title && "mt-2" } outline-0 border border-dark/40 rounded px-3 py-2 focus:border-dark 
                 ${!readonly ? "bg-light/60" : "bg-dark/10 outline-0 focus:outline-0"}    
                 `}
                 value={state[key] ?? ""}
@@ -63,7 +63,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
             </>}
 
             {overshadow && 
-                <div className=" w-[70%] top-2.5 h-[90%] left-3 absolute flex items-center pointer-events-none bg-[#e5e5e5] outline-0">
+                <div className={` w-[70%] h-7.5 left-3 absolute flex items-center pointer-events-none bg-[#e5e5e5] outline-0  ${title ? "top-6.5" : "top-px"}`}>
                     {overshadowText}
                 </div>
             }
@@ -72,10 +72,10 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
             {select && 
             <button 
             type={"button"}
-            className={`absolute right-2 p-2 
-            ${!title ? "top-2.75" : "top-6.5"}    
+            className={`absolute right-0 p-2 
+            ${!title ? "top-1" : "top-6.5"}    
             `}
-            onClick={(e) => {
+            onClick={( ) => {
                 setIsDropDownActive(!isDropDownActive)
             }}
             >

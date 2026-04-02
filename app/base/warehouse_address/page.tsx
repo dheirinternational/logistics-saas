@@ -2,24 +2,22 @@
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
 import CopyWarehouseDetails from '@/components/base/CopyWarehouseDetails'
-import Map from '@/components/base/Map'
 import { Warehouse } from '@/types/entityTypeDef'
 import Link from 'next/link'
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from 'react'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
-import { BeatLoader, ClipLoader } from 'react-spinners'
+import { BeatLoader } from 'react-spinners'
 
 export default function Page() {
 
     const router = useRouter()
 
-    const [filterValues, setFilterValues] = useState({country: "china", name: ""})
+    const [filterValues, setFilterValues] = useState({country: "china", id: 0})
     // const [coordinates, setCoordinates] = useState({coordinates: ""})
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(true)
-    const [index, setIndex] = useState(0)
 
     const fetchWarehouses = async () => {
         try{
@@ -38,6 +36,7 @@ export default function Page() {
             setWarehouses(result.data)
         }
         catch(err){
+            console.error(err)
             setError("An error occurred. Please try again.")
         }
         finally{
@@ -50,7 +49,7 @@ export default function Page() {
         fetchWarehouses()
     }, [])
 
-    const currentlySelectedWarehouse = warehouses.find(x => x.name === filterValues.name)
+    const currentlySelectedWarehouse = warehouses.find( warehouse => warehouse.id === filterValues.id)
 
   return (
     <div className='h-full w-full space-y-1 '>
@@ -92,8 +91,8 @@ export default function Page() {
                 </div> */}
                 <div className='w-60 -mt-2'>
                     <InputComponent
-                    name='name'
-                    type='text'
+                    name='id'
+                    type='number'
                     state={filterValues}
                     setState={setFilterValues}
                     readonly

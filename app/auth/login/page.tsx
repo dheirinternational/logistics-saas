@@ -1,13 +1,13 @@
 "use client"
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
 import { FaTruck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
-import { BeatLoader, ClipLoader, RiseLoader } from 'react-spinners'
+import { BeatLoader } from 'react-spinners'
 
 const Page: NextPage = () => {
     const router = useRouter()

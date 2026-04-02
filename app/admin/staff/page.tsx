@@ -1,5 +1,5 @@
 import SearchComponent from '@/components/admin/staff/SearchComponent'
-import StatusStatCard from '@/components/admin/StatusStatCard'
+import StatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { NextPage } from 'next'
 
 const Page: NextPage = () => {

@@ -60,7 +60,7 @@ export type Package = {
 }
 
 export type Warehouse = {
-    id: string // unique
+    id: number  // unique
     name: string 
     recipient_name: null | string
     phone: null | string
