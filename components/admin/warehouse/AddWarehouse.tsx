@@ -2,9 +2,6 @@
 
 import { FormEvent, useState } from "react"
 import InputComponent from "../shipments/InputComponent"
-import { IoCreate } from "react-icons/io5"
-import { Warehouse } from "@/types/entityTypeDef"
-import { BsHouseAdd } from "react-icons/bs"
 import { LuHousePlus } from "react-icons/lu"
 import { toast } from "react-toastify"
 import { ClipLoader } from "react-spinners"
@@ -20,9 +17,8 @@ type WarehouseValues = {
     street: string
     building: string
     postal_code: string
-    capacity: string
     manager_id: string
-    type: string
+    type: "air" | "sea"
 }
 
 const AddWarehouse = () => {
@@ -38,7 +34,6 @@ const AddWarehouse = () => {
         street: "",
         building: "",
         postal_code: "",
-        capacity: "",
         manager_id: "",
         type: "air",
     })
@@ -55,7 +50,7 @@ const AddWarehouse = () => {
         setError("")
 
         try{
-            const res = await fetch("/api/warehouses/warehouse", {
+            const res = await fetch("/api/warehouses", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -84,7 +79,6 @@ const AddWarehouse = () => {
                     street: "",
                     building: "",
                     postal_code: "",
-                    capacity: "",
                     manager_id: "",
                     type: "air",
                 })
@@ -106,7 +100,6 @@ const AddWarehouse = () => {
         <div className="flex flex-col gap-3 border-b pb-4">
             <h3 className="font-semibold text-sm mb-2">Warehouse Details</h3>
             <InputComponent name="name" type="text" title="Warehouse Name" state={userValues} setState={setUserValues} required/>
-            <InputComponent name="capacity" type="number" title="Capacity" state={userValues} setState={setUserValues} required/>
             <InputComponent name="manager_id" type="text" title="Manager ID" state={userValues} setState={setUserValues} required/>
             <InputComponent name="type" type="text" title="Type" state={userValues} setState={setUserValues} required readonly select selectValues={[{name: "Air", value: "air"}, {name: "Sea", value: "sea"}]}/>
         </div>

@@ -14,7 +14,7 @@ export async function GET(){
         }
 
         const res = await pool.query(`
-            SELECT id, email, first_name, last_name, phone, role, created_at FROM users
+            SELECT id, email, first_name, last_name, phone, role, profile_img, created_at FROM users
             WHERE id = $1
             LIMIT 1    
         `, [session.user_id])

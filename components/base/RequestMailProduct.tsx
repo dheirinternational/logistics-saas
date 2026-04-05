@@ -40,7 +40,7 @@ const RequestMailProduct = ({prop, handlePackage}: {prop:Package, handlePackage:
 
             <div className='text-xs flex'>
                 <p className='text-xs flex-1 whitespace-nowrap border-r border-dark/20'>
-                    Track: {prop.id}
+                    Track: {prop.incoming_package_id}
                 </p>
                 <p className='flex-1 whitespace-nowrap flex justify-center border-r border-dark/20'>
                     {prop.warehouse_id}

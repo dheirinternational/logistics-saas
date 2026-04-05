@@ -1,11 +1,53 @@
 "use client"
+
 import { dummyShippingRequests } from '@/types/dummyData'
+import { ShippingRequest } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
+import { BeatLoader } from 'react-spinners'
+import { toast } from 'react-toastify'
 
 const Page: NextPage = () => {
+
+    const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
+    const [isDataLoading, setIsDataLoading] = useState(false)
+
+    useEffect(() => {
+        const fetchShipmentRequests = async() => {
+
+            setIsDataLoading(true)
+            try{
+                const res = await fetch(`/api/shipment-requests/user`, {
+                    method: "GET",
+                    credentials: "include"
+                })
+
+                const result = await res.json()
+                
+                if(!res.ok){
+                    toast.error(result.message)
+                    return
+                }
+
+                setShipmentRequests(result.data)
+
+            }
+            catch(err){
+                toast.error("ERR:: fetching shipments requests")
+                console.error("ERR:: fetching shipments requests", err)
+            }
+            finally{
+                setIsDataLoading(false)
+            }
+        }
+
+        fetchShipmentRequests()
+    }, [])
+
+
 
     const router = useRouter()
 
@@ -56,35 +98,50 @@ const Page: NextPage = () => {
 
     <div className='bg-light p-4 min-h-150'>
         {
-            dummyShippingRequests.length < 1 && 
+            shipmentRequests.length < 1 && !isDataLoading && 
             <p className='text-xs italic'>
-                ...You have not made a shipping request 
+                ...No shipment requests 
             </p>
         }
         
-        <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
-            <div className='flex items-center justify-between'>
-                <p className='text-lg'>
-                    {dummyShippingRequests[0].method}
-                </p>
-                <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
-                    <span className='text-[10px] text-accent-blue block'>
-                        {dummyShippingRequests[0].status}
-                    </span>
+
+        {
+        !isDataLoading ?
+            shipmentRequests 
+                .map( request => 
+                    <div key={request.id} className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
+                        <div className='flex items-center justify-between'>
+                            <p className='text-lg'>
+                                {shipmentRequests[0].channel}
+                            </p>
+                            <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
+                                <span className='text-[10px] text-accent-blue block'>
+                                    {shipmentRequests[0].status}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className='text-xs flex'>
+                            
+                            <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20'>
+                                Packages No: {shipmentRequests[0].package_ids.length}
+                            </p>
+
+                            <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20 px-2'>
+                                Wrapping: {shipmentRequests[0].wrapping}
+                            </p>
+
+                            <p className='flex-1 whitespace-nowrap flex justify-end'>
+                                {shipmentRequests[0].created_at.slice(0, 10)}
+                            </p>
+                        </div>
+                    </div>
+                ) :
+                <div className='w-full h-full center-items'>
+                    <BeatLoader color='#f26430' size={15}/>
                 </div>
-            </div>
-
-            <div className='text-xs flex'>
-                
-                <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20'>
-                    Packages No: {dummyShippingRequests[0].package_ids.length}
-                </p>
-
-                <p className='flex-1 whitespace-nowrap flex justify-end'>
-                    {dummyShippingRequests[0].created_at.slice(0, 10)}
-                </p>
-            </div>
-        </div>
+        }
+        
     </div>
   </div>
 }

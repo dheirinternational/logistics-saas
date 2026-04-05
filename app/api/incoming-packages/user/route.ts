@@ -9,33 +9,16 @@ import { NextRequest, NextResponse } from "next/server";
 // }
 
 
-export async function GET(req: NextRequest, {params} : {params: Promise<{id: string}>}){
+export async function GET(req: NextRequest){
     try{
         const session = await getSession()
-        const {id} = await params
         
         if(!session){
             return NextResponse.json({
                 success: false,
                 message: "Unauthorized"
-            })
+            }, {status: 401})
         }
-
-        // Quering using params 
-
-        if(id){
-            const resp = await pool.query(`
-                SELECT * FROM incoming_packages
-                WHERE id = $1
-            `, [Number(id)])
-
-            return NextResponse.json({
-                success: true,
-                data: resp.rows
-            })
-        }
-
-
 
         // Quering for user specifc data using session id
  

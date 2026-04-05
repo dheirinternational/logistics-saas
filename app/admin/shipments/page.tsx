@@ -4,7 +4,9 @@ import SearchComponent from '@/components/admin/shipments/SearchComponent'
 import ShipmentStatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
 import { IncomingPackage } from '@/types/entityTypeDef'
+import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { FaTruckMoving } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
@@ -16,7 +18,46 @@ export type SearchProps = {
     warehouse_id: number
 }
 
+const columnHelper = createColumnHelper<IncomingPackage>()
 
+const incomingPackageColumnDef = [
+    columnHelper.accessor("incoming_tracking_number", {
+        header: "Tracking Id",
+        cell: ({getValue}) => getValue()
+    }),
+    columnHelper.accessor("customer_code", {
+        header: "Customer Code",
+        cell: ({getValue}) => getValue()
+    }),
+    columnHelper.accessor("declared_item_name", {
+        header: "Item Name",
+        cell: ({getValue}) => getValue()
+    }),
+    columnHelper.accessor("declared_item_quantity", {
+        header: "Quantity",
+        cell: ({getValue}) => getValue()
+    }),
+    columnHelper.accessor("status", {
+        header: "Status",
+        cell: ({getValue}) => getValue()
+    }),
+    columnHelper.display({
+        header: "Add Product",
+        id: "add-product",
+        cell: ({row}) => 
+        {
+            if (row.original.status === "stored") {
+                return null 
+            }else{
+                return <Link href={`/admin/packages/add_package/${row.original.id}`}
+                    className='bg-accent-blue/40 px-2 py-1 rounded text-white'
+                    >
+                        Add 
+                    </Link>
+            }
+        }
+    })
+]
 
 const Page: NextPage = () => {
 
@@ -28,7 +69,6 @@ const Page: NextPage = () => {
         status: "expected"
     })
 
-    
 
     useEffect(() => {
         const fetchShipmentData = async () => {
@@ -61,8 +101,8 @@ const Page: NextPage = () => {
     }, [])
 
 
-  return <div className='space-y-body p-body'>
-    {isDataLoading ? <div className='w-screen h-[calc(100dvh-80px)] center-items'>
+  return <div className='space-y-body'>
+    {isDataLoading ? <div className='w-full h-[calc(100dvh-80px)] center-items'>
         <BeatLoader color='#f26430' size={20}/>
     </div> :
     <>
@@ -113,11 +153,14 @@ const Page: NextPage = () => {
             <p className='text-xs mt-2 opacity-70'>
                 A live overview of all shipments in the system.
             </p>
-            <div>
-                {/* <Table 
-                importedData={}
-                columnDef={}
-                /> */}
+            <div className='mt-4'>
+                {
+                    incomingPackages ?
+                    <Table 
+                    importedData={incomingPackages}
+                    columnDef={incomingPackageColumnDef}
+                    /> : null
+                }
             </div>
         </div>
     </>}

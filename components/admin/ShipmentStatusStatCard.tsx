@@ -9,7 +9,7 @@ type Props = {
 const ShipmentStatusStatCard = ({value, icon: Icon, status}: Props) => {
   return (
     <div className="p-4 bg-light rounded-lg flex flex-col justify-center items-center min-w-31">
-        <Icon className="text-3xl opacity-70" />
+        <Icon className="text-xl opacity-70" />
         <h3 className="font-bold text-xl mt-2">
             {value}
         </h3>

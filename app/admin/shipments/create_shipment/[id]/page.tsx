@@ -1,8 +1,11 @@
 import CreateShipments from '@/components/admin/shipments/CreateShipments'
 import { NextPage } from 'next'
 
-const Page: NextPage = () => {
-  return <div className='space-y-body p-body'>
+export default async function Page(){
+
+  const shipmentRequestDetails = fetch(`/api/shipment-requests/`)
+
+  return <div className='space-y-body -mt-16'>
     <div className='p-4 bg-accent-red rounded-l text-white'>
         <span className='text-xs opacity-80'>
             Admin/Operations
@@ -20,4 +23,3 @@ const Page: NextPage = () => {
   </div>
 }
 
-export default Page

@@ -6,21 +6,25 @@ import { NextPage } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { FaCamera, FaChevronLeft, FaUser } from 'react-icons/fa'
-import { BeatLoader } from 'react-spinners'
+import { BeatLoader, ClipLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
 
-type BasicDetails = Omit<User, "id" | "password" | "role" | "created_at" | "email">
+type BasicDetails = Omit<User, "id" | "password" | "role" | "created_at" | "email" | "profile_img">
 
 const Page: NextPage = () => {
 
     const [isEditButtonActive, setIsEditButtonActive] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [isEditLoading, setIsEditLoading] = useState(false)
+    const [isImageUploading, setIsImageUploading] = useState(false)
     const [error, setError] = useState("")
     const [user, setUser] = useState<null | User>(null)
+    const [image, setImage] = useState<string | null>(null)
+
+
 
     const [userDetails, setUserDetails] = useState<BasicDetails>({
         first_name: "",
@@ -68,6 +72,89 @@ const Page: NextPage = () => {
             setIsLoading(false)
         }
     }
+
+    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        setIsImageUploading(true)
+        try{
+
+            if(!e.target.files) {
+                throw new Error("Image must be selected")
+            }
+
+            if(e.target.files?.length < 1) return
+
+            console.log("Stage one")
+
+            const file = e.target.files[0]
+
+            const sigRes = await fetch("/api/sign-cloudinary", {
+                method: "POST",
+                credentials: "include",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    folder: "avatars",
+                    public_id: user?.id
+                })
+            })
+
+            console.log("Stage Two")
+
+            const {timestamp, signature, apiKey, cloudName} = await sigRes.json()
+
+            if (file.size > (5 * 1024 * 1024)) {
+                toast.error("Image size should not exceed 5mb")
+                throw new Error("Image size should not exceed 5mb")
+            }
+
+            console.log("Stage three")
+
+            const formData = new FormData()
+            formData.append("file", file)
+            formData.append("timestamp", timestamp)
+            formData.append("signature", signature)
+            formData.append("api_key", apiKey)
+            formData.append("folder", "avatars")
+            formData.append("public_id", `${user?.id}`)
+
+            const image_url = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                { method: "POST", body: formData }
+            ).then( (r) => r.json())
+
+
+            console.log("Stage Four")
+            
+            const res = await fetch("/api/users/upload-profile-picture", {
+                headers: {
+                    "Content-Type" : "application/json", 
+                },
+                method: "PUT",
+                credentials: "include",
+                body: JSON.stringify({image_url: image_url.secure_url})
+            })
+
+            const result = await res.json()
+
+            if(!res.ok){
+                console.error(result.message)
+                toast.error(result.message)
+                return
+            }
+
+
+            setImage(image_url.secure_url)
+            toast.success("Image succesfully uploaded")
+        
+        }
+        catch(err){
+            console.log("Issue uploading profile image", err)
+            toast.error("Issue uploading profile image")
+            return
+        }
+        finally{
+            setIsImageUploading(false)
+        }
+    }
     
     useEffect(() => {
         fetchData()
@@ -86,6 +173,9 @@ const Page: NextPage = () => {
         else {
             setIsEditButtonActive(false)
         }
+
+        console.log(user)
+
     }, [user, userDetails])
 
 
@@ -154,7 +244,7 @@ const Page: NextPage = () => {
                 </span>
             </button>
             <h1 className='font-semibold text-xs'>
-                Pending Payments
+                Edit profile
             </h1>
             <Link href={"/base/profile"} className='flex-1 flex justify-end'>
                 <FaUser />
@@ -164,14 +254,35 @@ const Page: NextPage = () => {
         <div className='p-body bg-light mt-2 text-sm space-y-4'>
             <div className='relative w-fit h-fit mx-auto space-y-2'>
                 <figure className='w-31 h-31 bg-red-300 rounded-full mx-auto relative overflow-hidden'>
-                    <Image
-                    src={"https://i.pravatar.cc/150?img=3"}
-                    alt='User Profile'
-                    fill
-                    />
+                    {
+                        user?.profile_img ?
+                        <Image
+                        src={image ?? user?.profile_img}
+                        alt='User Profile'
+                        fill
+                        className='object-cover'
+                        loading='eager'
+                        /> :
+                        <div className='bg-white/50 absolute top-0 left-0 w-full h-full border rounded-full center-items border-dark/20'>
+                            <ClipLoader speedMultiplier={0.5}/>
+                        </div>
+                    }
+                    {
+                        isImageUploading && 
+                        <div className='bg-white/50 absolute top-0 left-0 w-full h-full border rounded-full center-items border-dark/20'>
+                            <ClipLoader speedMultiplier={0.5}/>
+                        </div>
+                    }
                 </figure>
                 <div className='h-10 w-10 absolute bg-dark/60 rounded-full bottom-0 right-0 flex center-items' > 
                     <FaCamera className='text-secondary-text'/>
+                    <input 
+                    type="file"
+                    accept='image/*'
+                    className='absolute w-full h-full bg-white rounded-full opacity-0' 
+                    onChange={ e => {handleImageUpload(e)}}
+                    disabled={isImageUploading}
+                    />
                 </div>
             </div>
 

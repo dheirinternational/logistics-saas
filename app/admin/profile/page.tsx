@@ -36,11 +36,11 @@ const Page: NextPage = async() => {
                 <span className='text-white font-semibold'>
                     {userData.first_name}{userData.last_name}
                 </span>
-                <div className='w-fit py-xs px-4 bg-white rounded-full'>
+                {/* <div className='w-fit py-xs px-4 bg-white rounded-full'>
                     <span className='text-xs'>
                         Member Code: {userData.code}
                     </span>
-                </div>
+                </div> */}
             </div>
         </div>
     </div>

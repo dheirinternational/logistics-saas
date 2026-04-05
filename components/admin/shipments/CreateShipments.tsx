@@ -5,17 +5,17 @@ import InputComponent from "./InputComponent"
 import { IoCreate } from "react-icons/io5"
 import { Shipment } from "@/types/entityTypeDef"
 
-type ShipmentValues = Omit<Shipment, "id" | "status" | "createdAt" | "trackingNumber">
+type ShipmentValues = Omit<Shipment, "id" | "status" | "created_at" | "tracking_number">
 
 const CreateShipments = () => {
 
-    // const [shipmentValues, setShipmentValues] = useState<ShipmentValues>({
-    //     customerCode: "",
-    //     originWarehouseId: "",
-    //     destinationWarehouseId: "",
-    //     shippingMethod: "air",
-    //     totalCost: 0, 
-    // })
+    const [shipmentValues, setShipmentValues] = useState<ShipmentValues>({
+        customer_code: "",
+        origin_warehouse_id: "",
+        destination_warehouse_id: "",
+        channel: "air",
+        total_cost: 50000, 
+    })
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -23,7 +23,7 @@ const CreateShipments = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {/* <InputComponent name="customerCode" type="text" title="Customer Code" state={shipmentValues} setState={setShipmentValues}/>
+        <InputComponent name="customerCode" type="text" title="Customer Code" state={shipmentValues} setState={setShipmentValues}/>
         <InputComponent name="originWarehouseId" type="text" title="Origin Warehouse ID" state={shipmentValues} setState={setShipmentValues}/>
         <InputComponent name="destinationWarehouseId" type="text" title="Destination Warehouse ID" state={shipmentValues} setState={setShipmentValues}/>
         <InputComponent name="shippingMethod" type="text" title="Shipping Method" state={shipmentValues} setState={setShipmentValues}/>
@@ -35,7 +35,7 @@ const CreateShipments = () => {
                     Create
                 </p>
             </button>
-        </div> */}
+        </div>
     </form>
   )
 }

@@ -8,7 +8,8 @@ export async function GET(){
 
         if(!session){
             return NextResponse.json({
-                error: "Unauthorized"
+                success: false,
+                message: "Unauthorized"
             }, {status: 401})
         }
 
@@ -63,10 +64,10 @@ export async function POST(request: Request){
         }
 
         const res = await pool.query(`
-          INSERT INTO warehouses (name, recipient_name, phone, country, province, city, district, street, building, postal_code, type, manager_id, capacity)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          INSERT INTO warehouses (name, recipient_name, phone, country, province, city, district, street, building, postal_code, type, manager_id)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
           RETURNING *
-        `, [body.name, body.recipient_name, body.phone, body.country, body.province, body.city, body.district, body.street, body.building, body.postal_code, body.type, body.manager_id, body.capacity])
+        `, [body.name, body.recipient_name, body.phone, body.country, body.province, body.city, body.district, body.street, body.building, body.postal_code, body.type, body.manager_id])
 
         return NextResponse.json({
             success: true,

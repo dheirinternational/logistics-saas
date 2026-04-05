@@ -26,14 +26,7 @@ const Page: NextPage = ({}) => {
         const fetchPackages = async () => {
             try{
 
-                const userRes = await fetch(`/api/auth/me`, {
-                    method: "GET",
-                    credentials: "include"
-                })
-
-                const user = await userRes.json()
-
-                const res = await fetch(`/api/incoming-packages/${user.user_id}`, {
+                const res = await fetch(`/api/incoming-packages/user`, {
                     method: "GET",
                     credentials: "include"
                 })
@@ -105,7 +98,7 @@ const Page: NextPage = ({}) => {
     </div>
     <div className='bg-light px-4 py-2'>
         <span className='text-xs'>
-            Total: <span className='text-accent-red font-bold text-sm'>{packages?.length || 0}</span> incoming Packgages
+            Total: <span className='text-accent-red font-bold text-sm'>{packages?.filter(x => x.status === "expected").length || 0}</span> incoming Packgages
         </span>
     </div>
 
@@ -131,9 +124,15 @@ const Page: NextPage = ({}) => {
                             <p className='text-lg'>
                                 {x.declared_item_name}
                             </p>
-                            <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
-                                <span className='text-[10px] text-accent-blue block'>
-                                    expected
+                            <div className={`
+                                 px-3 py-1 w-fit rounded-full h-fit
+                                ${x.status === "expected" ? "text-accent-blue bg-accent-blue/30" : "text-green-800 bg-green-300"}
+
+                            `}>
+                                <span className={`
+                                    text-[10px] block
+                                `}>
+                                    {x.status}
                                 </span>
                             </div>
                         </div>

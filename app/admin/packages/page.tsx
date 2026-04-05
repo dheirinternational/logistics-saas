@@ -1,11 +1,82 @@
+"use client"
+
 import SearchComponent from '@/components/admin/packages/SearchComponent'
 import StatusStatCard from '@/components/admin/ShipmentStatusStatCard'
+import { Table } from '@/components/admin/table/Table'
+import { Package, Product } from '@/types/entityTypeDef'
+import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { LuPackagePlus } from 'react-icons/lu'
+import { BeatLoader } from 'react-spinners'
+import { toast } from 'react-toastify'
 
 
 const Page: NextPage = ({}) => {
     
-    //  Add Packages to system from table
+    const [packages, setpackages] = useState<Package[]>([]);
+    const [isDataLoading, setIsDataLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+
+        const fetchShipments = async () => {
+            setIsDataLoading(true)
+            try{
+                const res = await fetch("/api/packages", {
+                    method: "GET",
+                    credentials: 'include'
+                })
+
+                const result = await res.json()
+                
+                if(!res.ok){
+                    toast.error(result.message)
+                    setError(result.message)
+                    return
+                }
+
+                setpackages(result.data)
+            }
+            catch(err){
+                console.error("ERR fetching packages",err)
+            }
+            finally{
+                setIsDataLoading(false)
+            }
+        }
+
+        fetchShipments()
+
+    }, [])
+
+    const columnHelper = createColumnHelper<Package>()
+
+    const columnDef = [
+        columnHelper.accessor("package_name", {
+            header: "Name"
+        }),
+        columnHelper.accessor("customer_code", {
+            header: "Customer Code"
+        }),
+        columnHelper.accessor("weight", {
+            header: "Weight"
+        }),
+        columnHelper.accessor("warehouse_id", {
+            header: "Warehouse"
+        }),
+        columnHelper.accessor("received_at", {
+            header: "Received At",
+            cell: ({getValue}) => <p>{new Date(getValue()).toDateString()}</p>
+        }),
+        columnHelper.accessor("stored_at", {
+            header: "Stored At",
+            cell: ({getValue}) => <p>{new Date(getValue()).toDateString()}</p>
+        })
+    ]
+    
+
 
   return <div className=' h-full p-body'>
     <div className='p-4 bg-accent-red rounded-lg text-white'>
@@ -22,29 +93,48 @@ const Page: NextPage = ({}) => {
         </div>
     </div>
 
-    {/* <div className='bg-light rounded-lg mt-2'>
-        <Link href={'/admin/packages/add_package'} className='rounded-lg border border-dark/20 flex w-full items-center justify-center gap-3 text-sm py-3 font-bold'>
-            <LuPackagePlus className='text-lg'/>
-            Add package
-        </Link>
-    </div> */}
-
-
     {/* STATUS CARDS */}
     <div className='mt-4'>
         <h2 className='text-sm'>
             STATS
         </h2>
         <div className='flex my-body space-x-2 overflow-x-auto'>
+            {/* <StatusStatCard />
             <StatusStatCard />
             <StatusStatCard />
-            <StatusStatCard />
-            <StatusStatCard />
+            <StatusStatCard /> */}
         </div>
     </div>
 
     {/* SEARCH COMPONENT  */}
     <SearchComponent />
+
+    {/* Table */}
+    <div className='bg-light p-body rounded-lg mt-4'>
+        <h2 className='text-sm font-bold'>
+            Packages 
+        </h2>
+        <p className='text-xs mt-2 opacity-70'>
+            A live record of all packages in the system.
+        </p>
+        <div className='mt-4'>
+            {isDataLoading ? (
+                <div className='flex justify-center items-center py-8'>
+                    <BeatLoader color="#3B82F6" size={15} />
+                    <span className='ml-2 text-sm'>Loading warehouses...</span>
+                </div>
+            ) : error ? (
+                <div className='text-center py-8'>
+                    <p className='text-red-500 text-sm'>{error}</p>
+                </div>
+            ) : (
+                <Table 
+                    importedData={packages}
+                    columnDef={columnDef}
+                />
+            )}
+        </div>
+    </div>
   </div>
 }
 

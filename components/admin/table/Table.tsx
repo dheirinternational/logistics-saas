@@ -3,7 +3,8 @@ import { useMemo } from "react"
 
 type TableProps<T> = {
     importedData: T[],
-    columnDef: ColumnDef<T>[]
+    columnDef: ColumnDef<T, any>[],  // eslint-disable-line @typescript-eslint/no-explicit-any
+
 }   
 
 export function Table <T,>({importedData, columnDef}: TableProps<T>){
@@ -20,11 +21,14 @@ export function Table <T,>({importedData, columnDef}: TableProps<T>){
 
     return(
         <div className="w-full max-w-full h-full max-h-full">
-            <div className="w-full max-w-full">
-                <table className="table-auto min-w-125">
+            <div className="w-full max-w-full overflow-auto max-h-100 h-200 bg-yellow-50 ">
+                <table className="table-auto min-w-80 w-full text-[10px] whitespace-nowrap">
                     <thead>
                         {table.getHeaderGroups().map( headerGroup => 
-                            <tr key={headerGroup.id}>
+                            <tr 
+                            key={headerGroup.id}
+                            className="bg-gray-100"
+                            >
                                 {headerGroup.headers.map( header => 
                                     <th key={header.id} className="p-2 text-left">
                                         {flexRender(header.column.columnDef.header, header.getContext())}

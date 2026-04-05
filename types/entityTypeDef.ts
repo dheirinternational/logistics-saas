@@ -9,6 +9,7 @@ export type User = {
     email: string // unique
     role: string
     phone: string // unique
+    profile_img: string
     created_at: string
 }
 
@@ -32,31 +33,31 @@ export type Customer = {
 }
 
 export type Shipment = {
-    id: string // unique
+    id: number // unique
     tracking_number: string // unique
     customer_code: string // FK -> Customer(code)
     origin_warehouse_id: string // FK -> Warehouse(id)
     destination_warehouse_id: string  // FK -> Warehouse(id) 
-    status: "shipped" | "in_transit" | "arrived_nigeria" | "pending_payment" | "delivered"
-    shipping_method: ShippingType
-
+    status: "processing" | "shipped" | "in_transit" | "arrived_nigeria" | "pending_payment" | "out_for_delivery" | "delivered"
+    channel: ShippingType
+    shipping_note: string
     total_cost: number
     created_at: string
 }
 
 export type Package = {
-    id: string // unique
+    id: number // unique
     incoming_package_id: string  // FK -> IncomingPackage(id)
     package_name: string
-    user_id: string  // Fk -> Users(id)
+    user_id: number  // Fk -> Users(id)
     customer_code: string // Fk -> Customers(code)
     warehouse_id: string // Fk -> Warehouses(id)
-    actual_weight: number
-    photos?: string[]
-    condition?: "good" | "damaged"
-    status: "stored" | "ready_to_ship" | "assigned_to_shipment"
-    shipment_id: null | string  // FK -> Shipments(id)
-    created_at: string
+    weight: number
+    condition: "good" | "damaged"
+    status: "stored" | "requested_for" | "assigned_to_shipment" | "delivered"
+    received_at: string
+    stored_at: string
+    created_at: string    
 }
 
 export type Warehouse = {
@@ -113,12 +114,12 @@ export type StaffAssignment = {
 
 
 export type IncomingPackage = {
-    id: string // u
-    user_id: string 
+    id: number // u
+    user_id: number 
     customer_code: string  // Fk -> Customer(code)
     incoming_tracking_number: string
     warehouse_id: string
-    status: "expected" | "received" | "processed" | "cancelled" 
+    status: "expected" | "received" | "cancelled" | "stored" 
     declared_item_name: string
     declared_item_quantity: number
     declared_item_weight: number 
@@ -130,9 +131,11 @@ export type ShippingRequest = {
     user_id: string  // Fk -> Users(id)
     customer_code: string //  Fk -> Customers(code)
     package_ids: string[]
-    method: ShippingType
-    status: "peding" | "approved"
+    channel: ShippingType
+    status: "pending" | "accepted"
+    wrapping: "bubble" | "normal"
     created_at: string
+    shipping_note: string
 }
 
 // Processed means it's been converted to processed
