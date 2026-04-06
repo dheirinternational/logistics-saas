@@ -1,11 +1,9 @@
 "use client"
 
-import { FormEvent, useState } from "react"
-import InputComponent from "../shipments/InputComponent"
-import { IoCreate } from "react-icons/io5"
-import { Product} from "@/types/entityTypeDef"
+import { FormEvent } from "react"
+// import { Product} from "@/types/entityTypeDef"
 
-type ProductValues = Omit<Product, "id" | "status" | "slug" | "createdAt" | "createdBy" | "updatedBy" | "createdAt" | "updatedAt">
+// type ProductValues = Omit<Product, "id" | "status" | "slug" | "createdAt" | "createdBy" | "updatedBy" | "createdAt" | "updatedAt">
 
 const AddProduct = () => {
 

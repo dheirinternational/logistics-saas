@@ -1,8 +1,6 @@
 "use client"
 
 import { FormEvent, useState } from "react"
-import InputComponent from "../shipments/InputComponent"
-import { IoCreate } from "react-icons/io5"
 import { User } from "@/types/entityTypeDef"
 
 type UserValues = Omit<User, "id" | "created_at">

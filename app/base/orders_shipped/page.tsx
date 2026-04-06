@@ -1,7 +1,6 @@
 "use client"
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
-import { dummyShipments } from '@/types/dummyData'
 import { Shipment } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'
@@ -44,8 +43,6 @@ const Page: NextPage = () => {
         fetchShipments()
     }, [])
     
-    const dummy = dummyShipments
-
     const router = useRouter()
 
   return <div className='h-full w-full space-y-2'>
@@ -91,13 +88,13 @@ const Page: NextPage = () => {
 
         <div className='bg-light px-4 py-2'>
             <span className='text-xs'>
-                Shipments: <span className='text-accent-red font-bold text-sm'>{dummyShipments.length}</span> 
+                Shipments: <span className='text-accent-red font-bold text-sm'>{shipments.length}</span> 
             </span>
         </div>
 
         <div className='bg-light p-4 min-h-150 space-y-3'>
             {
-                dummy.length < 1 && 
+                shipments.length < 1 && 
                 <p className='text-xs italic'>
                     ...You have not made a shipping request 
                 </p>

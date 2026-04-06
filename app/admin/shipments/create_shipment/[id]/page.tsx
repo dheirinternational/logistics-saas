@@ -1,9 +1,8 @@
 import CreateShipments from '@/components/admin/shipments/CreateShipments'
-import { NextPage } from 'next'
 
 export default async function Page(){
 
-  const shipmentRequestDetails = fetch(`/api/shipment-requests/`)
+  // const shipmentRequestDetails = fetch(`/api/shipment-requests/`)
 
   return <div className='space-y-body -mt-16'>
     <div className='p-4 bg-accent-red rounded-l text-white'>

@@ -5,9 +5,8 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
-import { dummyIncomingPackages } from '@/types/dummyData'
 import { useEffect, useState } from 'react'
-import { IncomingPackage, Package } from '@/types/entityTypeDef'
+import { IncomingPackage } from '@/types/entityTypeDef'
 import { toast } from 'react-toastify'
 import { BeatLoader } from 'react-spinners'
 
@@ -109,7 +108,7 @@ const Page: NextPage = ({}) => {
         </div> :
         <div className='bg-light p-4 min-h-100 gap-y-3'>
             {
-                dummyIncomingPackages.length < 1 && 
+                packages.length < 1 && 
                 <p className='text-xs italic'>
                     ...There are no incoming packages
                 </p>

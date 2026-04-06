@@ -2,7 +2,6 @@ import { Header } from "@/components/admin/Header";
 import { getSession } from "@/lib/db/session";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
-import { ToastContainer } from "react-toastify";
 
 export default async function AdminLayout({children}: {children: ReactNode}){
     

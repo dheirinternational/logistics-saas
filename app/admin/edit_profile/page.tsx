@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { FaCamera, FaChevronLeft, FaUser } from 'react-icons/fa'
-import { BeatLoader, ClipLoader } from 'react-spinners'
+import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
 

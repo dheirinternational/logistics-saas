@@ -1,7 +1,6 @@
 import AddToCart from "@/components/base/marketplace/AddToCart"
 import Header from "@/components/base/marketplace/Header"
 import { dummyProductImages, dummyProducts } from "@/types/dummyData"
-import { Product } from "@/types/entityTypeDef"
 import Image from "next/image"
 import { FaStar } from "react-icons/fa"
 

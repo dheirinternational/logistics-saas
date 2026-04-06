@@ -1,6 +1,5 @@
 "use client"
 
-import { dummyShippingRequests } from '@/types/dummyData'
 import { ShippingRequest } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'

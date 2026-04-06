@@ -1,5 +1,4 @@
 import SearchComponent from '@/components/admin/staff/SearchComponent'
-import StatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { NextPage } from 'next'
 
 const Page: NextPage = () => {
@@ -24,9 +23,9 @@ const Page: NextPage = () => {
             STATS
         </h2>
         <div className='flex my-body space-x-2 overflow-x-auto'>
+            {/* <StatusStatCard />
             <StatusStatCard />
-            <StatusStatCard />
-            <StatusStatCard />
+            <StatusStatCard /> */}
         </div>
     </div>
 

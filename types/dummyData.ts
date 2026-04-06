@@ -1,38 +1,36 @@
-import { User, Admin, Staff, Customer, Shipment, Package, Warehouse, Address, Payment, StaffAssignment, IncomingPackage, ShippingRequest, TrackingEvent, Carrier, PricingRule, Notification, ActivityLog, Country, Product, ProductCategory, ProductImage } from "./entityTypeDef";
-import { ShippingType } from "./miscallaneous";
-import { ProductStatus, ProductVisibility } from "./statusTypes";
+import {Admin, Staff, Customer, Address, Payment, StaffAssignment, TrackingEvent, Carrier, PricingRule, Notification, ActivityLog, Product, ProductCategory, ProductImage } from "./entityTypeDef";
 
 // Dummy data for testing frontend
 
-export const dummyUsers: User[] = [
-  {
-    id: "u1",
-    first_name: "John",
-    last_name: "Doe",
-    email: "john.doe@example.com",
-    role: "customer",
-    phone: "+1234567890",
-    created_at: "2023-01-15T10:00:00Z"
-  },
-  {
-    id: "u2",
-    first_name: "Jane",
-    last_name: "Smith",
-    email: "jane.smith@example.com",
-    role: "staff",
-    phone: "+0987654321",
-    created_at: "2023-02-20T14:30:00Z"
-  },
-  {
-    id: "u3",
-    first_name: "Admin",
-    last_name: "User",
-    email: "admin@example.com",
-    role: "admin",
-    phone: "+1122334455",
-    created_at: "2023-01-01T00:00:00Z"
-  }
-];
+// export const dummyUsers: User[] = [
+//   {
+//     id: "u1",
+//     first_name: "John",
+//     last_name: "Doe",
+//     email: "john.doe@example.com",
+//     role: "customer",
+//     phone: "+1234567890",
+//     created_at: "2023-01-15T10:00:00Z"
+//   },
+//   {
+//     id: "u2",
+//     first_name: "Jane",
+//     last_name: "Smith",
+//     email: "jane.smith@example.com",
+//     role: "staff",
+//     phone: "+0987654321",
+//     created_at: "2023-02-20T14:30:00Z"
+//   },
+//   {
+//     id: "u3",
+//     first_name: "Admin",
+//     last_name: "User",
+//     email: "admin@example.com",
+//     role: "admin",
+//     phone: "+1122334455",
+//     created_at: "2023-01-01T00:00:00Z"
+//   }
+// ];
 
 export const dummyAdmins: Admin[] = [
   {
@@ -108,106 +106,106 @@ export const dummyAddresses: Address[] = [
 //   }
 // ];
 
-export const dummyShipments: Shipment[] = [
-  {
-    id: "sh1",
-    tracking_number: "TRK123456789",
-    customer_code: "KRC2530",
-    origin_warehouse_id: "w2",
-    destination_warehouse_id: "w1",
-    status: "in_transit",
-    shipping_method: "air",
-    total_cost: 150.00,
-    created_at: "2023-05-01T08:00:00Z"
-  }
-];
+// export const dummyShipments: Shipment[] = [
+//   {
+//     id: "sh1",
+//     tracking_number: "TRK123456789",
+//     customer_code: "KRC2530",
+//     origin_warehouse_id: "w2",
+//     destination_warehouse_id: "w1",
+//     status: "in_transit",
+//     shipping_method: "air",
+//     total_cost: 150.00,
+//     created_at: "2023-05-01T08:00:00Z"
+//   }
+// ];
 
-export const dummyPackages: Package[] = [
-  {
-    id: "p1",
-    package_name: "Electronics",
-    incoming_package_id: "ip1",
-    user_id: "u1",
-    customer_code: "KRC2530",
-    warehouse_id: "w2",
-    actual_weight: 2.5,
-    photos: ["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"],
-    condition: "good",
-    status: "stored",
-    shipment_id: null,
-    created_at: "2023-04-15T10:00:00Z"
-  },
-  {
-    id: "p2",
-    package_name: "Clothing",
-    incoming_package_id: "ip2",
-    user_id: "u2",
-    customer_code: "KRC2531",
-    warehouse_id: "w1",
-    actual_weight: 1.2,
-    photos: ["https://example.com/photo3.jpg", "https://example.com/photo4.jpg"],
-    condition: "good",
-    status: "stored",
-    shipment_id: null,
-    created_at: "2023-04-16T11:30:00Z"
-  },
-  {
-    id: "p3",
-    package_name: "Books",
-    incoming_package_id: "ip3",
-    user_id: "u3",
-    customer_code: "KRC2532",
-    warehouse_id: "w3",
-    actual_weight: 3.0,
-    photos: ["https://example.com/photo5.jpg"],
-    condition: "good",
-    status: "stored",
-    shipment_id: null,
-    created_at: "2023-04-17T09:15:00Z"
-  },
-  {
-    id: "p4",
-    package_name: "Cosmetics",
-    incoming_package_id: "ip4",
-    user_id: "u1",
-    customer_code: "KRC2530",
-    warehouse_id: "w2",
-    actual_weight: 0.8,
-    photos: ["https://example.com/photo6.jpg", "https://example.com/photo7.jpg"],
-    condition: "good",
-    status: "stored",
-    shipment_id: null,
-    created_at: "2023-04-18T14:45:00Z"
-  },
-  {
-    id: "p5",
-    package_name: "Shoes",
-    incoming_package_id: "ip5",
-    user_id: "u4",
-    customer_code: "KRC2533",
-    warehouse_id: "w1",
-    actual_weight: 2.0,
-    photos: ["https://example.com/photo8.jpg"],
-    condition: "good",
-    status: "stored",
-    shipment_id: null,
-    created_at: "2023-04-19T16:20:00Z"
-  },
-  {
-    id: "p6",
-    package_name: "Accessories",
-    incoming_package_id: "ip6",
-    user_id: "u2",
-    customer_code: "KRC2531",
-    warehouse_id: "w3",
-    actual_weight: 1.5,
-    photos: ["https://example.com/photo9.jpg", "https://example.com/photo10.jpg"],
-    condition: "good",
-    status: "stored",
-    shipment_id: null,
-    created_at: "2023-04-20T12:10:00Z"
-  }
-];
+// export const dummyPackages: Package[] = [
+//   {
+//     id: "p1",
+//     package_name: "Electronics",
+//     incoming_package_id: "ip1",
+//     user_id: "u1",
+//     customer_code: "KRC2530",
+//     warehouse_id: "w2",
+//     actual_weight: 2.5,
+//     photos: ["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"],
+//     condition: "good",
+//     status: "stored",
+//     shipment_id: null,
+//     created_at: "2023-04-15T10:00:00Z"
+//   },
+//   {
+//     id: "p2",
+//     package_name: "Clothing",
+//     incoming_package_id: "ip2",
+//     user_id: "u2",
+//     customer_code: "KRC2531",
+//     warehouse_id: "w1",
+//     actual_weight: 1.2,
+//     photos: ["https://example.com/photo3.jpg", "https://example.com/photo4.jpg"],
+//     condition: "good",
+//     status: "stored",
+//     shipment_id: null,
+//     created_at: "2023-04-16T11:30:00Z"
+//   },
+//   {
+//     id: "p3",
+//     package_name: "Books",
+//     incoming_package_id: "ip3",
+//     user_id: "u3",
+//     customer_code: "KRC2532",
+//     warehouse_id: "w3",
+//     actual_weight: 3.0,
+//     photos: ["https://example.com/photo5.jpg"],
+//     condition: "good",
+//     status: "stored",
+//     shipment_id: null,
+//     created_at: "2023-04-17T09:15:00Z"
+//   },
+//   {
+//     id: "p4",
+//     package_name: "Cosmetics",
+//     incoming_package_id: "ip4",
+//     user_id: "u1",
+//     customer_code: "KRC2530",
+//     warehouse_id: "w2",
+//     actual_weight: 0.8,
+//     photos: ["https://example.com/photo6.jpg", "https://example.com/photo7.jpg"],
+//     condition: "good",
+//     status: "stored",
+//     shipment_id: null,
+//     created_at: "2023-04-18T14:45:00Z"
+//   },
+//   {
+//     id: "p5",
+//     package_name: "Shoes",
+//     incoming_package_id: "ip5",
+//     user_id: "u4",
+//     customer_code: "KRC2533",
+//     warehouse_id: "w1",
+//     actual_weight: 2.0,
+//     photos: ["https://example.com/photo8.jpg"],
+//     condition: "good",
+//     status: "stored",
+//     shipment_id: null,
+//     created_at: "2023-04-19T16:20:00Z"
+//   },
+//   {
+//     id: "p6",
+//     package_name: "Accessories",
+//     incoming_package_id: "ip6",
+//     user_id: "u2",
+//     customer_code: "KRC2531",
+//     warehouse_id: "w3",
+//     actual_weight: 1.5,
+//     photos: ["https://example.com/photo9.jpg", "https://example.com/photo10.jpg"],
+//     condition: "good",
+//     status: "stored",
+//     shipment_id: null,
+//     created_at: "2023-04-20T12:10:00Z"
+//   }
+// ];
 
 export const dummyPayments: Payment[] = [
   {
@@ -233,32 +231,32 @@ export const dummyStaffAssignments: StaffAssignment[] = [
   }
 ];
 
-export const dummyIncomingPackages: IncomingPackage[] = [
-  {
-    id: "ip1",
-    user_id: "u1",
-    customer_code: "KRC2530",
-    incoming_tracking_number: "INC123456",
-    warehouse_id: "w2",
-    status: "received",
-    declared_item_name: "Electronics",
-    declared_item_quantity: 1,
-    declared_item_weight: 2.5,
-    created_at: "2023-04-10T12:00:00Z"
-  }
-];
+// export const dummyIncomingPackages: IncomingPackage[] = [
+//   {
+//     id: "ip1",
+//     user_id: "u1",
+//     customer_code: "KRC2530",
+//     incoming_tracking_number: "INC123456",
+//     warehouse_id: "w2",
+//     status: "received",
+//     declared_item_name: "Electronics",
+//     declared_item_quantity: 1,
+//     declared_item_weight: 2.5,
+//     created_at: "2023-04-10T12:00:00Z"
+//   }
+// ];
 
-export const dummyShippingRequests: ShippingRequest[] = [
-  {
-    id: "sr1",
-    user_id: "u1",
-    customer_code: "KRC2530",
-    package_ids: ["p1"],
-    method: "air",
-    status: "approved",
-    created_at: "2023-04-20T14:00:00Z"
-  }
-];
+// export const dummyShippingRequests: ShippingRequest[] = [
+//   {
+//     id: "sr1",
+//     user_id: "u1",
+//     customer_code: "KRC2530",
+//     package_ids: ["p1"],
+//     method: "air",
+//     status: "approved",
+//     created_at: "2023-04-20T14:00:00Z"
+//   }
+// ];
 
 export const dummyTrackingEvents: TrackingEvent[] = [
   {

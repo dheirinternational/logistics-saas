@@ -7,7 +7,7 @@ import { IncomingPackage } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import Link from 'next/link'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BiBox } from 'react-icons/bi'
 import { FaTruckMoving } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
@@ -74,7 +74,7 @@ const Page: NextPage = () => {
         status: "expected"
     })
 
-    const [globalFilter, setGlobalFilter] = useState("")
+    // const [globalFilter, setGlobalFilter] = useState("")
 
 
     useEffect(() => {
@@ -108,11 +108,6 @@ const Page: NextPage = () => {
     
     }, [])
 
-    const handleSearch = (value: string) => {
-        setFilterValues( prev => ({
-            ...prev, search: value
-        }))
-    }
 
 
     const data = incomingPackages.filter(x => x.status === filterValues.status)

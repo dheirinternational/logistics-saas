@@ -103,6 +103,7 @@ const Page: NextPage = ({}) => {
                 <Table 
                     importedData={warehouses}
                     columnDef={columnDef}
+                    globalFilter=''
                 />
             )}
         </div>
