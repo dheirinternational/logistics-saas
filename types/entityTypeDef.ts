@@ -1,6 +1,6 @@
 import { Timestamp } from "next/dist/server/lib/cache-handlers/types"
 import { ShippingType } from "./miscallaneous"
-import { ProductStatus, ProductVisibility } from "./statusTypes"
+import { PackageStatus, ProductStatus, ProductVisibility, ShipmentStatus } from "./statusTypes"
 
 export type User = {
     id: string // unique
@@ -38,10 +38,11 @@ export type Shipment = {
     customer_code: string // FK -> Customer(code)
     origin_warehouse_id: string // FK -> Warehouse(id)
     destination_warehouse_id: string  // FK -> Warehouse(id) 
-    status: "processing" | "shipped" | "in_transit" | "arrived_nigeria" | "pending_payment" | "out_for_delivery" | "delivered"
+    status: ShipmentStatus
     channel: ShippingType
     shipping_note: string
     total_cost: number
+    payment_time: "before" | "after"
     created_at: string
 }
 
@@ -54,7 +55,7 @@ export type Package = {
     warehouse_id: string // Fk -> Warehouses(id)
     weight: number
     condition: "good" | "damaged"
-    status: "stored" | "requested_for" | "assigned_to_shipment" | "delivered"
+    status: PackageStatus
     received_at: string
     stored_at: string
     created_at: string    
@@ -135,6 +136,7 @@ export type ShippingRequest = {
     status: "pending" | "accepted"
     wrapping: "bubble" | "normal"
     created_at: string
+    payment_time: "before" | "after"
     shipping_note: string
 }
 

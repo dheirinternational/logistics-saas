@@ -23,21 +23,27 @@ export async function POST(req: NextRequest){
         }
 
         const body = await req.json()
-        const {customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_request_id, shipment_note} = body
+        const {customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_request_id, shipment_note, user_id, payment_time, package_ids} = body
 
         const tracking_number = generateTrackingNumber()
 
         const res = await pool.query(`
             INSERT INTO shipments
-            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        `, [tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note])
+            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        `, [tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids])
 
         await pool.query(`
             UPDATE shipment_requests
                 SET status = 'accepted'
                 WHERE id = $1
         `, [shipment_request_id])
+
+        await pool.query(`
+            UPDATE packages
+                SET status = 'assigned_to_shipment'
+                WHERE id = ANY($1)
+        `, [package_ids])
 
         return NextResponse.json({
             success: true,

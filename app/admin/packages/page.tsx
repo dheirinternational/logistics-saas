@@ -1,16 +1,20 @@
 "use client"
 
 import SearchComponent from '@/components/admin/packages/SearchComponent'
-import StatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
-import { Package, Product } from '@/types/entityTypeDef'
+import { Package } from '@/types/entityTypeDef'
+import { PackageStatus } from '@/types/statusTypes'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LuPackagePlus } from 'react-icons/lu'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
+
+
+type FilterValues = {
+    search: string
+    status: PackageStatus | ""
+}
 
 
 const Page: NextPage = ({}) => {
@@ -18,6 +22,11 @@ const Page: NextPage = ({}) => {
     const [packages, setpackages] = useState<Package[]>([]);
     const [isDataLoading, setIsDataLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    
+    const [filterValues, setFilterValues] = useState<FilterValues>({
+        search: "",
+        status: ""
+    })
 
     useEffect(() => {
 
@@ -66,6 +75,9 @@ const Page: NextPage = ({}) => {
         columnHelper.accessor("warehouse_id", {
             header: "Warehouse"
         }),
+        columnHelper.accessor("status", {
+            header: "Status"
+        }),
         columnHelper.accessor("received_at", {
             header: "Received At",
             cell: ({getValue}) => <p>{new Date(getValue()).toDateString()}</p>
@@ -107,7 +119,7 @@ const Page: NextPage = ({}) => {
     </div>
 
     {/* SEARCH COMPONENT  */}
-    <SearchComponent />
+    <SearchComponent state={filterValues} setState={setFilterValues} />
 
     {/* Table */}
     <div className='bg-light p-body rounded-lg mt-4'>
@@ -131,6 +143,7 @@ const Page: NextPage = ({}) => {
                 <Table 
                     importedData={packages}
                     columnDef={columnDef}
+                    globalFilter=''
                 />
             )}
         </div>

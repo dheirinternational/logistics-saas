@@ -7,7 +7,8 @@ import { IncomingPackage } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { BiBox } from 'react-icons/bi'
 import { FaTruckMoving } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
@@ -31,15 +32,19 @@ const incomingPackageColumnDef = [
     }),
     columnHelper.accessor("declared_item_name", {
         header: "Item Name",
-        cell: ({getValue}) => getValue()
+        cell: ({getValue}) => getValue(),
+        enableColumnFilter: false
     }),
     columnHelper.accessor("declared_item_quantity", {
         header: "Quantity",
-        cell: ({getValue}) => getValue()
+        cell: ({getValue}) => getValue(),
+        enableColumnFilter: false
+
     }),
     columnHelper.accessor("status", {
         header: "Status",
-        cell: ({getValue}) => getValue()
+        cell: ({getValue}) => getValue(),
+        enableColumnFilter: false
     }),
     columnHelper.display({
         header: "Add Product",
@@ -69,6 +74,8 @@ const Page: NextPage = () => {
         status: "expected"
     })
 
+    const [globalFilter, setGlobalFilter] = useState("")
+
 
     useEffect(() => {
         const fetchShipmentData = async () => {
@@ -86,6 +93,7 @@ const Page: NextPage = () => {
                 }
 
                 setIncomingPackages(data.data)
+                
             }
             catch(err){
                 toast.error("Cannot fetch Shipment Data")
@@ -99,6 +107,15 @@ const Page: NextPage = () => {
         fetchShipmentData()
     
     }, [])
+
+    const handleSearch = (value: string) => {
+        setFilterValues( prev => ({
+            ...prev, search: value
+        }))
+    }
+
+
+    const data = incomingPackages.filter(x => x.status === filterValues.status)
 
 
   return <div className='space-y-body'>
@@ -139,6 +156,12 @@ const Page: NextPage = () => {
                 status='Expected'
                 icon={FaTruckMoving}
                 />
+
+                <ShipmentStatusStatCard 
+                value={incomingPackages.filter(x => x.status === "stored").length}
+                status='Stored'
+                icon={BiBox}
+                />
             </div>
         </div>
 
@@ -157,8 +180,9 @@ const Page: NextPage = () => {
                 {
                     incomingPackages ?
                     <Table 
-                    importedData={incomingPackages}
+                    importedData={data}
                     columnDef={incomingPackageColumnDef}
+                    globalFilter={filterValues.search}
                     /> : null
                 }
             </div>

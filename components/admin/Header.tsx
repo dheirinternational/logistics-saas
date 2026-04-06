@@ -9,7 +9,7 @@ export const Header = () => {
     const [isMenuActive, setIsMenuActive] = useState(false)
 
     return(
-        <header className="h-14 px-body flex items-center justify-between border-b border-dark/20 relative z-80">
+        <header className="h-14 px-body flex items-center justify-between border-b border-dark/20 relative z-1080">
             <Link href={`/`} className="">
                 .logo
             </Link>            

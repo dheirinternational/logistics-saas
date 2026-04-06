@@ -20,13 +20,13 @@ export const ctaButtonsProps: CTARedirectButton[] = [
     {
         title: "Pending Payments",
         icon: MdPendingActions,
-        path: "/base/pending_payments"
+        path: "/in_development"
     },
 
     {
         title: "New User Ordering Process",
         icon: FaUserTag,
-        path: "/"
+        path: "/in_development"
     },
 ]
 
@@ -59,7 +59,7 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
     {
         title: "Order Payment",
         icon: MdPayment,
-        path: "/base/shipments_payments"
+        path: "/in_development"
     },
 ]
 

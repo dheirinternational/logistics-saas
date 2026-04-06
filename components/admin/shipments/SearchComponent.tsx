@@ -9,7 +9,9 @@ type InputSafe = string | number
 
 type Props<T extends Record<string, InputSafe>> = {
     state: T,
-    setState: Dispatch<SetStateAction<T>>
+    setState: Dispatch<SetStateAction<T>>,
+    globalFilter?: string
+    onGlobalFilterChange?: (value: string) => void;
 }
 
 
@@ -40,6 +42,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
 
                 setWareHouses(result.data)
                 setState( prev => ({...prev, ["warehouses"]: result.data[0].id}))
+                
             }
             catch(err){
                 console.error("Error Fetching Warehouses", err)
@@ -53,8 +56,17 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
 
   return (
     <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col gap-4'>
-        <InputComponent name="search" title="Search" type="text" state={state} setState={setState}/>
-        {state.search}
+
+
+        <InputComponent 
+        name="search" 
+        title="Search" 
+        type="text" 
+        state={state} 
+        setState={setState}
+        placeHolder="Seacrch Tracking Number, Customer Code..."        
+        />
+
         <InputComponent 
         name="status" 
         title="Status" 
@@ -63,7 +75,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         setState={setState}
         readonly
         select
-        selectValues={[{name: "Expected", value: "expected"}, {name: "Received", value: "received"}]}
+        selectValues={[{name: "Expected", value: "expected"}, {name: "Stored", value: "stored"}]}
         />
 
         <InputComponent 
@@ -80,19 +92,6 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         overshadow
         />
         
-        {/* Btns */}
-        <div className="space-x-2 mt-5">
-            <button className="text-xs px-5 py-2 bg-accent-blue rounded-lg text-white">
-                Apply
-            </button>
-
-            <button
-            type="button"
-            className="text-xs px-5 py-2 border border-dark/30 rounded-lg"
-            >
-                Reset
-            </button>
-        </div>
     </form>
   )
 }

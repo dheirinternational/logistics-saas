@@ -91,11 +91,11 @@ const Page: NextPage = () => {
 
         <div className='bg-light px-4 py-2'>
             <span className='text-xs'>
-                Selected Packages: <span className='text-accent-red font-bold text-sm'>{dummyShipments.length}</span> 
+                Shipments: <span className='text-accent-red font-bold text-sm'>{dummyShipments.length}</span> 
             </span>
         </div>
 
-        <div className='bg-light p-4 min-h-150'>
+        <div className='bg-light p-4 min-h-150 space-y-3'>
             {
                 dummy.length < 1 && 
                 <p className='text-xs italic'>

@@ -1,23 +1,33 @@
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
-import { useMemo } from "react"
+"use client"
+
+import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from "@tanstack/react-table"
+import { useMemo, useState } from "react"
 
 type TableProps<T> = {
     importedData: T[],
     columnDef: ColumnDef<T, any>[],  // eslint-disable-line @typescript-eslint/no-explicit-any
-
+    globalFilter: string
 }   
 
-export function Table <T,>({importedData, columnDef}: TableProps<T>){
+export function Table <T,>({importedData, columnDef, globalFilter }: TableProps<T>){
     const data = useMemo(() => importedData, [importedData]) 
     const columns = useMemo(() => {
         return ([...columnDef])
     }, [columnDef])
 
+
     const table = useReactTable({
         data,
         columns,
-        getCoreRowModel: getCoreRowModel()
+        state: {
+            globalFilter,
+        },
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        globalFilterFn: "includesString"
     })
+
+    
 
     return(
         <div className="w-full max-w-full h-full max-h-full">

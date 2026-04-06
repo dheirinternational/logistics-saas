@@ -2,7 +2,6 @@
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
 import RequestMailProduct from '@/components/base/RequestMailProduct'
-import { dummyPackages } from '@/types/dummyData'
 import { Package } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'
@@ -22,6 +21,7 @@ const Page: NextPage = () => {
     const [isConfirmModal, setIsConfirmModal] = useState(false)
     const [wrappingMethod, setWrappingMethod] = useState<"bubble" | "normal">("normal")
     const [shippingMethod, setShippingMethod] = useState<"air" | "sea">("air")
+    const [shippingPayment, setShippingPayment] = useState<"before" | "after">("after")
 
     const [filterValues, setFilterValues] = useState({
         warehouse_id: "",
@@ -48,7 +48,8 @@ const Page: NextPage = () => {
                     user_id: selectedPackages[0].user_id,
                     customer_code: selectedPackages[0].customer_code,
                     channel: shippingMethod,
-                    wrapping: wrappingMethod, 
+                    wrapping: wrappingMethod,
+                    payment_time: shippingPayment 
                 })
             })
             const result = await res.json()
@@ -102,6 +103,8 @@ const Page: NextPage = () => {
 
 
   return <div className='h-full w-full space-y-2'>
+    
+    {/* Header */}
     <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
         <button 
         className='flex gap-2 flex-1 justify-start'
@@ -119,6 +122,9 @@ const Page: NextPage = () => {
             <FaUser/>
         </Link>
     </div>
+
+
+    {/* Search Component */}
     <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='w-40 -mt-2'>
             <InputComponent
@@ -145,6 +151,8 @@ const Page: NextPage = () => {
         </div>
     </div>
 
+
+    {/* Input Fields */}
     <div className='bg-light px-4 py-2'>
         <span className='text-xs'>
             Selected Packages: <span className='text-accent-red font-bold text-sm'>{selectedPackages.length}</span> 
@@ -193,9 +201,34 @@ const Page: NextPage = () => {
                 <input 
                 type="radio" 
                 name='shipping'
-                value={"bubble"}
-                checked={wrappingMethod === "bubble"}
+                value={"sea"}
+                checked={shippingMethod === "sea"}
                 onChange={(e) => setShippingMethod(e.target.value as "sea")}
+                />
+            </label>
+        </fieldset>
+
+        {/* Payment Type */}
+        <fieldset className='text-xs flex gap-4 mt-2'>
+            <span>Payment Time:</span>
+            <label className='flex items-center gap-2'>
+                <span>Before</span>
+                <input 
+                type="radio" 
+                name='payment_time'
+                value={"before"}
+                checked={shippingPayment === "before"}
+                onChange={(e) => setShippingPayment(e.target.value as "before")}
+                />
+            </label>
+            <label className='flex items-center gap-2'>
+                <span>After</span>
+                <input 
+                type="radio" 
+                name='payment_time'
+                value={"after"}
+                checked={shippingPayment === "after"}
+                onChange={(e) => setShippingPayment(e.target.value as "after")}
                 />
             </label>
         </fieldset>
@@ -211,7 +244,7 @@ const Page: NextPage = () => {
         {
             !isDataLoading ?
             packages
-                .filter( pack => pack.status !== "requested_for")
+                .filter( pack => pack.status === "stored" )
                 .map( packag => 
                     <RequestMailProduct key={packag.id} prop={packag} handlePackage={setSelectedPackages}/>   
                 ) :

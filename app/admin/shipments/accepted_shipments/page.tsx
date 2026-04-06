@@ -1,12 +1,15 @@
 "use client"
 
-import SearchComponent from '@/components/admin/shipments/SearchComponent'
+import SearchComponent from '@/components/admin/shipments/accepted/SearchComponent'
+import InputComponent from '@/components/admin/shipments/InputComponent'
 import ShipmentStatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
 import { generateTrackingNumber } from '@/lib/generators/generateTrackingNumber'
 import { Shipment } from '@/types/entityTypeDef'
+import { ShipmentStatus } from '@/types/statusTypes'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaInbox, FaMoneyBillWave, FaShippingFast, FaTruck } from 'react-icons/fa'
 import { FaX } from 'react-icons/fa6'
@@ -17,7 +20,11 @@ import { toast } from 'react-toastify'
 
 export type SearchProps = {
     search: string,
-    status: "expected" | "received",
+    status: ShipmentStatus,
+}
+
+type currentSelectedStatus = {
+    status: ShipmentStatus | ""
 }
 
 const columnHelper = createColumnHelper<Shipment>()
@@ -29,14 +36,19 @@ const Page: NextPage = () => {
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [filterValues, setFilterValues] = useState<SearchProps>({
         search: "",
-        status: "expected"
+        status: "processing"
     })
     const [isModalActive, setIsModalActive] = useState(false)
-
-
+    
+    
     const [modalSelectedShipment, setModalSelectedShipmodalSelectedShipment] = useState<null | Shipment>(null)
+    const [currentStatus, setCurrentStatus] = useState<currentSelectedStatus>({
+        status: ""
+    })
 
+    const [isUpdatingShipmentStatus, setIsUpdatingShipmentStatus] = useState(false)
 
+    const router = useRouter()
 
     const shipmentRequestColumnDef = [
         columnHelper.accessor("tracking_number", {
@@ -98,6 +110,43 @@ const Page: NextPage = () => {
     }, [])
 
 
+    const updateShipmentStatus = async() => {
+        setIsUpdatingShipmentStatus(true)
+        try{
+            const res = await fetch(`/api/shipments/shipment-status/${modalSelectedShipment?.id}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                body: JSON.stringify({
+                    status: currentStatus.status
+                })
+            })
+
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            toast.success("Shipment Status successfully updated")
+            router.refresh()
+
+        }
+        catch(err){
+            toast.error("ERR:: Updating shipment Status")
+            console.error(err)
+        }
+        finally{
+            setIsUpdatingShipmentStatus(false)
+        }
+    }
+
+    const data = shipments.filter( x => x.status === filterValues.status )
+
+
   return <div className='space-y-body'>
     {isDataLoading ? <div className='w-screen h-[calc(100dvh-80px)] center-items'>
         <BeatLoader color='#f26430' size={20}/>
@@ -148,7 +197,7 @@ const Page: NextPage = () => {
                 icon={FaTruck}
                 />
                 <ShipmentStatusStatCard 
-                value={shipments.filter(x => x.status === "arrived_nigeria").length}
+                value={shipments.filter(x => x.status === "arrived").length}
                 status='Arrived'
                 icon={FaInbox}
                 />
@@ -185,21 +234,24 @@ const Page: NextPage = () => {
                 {
                     shipments ?
                     <Table 
-                    importedData={shipments}
+                    importedData={data}
                     columnDef={shipmentRequestColumnDef}
+                    globalFilter={filterValues.search}
                     /> : null
                 }
             </div>
         </div>
+
         {
             isModalActive &&
             <div className={`fixed w-screen h-dvh bg-dark/20 top-0 right-0 z-1000 center-items text-xs`}>
                 <div className='bg-white p-4 rounded max-w-100 w-[90%] h-fit shadow shadow-dark/20'>
                     <div className='flex justify-between items-center'>
                         <h2 className='text-sm font-semibold'>
-                            Request Details
+                            Shipment Details
                         </h2>
                         <button 
+                        disabled={isUpdatingShipmentStatus}
                         onClick={() => setIsModalActive(false)}>
                             <FaX/>
                         </button>
@@ -217,14 +269,50 @@ const Page: NextPage = () => {
                                 {modalSelectedShipment?.shipping_note}
                             </p>
                         </div>
-                        t
                     </div>
 
                     <div className='mt-4 mb-8'>
-                        {/* <InputComponent
-                        name='status'
-                        
-                        /> */}
+                        <div className='mb-3 flex items-center'>
+                            Current Status: &nbsp; 
+                            <p className='w-fit py-2 px-3 bg-accent-blue/20 rounded-full'>
+                                {modalSelectedShipment?.status}
+                            </p>
+                        </div>
+                        <InputComponent
+                        name="status" 
+                        type="text" 
+                        state={currentStatus} 
+                        setState={setCurrentStatus}
+                        readonly
+                        select
+                        selectValues={[
+                            {name: "Processing", value: "processing"}, 
+                            {name: "In Transit", value: "in_transit"},
+                            {name: "Shipped", value: "shipped"},
+                            {name: "Arrived", value: "arrived"},
+                            {name: "Pending Payment", value: "pending_payment"},
+                            {name: "Out For Delivery", value: "out_for_delivery"},
+                            {name: "Delivered", value: "delivered"}
+                        ]}
+                        />
+                        <div className='flex justify-end'>
+                            {
+                                currentStatus.status && 
+                                <button 
+                                onClick={() => {
+                                    updateShipmentStatus()
+                                }}
+                                disabled={isUpdatingShipmentStatus}
+                                className='bg-accent-blue text-white px-4 py-2 rounded mt-2'
+                                >
+                                    {
+                                        isUpdatingShipmentStatus ? 
+                                        <BeatLoader color='#FFF' size={10} speedMultiplier={0.5}/> :
+                                        "Update"
+                                    }
+                                </button>
+                            }
+                        </div>
                     </div>
                 
                 </div>

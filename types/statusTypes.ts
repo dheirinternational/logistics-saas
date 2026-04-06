@@ -11,7 +11,22 @@ export type ProductVisibility =
     | "hidden";
 
 export type PaymentStatus = 
-  | "pending"
-  | "paid"
-  | "failed"
-  | "abandoned"
+    | "pending"
+    | "paid"
+    | "failed"
+    | "abandoned"
+
+export type ShipmentStatus = 
+    | "processing" 
+    | "shipped" 
+    | "in_transit" 
+    | "arrived" 
+    | "pending_payment" 
+    | "out_for_delivery"
+    | "delivered"
+
+export type PackageStatus = 
+    | "stored"
+    | "requested_for"
+    | "assigned_to_shipment"
+    | "delivered"

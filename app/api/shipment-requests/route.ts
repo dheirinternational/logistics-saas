@@ -16,7 +16,7 @@ export async function POST(req: NextRequest){
 
         const body = await req.json()
 
-        const {customer_code, package_ids, channel, wrapping} = body
+        const {customer_code, package_ids, channel, wrapping, payment_time} = body
 
         const {user_id} = session
 
@@ -26,13 +26,14 @@ export async function POST(req: NextRequest){
                 customer_code,
                 package_ids,
                 channel,
-                wrapping
+                wrapping,
+                payment_time
             )
             VALUES (
-                $1, $2, $3, $4, $5
+                $1, $2, $3, $4, $5, $6
             )
             RETURNING *     
-        `, [user_id,customer_code, package_ids, channel, wrapping])
+        `, [user_id,customer_code, package_ids, channel, wrapping, payment_time])
 
         await pool.query(`
             UPDATE packages

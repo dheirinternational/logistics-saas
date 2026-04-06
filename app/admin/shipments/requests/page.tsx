@@ -1,12 +1,13 @@
 "use client"
 
-import SearchComponent from '@/components/admin/shipments/SearchComponent'
+import SearchComponent from '@/components/admin/shipments/requests/SearchComponent'
 import ShipmentStatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
 import { generateTrackingNumber } from '@/lib/generators/generateTrackingNumber'
 import { ShippingRequest } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
 import { FaCheckCircle, FaClock } from 'react-icons/fa'
@@ -16,7 +17,7 @@ import { toast } from 'react-toastify'
 
 export type SearchProps = {
     search: string,
-    status: "expected" | "received",
+    status: "pending" | "approved",
     warehouse_id: number
 }
 
@@ -31,9 +32,11 @@ const Page: NextPage = () => {
     const [filterValues, setFilterValues] = useState<SearchProps>({
         search: "",
         warehouse_id: 0,
-        status: "expected"
+        status: "pending"
     })
     const [isModalActive, setIsModalActive] = useState(false)
+
+    const router = useRouter()
 
 
     const [modalSelectedRequest, setModalSelectedRequest] = useState<null | ShippingRequest>(null)
@@ -55,7 +58,9 @@ const Page: NextPage = () => {
                     total_cost: 50000,
                     shipment_request_id: modalSelectedRequest?.id,
                     shipment_note: modalSelectedRequest?.shipping_note,
-                    user_id: modalSelectedRequest?.user_id
+                    user_id: modalSelectedRequest?.user_id,
+                    payment_time: modalSelectedRequest?.payment_time,
+                    package_ids: modalSelectedRequest?.package_ids
                 })
             })
 
@@ -67,7 +72,7 @@ const Page: NextPage = () => {
             }
 
             toast.success("Shipment Initialized Succesfully")
-
+            router.refresh()
 
         }
         catch(err){
@@ -145,6 +150,7 @@ const Page: NextPage = () => {
     
     }, [])
 
+    const data = shipmentRequests.filter( x => x.status === filterValues.status )
 
   return <div className='space-y-body'>
     {isDataLoading ? <div className='w-screen h-[calc(100dvh-80px)] center-items'>
@@ -186,7 +192,7 @@ const Page: NextPage = () => {
                 />
                 <ShipmentStatusStatCard 
                 value={shipmentRequests.filter(x => x.status === "accepted").length}
-                status='Approved'
+                status='Accepted'
                 icon={FaCheckCircle}
                 />
             </div>
@@ -207,8 +213,9 @@ const Page: NextPage = () => {
                 {
                     shipmentRequests ?
                     <Table 
-                    importedData={shipmentRequests}
+                    importedData={data}
                     columnDef={shipmentRequestColumnDef}
+                    globalFilter={`${filterValues.search}`}
                     /> : null
                 }
             </div>

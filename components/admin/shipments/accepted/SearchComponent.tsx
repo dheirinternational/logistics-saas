@@ -1,7 +1,7 @@
 "use client"
 
 import { Dispatch, FormEvent, SetStateAction, useEffect, useState} from "react"
-import InputComponent from "../shipments/InputComponent"
+import InputComponent from "../InputComponent"
 import { Warehouse } from "@/types/entityTypeDef"
 import { toast } from "react-toastify"
 
@@ -76,10 +76,13 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         readonly
         select
         selectValues={[
-            {name: "Stored", value: "stored"}, 
-            {name: "Requested For", value: "requested_for"},
-            {name: "Assigned To Shipment", value: "assigned_to_shipment"},
-            {name: "delivered", value: "Delivered"}
+            {name: "Processing", value: "processing"}, 
+            {name: "Shipped", value: "shipped"},
+            {name: "In Transit", value: "in_transit"},
+            {name: "Arrived", value: "arrived"},
+            {name: "Pending Payment", value: "pending_payment"},
+            {name: "Out for delivery", value: "out_for_delivery"},
+            {name: "Delivered", value: "delivered"}
         ]}
         />
 
