@@ -1,10 +1,9 @@
 import type { CTARedirectButton } from "@/components/base/CTARedirectButton";
 import { BsBoxArrowInDown, BsBoxArrowUp } from "react-icons/bs";
-import { FaBox, FaShippingFast, FaUserEdit } from "react-icons/fa";
-import { FaMapLocationDot, FaUserPlus, FaUserTag } from "react-icons/fa6";
-import { HiClipboardDocumentList } from "react-icons/hi2";
+import { FaShippingFast, FaUserEdit } from "react-icons/fa";
+import { FaMapLocationDot, FaUserTag } from "react-icons/fa6";
 import { LuPackagePlus } from "react-icons/lu";
-import { MdLocalShipping, MdPayment, MdPending, MdPendingActions, MdVerified } from "react-icons/md";
+import { MdLocalShipping, MdPayment, MdPendingActions} from "react-icons/md";
 
 export const ctaButtonsProps: CTARedirectButton[] = [
     {
