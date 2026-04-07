@@ -15,7 +15,7 @@ type PackageValues = Omit<Package, "id" | "created_at" >
 const AddPackage = ({props} : {props: IncomingPackage}) => {
 
     const [packageValues, setPackageValues] = useState<PackageValues>({
-        package_name: "",
+        package_name: props.declared_item_name,
         weight: 0,
         condition: "good",
         status: "stored",
@@ -114,7 +114,7 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <InputComponent name="package_name" type="text" title="Package Name" state={packageValues} setState={setPackageValues} required/>
+        <InputComponent name="package_name" type="text" title="Package Name" state={packageValues} setState={setPackageValues} required readonly/>
         <InputComponent name="weight" type="number" title="Actual Weight of product" state={packageValues} setState={setPackageValues} required/>
 
         <InputComponent name="warehouse_id" type="text" title="Warehouse" state={packageValues} setState={setPackageValues} readonly required/>
@@ -142,25 +142,7 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
         required
         />
 
-        <InputComponent 
-        name="status"
-        type="text"
-        title="Status"
-        state={packageValues}
-        setState={setPackageValues}
-        select
-        selectValues={[{name: "Stored", value: "stored"}, {name: "Ready to ship", value: "ready_to_ship"}, {name: "Assigned to shipment", value: "assigned_to_shipment"}]}
-        required
-        />
 
-        {/* <input
-        type="file"
-        accept="image/*"
-        multiple
-        className="bg-light w-fit p-2 rounded-lg text-xs "
-        onChange={hanldeImageChange}
-        />
-         */}
         <div className="flex gap-2">
             {previews.map( (x, i) => 
             <figure key={i} className="w-15 h-15 bg-accent-red rounded overflow-hidden relative">

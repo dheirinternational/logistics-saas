@@ -1,6 +1,6 @@
 import type { CTARedirectButton } from "@/components/base/CTARedirectButton";
 import { BsBoxArrowInDown, BsBoxArrowUp } from "react-icons/bs";
-import { FaShippingFast, FaUserEdit } from "react-icons/fa";
+import { FaBoxes, FaShippingFast, FaUserEdit } from "react-icons/fa";
 import { FaMapLocationDot, FaUserTag } from "react-icons/fa6";
 import { LuPackagePlus } from "react-icons/lu";
 import { MdLocalShipping, MdPayment, MdPendingActions} from "react-icons/md";
@@ -19,7 +19,7 @@ export const ctaButtonsProps: CTARedirectButton[] = [
     {
         title: "Pending Payments",
         icon: MdPendingActions,
-        path: "/in_development"
+        path: "/base/pending_payments"
     },
 
     {
@@ -41,6 +41,11 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
         path: "/base/waiting_to_be_stored"
     },
     {
+        title: "All Packages",
+        icon: FaBoxes,
+        path: "/base/all_packages"
+    },
+    {
         title: "Request Mail",
         icon: FaShippingFast,
         path: "/base/request_mail"
@@ -56,10 +61,15 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
         path: "/base/orders_shipped"
     },
     {
-        title: "Order Payment",
+        title: "Payment Receipts",
         icon: MdPayment,
-        path: "/in_development"
+        path: "/base/payment_receipts"
     },
+    {
+        title: "Pending Payments",
+        icon: MdPendingActions, 
+        path: "/base/pending_payments"
+    }
 ]
 
 export const profileMenuCtaButtonsProps: CTARedirectButton[] = [
@@ -71,6 +81,11 @@ export const profileMenuCtaButtonsProps: CTARedirectButton[] = [
     {
         title: "Warehouse Address",
         path: "/base/warehouse_address",
+        icon: FaMapLocationDot
+    },
+    {
+        title: "My Address",
+        path: "/base/my_address",
         icon: FaMapLocationDot
     },
     {

@@ -11,7 +11,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { FaInbox, FaMoneyBillWave, FaShippingFast, FaTruck } from 'react-icons/fa'
+import { FaInbox, FaShippingFast, FaTruck } from 'react-icons/fa'
 import { FaX } from 'react-icons/fa6'
 import { FcProcess } from 'react-icons/fc'
 import { MdDoneAll, MdOutbox } from 'react-icons/md'
@@ -62,6 +62,12 @@ const Page: NextPage = () => {
         }),
         columnHelper.accessor("status", {
             header: "Status"
+        }),
+        columnHelper.accessor("payment_time", {
+            header: "Payment Time"
+        }),
+        columnHelper.accessor("paid_for", {
+            header: "Paid For",
         }),
         columnHelper.display({
             id: "Details",
@@ -166,25 +172,19 @@ const Page: NextPage = () => {
             </div>
         </div>
 
-        {/* ADD SHIPMENT BUTTON */}
-        {/* <div className='bg-light rounded-lg '>
-            <Link href={'/admin/shipments/create_shipment'} className='rounded-lg border border-dark/20 flex w-full items-center justify-center gap-3 text-sm py-3 font-bold'>
-                <FaPlus/>
-                Create Shipment
-            </Link>
-        </div> */}
 
-        {/* STATUS CARDS */}
         <div>
             <h2 className='text-sm'>
                 STATS
             </h2>
             <div className='flex my-body space-x-2 overflow-x-auto'>
+
                 <ShipmentStatusStatCard 
                 value={shipments.filter(x => x.status === "processing").length}
                 status='Processing'
                 icon={FcProcess}
                 />
+
                 <ShipmentStatusStatCard 
                 value={shipments.filter(x => x.status === "shipped").length}
                 status='Shipped'
@@ -196,21 +196,19 @@ const Page: NextPage = () => {
                 status='In transit'
                 icon={FaTruck}
                 />
+
                 <ShipmentStatusStatCard 
                 value={shipments.filter(x => x.status === "arrived").length}
                 status='Arrived'
                 icon={FaInbox}
                 />
-                <ShipmentStatusStatCard 
-                value={shipments.filter(x => x.status === "pending_payment").length}
-                status='Pending Payment'
-                icon={FaMoneyBillWave}
-                />
+
                 <ShipmentStatusStatCard 
                 value={shipments.filter(x => x.status === "out_for_delivery").length}
                 status='Out For Delivery'
                 icon={MdOutbox}
                 />
+
                 <ShipmentStatusStatCard 
                 value={shipments.filter(x => x.status === "delivered").length}
                 status='Delivered'
@@ -242,6 +240,9 @@ const Page: NextPage = () => {
             </div>
         </div>
 
+
+        {/* EDIT MODAL */}
+
         {
             isModalActive &&
             <div className={`fixed w-screen h-dvh bg-dark/20 top-0 right-0 z-1000 center-items text-xs`}>
@@ -263,6 +264,7 @@ const Page: NextPage = () => {
                         <p><span className='font-semibold'>Channel Requested:</span> {modalSelectedShipment?.channel}</p>
                         <p><span className='font-semibold'>Customer Code:</span> {modalSelectedShipment?.customer_code}</p>
                         <p><span className='font-semibold'>Total Cost:</span> ₦ {modalSelectedShipment?.total_cost}</p>
+                        <p><span className='font-semibold'>User ID:</span> {modalSelectedShipment?.user_id}</p>
                         <div className='mt-3 space-y-1'>
                             <span>Customer Note</span>
                             <p className='border border-dark/20 h-26 mt-2 p-3 rounded-lg overflow-y-auto'>
@@ -290,7 +292,6 @@ const Page: NextPage = () => {
                             {name: "In Transit", value: "in_transit"},
                             {name: "Shipped", value: "shipped"},
                             {name: "Arrived", value: "arrived"},
-                            {name: "Pending Payment", value: "pending_payment"},
                             {name: "Out For Delivery", value: "out_for_delivery"},
                             {name: "Delivered", value: "delivered"}
                         ]}
@@ -299,8 +300,31 @@ const Page: NextPage = () => {
                             {
                                 currentStatus.status && 
                                 <button 
-                                onClick={() => {
-                                    updateShipmentStatus()
+                                onClick={async () => {
+                                    try{
+
+                                        if(modalSelectedShipment?.status === currentStatus.status){
+                                            toast.info("No changes made to shipment status")
+                                            return
+                                        }
+
+                                        if(modalSelectedShipment?.payment_time === "before" && currentStatus.status !== "processing" && modalSelectedShipment.paid_for === false){
+                                            toast.error("Invalid status update. Payment is required before processing.")
+                                            return
+                                        }
+
+                                        if(modalSelectedShipment?.payment_time === "after" && ["out_for_delivery", "delivered"].includes(currentStatus.status) && modalSelectedShipment.paid_for === false){
+                                            toast.error("Invalid status update. Payment is required before marking shipment as out for delivery or delivered.")
+                                            return
+                                        }
+
+                                        await updateShipmentStatus()
+
+                                    }
+                                    catch(err){
+                                        toast.error("ERR:: Updating Shipment Status")
+                                        console.error(err)  
+                                    }  
                                 }}
                                 disabled={isUpdatingShipmentStatus}
                                 className='bg-accent-blue text-white px-4 py-2 rounded mt-2'

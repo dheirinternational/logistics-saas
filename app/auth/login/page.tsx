@@ -29,9 +29,7 @@ const Page: NextPage = () => {
                 method: "GET",
                 credentials: "include"
             })
-            const data = await res.json()
-            console.log(data.user?.role)
-            
+            const data = await res.json()            
             if(data.user?.role){
                 if (data.user.role === "customer"){
                     router.push("/base")

@@ -6,6 +6,7 @@ import { Table } from '@/components/admin/table/Table'
 import { generateTrackingNumber } from '@/lib/generators/generateTrackingNumber'
 import { ShippingRequest } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
+import { create } from 'domain'
 import { NextPage } from 'next'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -116,9 +117,6 @@ const Page: NextPage = () => {
             </button>
         })
     ]
-
-    generateTrackingNumber()
-
 
     useEffect(() => {
         const fetchShipmentData = async () => {
@@ -246,6 +244,7 @@ const Page: NextPage = () => {
                         <p><span className='font-semibold'>Channel Requested:</span> {modalSelectedRequest?.channel}</p>
                         <p><span className='font-semibold'>Customer Code:</span> {modalSelectedRequest?.customer_code}</p>
                         <p><span className='font-semibold'>Package Wrapping:</span> {modalSelectedRequest?.wrapping}</p>
+                        <p><span className='font-semibold'>Payment Time:</span> {modalSelectedRequest?.payment_time} shipping</p>
                         <div className='mt-3 space-y-1'>
                             <span>Customer Note</span>
                             <p className='border border-dark/20 h-26 mt-2 p-3 rounded-lg overflow-y-auto'>

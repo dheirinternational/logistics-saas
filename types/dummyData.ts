@@ -56,34 +56,6 @@ export const dummyCustomers: Customer[] = [
   }
 ];
 
-export const dummyAddresses: Address[] = [
-  {
-    id: "addr1",
-    recipient_name: "John Doe",
-    phone: "+1234567890",
-    country: "Nigeria",
-    province: "Lagos",
-    city: "Lagos",
-    district: "Ikeja",
-    street: "Allen Avenue",
-    building: "Block 5",
-    postal_code: "100001",
-    created_at: "2023-01-15T10:00:00Z"
-  },
-  {
-    id: "addr2",
-    recipient_name: null,
-    phone: null,
-    country: "China",
-    province: "Guangdong",
-    city: "Shenzhen",
-    district: null,
-    street: "Huaqiangbei",
-    building: null,
-    postal_code: "518000",
-    created_at: "2023-03-10T12:00:00Z"
-  }
-];
 
 // export const dummyWarehouses: Warehouse[] = [
 //   {
@@ -207,19 +179,7 @@ export const dummyAddresses: Address[] = [
 //   }
 // ];
 
-export const dummyPayments: Payment[] = [
-  {
-    id: "pay1",
-    shipment_id: "sh1",
-    customer_code: "KRC2530",
-    amount: 150.00,
-    payment_method: "bank_transfer",
-    status: "successful",
-    transaction_ref: "TXN987654321",
-    paid_at: "2023-05-02T09:00:00Z",
-    created_at: "2023-05-01T08:00:00Z"
-  }
-];
+
 
 export const dummyStaffAssignments: StaffAssignment[] = [
   {

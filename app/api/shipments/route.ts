@@ -45,6 +45,44 @@ export async function POST(req: NextRequest){
                 WHERE id = ANY($1)
         `, [package_ids])
 
+        await pool.query(`
+            INSERT INTO payments (user_id, customer_code, shipment_tracking_number, amount, status,  created_at)
+            VALUES ($1, $2, $3, $4, $5, NOW())
+        `, [user_id, customer_code, tracking_number, total_cost, 'pending']) 
+
+        
+            // const createPaymentRecord = async(userId: number, customerCode: string, shipmentTrackingNumber: string, amount: number) => {
+            //     try{
+            //         const res = await fetch("/api/payments/initialize", {
+            //             method: "POST",
+            //             credentials: "include",
+            //             headers: {
+            //                 "Content-Type": "application/json"
+            //             },
+            //             body: JSON.stringify({
+            //                 user_id: userId,
+            //                 customer_code: customerCode,
+            //                 shipment_tracking_number: shipmentTrackingNumber,
+            //                 amount: amount
+            //             })
+            //         })
+        
+            //         const result = await res.json()
+        
+            //         if(!res.ok){
+            //             toast.error(result.message)
+            //             return
+            //         }
+        
+            //         toast.success("Payment record created successfully")
+            //         router.refresh()
+            //     }
+            //     catch(err){
+            //         toast.error("ERR:: Creating Payment Record")
+            //         console.error(err)
+            //     }
+            // }
+
         return NextResponse.json({
             success: true,
             data: res.rows[0]

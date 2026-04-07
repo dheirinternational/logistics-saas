@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
 import { useEffect, useState } from 'react'
-import { IncomingPackage } from '@/types/entityTypeDef'
+import { IncomingPackage, Package } from '@/types/entityTypeDef'
 import { toast } from 'react-toastify'
 import { BeatLoader } from 'react-spinners'
 
@@ -36,7 +36,7 @@ const Page: NextPage = ({}) => {
                     toast.error(result?.message)
                 }
     
-                setPackages(result.data)
+                setPackages(result.data.filter((x : IncomingPackage) => x.status === "expected"))
             }
             catch(err){
                 console.error(err)
@@ -81,7 +81,7 @@ const Page: NextPage = ({}) => {
             // selectValues={dummyWarehouses.map( x => x.name)}
             />
         </div>
-        <div className='flex items-center text-xs gap-1 -mt-2'>
+        <div className='flex items-center text-xs gap-1'>
             <InputComponent
             name='incoming_tracking_id'
             type='text'
@@ -89,7 +89,7 @@ const Page: NextPage = ({}) => {
             setState={setFilterValues}
             placeHolder='Tracking Number Id...'
             />
-            <button className='h-full px-4 py-2 bg-accent-red text-white mt-2 rounded'>
+            <button className='h-full px-4 py-2 bg-accent-red text-white rounded'>
                 Search
             </button>
         </div>
@@ -106,7 +106,7 @@ const Page: NextPage = ({}) => {
         <div className='flex justify-center py-10'>
             <BeatLoader color='#f26430' size={12} speedMultiplier={0.5}/>
         </div> :
-        <div className='bg-light p-4 min-h-100 gap-y-3'>
+        <div className='bg-light p-4 min-h-100 gap-y-3 pb-30'>
             {
                 packages.length < 1 && 
                 <p className='text-xs italic'>

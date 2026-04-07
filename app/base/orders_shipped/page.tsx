@@ -24,7 +24,7 @@ const Page: NextPage = () => {
             try{
                 const res = await fetch("/api/shipments/user")
                 const result = await res.json()
-
+                
                 if(!res.ok){
                     toast.error(result.message)
                 }
@@ -45,6 +45,7 @@ const Page: NextPage = () => {
     
     const router = useRouter()
 
+    
   return <div className='h-full w-full space-y-2'>
     <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
         <button 
@@ -72,7 +73,7 @@ const Page: NextPage = () => {
     :
     <>
         <div className='bg-white p-4 flex flex-col gap-2'> 
-            <div className='flex items-center text-xs gap-1 -mt-2'>
+            <div className='flex items-center text-xs gap-1'>
                 <InputComponent
                 name='incoming_tracking_id'
                 type='text'
@@ -80,7 +81,7 @@ const Page: NextPage = () => {
                 setState={setFilterValues}
                 placeHolder='Tracking Id...'
                 />
-                <button className='h-full px-4 py-2 bg-accent-red text-white mt-2 rounded'>
+                <button className='h-full px-4 py-2 bg-accent-red text-white rounded'>
                     Search
                 </button>
             </div>
@@ -104,7 +105,7 @@ const Page: NextPage = () => {
                 shipments.map( x =>  
                      <div key={x.tracking_number} className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
                         <div className='flex items-center justify-between'>
-                            <p className='text-lg'>
+                            <p className='text-sm border border-dark/20 px-3 py-1 w-50 rounded-full'>
                                 {x.tracking_number}
                             </p>
                             <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
@@ -114,15 +115,17 @@ const Page: NextPage = () => {
                             </div>
                         </div>
 
-                        <div className='text-xs flex'>
+                        <div className='text-xs flex justify-between'>
                             
-                            <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20'>
-                                Destination: Warehouse Lagos
-                            </p>
+                            <div className='flex gap-1 flex-col text-[10px] border border-dark/20 rounded p-2 w-45'>
+                                <p className='flex-1 pr-3 whitespace-nowrap flex justify-start border-dark/20'>
+                                    Destination: Warehouse Lagos
+                                </p>
 
-                            <p className='flex-1 whitespace-nowrap flex justify-end'>
-                                {x.created_at.slice(0, 10)}
-                            </p>
+                                <p className='flex-1 whitespace-nowrap flex'>
+                                    {x.created_at.slice(0, 10)}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 )

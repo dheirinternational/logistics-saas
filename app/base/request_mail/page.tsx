@@ -28,11 +28,7 @@ const Page: NextPage = () => {
         incoming_tracking_id: "" 
     })
 
-
     const router = useRouter()
-
-    
-
 
     const handleSubmit = async () => {
         setIsPostingData(true)
@@ -71,8 +67,7 @@ const Page: NextPage = () => {
         }
     }
 
-
-
+    // Fetch Packages
     useEffect(() => {
         const fetchPackages = async () => {
             setIsDataLoading(true)
@@ -103,7 +98,6 @@ const Page: NextPage = () => {
 
 
   return <div className='h-full w-full space-y-2'>
-    
     {/* Header */}
     <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
         <button 
@@ -254,7 +248,7 @@ const Page: NextPage = () => {
         }
     </div>
 
-    <div className='p-body'>
+    <div className='p-body pb-20'>
         <button 
         className='bg-accent-red text-white w-full text-sm py-3 rounded'
         onClick={() => {

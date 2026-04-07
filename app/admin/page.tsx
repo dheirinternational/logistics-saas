@@ -5,6 +5,7 @@ import RecentShipmentCard from '@/components/admin/RecentShipmentCard'
 import RevenueSnapshot from '@/components/admin/RevenueSnapshot'
 import StatusStatCard from '@/components/admin/StatusStatCard'
 import { NextPage } from 'next'
+import { Fa42Group } from 'react-icons/fa6'
 
 const Page: NextPage = () => {
   return (
@@ -40,10 +41,10 @@ const Page: NextPage = () => {
             
             {/* STATS Components Ctn */}
             <div className='flex my-body space-x-2 overflow-x-auto'>
-                <StatusStatCard />
-                <StatusStatCard />
-                <StatusStatCard />
-                <StatusStatCard />
+                <StatusStatCard count={0} status='delivered' icon={Fa42Group} />
+                <StatusStatCard count={0} status='delivered' icon={Fa42Group} />
+                <StatusStatCard count={0} status='delivered' icon={Fa42Group} />
+                <StatusStatCard count={0} status='delivered' icon={Fa42Group} />
             </div>
         </div>
 

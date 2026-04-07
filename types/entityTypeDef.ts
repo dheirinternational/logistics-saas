@@ -43,7 +43,9 @@ export type Shipment = {
     shipping_note: string
     total_cost: number
     payment_time: "before" | "after"
+    paid_for: boolean
     created_at: string
+    user_id: number // FK -> Users(id)
 }
 
 export type Package = {
@@ -80,27 +82,26 @@ export type Warehouse = {
 }
 
 export type Address = {
-    id: string  // u
-    recipient_name: null | string
-    phone: null | string
+    id: number  // unique
+    user_id: number  // Fk -> Users(id)
     country: string
-    province? : string | null
+    state : string 
     city: string
-    district?: string | null
-    street: string | null
-    building: string | null 
+    street: string 
     postal_code: string 
     created_at: string
 }
 
 export type Payment = {
     id: string // unique
-    shipment_id: string // (FK -> Shipments(id))
+    shipment_tracking_number: string // (FK -> Shipments(tracking_number))
+    user_id: number // (FK -> users(id))
     customer_code: string  // (Fk -> Customers(id))
     amount: number
-    payment_method: "bank_transfer" | "card" | "cash"
-    status: "successful" | "pending" | "failed"
+    channel: string
+    status: "pending" | "failed" | "paid"
     transaction_ref: string
+    fees: number    
     paid_at: string
     created_at: string
 }
@@ -129,7 +130,7 @@ export type IncomingPackage = {
 
 export type ShippingRequest = {
     id: string // u
-    user_id: string  // Fk -> Users(id)
+    user_id: number  // Fk -> Users(id)
     customer_code: string //  Fk -> Customers(code)
     package_ids: string[]
     channel: ShippingType

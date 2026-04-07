@@ -21,7 +21,6 @@ export type ShipmentStatus =
     | "shipped" 
     | "in_transit" 
     | "arrived" 
-    | "pending_payment" 
     | "out_for_delivery"
     | "delivered"
 

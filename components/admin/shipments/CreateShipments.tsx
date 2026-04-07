@@ -5,7 +5,7 @@ import InputComponent from "./InputComponent"
 import { IoCreate } from "react-icons/io5"
 import { Shipment } from "@/types/entityTypeDef"
 
-type ShipmentValues = Omit<Shipment, "id" | "status" | "created_at" | "tracking_number" | "payment_time">
+type ShipmentValues = Omit<Shipment, "id" | "status" | "created_at" | "tracking_number" | "payment_time" | "user_id" | "paid_for">
 
 const CreateShipments = () => {
 
@@ -15,7 +15,7 @@ const CreateShipments = () => {
         destination_warehouse_id: "",
         channel: "air",
         total_cost: 50000, 
-        shipping_note: ""
+        shipping_note: "",
     })
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {

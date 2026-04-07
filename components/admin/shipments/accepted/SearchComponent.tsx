@@ -80,7 +80,6 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
             {name: "Shipped", value: "shipped"},
             {name: "In Transit", value: "in_transit"},
             {name: "Arrived", value: "arrived"},
-            {name: "Pending Payment", value: "pending_payment"},
             {name: "Out for delivery", value: "out_for_delivery"},
             {name: "Delivered", value: "delivered"}
         ]}

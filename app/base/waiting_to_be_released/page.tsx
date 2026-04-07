@@ -14,6 +14,7 @@ const Page: NextPage = () => {
     const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
     const [isDataLoading, setIsDataLoading] = useState(false)
 
+    // Fetch Shipment Requests
     useEffect(() => {
         const fetchShipmentRequests = async() => {
 
@@ -31,7 +32,7 @@ const Page: NextPage = () => {
                     return
                 }
 
-                setShipmentRequests(result.data)
+                setShipmentRequests(result.data.filter((x: ShippingRequest) => x.status === "pending"))
 
             }
             catch(err){
@@ -45,8 +46,6 @@ const Page: NextPage = () => {
 
         fetchShipmentRequests()
     }, [])
-
-
 
     const router = useRouter()
 
@@ -62,7 +61,7 @@ const Page: NextPage = () => {
             </span>
         </button>
         <h1 className='font-semibold text-xs'>
-            Pending Shipment Approval
+            Shipment Requests
         </h1>
         <Link href={"/base/profile"} className='flex-1 flex justify-end'>
             <FaUser/>
@@ -95,7 +94,7 @@ const Page: NextPage = () => {
         </div>
     </div> */}
 
-    <div className='bg-light p-4 min-h-150'>
+    <div className='bg-light p-4 min-h-150 space-y-3'>
         {
             shipmentRequests.length < 1 && !isDataLoading && 
             <p className='text-xs italic'>
@@ -111,11 +110,11 @@ const Page: NextPage = () => {
                     <div key={request.id} className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
                         <div className='flex items-center justify-between'>
                             <p className='text-lg'>
-                                {shipmentRequests[0].channel}
+                                {request.channel}
                             </p>
                             <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
                                 <span className='text-[10px] text-accent-blue block'>
-                                    {shipmentRequests[0].status}
+                                    {request.status}
                                 </span>
                             </div>
                         </div>
@@ -123,15 +122,15 @@ const Page: NextPage = () => {
                         <div className='text-xs flex'>
                             
                             <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20'>
-                                Packages No: {shipmentRequests[0].package_ids.length}
+                                Packages No: {request.package_ids.length}
                             </p>
 
                             <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20 px-2'>
-                                Wrapping: {shipmentRequests[0].wrapping}
+                                Wrapping: {request.wrapping}
                             </p>
 
                             <p className='flex-1 whitespace-nowrap flex justify-end'>
-                                {shipmentRequests[0].created_at.slice(0, 10)}
+                                {request.created_at.slice(0, 10)}
                             </p>
                         </div>
                     </div>

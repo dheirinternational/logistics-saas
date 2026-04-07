@@ -1,14 +1,20 @@
-import { BiPackage } from "react-icons/bi"
+import { IconType } from "react-icons"
 
-const StatusStatCard = () => {
+interface StatusStatCardProps {
+    count: number
+    status: "stored" | "assigned_to_shipment" | "delivered" ,
+    icon: IconType  
+}
+
+const StatusStatCard = ({ count, status, icon: Icon }: StatusStatCardProps) => {
   return (
-    <div className="p-4 bg-light rounded-lg flex flex-col justify-center items-center min-w-31">
-        <BiPackage className="text-3xl opacity-70" />
+    <div className="p-2 bg-dark/10 rounded-lg flex flex-col justify-center items-center min-w-26">
+        <Icon className="text-xl opacity-70" />
         <h3 className="font-bold text-xl mt-2">
-            1200
+            {count}
         </h3>
         <span className="text-[10px] mt-1">
-            Delivered
+            {status.charAt(0).toUpperCase() + status.slice(1)}
         </span>
     </div>
   )

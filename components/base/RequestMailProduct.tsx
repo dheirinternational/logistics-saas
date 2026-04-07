@@ -1,11 +1,18 @@
 import { Package } from "@/types/entityTypeDef"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 
-const RequestMailProduct = ({prop, handlePackage}: {prop:Package, handlePackage: Dispatch<SetStateAction<Package[]>>}) => {
+interface Props {
+    prop: Package
+    handlePackage?: Dispatch<SetStateAction<Package[]>>
+}
+
+const RequestMailProduct = ({prop, handlePackage}: Props) => {
 
     const [isSelected, setIsSelected] = useState(false)
 
     useEffect(() => {
+        if(!handlePackage) return
+
         if(isSelected){
             handlePackage(prev => {
                 const prevArray = prev.filter( packag => packag.id != prop.id )
@@ -17,14 +24,15 @@ const RequestMailProduct = ({prop, handlePackage}: {prop:Package, handlePackage:
     }, [isSelected])
 
 
-
   return (
     <div className={`
         border border-dark/20 p-4 py-3 space-y-2 rounded active:scale-90 transition-set
         ${isSelected ? "bg-accent-red/30" : ""}    
     `}
     onClick={() => {
-        setIsSelected(!isSelected)
+        if(handlePackage) {
+            setIsSelected(!isSelected)
+        }
     }}
     >
             <div className='flex items-center justify-between'>
