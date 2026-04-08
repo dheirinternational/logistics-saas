@@ -14,14 +14,14 @@ export async function POST(request: Request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-//     if (!supabaseUrl || !serviceRoleKey) {
-//       return NextResponse.json(
-//         { success: false, message: "Missing Supabase environment variables" },
-//         { status: 500 }
-//       )
-//     }
+    if (!supabaseUrl || !serviceRoleKey) {
+      return NextResponse.json(
+        { success: false, message: "Missing Supabase environment variables" },
+        { status: 500 }
+      )
+    }
 
-//     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
 //     const formData = await request.formData()
 //     const file = formData.get("file")
