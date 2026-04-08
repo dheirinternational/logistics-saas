@@ -6,9 +6,12 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { FormEvent, useState } from 'react'
 import { FaTruck } from 'react-icons/fa'
+import { BeatLoader } from 'react-spinners'
 
 const Page: NextPage = () => {
     const router = useRouter()
+
+    const [isCreatingAccount, setIsCreatingAccount] = useState(false)
 
     const [credentials, setCredentials] = useState({
         email: "",
@@ -21,6 +24,7 @@ const Page: NextPage = () => {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setIsCreatingAccount(true)
 
         if (credentials.password !== credentials.confirm_password){ 
             alert("Passwords don't match")
@@ -48,6 +52,9 @@ const Page: NextPage = () => {
         .catch(err => {
             console.error(err)
             alert("An error occurred")
+        })
+        .finally(() => {
+            setIsCreatingAccount(false)
         })
     }
 
@@ -128,7 +135,13 @@ const Page: NextPage = () => {
             </div>
             <div>
                 <button className='w-full bg-accent-blue text-white text-xs mt-6 py-3 rounded'>
-                    Create Account
+                    {
+                        isCreatingAccount ?
+                        <BeatLoader color='#fff' size={8}/> :
+                        <>
+                            Create Account
+                        </>
+                    }
                 </button>
             </div>
         </form>

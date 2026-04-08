@@ -1,5 +1,4 @@
-import { CartProduct, Product } from "@/types/entityTypeDef"
-import { Carter_One } from "next/font/google"
+import { CartProduct } from "@/types/entityTypeDef"
 import {create} from "zustand"
 
 type CartStore = {
