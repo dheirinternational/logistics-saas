@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/db/session"
 // import { NextResponse } from "next/server"
 // import { pool } from '@/lib/db/db'
-// import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
 // export async function POST(request: Request) {
 //   try {
