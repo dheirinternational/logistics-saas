@@ -4,10 +4,18 @@ declare global{
     var pgPool: Pool | undefined;
 }
 
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) {
+  throw new Error("Missing DATABASE_URL")
+}
+
+
+
 export const pool =
     global.pgPool ?? 
     new Pool({
-        connectionString: process.env.DATABASE_URL,
+        connectionString,
         ssl: {
             rejectUnauthorized: false,
         }
