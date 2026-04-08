@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer()
     const blob = new Blob([arrayBuffer], { type: file.type })
 
-//     // Fixed path per user — upsert overwrites the existing file
+    // Fixed path per user — upsert overwrites the existing file
     const filePath = `avatars/${session.user_id}`
 
     const { error: uploadError } = await supabaseAdmin.storage
@@ -56,15 +56,15 @@ export async function POST(request: Request) {
 
     const bustUrl = `${publicUrl}?t=${Date.now()}`
 
-//     await pool.query(
-//       `UPDATE users SET profile_img = $1 WHERE id = $2`,
-//       [bustUrl, session.user_id]
-//     )
+    await pool.query(
+      `UPDATE users SET profile_img = $1 WHERE id = $2`,
+      [bustUrl, session.user_id]
+    )
 
     return NextResponse.json({ 
         success: true, 
         message: "Image uploaded successfully", 
-        // imageUrl: bustUrl 
+        imageUrl: bustUrl 
     })
 
   } catch (err) {
