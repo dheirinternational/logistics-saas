@@ -16,7 +16,6 @@ const Page: NextPage = () => {
         email: "",
         password: ""
     })
-    const [error, setError] = useState("")
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(()=>{
@@ -46,7 +45,6 @@ const Page: NextPage = () => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setError("")
         setIsLoading(true)
         const formData = new FormData(e.currentTarget)
         const data = Object.fromEntries(formData)
@@ -64,7 +62,6 @@ const Page: NextPage = () => {
 
             if(!res.ok){
                 toast.error(result.error)
-                setError(result.error || "Login failed")
                 return
             }
 

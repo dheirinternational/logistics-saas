@@ -87,7 +87,7 @@ const Page: NextPage = ({}) => {
         <p className="text-primary-text/60 text-base leading-relaxed mt-4 mb-8">
           Below are some of our frequently asked questions
         </p>
-        <div className="space-y-4">
+        <div className="space-y-4 md:max-w-100">
           <FAQ/>
           <FAQ/>
           <FAQ/>

@@ -71,6 +71,9 @@ export default function PendingPayments(){
         fetchPayments()
     }, [])
 
+
+    const data = payments.filter( x => x.shipment_tracking_number.toLowerCase().includes(filterValues.tracking_id.toLowerCase()) )
+
     
 
 
@@ -94,34 +97,24 @@ export default function PendingPayments(){
                 </Link>
             </div>
 
-            <div className='bg-white p-4 flex flex-col gap-2'> 
-                <div className='w-40 -mt-2'>
+            <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 mx-auto'> 
+             
+                <div className='flex items-center text-xs gap-1'>
                     <InputComponent
-                    name='warehouse_id'
-                    type='text'
-                    state={filterValues}
-                    setState={setFilterValues}
-                    readonly
-                    select
-                    // selectValues={["pending", "paid", "failed", "abandoned"]}
-                    />
-                </div>
-                <div className='flex items-center text-xs gap-1 -mt-2'>
-                    <InputComponent
-                    name='incoming_tracking_id'
+                    name='tracking_id'
                     type='text'
                     state={filterValues}
                     setState={setFilterValues}
                     placeHolder='Tracking Number Id...'
                     />
-                    <button className='h-full px-4 py-2 bg-accent-red text-white mt-2 rounded'>
+                    <button className='h-full px-4 py-2 bg-accent-red text-white rounded'>
                         Search
                     </button>
                 </div>
 
             </div>
 
-            <div className='bg-light p-4 min-h-150 space-y-2'>
+            <div className='bg-light p-4 min-h-150 space-y-2 md:max-w-150 mx-auto'>
                 {
                     isDataLoading ? 
                     <div className='flex justify-center py-5'> 
@@ -136,7 +129,7 @@ export default function PendingPayments(){
                     }
                     
                     {
-                        payments.map( payment => 
+                        data.map( payment => 
                             <PaymentCard payment={payment} userEmail={user?.email || ""} key={payment.shipment_tracking_number}/>
                         )
                     }

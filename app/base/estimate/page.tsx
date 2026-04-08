@@ -19,10 +19,10 @@ const Page: NextPage = ({}) => {
         amount: 0,
     })
 
-    const shippingTypeValues: ShippingType[] = ["air", "sea"]
+    const shippingTypeValues: ShippingType[] = ["air", "sea", "express"]
   return <>
     <div className='h-full w-full p-body space-y-body'>
-        <div className='bg-accent-blue h-fit rounded-lg p-body'>
+        <div className='bg-accent-blue h-fit rounded-lg p-body md:max-w-150 md:mx-auto'>
             <h1 className='text-white font-bold text-lg'>
                 Shipping Cost Estimate
             </h1>
@@ -31,7 +31,7 @@ const Page: NextPage = ({}) => {
             </p>
         </div>
 
-        <div className='text-sm'>
+        <div className='text-sm md:max-w-150 md:mx-auto'>
             <h2 className='py-2'>
                 Shipping Type
             </h2>
@@ -43,12 +43,16 @@ const Page: NextPage = ({}) => {
                 setState={setCalculateParameters}
                 readonly
                 select
-                // selectValues={shippingTypeValues}
+                selectValues={[
+                    {name: "Air Shipping", value: "air"},
+                    {name: "Sea Shipping", value: "sea"},
+                    {name: "Express Shipping", value: "express"}
+                ]}
                 />
             </div>
         </div>
 
-        <div className='text-sm'>
+        <div className='text-sm md:max-w-150 md:mx-auto'>
             <h2 className='py-2'>
                 Shipping Information    
             </h2>
@@ -72,7 +76,7 @@ const Page: NextPage = ({}) => {
                 />
             </div>
         </div>
-        <div>
+        <div className='md:max-w-150 md:mx-auto'>
             <button 
             className='w-full bg-accent-red text-white py-2 rounded'
             onClick={() => console.log(calculateParameters.amount, calculateParameters.type, calculateParameters.weight)}

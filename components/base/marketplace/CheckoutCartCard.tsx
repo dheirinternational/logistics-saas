@@ -2,29 +2,22 @@
 
 import { useCartStore } from "@/store/cartStore"
 import { dummyProductImages } from "@/types/dummyData"
-import { Product } from "@/types/entityTypeDef"
+import { CartProduct } from "@/types/entityTypeDef"
 import Image from "next/image"
-import { useEffect, useState } from "react"
 import { FaMinus, FaPlus } from "react-icons/fa"
 
-const CheckoutCartCard = (props: Product) => {
+const CheckoutCartCard = (props: CartProduct) => {
 
-    const [amount, setAmount] = useState(1)
-    const [previousAmount, setPreviousAmount] = useState(0)
     const productImage = dummyProductImages.filter( x => x.product_id === props.id )
-    const price = props.discount_price ? props.discount_price : props.price
 
-    const totalPrice = price * amount
 
-    const {editTotal, resetTotal} = useCartStore()
+    const { removeProduct, increaseAmount, decreaseAmount} = useCartStore()
 
-    useEffect(() => {
-        
-        editTotal(totalPrice, previousAmount)
-    }, [amount])
+
+    console.log(props)
 
   return (
-    <div className='flex'>
+    <div className='flex relative'>
         <figure className='h-26 w-26 relative overflow-hidden rounded'>
             <Image 
             src={productImage[0].image_url}
@@ -37,37 +30,47 @@ const CheckoutCartCard = (props: Product) => {
                 {props.name}
             </p>
             <p className={`text-xl font-semibold flex gap-2`}>
-                <span className={`${props.discount_price && "opacity-50"} relative`}># {props.price}
+                <span className={`${props.discount_price && "opacity-50"} relative`}>
+                    ₦ {props.price}
                     <span className={`absolute left-0 border-dark border-b w-full top-1/2 -translate-y-1/2 ${!props.discount_price && "opacity-0"}`} />
                 </span>
-                {props.discount_price && "#" + props.discount_price}
+                {props.discount_price && "₦" + props.discount_price}
             </p>
             <p className='text-xs text-primary-text/60 italic'>
-                {props.stock_quantity > 0 ? "In stock" : "Out of Stock"}
+                {props.quantity > 0 ? "In stock" : "Out of Stock"}
             </p>
             <div className='flex items-center gap-5 mt-2'>
+                
                 <button className='p-2 rounded border-dark/20 border disabled:opacity-60'
                 onClick={() => {
-                    setPreviousAmount(amount * price)
-                    setAmount(prev  => prev > 2 ? prev - 1 : 1)
+                    decreaseAmount(props.id)
                 }}  
-                disabled={amount < 2}
+                disabled={props.amount_to_be_ordered < 2}
                 >
                     <FaMinus/>
                 </button>
+                
                 <span className='text-lg'>
-                    {amount}
+                    {props.amount_to_be_ordered}
                 </span>
+
                 <button className='p-2 rounded bg-accent-red text-white disabled:opacity-60'
                 onClick={() => {
-                    setPreviousAmount(amount * price)
-                    setAmount(prev => prev < props.stock_quantity ? prev + 1 : props.stock_quantity)
+                    increaseAmount(props.id)
                 }} 
-                disabled={amount > props.stock_quantity - 1} 
+                disabled={props.amount_to_be_ordered === props.quantity - 1} 
                 >
                     <FaPlus/>
                 </button>
             </div>
+        </div>
+        <div>
+            <button 
+                className='p-2 rounded text-accent-red disabled:opacity-60 text-xs absolute right-2 top-2'
+                onClick={() => removeProduct(props.id)}
+            >
+                Remove
+            </button>
         </div>
     </div>
   )

@@ -14,12 +14,12 @@ import { toast } from 'react-toastify'
 const Page: NextPage = ({}) => {
 
     type Filter = {
-        trackingId: string
+        tracking_id: string
         status: PaymentStatus | ""
     }
 
     const [filterValues, setFilterValues] = useState<Filter>({
-        trackingId: "",
+        tracking_id: "",
         status: ""
     })
     const [isDataLoading, setIsDataLoading] = useState(false)
@@ -57,6 +57,9 @@ const Page: NextPage = ({}) => {
 
     const router = useRouter()
 
+    const data = payments.filter( x => x.shipment_tracking_number.toLowerCase().includes(filterValues.tracking_id.toLowerCase()) && x.status === filterValues.status )
+
+
   return <div className='h-full w-full space-y-2'>
     <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
         <button 
@@ -78,10 +81,10 @@ const Page: NextPage = ({}) => {
 
 
 
-    <div className='bg-white p-4 flex flex-col gap-2'> 
-        <div className='flex items-center text-xs gap-1 -mt-2'>
+    <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto'> 
+        <div className='flex items-center text-xs gap-1 '>
             <InputComponent
-            name='incoming_tracking_id'
+            name='tracking_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
@@ -92,12 +95,27 @@ const Page: NextPage = ({}) => {
             </button>
         </div>
 
+        <div className='flex items-center text-xs gap-1 max-w-30'>
+            <InputComponent
+            name='status'
+            type='text'
+            state={filterValues}
+            setState={setFilterValues}
+            placeHolder='Select Status'
+            readonly
+            select
+            selectValues={[{name: "Pending", value: "pending" }, { name: "Paid", value: "paid"}]}
+            overshadow
+            />
+            
+        </div>
+
     </div>
 
 
 
 
-    <div className='bg-light p-4 min-h-150 space-y-2'>
+    <div className='bg-light p-4 min-h-150 space-y-2 md:max-w-150 md:mx-auto'>
         
         {
             isDataLoading ? 
@@ -107,15 +125,15 @@ const Page: NextPage = ({}) => {
             :
             <>
                 {
-                    payments.length < 1 && 
+                    data.length < 1 && 
                     <p className='text-xs italic'>
                         ...No Payment receipts 
                     </p>
                 }
                 
                 {
-                    payments.map( x => 
-                    <div key={x.shipment_tracking_number} className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
+                    data.map( x => 
+                    <div key={x.shipment_tracking_number} className='border border-dark/20 p-4 py-3 space-y-2 rounded relative'>
                         <div className='flex items-center justify-between'>
                             <p className='text-sm border border-dark/20 px-2 py-1 rounded bg-accent-blue/10 w-40'>
                                 {x.transaction_ref}
@@ -146,6 +164,9 @@ const Page: NextPage = ({}) => {
                             </div>
                             <div className='flex-1'>
                                 <hr className='border-px border-dark/20'/>
+                            </div>
+                            <div className='absolute bottom-2 right-2'>
+                                {x.shipment_tracking_number}
                             </div>
                         </div>
                     </div>

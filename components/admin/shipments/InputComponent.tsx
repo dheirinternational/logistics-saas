@@ -63,7 +63,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
             </>}
 
             {overshadow && 
-                <div className={` w-[70%] h-7.5 left-3 absolute flex items-center pointer-events-none bg-[#e5e5e5] outline-0  ${title ? "top-6.5" : "top-px"}`}>
+                <div className={`whitespace-nowrap w-[70%] h-7.5 left-3 absolute flex items-center pointer-events-none bg-[#e5e5e5] outline-0  ${title ? "top-6.5" : "top-px"}`}>
                     {overshadowText}
                 </div>
             }

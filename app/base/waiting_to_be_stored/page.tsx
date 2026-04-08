@@ -6,15 +6,22 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
 import { useEffect, useState } from 'react'
-import { IncomingPackage, Package } from '@/types/entityTypeDef'
+import { IncomingPackage } from '@/types/entityTypeDef'
 import { toast } from 'react-toastify'
 import { BeatLoader } from 'react-spinners'
+import { IncomingPackageStatus } from '@/types/statusTypes'
+
+type FilterValues = {
+    status: IncomingPackageStatus | ""
+    tracking_id: string
+}
+
 
 const Page: NextPage = ({}) => {
 
-    const [filterValues, setFilterValues] = useState({
-        warehouse_id: "",
-        incoming_tracking_id: "" 
+    const [filterValues, setFilterValues] = useState<FilterValues>({
+        status: "",
+        tracking_id: "" 
     })
     const [packages, setPackages] = useState<IncomingPackage[]>([])
     const [loading, setLoading] = useState(true)
@@ -48,10 +55,16 @@ const Page: NextPage = ({}) => {
 
         fetchPackages()
     }, [])
+
+
+        const data = packages.filter( x => 
+        (x.incoming_tracking_number.toLowerCase().includes(filterValues.tracking_id.toLowerCase()) || 
+        x.declared_item_name.toLowerCase().includes(filterValues.tracking_id.toLowerCase())))
+
     
 
   return <div className='h-full w-full space-y-1'>
-    <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
+    <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between '>
         <button 
         className='flex gap-2 flex-1 justify-start'
         onClick={() => {router.back()}}
@@ -69,18 +82,7 @@ const Page: NextPage = ({}) => {
         </Link>
     </div>
 
-    <div className='bg-white p-4 flex flex-col gap-2'> 
-        <div className='w-40 -mt-2'>
-            <InputComponent
-            name='warehouse_id'
-            type='text'
-            state={filterValues}
-            setState={setFilterValues}
-            readonly
-            select
-            // selectValues={dummyWarehouses.map( x => x.name)}
-            />
-        </div>
+    <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto '> 
         <div className='flex items-center text-xs gap-1'>
             <InputComponent
             name='incoming_tracking_id'
@@ -94,8 +96,28 @@ const Page: NextPage = ({}) => {
             </button>
         </div>
 
+        <div className='w-40 '>
+            <InputComponent
+            name='warehouse_id'
+            type='text'
+            state={filterValues}
+            setState={setFilterValues}
+            placeHolder='Select Status'
+            title='Status'
+            readonly
+            select
+            selectValues={[
+                {name: "Expected", value: "expected"},
+                {name: "Received", value: "received"},
+                {name: "Cancelled", value: "cancelled"},
+                {name: "Stored", value: "stored"}
+            ]}
+            overshadow
+            // "expected" | "received" | "cancelled" | "stored"
+            />
+        </div>
     </div>
-    <div className='bg-light px-4 py-2'>
+    <div className='bg-light px-4 py-2 md:max-w-150 md:mx-auto'>
         <span className='text-xs'>
             Total: <span className='text-accent-red font-bold text-sm'>{packages?.filter(x => x.status === "expected").length || 0}</span> incoming Packgages
         </span>
@@ -106,16 +128,16 @@ const Page: NextPage = ({}) => {
         <div className='flex justify-center py-10'>
             <BeatLoader color='#f26430' size={12} speedMultiplier={0.5}/>
         </div> :
-        <div className='bg-light p-4 min-h-100 gap-y-3 pb-30'>
+        <div className='bg-light p-4 min-h-100 gap-y-3 pb-30 md:max-w-150 md:mx-auto'>
             {
-                packages.length < 1 && 
+                data.length < 1 && 
                 <p className='text-xs italic'>
                     ...There are no incoming packages
                 </p>
             }
             
             {
-                packages.map( x => 
+                data.map( x => 
                     <div
                     key={x.id} 
                     className='border border-dark/20 p-4 py-3 space-y-2 rounded mb-3'>

@@ -104,9 +104,9 @@ const Page: NextPage = () => {
             <FaUser/>
         </Link>
     </div>
-    <form onSubmit={handleSubmit}>
-        <div className='bg-white p-4 flex flex-col gap-2'>
-            <div className='flex gap-2'>
+    <form onSubmit={handleSubmit} className='md:flex-row'>
+        <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto'>
+            <div className='flex gap-2 md:max-w-150'>
                 <div className='w-1/2'>
                     <InputComponent 
                     name='warehouse_id'
@@ -133,41 +133,43 @@ const Page: NextPage = () => {
                 </div>
             </div>
 
-            <InputComponent 
-            name='declared_item_name'
-            type='text'
-            state={packageInformation}
-            setState={setPackageInformation}
-            placeHolder='Input Package Name...'
-            required
-            />
+                <div className='space-y-2'>
+                    <InputComponent 
+                    name='declared_item_name'
+                    type='text'
+                    state={packageInformation}
+                    setState={setPackageInformation}
+                    placeHolder='Input Package Name...'
+                    required
+                    />
 
-            <InputComponent 
-            name='incoming_tracking_number'
-            type='text'
-            state={packageInformation}
-            setState={setPackageInformation}
-            placeHolder='Input Tracking Number...'
-            required
-            
-            />
-        </div>
-        
-        <div className='bg-white p-4 flex flex-col gap-2'>
-            <InputComponent 
-            title='Customer Personal Note'
-            name='customer_note'
-            type='text'
-            state={packageInformation}
-            setState={setPackageInformation}
-            placeHolder='customer personal note...'
-            textarea
-            />
-        </div>
+                    <InputComponent 
+                    name='incoming_tracking_number'
+                    type='text'
+                    state={packageInformation}
+                    setState={setPackageInformation}
+                    placeHolder='Input Tracking Number...'
+                    required
+                    
+                    />
+                </div>
+                
+                <div className='bg-white p-4 flex flex-col gap-2'>
+                    <InputComponent 
+                    title='Customer Personal Note'
+                    name='customer_note'
+                    type='text'
+                    state={packageInformation}
+                    setState={setPackageInformation}
+                    placeHolder='customer personal note...'
+                    textarea
+                    />
+                </div>
+            </div>
 
-        <div className='p-body'>
+        <div className='p-body w-fit mx-auto'>
             <button 
-            className='bg-accent-red text-white text-xs py-3 w-full rounded disabled:opacity-70'
+            className='bg-accent-red text-white text-xs py-3 w-full rounded disabled:opacity-70 md:min-w-150'
             disabled={isSubmiting}
             >
                 {

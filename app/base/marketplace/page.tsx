@@ -11,7 +11,7 @@ const Page: NextPage = ({}) => {
   const regularProducts = dummyProducts.filter(product => product.is_featured !== "true")
 
   // Helper function to get images for a product
-  const getProductImages = (productId: string) => {
+  const getProductImages = (productId: number) => {
     return dummyProductImages.filter(image => image.product_id === productId)
   }
 

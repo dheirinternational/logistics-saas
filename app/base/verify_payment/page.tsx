@@ -3,13 +3,7 @@
 export default async function VerifyPayment({searchParams}: {searchParams: Promise<{[key: string]: string}>}){
 
     const { reference } = await searchParams
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/paystack/verify-payment/${reference}`)
-
-    
-    if (response.ok) {
-        const result = await response.json()
-
-    }
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/paystack/verify-payment/${reference}`)
 
     return(
         <div className="p-body">

@@ -33,7 +33,7 @@ export default function Page() {
                 setError(result.error || "Login failed")
                 return
             }
-            setWarehouses(result.data)
+            setWarehouses(result.data.filter( (x: Warehouse) => !x.manager_id ))
         }
         catch(err){
             console.error(err)

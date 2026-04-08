@@ -6,7 +6,7 @@ import { NextPage } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import { FaCamera, FaChevronLeft, FaUser } from 'react-icons/fa'
 import { BeatLoader, ClipLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
@@ -24,7 +24,8 @@ const Page: NextPage = () => {
     const [user, setUser] = useState<null | User>(null)
     const [image, setImage] = useState<string | null>(null)
 
-
+    const inputRef = useRef<HTMLInputElement>(null)
+    const router = useRouter()
 
     const [userDetails, setUserDetails] = useState<BasicDetails>({
         first_name: "",
@@ -73,88 +74,46 @@ const Page: NextPage = () => {
         }
     }
 
-    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-        setIsImageUploading(true)
-        try{
-
-            if(!e.target.files) {
-                throw new Error("Image must be selected")
-            }
-
-            if(e.target.files?.length < 1) return
-
-            console.log("Stage one")
-
-            const file = e.target.files[0]
-
-            const sigRes = await fetch("/api/sign-cloudinary", {
-                method: "POST",
-                credentials: "include",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    folder: "avatars",
-                    public_id: user?.id
-                })
-            })
-
-            console.log("Stage Two")
-
-            const {timestamp, signature, apiKey, cloudName} = await sigRes.json()
-
-            if (file.size > (5 * 1024 * 1024)) {
-                toast.error("Image size should not exceed 5mb")
-                throw new Error("Image size should not exceed 5mb")
-            }
-
-            console.log("Stage three")
-
-            const formData = new FormData()
-            formData.append("file", file)
-            formData.append("timestamp", timestamp)
-            formData.append("signature", signature)
-            formData.append("api_key", apiKey)
-            formData.append("folder", "avatars")
-            formData.append("public_id", `${user?.id}`)
-
-            const image_url = await fetch(
-                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                { method: "POST", body: formData }
-            ).then( (r) => r.json())
-
-
-            console.log("Stage Four")
-            
-            const res = await fetch("/api/users/upload-profile-picture", {
-                headers: {
-                    "Content-Type" : "application/json", 
-                },
-                method: "PUT",
-                credentials: "include",
-                body: JSON.stringify({image_url: image_url.secure_url})
-            })
-
-            const result = await res.json()
-
-            if(!res.ok){
-                console.error(result.message)
-                toast.error(result.message)
-                return
-            }
-
-
-            setImage(image_url.secure_url)
-            toast.success("Image succesfully uploaded")
-        
-        }
-        catch(err){
-            console.log("Issue uploading profile image", err)
-            toast.error("Issue uploading profile image")
-            return
-        }
-        finally{
-            setIsImageUploading(false)
-        }
+    type UploadResponse = {
+        success: boolean
+        message: string
+        imageUrl?: string
     }
+
+const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    
+    setIsImageUploading(true)
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/upload-user-image', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      })
+
+      const data = await res.json()
+
+      if (!data.success) {
+        toast.error(data.message ?? 'Error uploading image')
+        return
+      }
+
+      setImage(data.imageUrl)  // instant UI update
+      router.refresh()         // re-fetch server components
+      toast.success('Profile image updated!')
+
+    } catch (err) {
+      console.error('Upload error:', err)
+      toast.error('Something went wrong uploading your image')
+    }finally {
+        setIsImageUploading(false)
+    }
+}
     
     useEffect(() => {
         fetchData()
@@ -183,7 +142,7 @@ const Page: NextPage = () => {
     // ------------------------------------------------------------------------
     
 
-    const router = useRouter()
+    
 
     // ------------------------------------------------------------------------
 
@@ -255,9 +214,9 @@ const Page: NextPage = () => {
             <div className='relative w-fit h-fit mx-auto space-y-2'>
                 <figure className='w-31 h-31 bg-red-300 rounded-full mx-auto relative overflow-hidden'>
                     {
-                        user?.profile_img ?
+                        (image || user?.profile_img) ?
                         <Image
-                        src={image ?? user?.profile_img}
+                        src={image ?? user?.profile_img ?? ""}
                         alt='User Profile'
                         fill
                         className='object-cover'
@@ -280,7 +239,7 @@ const Page: NextPage = () => {
                     type="file"
                     accept='image/*'
                     className='absolute w-full h-full bg-white rounded-full opacity-0' 
-                    onChange={ e => {handleImageUpload(e)}}
+                    onChange={ e => {profileImageUpload(e)}}
                     disabled={isImageUploading}
                     />
                 </div>

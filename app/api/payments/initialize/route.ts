@@ -21,7 +21,7 @@ export async function POST(req: Request){
         
         const body = await req.json()
 
-        const res = await pool.query(`
+        await pool.query(`
             INSERT INTO payments (user_id, customer_code, shipment_tracking_number, amount, status,  created_at)
             VALUES ($1, $2, $3, $4, $5, NOW())
         `, [body.user_id, body.customer_code, body.shipment_tracking_number, body.amount, 'pending']) 

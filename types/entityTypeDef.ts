@@ -1,6 +1,6 @@
 import { Timestamp } from "next/dist/server/lib/cache-handlers/types"
 import { ShippingType } from "./miscallaneous"
-import { PackageStatus, ProductStatus, ProductVisibility, ShipmentStatus } from "./statusTypes"
+import { IncomingPackageStatus, PackageStatus, ProductStatus, ProductVisibility, ShipmentStatus } from "./statusTypes"
 
 export type User = {
     id: string // unique
@@ -77,7 +77,7 @@ export type Warehouse = {
     postal_code: string 
     created_at: string
     capacity: string
-    manager_id: string  // (FK -> staff)
+    manager_id: number  // (FK -> staff)
     type: ShippingType | "local"
 }
 
@@ -121,7 +121,7 @@ export type IncomingPackage = {
     customer_code: string  // Fk -> Customer(code)
     incoming_tracking_number: string
     warehouse_id: string
-    status: "expected" | "received" | "cancelled" | "stored" 
+    status: IncomingPackageStatus
     declared_item_name: string
     declared_item_quantity: number
     declared_item_weight: number 
@@ -201,8 +201,7 @@ export type Country = {
 }
 
 export type Product = {
-    id: string // unique
-    slug: string // unique
+    id: number // unique
     name: string
     description?: string
     category_id?: string
@@ -224,6 +223,16 @@ export type Product = {
     updated_at: string 
 }
 
+export type CartProduct = {
+    id: number // unique
+    name: string
+    price: number
+    discount_price?: number | null
+    quantity: number
+    image: string
+    amount_to_be_ordered: number
+}
+
 export type ProductCategory = {
     id: string, // unique
     name: string,
@@ -233,7 +242,7 @@ export type ProductCategory = {
 
 export type ProductImage = {
     id: string // unique
-    product_id: string // (FK -> Proudtc)
+    product_id: number // (FK -> Proudtc)
     image_url: string // unique
     alt_text: string
     created_at: string

@@ -51,7 +51,7 @@ const Carousel = () => {
 
 
   return (
-    <div className="bg-accent-blue h-50 relative max-w-[100vw] overflow-hidden">
+    <div className="bg-accent-blue h-50 relative max-w-[100vw] overflow-hidden md:h-110">
 
         {/* Content Scroll bar */}
         <div 

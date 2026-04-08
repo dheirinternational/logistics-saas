@@ -7,11 +7,21 @@ import { FaStar } from "react-icons/fa"
 export default async function ProductDisplay({ params }: {params: {id: string}}){
     
     const {id} = await params
+    const numericId = parseInt(id)
 
     // Get Product 
 
-    const product = dummyProducts.find( x => x.id === id )
-    const productImg = dummyProductImages.filter(x => x.product_id === id)
+    const product = dummyProducts.find( x => x.id === numericId )
+    const cartProduct = {
+        id: product?.id || 0,
+        name: product?.name || "",
+        price: product?.price || 0,
+        discount_price: product?.discount_price || null,
+        quantity: product?.stock_quantity || 0,
+        image:dummyProductImages.find(img => img.product_id === numericId)?.image_url || "",
+        amount_to_be_ordered: 1
+    }
+    const productImg = dummyProductImages.filter(x => x.product_id === numericId)
 
     if (!product) return
 
@@ -69,7 +79,7 @@ export default async function ProductDisplay({ params }: {params: {id: string}})
 
             {/* Add to cart */}
             <div className="bg-light p-body mb-20">
-                <AddToCart {...product}/>
+                <AddToCart {...cartProduct}/>
             </div>
         </div>
     )

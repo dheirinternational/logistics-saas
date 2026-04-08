@@ -22,7 +22,7 @@ const NavBar = () => {
         }, 
         {
             icon: FaShop,
-            path: "/in_development"
+            path: "/base/marketplace"
         }, 
         {
             icon: FaCalculator,

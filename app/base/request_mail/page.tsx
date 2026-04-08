@@ -25,7 +25,7 @@ const Page: NextPage = () => {
 
     const [filterValues, setFilterValues] = useState({
         warehouse_id: "",
-        incoming_tracking_id: "" 
+        tracking_id: "" 
     })
 
     const router = useRouter()
@@ -96,6 +96,7 @@ const Page: NextPage = () => {
         
     }, [])
 
+    const data = packages.filter( x => x.incoming_package_id.toLowerCase().includes(filterValues.tracking_id.toLowerCase()) || x.package_name.toLowerCase().includes(filterValues.tracking_id.toLowerCase()))
 
   return <div className='h-full w-full space-y-2'>
     {/* Header */}
@@ -119,25 +120,17 @@ const Page: NextPage = () => {
 
 
     {/* Search Component */}
-    <div className='bg-white p-4 flex flex-col gap-2'> 
+    <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto'> 
         <div className='w-40 -mt-2'>
-            <InputComponent
-            name='warehouse_id'
-            type='text'
-            state={filterValues}
-            setState={setFilterValues}
-            readonly
-            select
-            // selectValues={["Warehouse one", "warehouse 2"]}
-            />
+
         </div>
         <div className='flex items-center text-xs gap-1'>
             <InputComponent
-            name='incoming_tracking_id'
+            name='tracking_id'
             type='text'
             state={filterValues}
             setState={setFilterValues}
-            placeHolder='Tracking Id...'
+            placeHolder='Tracking Id, package name...'
             />
             <button className='h-full px-4 py-2 bg-accent-red text-white rounded'>
                 Search
@@ -147,7 +140,7 @@ const Page: NextPage = () => {
 
 
     {/* Input Fields */}
-    <div className='bg-light px-4 py-2'>
+    <div className='bg-light px-4 py-2 md:max-w-150 md:mx-auto'>
         <span className='text-xs'>
             Selected Packages: <span className='text-accent-red font-bold text-sm'>{selectedPackages.length}</span> 
         </span>
@@ -228,7 +221,7 @@ const Page: NextPage = () => {
         </fieldset>
     </div>
 
-    <div className='bg-light p-4 min-h-68 h-68 max-h-68 space-y-2 overflow-y-scroll'>
+    <div className='bg-light p-4 min-h-68 h-68 max-h-68 space-y-2 overflow-y-scroll md:max-w-150 md:mx-auto'>
         {
             // packages.length < 1 && 
             // <p className='text-xs italic'>
@@ -237,8 +230,8 @@ const Page: NextPage = () => {
         }
         {
             !isDataLoading ?
-            packages
-                .filter( pack => pack.status === "stored" )
+            data
+                // .filter( pack => pack.status === "stored" )
                 .map( packag => 
                     <RequestMailProduct key={packag.id} prop={packag} handlePackage={setSelectedPackages}/>   
                 ) :
@@ -248,7 +241,7 @@ const Page: NextPage = () => {
         }
     </div>
 
-    <div className='p-body pb-20'>
+    <div className='p-body pb-20 md:max-w-158 md:mx-auto'>
         <button 
         className='bg-accent-red text-white w-full text-sm py-3 rounded'
         onClick={() => {

@@ -94,7 +94,7 @@ const Page: NextPage = () => {
         </div>
     </div> */}
 
-    <div className='bg-light p-4 min-h-150 space-y-3'>
+    <div className='bg-light p-4 min-h-150 space-y-3 md:max-w-150 md:mx-auto'>
         {
             shipmentRequests.length < 1 && !isDataLoading && 
             <p className='text-xs italic'>

@@ -1,1 +1,1 @@
-export type ShippingType = "air" | "sea"
+export type ShippingType = "air" | "sea" | "express"

@@ -29,3 +29,10 @@ export type PackageStatus =
     | "requested_for"
     | "assigned_to_shipment"
     | "delivered"
+
+
+export type IncomingPackageStatus = 
+    | "expected" 
+    | "received" 
+    | "cancelled" 
+    | "stored"

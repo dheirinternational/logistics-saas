@@ -48,7 +48,7 @@ export async function POST(request: Request){
             await pool.query(`
             INSERT INTO customers (user_id, code)
             VALUES ($1, $2)
-            `, [user.id, `KRC${String(user.id).padStart(4, "0")}`])
+            `, [user.id, `${body.first_name}-DHI${String(user.id).padStart(4, "0")}`])
         }
 
         await createSession(user.id, body.role)

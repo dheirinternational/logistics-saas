@@ -13,7 +13,7 @@ import { toast } from 'react-toastify'
 const Page: NextPage = () => {
 
     const [filterValues, setFilterValues] = useState({
-        incoming_tracking_id: "" 
+        tracking_id: "" 
     })
     const [isDataLoading, setIsDataLoading] = useState(false)
     const [shipments, setShipments] = useState<Shipment[]>([])
@@ -45,6 +45,8 @@ const Page: NextPage = () => {
     
     const router = useRouter()
 
+    const data = shipments.filter( x => x.tracking_number.toLowerCase().includes(filterValues.tracking_id.toLowerCase()))
+
     
   return <div className='h-full w-full space-y-2'>
     <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
@@ -72,10 +74,10 @@ const Page: NextPage = () => {
     </div>
     :
     <>
-        <div className='bg-white p-4 flex flex-col gap-2'> 
+        <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto'> 
             <div className='flex items-center text-xs gap-1'>
                 <InputComponent
-                name='incoming_tracking_id'
+                name='tracking_id'
                 type='text'
                 state={filterValues}
                 setState={setFilterValues}
@@ -87,22 +89,22 @@ const Page: NextPage = () => {
             </div>
         </div>
 
-        <div className='bg-light px-4 py-2'>
+        <div className='bg-light px-4 py-2 md:max-w-150 md:mx-auto'>
             <span className='text-xs'>
-                Shipments: <span className='text-accent-red font-bold text-sm'>{shipments.length}</span> 
+                Shipments: <span className='text-accent-red font-bold text-sm'>{data.length}</span> 
             </span>
         </div>
 
-        <div className='bg-light p-4 min-h-150 space-y-3'>
+        <div className='bg-light p-4 max-h-94 overflow-auto space-y-3 md:max-w-150 md:mx-auto'>
             {
-                shipments.length < 1 && 
+                data.length < 1 && 
                 <p className='text-xs italic'>
                     ...You have not made a shipping request 
                 </p>
             }
             
             {
-                shipments.map( x =>  
+                data.map( x =>  
                      <div key={x.tracking_number} className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
                         <div className='flex items-center justify-between'>
                             <p className='text-sm border border-dark/20 px-3 py-1 w-50 rounded-full'>

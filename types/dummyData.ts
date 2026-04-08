@@ -1,4 +1,4 @@
-import {Admin, Staff, Customer, Address, Payment, StaffAssignment, TrackingEvent, Carrier, PricingRule, Notification, ActivityLog, Product, ProductCategory, ProductImage } from "./entityTypeDef";
+import {Admin, Staff, Customer, StaffAssignment, TrackingEvent, Carrier, PricingRule, Notification, ActivityLog, Product, ProductCategory, ProductImage } from "./entityTypeDef";
 
 // Dummy data for testing frontend
 
@@ -279,18 +279,7 @@ export const dummyActivityLogs: ActivityLog[] = [
   }
 ];
 
-// export const dummyCountries: Country[] = [
-//   {
-//     id: "cn1",
-//     name: "Nigeria",
-//     country: "NG"
-//   },
-//   {
-//     id: "cn2",
-//     name: "China",
-//     country: "CN"
-//   }
-// ];
+
 
 export const dummyProductCategories: ProductCategory[] = [
   {
@@ -303,8 +292,7 @@ export const dummyProductCategories: ProductCategory[] = [
 
 export const dummyProducts: Product[] = [
   {
-    id: "prod1",
-    slug: "smartphone-case",
+    id: 0,
     name: "Smartphone Case",
     description: "Protective case for smartphones",
     category_id: "pc1",
@@ -326,8 +314,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-01T10:00:00Z"
   },
   {
-    id: "prod2",
-    slug: "wireless-earbuds",
+    id: 1,
     name: "Wireless Earbuds",
     description: "High-quality wireless earbuds with noise cancellation",
     category_id: "pc1",
@@ -349,8 +336,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-02T10:00:00Z"
   },
   {
-    id: "prod3",
-    slug: "laptop-stand",
+    id: 2,
     name: "Laptop Stand",
     description: "Adjustable laptop stand for better ergonomics",
     category_id: "pc1",
@@ -372,8 +358,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-03T10:00:00Z"
   },
   {
-    id: "prod4",
-    slug: "usb-cable",
+    id: 3,
     name: "USB Cable",
     description: "Fast charging USB-C cable",
     category_id: "pc1",
@@ -395,8 +380,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-04T10:00:00Z"
   },
   {
-    id: "prod5",
-    slug: "power-bank",
+    id: 4,
     name: "Power Bank",
     description: "Portable power bank with 10000mAh capacity",
     category_id: "pc1",
@@ -418,8 +402,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-05T10:00:00Z"
   },
   {
-    id: "prod6",
-    slug: "bluetooth-speaker",
+    id: 5,
     name: "Bluetooth Speaker",
     description: "Portable Bluetooth speaker with waterproof design",
     category_id: "pc1",
@@ -441,8 +424,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-06T10:00:00Z"
   },
   {
-    id: "prod7",
-    slug: "mouse-pad",
+    id: 6,
     name: "Mouse Pad",
     description: "Large gaming mouse pad with anti-slip base",
     category_id: "pc1",
@@ -464,8 +446,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-07T10:00:00Z"
   },
   {
-    id: "prod8",
-    slug: "mechanical-keyboard",
+    id: 7,
     name: "Mechanical Keyboard",
     description: "RGB mechanical keyboard with blue switches",
     category_id: "pc1",
@@ -487,8 +468,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-08T10:00:00Z"
   },
   {
-    id: "prod9",
-    slug: "monitor",
+    id: 8,
     name: "27-inch Monitor",
     description: "4K UHD monitor with IPS panel",
     category_id: "pc1",
@@ -510,8 +490,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-09T10:00:00Z"
   },
   {
-    id: "prod10",
-    slug: "over-ear-headphones",
+    id: 9,
     name: "Over-Ear Headphones",
     description: "Noise-cancelling over-ear headphones",
     category_id: "pc1",
@@ -533,8 +512,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-10T10:00:00Z"
   },
   {
-    id: "prod11",
-    slug: "tablet",
+    id: 10,
     name: "10-inch Tablet",
     description: "Android tablet with 128GB storage",
     category_id: "pc1",
@@ -556,8 +534,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-11T10:00:00Z"
   },
   {
-    id: "prod12",
-    slug: "smartwatch",
+    id: 11,
     name: "Smartwatch",
     description: "Fitness tracking smartwatch with heart rate monitor",
     category_id: "pc1",
@@ -579,8 +556,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-12T10:00:00Z"
   },
   {
-    id: "prod13",
-    slug: "wall-charger",
+    id: 12,
     name: "Wall Charger",
     description: "Fast wall charger with USB-C and USB-A ports",
     category_id: "pc1",
@@ -602,8 +578,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-13T10:00:00Z"
   },
   {
-    id: "prod14",
-    slug: "webcam",
+    id: 13,
     name: "HD Webcam",
     description: "1080p HD webcam with auto-focus",
     category_id: "pc1",
@@ -625,8 +600,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-14T10:00:00Z"
   },
   {
-    id: "prod15",
-    slug: "usb-microphone",
+    id: 14,
     name: "USB Microphone",
     description: "Condenser USB microphone for streaming",
     category_id: "pc1",
@@ -648,8 +622,7 @@ export const dummyProducts: Product[] = [
     updated_at: "2023-03-15T10:00:00Z"
   },
   {
-    id: "prod16",
-    slug: "wifi-router",
+    id: 15,
     name: "WiFi Router",
     description: "Dual-band WiFi router with Gigabit ports",
     category_id: "pc1",
@@ -675,133 +648,133 @@ export const dummyProducts: Product[] = [
 export const dummyProductImages: ProductImage[] = [
   {
     id: "pi1",
-    product_id: "prod1",
+    product_id: 0,
     image_url: "https://picsum.photos/400/300?random=1",
     alt_text: "Smartphone case image",
     created_at: "2023-03-01T10:00:00Z"
   },
   {
     id: "pi2",
-    product_id: "prod1",
+    product_id: 1,
     image_url: "https://picsum.photos/400/300?random=2",
     alt_text: "Smartphone case side view",
     created_at: "2023-03-01T10:05:00Z"
   },
   {
     id: "pi3",
-    product_id: "prod1",
+    product_id: 2,
     image_url: "https://picsum.photos/400/300?random=3",
     alt_text: "Smartphone case in use",
     created_at: "2023-03-01T10:10:00Z"
   },
   {
     id: "pi4",
-    product_id: "prod1",
+    product_id: 3,
     image_url: "https://picsum.photos/400/300?random=4",
     alt_text: "Smartphone case packaging",
     created_at: "2023-03-01T10:15:00Z"
   },
   {
     id: "pi5",
-    product_id: "prod2",
+    product_id: 4,
     image_url: "https://picsum.photos/400/300?random=5",
     alt_text: "Wireless earbuds image",
     created_at: "2023-03-02T10:00:00Z"
   },
   {
     id: "pi6",
-    product_id: "prod3",
+    product_id: 5,
     image_url: "https://picsum.photos/400/300?random=6",
     alt_text: "Laptop stand image",
     created_at: "2023-03-03T10:00:00Z"
   },
   {
     id: "pi7",
-    product_id: "prod4",
+    product_id: 6,
     image_url: "https://picsum.photos/400/300?random=7",
     alt_text: "USB cable image",
     created_at: "2023-03-04T10:00:00Z"
   },
   {
     id: "pi8",
-    product_id: "prod5",
+    product_id: 7,
     image_url: "https://picsum.photos/400/300?random=8",
     alt_text: "Power bank image",
     created_at: "2023-03-05T10:00:00Z"
   },
   {
     id: "pi9",
-    product_id: "prod6",
+    product_id: 8,
     image_url: "https://picsum.photos/400/300?random=9",
     alt_text: "Bluetooth speaker image",
     created_at: "2023-03-06T10:00:00Z"
   },
   {
     id: "pi10",
-    product_id: "prod7",
+    product_id: 9,
     image_url: "https://picsum.photos/400/300?random=10",
     alt_text: "Mouse pad image",
     created_at: "2023-03-07T10:00:00Z"
   },
   {
     id: "pi11",
-    product_id: "prod8",
+    product_id: 10,
     image_url: "https://picsum.photos/400/300?random=11",
     alt_text: "Mechanical keyboard image",
     created_at: "2023-03-08T10:00:00Z"
   },
   {
     id: "pi12",
-    product_id: "prod9",
+    product_id: 11,
     image_url: "https://picsum.photos/400/300?random=12",
     alt_text: "27-inch monitor image",
     created_at: "2023-03-09T10:00:00Z"
   },
   {
     id: "pi13",
-    product_id: "prod10",
+    product_id: 12,
     image_url: "https://picsum.photos/400/300?random=13",
     alt_text: "Over-ear headphones image",
     created_at: "2023-03-10T10:00:00Z"
   },
   {
     id: "pi14",
-    product_id: "prod11",
+    product_id: 13,
     image_url: "https://picsum.photos/400/300?random=14",
     alt_text: "10-inch tablet image",
     created_at: "2023-03-11T10:00:00Z"
   },
   {
     id: "pi15",
-    product_id: "prod12",
+    product_id: 14,
     image_url: "https://picsum.photos/400/300?random=15",
     alt_text: "Smartwatch image",
     created_at: "2023-03-12T10:00:00Z"
   },
   {
     id: "pi16",
-    product_id: "prod13",
+    product_id: 15,
     image_url: "https://picsum.photos/400/300?random=16",
     alt_text: "Wall charger image",
     created_at: "2023-03-13T10:00:00Z"
   },
   {
     id: "pi17",
-    product_id: "prod14",
+    product_id: 16,
     image_url: "https://picsum.photos/400/300?random=17",
     alt_text: "HD webcam image",
     created_at: "2023-03-14T10:00:00Z"
   },
   {
     id: "pi18",
-    product_id: "prod15",
+    product_id: 17,
     image_url: "https://picsum.photos/400/300?random=18",
     alt_text: "USB microphone image",
     created_at: "2023-03-15T10:00:00Z"
   },
   {
     id: "pi19",
-    product_id: "prod16",
+    product_id: 18,
     image_url: "https://picsum.photos/400/300?random=19",
     alt_text: "WiFi router image",
     created_at: "2023-03-16T10:00:00Z"

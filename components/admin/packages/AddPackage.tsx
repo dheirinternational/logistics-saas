@@ -67,50 +67,6 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
         }
     }
 
-    const hanldeImageChange = (e:ChangeEvent<HTMLInputElement>) => {
-
-        if(!e.target.files) return
-
-        const files = Array.from(e.target.files)
-        const urls = files.map( file => URL.createObjectURL(file) )
-        alert(urls)
-        setPreviews(urls)
-        setImages(files)
-    }
-
-    const handleImageUpload = async () => {
-        if(images.length < 0) return
-
-        const sigRes = await fetch("/api/sign-cloudinary", {
-            method: "POST"
-        })
-
-        const {timestamp, signature, apiKey, cloudName} = await sigRes.json()
-
-        const uploads = await Promise.all(
-            images.map( async (file) => {
-
-                if (file.size > (5 * 1024 * 1024)) {
-                    toast.error("Image size should not exceed 5mb")
-                    throw new Error("Image size should not exceed 5mb")
-                }
-                const formData = new FormData()
-                formData.append("file", file)
-                formData.append("timestamp", timestamp)
-                formData.append("signature", signature)
-                formData.append("api_key", apiKey)
-                formData.append("folder", "logistics")
-
-                return fetch(
-                    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                    { method: "POST", body: formData }
-                ).then( (r) => r.json())
-            })
-        )   
-
-        const urls = uploads.map((u) => u.secure_url)
-        alert(urls)
-    }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
