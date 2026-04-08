@@ -1,4 +1,4 @@
-// import { getSession } from "@/lib/db/session"
+import { getSession } from "@/lib/db/session"
 // import { NextResponse } from "next/server"
 // import { pool } from '@/lib/db/db'
 // import { createClient } from '@supabase/supabase-js'
