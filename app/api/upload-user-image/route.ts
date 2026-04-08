@@ -49,12 +49,12 @@ export async function POST(request: Request) {
     }
 
     // Append timestamp to bust CDN cache since the file path stays the same
-    
-//     const { data: { publicUrl } } = supabaseAdmin.storage
-//       .from('avatars')
-//       .getPublicUrl(filePath)
 
-//     const bustUrl = `${publicUrl}?t=${Date.now()}`
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from('avatars')
+      .getPublicUrl(filePath)
+
+    const bustUrl = `${publicUrl}?t=${Date.now()}`
 
 //     await pool.query(
 //       `UPDATE users SET profile_img = $1 WHERE id = $2`,
