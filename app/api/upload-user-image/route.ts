@@ -36,12 +36,12 @@ export async function POST(request: Request) {
 //     // Fixed path per user — upsert overwrites the existing file
     const filePath = `avatars/${session.user_id}`
 
-//     const { error: uploadError } = await supabaseAdmin.storage
-//       .from('avatars')
-//       .upload(filePath, blob, {
-//         contentType: file.type,
-//         upsert: true, // overwrites the existing image
-//       })
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('avatars')
+      .upload(filePath, blob, {
+        contentType: file.type,
+        upsert: true, // overwrites the existing image
+      })
 
 //     if (uploadError) {
 //       console.error("Supabase Upload Error:", uploadError)
