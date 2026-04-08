@@ -43,12 +43,13 @@ export async function POST(request: Request) {
         upsert: true, // overwrites the existing image
       })
 
-//     if (uploadError) {
-//       console.error("Supabase Upload Error:", uploadError)
-//       return NextResponse.json({ success: false, message: "Error uploading image" }, { status: 500 })
-//     }
+    if (uploadError) {
+      console.error("Supabase Upload Error:", uploadError)
+      return NextResponse.json({ success: false, message: "Error uploading image" }, { status: 500 })
+    }
 
-//     // Append timestamp to bust CDN cache since the file path stays the same
+    // Append timestamp to bust CDN cache since the file path stays the same
+    
 //     const { data: { publicUrl } } = supabaseAdmin.storage
 //       .from('avatars')
 //       .getPublicUrl(filePath)
