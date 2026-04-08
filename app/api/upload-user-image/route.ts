@@ -1,18 +1,18 @@
 import { getSession } from "@/lib/db/session"
-// import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { pool } from '@/lib/db/db'
 import { createClient } from '@supabase/supabase-js'
 
-// export async function POST(request: Request) {
-//   try {
-//     const session = await getSession()
+export async function POST(request: Request) {
+  try {
+    const session = await getSession()
 
-//     if (!session) {
-//       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
-//     }
+    if (!session) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
+    }
 
-//     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-//     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 //     if (!supabaseUrl || !serviceRoleKey) {
 //       return NextResponse.json(
@@ -60,16 +60,14 @@ import { createClient } from '@supabase/supabase-js'
 //       [bustUrl, session.user_id]
 //     )
 
-//     return NextResponse.json({ success: true, message: "Image uploaded successfully", imageUrl: bustUrl })
+    return NextResponse.json({ 
+        success: true, 
+        message: "Image uploaded successfully", 
+        // imageUrl: bustUrl 
+    })
 
-//   } catch (err) {
-//     console.error("ERROR UPLOADING IMAGE:", err)
-//     return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })
-//   }
-// }
-
-import { NextResponse } from "next/server";
-
-export async function POST() {
-  return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("ERROR UPLOADING IMAGE:", err)
+    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })
+  }
 }
