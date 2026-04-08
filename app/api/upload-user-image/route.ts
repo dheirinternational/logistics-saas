@@ -23,18 +23,18 @@ export async function POST(request: Request) {
 
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
-//     const formData = await request.formData()
-//     const file = formData.get("file")
+    const formData = await request.formData()
+    const file = formData.get("file")
 
-//     if (!file || !(file instanceof File)) {
-//       return NextResponse.json({ success: false, message: "No valid file uploaded" }, { status: 400 })
-//     }
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json({ success: false, message: "No valid file uploaded" }, { status: 400 })
+    }
 
-//     const arrayBuffer = await file.arrayBuffer()
-//     const blob = new Blob([arrayBuffer], { type: file.type })
+    const arrayBuffer = await file.arrayBuffer()
+    const blob = new Blob([arrayBuffer], { type: file.type })
 
 //     // Fixed path per user — upsert overwrites the existing file
-//     const filePath = `avatars/${session.user_id}`
+    const filePath = `avatars/${session.user_id}`
 
 //     const { error: uploadError } = await supabaseAdmin.storage
 //       .from('avatars')
