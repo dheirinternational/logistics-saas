@@ -1,67 +1,75 @@
-import { supabaseAdmin } from '@/lib/supabase/supabase'
-import { getSession } from "@/lib/db/session"
-import { NextResponse } from "next/server"
-import { pool } from '@/lib/db/db'
+// import { getSession } from "@/lib/db/session"
+// import { NextResponse } from "next/server"
+// import { pool } from '@/lib/db/db'
+// import { createClient } from '@supabase/supabase-js'
 
-export async function POST(request: Request) {
-  try {
-    const session = await getSession()
+// export async function POST(request: Request) {
+//   try {
+//     const session = await getSession()
 
-    if (!session) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
-    }
+//     if (!session) {
+//       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
+//     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+//     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+//     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-    if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json(
-        { success: false, message: "Missing Supabase environment variables" },
-        { status: 500 }
-      )
-    }
+//     if (!supabaseUrl || !serviceRoleKey) {
+//       return NextResponse.json(
+//         { success: false, message: "Missing Supabase environment variables" },
+//         { status: 500 }
+//       )
+//     }
 
-    const formData = await request.formData()
-    const file = formData.get("file")
+//     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
-    if (!file || !(file instanceof File)) {
-      return NextResponse.json({ success: false, message: "No valid file uploaded" }, { status: 400 })
-    }
+//     const formData = await request.formData()
+//     const file = formData.get("file")
 
-    const arrayBuffer = await file.arrayBuffer()
-    const blob = new Blob([arrayBuffer], { type: file.type })
+//     if (!file || !(file instanceof File)) {
+//       return NextResponse.json({ success: false, message: "No valid file uploaded" }, { status: 400 })
+//     }
 
-    // Fixed path per user — upsert overwrites the existing file
-    const filePath = `avatars/${session.user_id}`
+//     const arrayBuffer = await file.arrayBuffer()
+//     const blob = new Blob([arrayBuffer], { type: file.type })
 
-    const { error: uploadError } = await supabaseAdmin.storage
-      .from('avatars')
-      .upload(filePath, blob, {
-        contentType: file.type,
-        upsert: true, // overwrites the existing image
-      })
+//     // Fixed path per user — upsert overwrites the existing file
+//     const filePath = `avatars/${session.user_id}`
 
-    if (uploadError) {
-      console.error("Supabase Upload Error:", uploadError)
-      return NextResponse.json({ success: false, message: "Error uploading image" }, { status: 500 })
-    }
+//     const { error: uploadError } = await supabaseAdmin.storage
+//       .from('avatars')
+//       .upload(filePath, blob, {
+//         contentType: file.type,
+//         upsert: true, // overwrites the existing image
+//       })
 
-    // Append timestamp to bust CDN cache since the file path stays the same
-    const { data: { publicUrl } } = supabaseAdmin.storage
-      .from('avatars')
-      .getPublicUrl(filePath)
+//     if (uploadError) {
+//       console.error("Supabase Upload Error:", uploadError)
+//       return NextResponse.json({ success: false, message: "Error uploading image" }, { status: 500 })
+//     }
 
-    const bustUrl = `${publicUrl}?t=${Date.now()}`
+//     // Append timestamp to bust CDN cache since the file path stays the same
+//     const { data: { publicUrl } } = supabaseAdmin.storage
+//       .from('avatars')
+//       .getPublicUrl(filePath)
 
-    await pool.query(
-      `UPDATE users SET profile_img = $1 WHERE id = $2`,
-      [bustUrl, session.user_id]
-    )
+//     const bustUrl = `${publicUrl}?t=${Date.now()}`
 
-    return NextResponse.json({ success: true, message: "Image uploaded successfully", imageUrl: bustUrl })
+//     await pool.query(
+//       `UPDATE users SET profile_img = $1 WHERE id = $2`,
+//       [bustUrl, session.user_id]
+//     )
 
-  } catch (err) {
-    console.error("ERROR UPLOADING IMAGE:", err)
-    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })
-  }
+//     return NextResponse.json({ success: true, message: "Image uploaded successfully", imageUrl: bustUrl })
+
+//   } catch (err) {
+//     console.error("ERROR UPLOADING IMAGE:", err)
+//     return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })
+//   }
+// }
+
+import { NextResponse } from "next/server";
+
+export async function POST() {
+  return NextResponse.json({ ok: true });
 }
