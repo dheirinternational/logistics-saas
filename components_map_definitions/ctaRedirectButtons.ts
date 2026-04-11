@@ -73,11 +73,6 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
 ]
 
 export const profileMenuCtaButtonsProps: CTARedirectButton[] = [
-    // {
-    //     title: "Package Claim",
-    //     path: "/base/profile",
-    //     icon: LuPackagePlus
-    // },
     {
         title: "Warehouse Address",
         path: "/base/warehouse_address",

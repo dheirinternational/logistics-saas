@@ -64,7 +64,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         type="text" 
         state={state} 
         setState={setState}
-        placeHolder="Tracking Number, Customer Code..."        
+        placeHolder="Tracking Number, Customer Code, Package Name..."        
         />
 
         <InputComponent 

@@ -87,6 +87,11 @@ const Page: NextPage = ({}) => {
             cell: ({getValue}) => <p>{new Date(getValue()).toDateString()}</p>
         })
     ]
+
+
+    const filteredData = packages
+        .filter( x => x.package_name.toLowerCase().includes(filterValues.search.toLowerCase()) || x.incoming_package_id.toLowerCase().includes(filterValues.search.toLowerCase()) || x.customer_code.toLowerCase().includes(filterValues.search.toLowerCase()))
+        .filter( x => x.status === filterValues.status)
     
 
 
@@ -141,7 +146,7 @@ const Page: NextPage = ({}) => {
                 </div>
             ) : (
                 <Table 
-                    importedData={packages}
+                    importedData={filteredData}
                     columnDef={columnDef}
                     globalFilter=''
                 />

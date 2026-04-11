@@ -29,7 +29,7 @@ export const navLinks: NavLink[] = [
     },
     {
         name: "Users",
-        path: "/in_development",
+        path: "/admin/users",
         logo: FaUsers
     },
     {
@@ -39,7 +39,7 @@ export const navLinks: NavLink[] = [
     },
     {
         name: "Marketplace",
-        path: "/in_development",
+        path: "/admin/marketplace",
         logo: FaShop
     },
     {

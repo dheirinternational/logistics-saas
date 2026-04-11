@@ -20,7 +20,7 @@ const CheckoutCartCard = (props: CartProduct) => {
     <div className='flex relative'>
         <figure className='h-26 w-26 relative overflow-hidden rounded'>
             <Image 
-            src={productImage[0].image_url}
+            src={props.image}
             alt=''
             fill
             />

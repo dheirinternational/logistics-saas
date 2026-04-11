@@ -5,6 +5,7 @@ import InputComponent from "../../admin/shipments/InputComponent"
 import Link from "next/link"
 import { FaCartShopping } from "react-icons/fa6"
 import { useCartStore } from "@/store/cartStore"
+import Image from "next/image"
 
 const MarketSearch = () => {
 
@@ -17,15 +18,15 @@ const MarketSearch = () => {
 
 
   return (
-    <div className="px-body py-2 flex items-center gap-2">
-        <InputComponent 
-        name='search'
-        type='text'
-        state={filterValues}
-        setState={setFilterValues}
-        placeHolder="Search Product..."
-        />
-        
+    <div className="px-body py-2 flex items-center gap-2 justify-between">
+        <figure className="h-13 w-13 bg-amber-50 relative rounded-full">
+            <Image 
+            src={`/d_heir_logo.png`}
+            alt="company logo"
+            fill
+            className="object-cover"
+            />
+        </figure>
         <Link href={"/base/marketplace/cart"} className="relative">
           <FaCartShopping className="text-xl"/>
           {cartItemCount > 0 && (

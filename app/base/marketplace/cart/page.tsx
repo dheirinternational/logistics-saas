@@ -13,6 +13,7 @@ import { toast } from 'react-toastify'
 const Page: NextPage = () => {
 
     const { cart } = useCartStore()
+
     const [isPaymentLoading, setIsPaymentLoading] = useState(false)
     const [userEmail, setUserEmail] = useState("")
     const [address, setAddress] = useState<Address | null>(null)
@@ -21,6 +22,7 @@ const Page: NextPage = () => {
 
     const router = useRouter()
 
+    console.log(cart)
 
     // Calculate total price
     useEffect(() => {

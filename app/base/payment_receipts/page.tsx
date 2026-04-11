@@ -151,7 +151,7 @@ const Page: NextPage = ({}) => {
                         <div className='text-xs flex items-center'>
                             <div className='text-[10px] border border-dark/20 px-2 py-1 rounded w-fit '>
                                 <p className='whitespace-nowrap'>
-                                    Amount: ${x.amount}K
+                                    Amount: ₦{x.amount}K
                                 </p>
 
                                 <p className='whitespace-nowrap '>

@@ -37,14 +37,15 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsSubmitting(true)
+
+        const formData = new FormData(e.currentTarget)
+        formData.append("inp_status", props.status)
+        formData.append("user_id", String(props.user_id))
+
         try{
             const res = await fetch("/api/packages", {
                 method: "POST",
-                headers: {
-                    "Content-Type" : "application/json"
-                },
-                credentials: "include",
-                body: JSON.stringify({...packageValues, inp_status: props.status})
+                body: formData
             })
 
             const result = await res.json()
@@ -67,6 +68,59 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
         }
     }
 
+    const hanldeImageChange = (e:ChangeEvent<HTMLInputElement>) => {
+
+        if(!e.target.files) return
+
+        const files = Array.from(e.target.files)
+
+        if(files.length < 1){
+            toast.error("Select Images")
+            return
+        }
+        else if(files.length !== 4){
+            toast.error("Select Just Four images")
+            return
+        }
+
+        const urls = files.map( file => URL.createObjectURL(file) )
+        setPreviews(urls)
+        setImages(files)
+    }
+
+    // const handleImageUpload = async () => {
+    //     if(images.length < 0) return
+
+    //     const sigRes = await fetch("/api/sign-cloudinary", {
+    //         method: "POST"
+    //     })
+
+    //     const {timestamp, signature, apiKey, cloudName} = await sigRes.json()
+
+    //     const uploads = await Promise.all(
+    //         images.map( async (file) => {
+
+    //             if (file.size > (5 * 1024 * 1024)) {
+    //                 toast.error("Image size should not exceed 5mb")
+    //                 throw new Error("Image size should not exceed 5mb")
+    //             }
+    //             const formData = new FormData()
+    //             formData.append("file", file)
+    //             formData.append("timestamp", timestamp)
+    //             formData.append("signature", signature)
+    //             formData.append("api_key", apiKey)
+    //             formData.append("folder", "logistics")
+
+    //             return fetch(
+    //                 `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    //                 { method: "POST", body: formData }
+    //             ).then( (r) => r.json())
+    //         })
+    //     )   
+
+    //     const urls = uploads.map((u) => u.secure_url)
+    //     alert(urls)
+    // }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -83,10 +137,6 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
 
         <InputComponent name="stored_at" type="datetime-local" title="Date stored" state={packageValues} setState={setPackageValues} required/>
 
-
-
-
-
         <InputComponent 
         name="condition" 
         type="text" 
@@ -98,11 +148,19 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
         required
         />
 
+        <input 
+        type="file" 
+        accept="image/*"
+        multiple
+        name="images"
+        onChange={hanldeImageChange}
+        className="bg-light text-xs w-40 py-1 pl-2 rounded-"
+        />
+
 
         <div className="flex gap-2">
             {previews.map( (x, i) => 
             <figure key={i} className="w-15 h-15 bg-accent-red rounded overflow-hidden relative">
-                hey 
                 <Image 
                     src={x}
                     alt=""

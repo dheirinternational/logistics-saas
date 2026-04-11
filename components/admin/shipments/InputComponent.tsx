@@ -3,8 +3,9 @@
 import { ChangeEvent, Dispatch, HTMLInputTypeAttribute, SetStateAction, useRef, useState } from "react"
 import { FaChevronDown } from "react-icons/fa"
 
-type InputSafe = string | number | readonly string[] | undefined
+type InputSafe = string | number | readonly string[] | undefined | null
 type SelectButton = {name: string, value: InputSafe}
+
 type InputProps<T extends Record<string, InputSafe>> = {
     title?: string
     name: string
@@ -19,24 +20,40 @@ type InputProps<T extends Record<string, InputSafe>> = {
     textarea?: boolean
     required?: boolean
     overshadow?: boolean
+    nullable?: boolean
 }
 
 
 
-const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, type, state, setState, readonly, select, selectValues=[], unit, placeHolder, textarea, required, overshadow}: InputProps<T>) => {
+const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, type, state, setState, readonly, select, selectValues=[], unit, placeHolder, textarea, required, overshadow, nullable=false}: InputProps<T>) => {
 
     const [isDropDownActive, setIsDropDownActive] = useState(false)
     const [overshadowText, setOvershadowText] = useState("")
     const inputRef = useRef(null) 
 
     const key = name as keyof T
+
     const handleChange= (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement > ) => {
-        const { value } = e.currentTarget
-        setState(prev => ({...prev, [key]: value})) 
+
+        const rawValue = e.currentTarget.value
+        let finalValue: InputSafe
+
+        if(nullable && rawValue === ""){
+            finalValue = null
+        } else if (type === "number"){
+            finalValue = rawValue === "" ? (nullable ? null : "") : Number(rawValue)
+        } else {
+            finalValue = rawValue
+        }
+
+        setState(prev => ({...prev, [key]: finalValue as T[keyof T]})) 
     }
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>, buttonValue: InputSafe ) => {
-        setState( prev => ({...prev, [name]: buttonValue}) )     
+    const handleClick = ( buttonValue: InputSafe ) => {
+        setState( prev => ({
+            ...prev, 
+            [name]: buttonValue as T[keyof T]
+        }) )     
         setIsDropDownActive(false)   
     }
     
@@ -46,7 +63,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
     <div className="w-full relative">
         <label className="text-xs relative">
             {!textarea && <>
-                <p>{title}</p>
+                <p className="font-semibold">{title}</p>
                 <input 
                 ref={inputRef}
                 type={type}
@@ -59,6 +76,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
                 readOnly={readonly}
                 placeholder={placeHolder}
                 required={required}
+                min={0}
                 />
             </>}
 
@@ -69,18 +87,19 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
             }
 
             {/* Customized select element */}
-            {select && 
-            <button 
-            type={"button"}
-            className={`absolute right-0 p-2 
-            ${!title ? "top-1" : "top-6.5"}    
-            `}
-            onClick={( ) => {
-                setIsDropDownActive(!isDropDownActive)
-            }}
-            >
-                <FaChevronDown className={` ${isDropDownActive && "rotate-180"} transition-set`} />
-            </button>}
+            {select && (
+                <button 
+                type={"button"}
+                className={`absolute right-0 p-2 
+                ${!title ? "top-1" : "top-6.5"}    
+                `}
+                onClick={( ) => {
+                    setIsDropDownActive(!isDropDownActive)
+                }}
+                >
+                    <FaChevronDown className={` ${isDropDownActive && "rotate-180"} transition-set`} />
+                </button>)
+            }
             
             <span className="absolute right-2 top-8 opacity-70">
                 {unit}
@@ -96,8 +115,8 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
                 type={"button"}
                 key={i}
                 className="text-xs block w-full text-left border-b border-b-dark/20 py-2 px-3"
-                onClick={(e) => {
-                    handleClick(e, btn.value)
+                onClick={() => {
+                    handleClick(btn.value)
                     setOvershadowText(btn.name)
                 }}            
                 >
@@ -107,18 +126,18 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
         </div>}
 
         {
-            textarea && 
+            textarea && (
             <>
                 <p>{title}</p>
                 <textarea
-                name={name}
-                placeholder={placeHolder}
-                className="w-full h-26 mt-2 outline-0 border border-dark/40 rounded px-3 py-2 bg-light/60 focus:border-dark text-sm resize-none"
-                value={state[key] ?? ""}
-                onChange={handleChange}
-                >
-                </textarea>
-            </>
+                    name={name}
+                    placeholder={placeHolder}
+                    className="w-full h-26 mt-2 outline-0 border border-dark/40 rounded px-3 py-2 bg-light/60 focus:border-dark text-sm resize-none"
+                    value={state[key] ?? ""}
+                    onChange={handleChange}
+                />
+                
+            </>)
         }
     </div>
   )

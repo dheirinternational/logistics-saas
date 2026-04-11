@@ -1,9 +1,13 @@
+import { getHost } from "@/lib/db/getHost";
 import { getSession } from "@/lib/db/session";
 import { NextRequest, NextResponse } from "next/server";
 
 
 
 export async function POST (req: NextRequest){
+
+    const origin = getHost(req)
+    
     try{
         const session = await getSession()
         if(!session){
@@ -23,7 +27,7 @@ export async function POST (req: NextRequest){
             body: JSON.stringify({
                 email,
                 amount,
-                callback_url: "http://localhost:3000/base/verify_order_payment",
+                callback_url: `${origin}/base/verify_order_payment`,
                 metadata
             })
         })

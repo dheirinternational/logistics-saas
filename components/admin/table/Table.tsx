@@ -31,7 +31,7 @@ export function Table <T,>({importedData, columnDef, globalFilter }: TableProps<
 
     return(
         <div className="w-full max-w-full h-full max-h-full">
-            <div className="w-full max-w-full overflow-auto max-h-100 h-200 bg-yellow-50 ">
+            <div className="w-full max-w-full overflow-auto max-h-80 h-200 bg-yellow-50 ">
                 <table className="table-auto min-w-80 w-full text-[10px] whitespace-nowrap">
                     <thead>
                         {table.getHeaderGroups().map( headerGroup => 

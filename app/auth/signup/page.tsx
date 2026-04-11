@@ -24,12 +24,14 @@ const Page: NextPage = () => {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setIsCreatingAccount(true)
 
         if (credentials.password !== credentials.confirm_password){ 
             alert("Passwords don't match")
             return
         }
+
+        setIsCreatingAccount(true)
+        
         const formData = new FormData(e.currentTarget)
         formData.append("role", "customer")
         const data = Object.fromEntries(formData)

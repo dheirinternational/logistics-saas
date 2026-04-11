@@ -3,6 +3,7 @@ import Link from "next/link"
 import { useState } from "react"
 import NavLink from "./NavLink"
 import { navLinks } from "@/components_map_definitions/NavigationLinks"
+import Image from "next/image"
 
 export const Header = () => {
 
@@ -11,7 +12,14 @@ export const Header = () => {
     return(
         <header className="h-14 px-body flex items-center justify-between border-b border-dark/20 relative z-1080">
             <Link href={`/`} className="">
-                .logo
+                <figure className="h-13 w-13 relative">
+                    <Image 
+                    src="/d_heir_logo.png" 
+                    alt="hey" 
+                    fill
+                    className="object-cover"
+                    />
+                </figure>
             </Link>            
             <div className="relative">
                 <button className="space-y-1.5" onClick={() => {setIsMenuActive(!isMenuActive)}}>

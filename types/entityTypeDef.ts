@@ -1,6 +1,6 @@
 import { Timestamp } from "next/dist/server/lib/cache-handlers/types"
 import { ShippingType } from "./miscallaneous"
-import { IncomingPackageStatus, PackageStatus, ProductStatus, ProductVisibility, ShipmentStatus } from "./statusTypes"
+import { IncomingPackageStatus, PackageStatus, ProductStatus, ShipmentStatus } from "./statusTypes"
 
 export type User = {
     id: string // unique
@@ -106,13 +106,13 @@ export type Payment = {
     created_at: string
 }
 
-export type StaffAssignment = {
-    id: string
-    staff_id: string  // Fk -> Staffs(id)
-    shipment_id: string  // Fk -> Shipments(id)
-    role: string
-    assigned_at: string
-}
+// export type StaffAssignment = {
+//     id: string
+//     staff_id: string  // Fk -> Staffs(id)
+//     shipment_id: string  // Fk -> Shipments(id)
+//     role: string
+//     assigned_at: string
+// }
 
 
 export type IncomingPackage = {
@@ -180,7 +180,9 @@ export type Notification = {
     user_id: string // (Fk -> User)
     title: string
     message: string
-    read: boolean
+    is_read: boolean
+    type: string
+    link?: string
     created_at: string
 }
 
@@ -203,19 +205,15 @@ export type Country = {
 export type Product = {
     id: number // unique
     name: string
-    description?: string
-    category_id?: string
+    description: string
+    category_id: number
     price: number
     discount_price?: number | null
-    cost_price?: number
+    cost_price: number
     stock_quantity: number
     low_stock_threshold: number
     weight: number
-    length: number
-    width: number
-    height: number
     status: ProductStatus
-    visibility: ProductVisibility
     is_featured: string
     created_by: string
     updated_by: string
@@ -234,9 +232,9 @@ export type CartProduct = {
 }
 
 export type ProductCategory = {
-    id: string, // unique
+    id: number, // unique
     name: string,
-    slug: string, // unique
+    description: string,
     created_at: string
 }
 
