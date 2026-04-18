@@ -64,8 +64,8 @@ const Page: NextPage = () => {
 
   return <div className='w-screen h-dvh max-h-screen center-items'>
     <div>
-        <form className='' onSubmit={handleSubmit}>
-            <div className=''>
+        <form className='pt=20' onSubmit={handleSubmit} >
+            <div className='pt-20'>
                 <figure className='w-15 h-15 rounded-full relative mt-8'>
                     <Image 
                     src={`/d_heir_logo.png`}

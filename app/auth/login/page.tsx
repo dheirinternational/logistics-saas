@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import { FaTruck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import { BeatLoader, ClipLoader } from 'react-spinners'
+import Image from 'next/image'
 
 const Page: NextPage = () => {
     const router = useRouter()
@@ -128,8 +129,15 @@ const Page: NextPage = () => {
     {   
         page === "login" ?
         <div className=''>
-            <div className='mb-10'>
-                <FaTruck className='text-3xl'/>
+            <div className=''>
+                <figure className='relative h-20 w-20 '>
+                    <Image 
+                    src={"/d_heir_logo.png"}
+                    alt='company logo'
+                    fill
+                    />
+                </figure>
+
                 <p className='text-xs font-semibold'>
                     D_Heir Internationals
                 </p>
