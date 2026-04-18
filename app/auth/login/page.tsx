@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
 import { FaTruck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
-import { BeatLoader } from 'react-spinners'
+import { BeatLoader, ClipLoader } from 'react-spinners'
 
 const Page: NextPage = () => {
     const router = useRouter()
@@ -17,6 +17,8 @@ const Page: NextPage = () => {
         password: ""
     })
     const [isLoading, setIsLoading] = useState(false)
+    const [isSendingPasswordChangeVerification, setIsSendingPasswordChangeVerification] = useState(false)
+    const [page, setPage] = useState<"login" | "forgot-password">("login")
 
     useEffect(()=>{
         handleSession()
@@ -40,6 +42,28 @@ const Page: NextPage = () => {
         }
         catch(err){
             console.log(err)
+        }
+    }
+
+    const initializePasswordChangeConfirmation = async () => {
+        setIsSendingPasswordChangeVerification(true)
+        try{
+            const res = await fetch(`/api/auth/change-password/initialize-change`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            toast.success(result.message)
+        }
+        catch(err){ 
+            toast.error("ERR:: Sending Password Change Confirmation, try again")
+            console.error("ERR:: Sending Password Change Confirmation", err)
+        }
+        finally{
+            setIsSendingPasswordChangeVerification(false)
         }
     }
 
@@ -78,57 +102,111 @@ const Page: NextPage = () => {
         }
     } 
 
+
+    const handleSubmitForgotPassword = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setIsSendingPasswordChangeVerification(true)
+        
+        const formData = new FormData(e.currentTarget)
+        const data = Object.fromEntries(formData)
+        console.log(data.email)
+
+        try{
+            
+        }
+        catch(err){
+            toast.error("ERR:: Sending Verification Link to Email")
+            console.error("ERR:: Sending Verification Link to Email", err)
+        }
+        finally{
+            setIsSendingPasswordChangeVerification(false)
+        }
+    }
+
+
   return <div className='w-screen h-dvh max-h-screen center-items'>
-    <div className=''>
-        <div className='mb-10'>
-            <FaTruck className='text-3xl'/>
-            <p className='text-xs font-semibold'>
-                D_Heir Internationals
-            </p>
-        </div>
-        <h1 className='my-2 font-bold text-2xl'>
-            Log in
-        </h1>
-        <form 
-        className='mt-8 space-y-4'
-        onSubmit={handleSubmit}
-        >
-            <div className='w-70'>
-                <InputComponent 
-                title='Email Address'
-                name='email'
-                type='email'
-                state={credentials}
-                setState={setCredentials}
-                />
+    {   
+        page === "login" ?
+        <div className=''>
+            <div className='mb-10'>
+                <FaTruck className='text-3xl'/>
+                <p className='text-xs font-semibold'>
+                    D_Heir Internationals
+                </p>
             </div>
-            <div className='w-70'>
-                <InputComponent 
-                title='Password'
-                name='password'
-                type='password'
-                state={credentials}
-                setState={setCredentials}
+            <h1 className='my-2 font-bold text-2xl'>
+                Log in
+            </h1>
+            <form 
+            className='mt-8 space-y-4'
+            onSubmit={handleSubmit}
+            >
+                <div className='w-70'>
+                    <InputComponent 
+                    title='Email Address'
+                    name='email'
+                    type='email'
+                    state={credentials}
+                    setState={setCredentials}
+                    />
+                </div>
+                <div className='w-70'>
+                    <InputComponent 
+                    title='Password'
+                    name='password'
+                    type='password'
+                    state={credentials}
+                    setState={setCredentials}
+                    />
+                </div>
+                <div>
+                    <button className='w-full bg-accent-blue text-white mt-6 py-2 rounded text-sm'>
+                        {isLoading ? <BeatLoader color='#FFF' size={10} /> : "Log in"}
+                    </button>
+                </div>
+            </form>
+            <div className='flex gap-1 text-xs mt-3'>
+                <p className='opacity-40'>
+                    {"Don't"} Have an account?
+                </p>
+                <Link href={"/auth/signup"}>
+                    Sign Up
+                </Link>
+            </div> 
+            <button 
+            className={`
+                text-xs flex gap-2 items-center underline
+            `}
+            onClick={() => {setPage("forgot-password")}}
+            >
+                Forgot password
+            </button>
+        </div> :
+        // Forgot passwords
+        <div className='bg-light rounded p-body shadow w-70 space-y-3'>
+            <h1 className='text-sm font-semibold'>
+                Input Email
+            </h1>
+            <form onSubmit={handleSubmitForgotPassword}
+            className='space-y-3'
+            >
+                <input 
+                type="email"
+                name='email' 
+                className='outline-0 border border-dark/20 rounded w-full text-xs px-3 py-2'
+                required
                 />
-            </div>
-            <div>
-                <button className='w-full bg-accent-blue text-white mt-6 py-2 rounded text-sm'>
-                    {isLoading ? <BeatLoader color='#FFF' size={10} /> : "Log in"}
+                <button className='bg-accent-blue text-white text-[10px] py-2 w-full rounded'>
+                    Send Link
                 </button>
-            </div>
-        </form>
-        <div className='flex gap-1 text-xs mt-3'>
-            <p className='opacity-40'>
-                {"Don't"} Have an account?
-            </p>
-            <Link href={"/auth/signup"}>
-                Sign Up
-            </Link>
-        </div> 
-        <Link href={"/auth/login"} className='text-xs'>
-            Forgot password
-        </Link>
-    </div>
+                <button className='bg-accent-red text-white text-[10px] py-2 w-full rounded'
+                onClick={() => {setPage("login")}}
+                >
+                    Go Back
+                </button>
+            </form>
+        </div>
+    }
   </div>
 }
 

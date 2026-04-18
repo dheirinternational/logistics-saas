@@ -10,7 +10,8 @@ const AddToCart = (product: CartProduct) => {
 
   return (
     <button 
-    className="bg-accent-red text-white w-full py-3 mb-22 rounded"
+    className="bg-accent-red text-white w-full py-3 mb-22 rounded disabled:opacity-60"
+    disabled={product.quantity < 1}
     onClick={() => {
     
       const isExistingInCart: CartProduct | undefined =  cart.find( item => item.id === product.id) 
@@ -23,7 +24,11 @@ const AddToCart = (product: CartProduct) => {
       toast.success("Added to cart")
     }}
     >
-        Add to cart
+        {
+          product.quantity < 1 ? 
+          "Out of stock":
+          "Add to cart"
+        }
     </button>
   )
 }

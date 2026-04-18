@@ -1,15 +1,11 @@
 "use client"
 
 import { useCartStore } from "@/store/cartStore"
-import { dummyProductImages } from "@/types/dummyData"
 import { CartProduct } from "@/types/entityTypeDef"
 import Image from "next/image"
 import { FaMinus, FaPlus } from "react-icons/fa"
 
 const CheckoutCartCard = (props: CartProduct) => {
-
-    const productImage = dummyProductImages.filter( x => x.product_id === props.id )
-
 
     const { removeProduct, increaseAmount, decreaseAmount} = useCartStore()
 
@@ -58,7 +54,7 @@ const CheckoutCartCard = (props: CartProduct) => {
                 onClick={() => {
                     increaseAmount(props.id)
                 }} 
-                disabled={props.amount_to_be_ordered === props.quantity - 1} 
+                disabled={props.amount_to_be_ordered > props.quantity - 1} 
                 >
                     <FaPlus/>
                 </button>

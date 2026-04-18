@@ -40,7 +40,7 @@ const Page: NextPage = async() => {
     {/* Profile */}
 
     <div className='bg-accent-red h-30 flex items-center '>
-        <div className='p-body flex gap-4'>
+        <div className='p-body flex gap-4 md:max-w-125 md:mx-auto'>
             <figure className='bg-[#adadad] h-18 w-18 min-w-18 rounded-full border-2 border-white/70 center-items overflow-hidden relative'>
                 {
                     !userData.profile_img ?
@@ -73,7 +73,7 @@ const Page: NextPage = async() => {
 
     {/* Announcement */}
 
-    <div className='p-body bg-white shadow shadow-dark/10 flex'>
+    <div className='p-body bg-white shadow shadow-dark/10 flex md:max-w-125 md:mx-auto'>
         <div className=' h-full w-7 '>
             <HiSpeakerWave className='text-2xl' />
         </div>
@@ -85,14 +85,14 @@ const Page: NextPage = async() => {
     </div>
 
     {/* Shipment Control */}
-    <div className='p-body bg-white shadow shadow-dark/10 flex flex-wrap gap-5 justify-center'>
+    <div className='p-body bg-white shadow shadow-dark/10 flex flex-wrap gap-5 justify-center md:max-w-125 md:mx-auto'>
         {profileCtaButtonsProps.map((btn, i) => 
             <CTARedirectButton key={i} {...btn}/>
         )}
     </div>
     
     {/* Profile Management */}
-    <div className='bg-white shadow shadow-dark/10 pb-30'>
+    <div className='bg-white shadow shadow-dark/10 pb-30 md:max-w-125 md:mx-auto'>
         {profileMenuCtaButtonsProps.map((link, i) => 
         <ProfileMenu key={i} {...link}/>
         )}

@@ -1,3 +1,4 @@
+import { faqs } from '@/assets/faqs/faqs'
 import Carousel from '@/components/base/Carousel'
 import CTARedirectButton from '@/components/base/CTARedirectButton'
 import FAQ from '@/components/base/FAQ'
@@ -88,9 +89,14 @@ const Page: NextPage = ({}) => {
           Below are some of our frequently asked questions
         </p>
         <div className="space-y-4 md:max-w-100">
-          <FAQ/>
-          <FAQ/>
-          <FAQ/>
+          
+          {
+            faqs.map( (faq, i) => 
+              <FAQ key={i}  {...faq}/>              
+            )
+          }
+          {/* <FAQ/> */}
+          
         </div>
       </div>
  

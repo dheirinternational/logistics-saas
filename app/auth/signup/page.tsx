@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { FormEvent, useState } from 'react'
 import { FaTruck } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
+import Image from 'next/image'
 
 const Page: NextPage = () => {
     const router = useRouter()
@@ -64,13 +65,19 @@ const Page: NextPage = () => {
   return <div className='w-screen h-dvh max-h-screen center-items'>
     <div>
         <form className='' onSubmit={handleSubmit}>
-            <div className='mb-10'>
-                <FaTruck className='text-3xl'/>
+            <div className=''>
+                <figure className='w-15 h-15 rounded-full relative mt-8'>
+                    <Image 
+                    src={`/d_heir_logo.png`}
+                    alt='company logo'
+                    fill
+                    />
+                </figure>
                 <p className='text-xs font-semibold'>
                     D_Heir Internationals
                 </p>
             </div>
-            <h1 className='my-2 font-bold text-2xl'>
+            <h1 className='my-2 font-bold text-2xl mt-6'>
                 Sign up
             </h1>
             <div className='mt-8 space-y-4'>
@@ -147,7 +154,7 @@ const Page: NextPage = () => {
                 </button>
             </div>
         </form>
-        <div className='flex gap-1 text-xs mt-3'>
+        <div className='flex gap-1 text-xs mt-3 pb-10'>
             <p className='opacity-40'>
                 Have an account?
             </p>

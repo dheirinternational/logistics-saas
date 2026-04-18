@@ -105,7 +105,7 @@ export async function POST(req: NextRequest){
             }
 
             const { data: publicUrl } = supabase.storage
-                .from("products")
+                .from("packages")
                 .getPublicUrl(filePath)
 
             uploadedImages.push(publicUrl.publicUrl)

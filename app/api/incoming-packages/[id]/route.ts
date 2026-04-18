@@ -18,39 +18,20 @@ export async function GET(req: NextRequest, {params} : {params: Promise<{id: str
             return NextResponse.json({
                 success: false,
                 message: "Unauthorized"
-            })
+            }, {status: 401})
         }
 
         // Quering using params 
 
-        if(id){
-            const resp = await pool.query(`
-                SELECT * FROM incoming_packages
-                WHERE id = $1
-            `, [Number(id)])
-
-            return NextResponse.json({
-                success: true,
-                data: resp.rows
-            })
-        }
-
-
-
-        // Quering for user specifc data using session id
- 
-        const res = await pool.query(`
+        const resp = await pool.query(`
             SELECT * FROM incoming_packages
-            WHERE user_id = $1    
-        `, [session.user_id])
-
-        console.log(res.rows)
+            WHERE id = $1
+        `, [Number(id)])
 
         return NextResponse.json({
             success: true,
-            data: res.rows
+            data: resp.rows
         })
-
 
     }
     catch(err){

@@ -7,24 +7,31 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
-import { FaCamera, FaChevronLeft, FaUser } from 'react-icons/fa'
+import { FaCamera, FaCheckCircle, FaChevronLeft, FaUser } from 'react-icons/fa'
 import { BeatLoader, ClipLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
 
 type BasicDetails = Omit<User, "id" | "password" | "role" | "created_at" | "email" | "profile_img">
+interface UserWithVerified extends User {
+    email_verified: boolean
+}
 
 const Page: NextPage = () => {
 
     const [isEditButtonActive, setIsEditButtonActive] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [isEditLoading, setIsEditLoading] = useState(false)
+    const [isSendingEmailVerification, setIsSendingEmailVerification] = useState(false)
+    const [isSendingEmailChangeVerification, setSendingEmailChangeVerification] = useState(false)
+    const [isSendingPasswordChangeVerification, setIsSendingPasswordChangeVerification] = useState(false)
     const [isImageUploading, setIsImageUploading] = useState(false)
     const [error, setError] = useState("")
-    const [user, setUser] = useState<null | User>(null)
+    const [user, setUser] = useState<null | UserWithVerified>(null)
     const [image, setImage] = useState<string | null>(null)
+    const [emailEditBtnState, setEmailEditBtnState] = useState<"change" | "save">("change")
+    const [emailReadOnly, setEmailReadOnly] = useState(true)
 
-    const inputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
 
     const [userDetails, setUserDetails] = useState<BasicDetails>({
@@ -32,17 +39,14 @@ const Page: NextPage = () => {
         last_name: "",
         phone: ""
     })
-
     const [email, setEmail] = useState({
         email: ""
     })
-
     const [password, setPassword] = useState({
         password: ""
     })
 
-    // Fetch User Related Data ------------------------------------------------ 
-
+    // Fetch User Related Data
     const fetchData = async () => {
         try{
             const res = await fetch("/api/users/my-data", {
@@ -57,6 +61,7 @@ const Page: NextPage = () => {
 
             const data = await res.json()
             const fetchedUser = data.data
+            console.log(fetchedUser)
             setUser(fetchedUser)
             setUserDetails({
                 first_name: fetchedUser.first_name,
@@ -74,51 +79,121 @@ const Page: NextPage = () => {
         }
     }
 
-    type UploadResponse = {
-        success: boolean
-        message: string
-        imageUrl?: string
+    // Upload Profile Image
+    const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        
+        setIsImageUploading(true)
+        const file = e.target.files?.[0]
+        if (!file) return
+        
+        try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const res = await fetch('/api/upload-user-image', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+        })
+
+        const data = await res.json()
+
+        if (!data.success) {
+            toast.error(data.message ?? 'Error uploading image')
+            return
+        }
+
+        setImage(data.imageUrl)  // instant UI update
+        router.refresh()         // re-fetch server components
+        toast.success('Profile image updated!')
+
+        } catch (err) {
+        console.error('Upload error:', err)
+        toast.error('Something went wrong uploading your image')
+        }finally {
+            setIsImageUploading(false)
+        }
     }
 
-const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    
-    setIsImageUploading(true)
-    const file = e.target.files?.[0]
-    if (!file) return
-    
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
+    // Initialize email Verification
+    const initializeEmailVerification = async () => {
+        setIsSendingEmailVerification(true)
 
-      const res = await fetch('/api/upload-user-image', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
+        try{
+            const res = await fetch("/api/auth/verify-email-initialization")
+            const result = await res.json()
+            
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
 
-      const data = await res.json()
-
-      if (!data.success) {
-        toast.error(data.message ?? 'Error uploading image')
-        return
-      }
-
-      setImage(data.imageUrl)  // instant UI update
-      router.refresh()         // re-fetch server components
-      toast.success('Profile image updated!')
-
-    } catch (err) {
-      console.error('Upload error:', err)
-      toast.error('Something went wrong uploading your image')
-    }finally {
-        setIsImageUploading(false)
+            toast.success("Email Verification Link Sent to your email")
+        }
+        catch(err){
+            toast.error("ERR:: Initializing Verification")
+            console.error("ERR:: Initializing Verification", err)
+        }
+        finally{
+            setIsSendingEmailVerification(false)
+        }
     }
-}
+
+    // Send Email Change Confirmation link to email
+    const initializeEmailChangeConfirmation = async () => {
+        setSendingEmailChangeVerification(true)
+        try{
+            const res = await fetch(`/api/auth/change-email/initialize-change`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            toast.success(result.message)
+        }
+        catch(err){ 
+            toast.error("ERR:: Sending Email Change Confirmation, try again")
+            console.error("ERR:: Sending Email Change Confirmation", err)
+        }
+        finally{
+            setSendingEmailChangeVerification(false)
+        }
+    }
+
+    // Send Password Change Confirmation link to email
+    const initializePasswordChangeConfirmation = async () => {
+        setIsSendingPasswordChangeVerification(true)
+        try{
+            const res = await fetch(`/api/auth/change-password/initialize-change`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            toast.success(result.message)
+        }
+        catch(err){ 
+            toast.error("ERR:: Sending Password Change Confirmation, try again")
+            console.error("ERR:: Sending Password Change Confirmation", err)
+        }
+        finally{
+            setIsSendingPasswordChangeVerification(false)
+        }
+    }
+
+
     
+
+    // Effect for fetching data
     useEffect(() => {
         fetchData()
     }, [])
 
+    // Set Profile Edit State
     useEffect(() => {
         if (!user) return
 
@@ -133,19 +208,13 @@ const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
             setIsEditButtonActive(false)
         }
 
-        console.log(user)
-
     }, [user, userDetails])
 
-
-
-    // ------------------------------------------------------------------------
     
 
+
+
     
-
-    // ------------------------------------------------------------------------
-
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
@@ -188,11 +257,11 @@ const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
   return <div className='h-full w-full'>
     {
     isLoading ? 
-    <div className='flex h-full w-full center-items'>
+    <div className='flex h-full w-full center-items md:max-w-125 md:mx-auto'>
         <BeatLoader color='#f26430' size={15} speedMultiplier={0.5}/>
     </div> :
     <>
-        <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
+        <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between md:max-w-125 md:mx-auto'>
             <button 
             className='flex gap-2 flex-1 justify-start'
             onClick={() => {router.back()}}
@@ -210,7 +279,7 @@ const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
             </Link>
         </div>
 
-        <div className='p-body bg-light mt-2 text-sm space-y-4'>
+        <div className='p-body bg-light mt-2 text-sm space-y-4 md:max-w-125 md:mx-auto'>
             <div className='relative w-fit h-fit mx-auto space-y-2'>
                 <figure className='w-31 h-31 bg-red-300 rounded-full mx-auto relative overflow-hidden'>
                     {
@@ -223,7 +292,7 @@ const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
                         loading='eager'
                         /> :
                         <div className='bg-white/50 absolute top-0 left-0 w-full h-full border rounded-full center-items border-dark/20'>
-                            <ClipLoader speedMultiplier={0.5}/>
+                            <FaUser className='text-4xl'/>
                         </div>
                     }
                     {
@@ -246,7 +315,7 @@ const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
             </div>
 
             {/* Details */}
-            <form className='w-full px-4 mt-4 space-y-2' onSubmit={handleSubmit}>
+            <form className='w-full px-4 mt-4 space-y-2 md:max-w-125 md:mx-auto' onSubmit={handleSubmit}>
                 <div className='flex gap-2'>
                     <InputComponent 
                     name='first_name'
@@ -283,7 +352,7 @@ const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
 
         </div>
 
-        <div className='bg-light p-body mt-2 space-y-3'>
+        <div className='bg-light p-body mt-2 space-y-3 md:max-w-125 md:mx-auto'>
             <div className='flex justify-between items-end'>
                 <div className='w-50'>
                     <InputComponent 
@@ -292,14 +361,58 @@ const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
                     setState={setEmail}
                     title='Email'
                     type='email'
-                    readonly
+                    readonly={emailReadOnly}
                     />
                 </div>
 
-                <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
-                    Change Email
-                </button>
+                <div className='space-x-2'>
+
+                 
+
+                    <button 
+                    className='text-[9px] px-3 py-2 bg-dark/20 rounded h-fit'
+                    disabled={isSendingEmailChangeVerification}
+                    onClick={() => {
+                      initializeEmailChangeConfirmation()
+                    }}
+                    >
+                        {
+                            isSendingEmailChangeVerification ?
+                            <BeatLoader color='orange' size={10}/> :
+                            "Change Email"
+                        }
+                    </button>
+
+                </div>
             </div>
+
+
+
+            {/* Verify Email Button */}
+
+            {
+                !user?.email_verified ?
+                <button
+                disabled={isSendingEmailVerification} 
+                className={`
+                    text-[10px] px-4 py-2 rounded h-fit border border-dark/20
+                    
+                `}
+                onClick={() => {
+                    initializeEmailVerification()
+                }}
+                >
+                    {
+                        isSendingEmailVerification ?
+                        <BeatLoader color='orange' size={10}/> :
+                        "Verify Email"
+                    }
+                </button> :
+                <p className='text-[10px] flex gap-1 items-center'>
+                    Email Verified
+                    <FaCheckCircle className='text-green-300 text-[10px]'/>
+                </p>
+            }
 
             <div className='flex justify-between items-end'>
                 <div className='w-50'>
@@ -313,20 +426,28 @@ const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
                     />
                 </div>
 
-                <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
-                    Change Password
+                <button 
+                className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'
+                disabled={isSendingPasswordChangeVerification}
+                onClick={initializePasswordChangeConfirmation}
+                >
+                    {
+                        isSendingPasswordChangeVerification ? 
+                        <BeatLoader color='orange' size={10}/> :
+                        "Change Password"
+                    }
                 </button>
             </div>
         </div>
 
-        <div className='bg-light p-body mt-2 flex justify-between items-center'>
+        {/* <div className='bg-light p-body mt-2 flex justify-between items-center md:max-w-125 md:mx-auto pb-26'>
             <p className='text-red-500 text-xs'>
                 Delete my Account
             </p>
             <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
                 Delete Account
             </button>
-        </div>
+        </div> */}
     </>}
   </div>
 }

@@ -14,7 +14,7 @@ export default function VerifyPayment(){
     useEffect(() => {
         const verifyPayment = async () => {
             try{
-                const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/paystack-ecommerce/verify-payment/${reference}`)   
+                const res = await fetch(`/api/paystack-ecommerce/verify-payment/${reference}`)   
                 
                 if(!res.ok){
                     const errorData = await res.json()
@@ -27,7 +27,6 @@ export default function VerifyPayment(){
 
                 const result = await res.json()
                 toast.success(result.message)  
-
                 console.log("Verification Result", result.redirect_to)
                 router.push(result.redirect_to)
             }

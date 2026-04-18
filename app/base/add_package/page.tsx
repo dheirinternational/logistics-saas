@@ -167,9 +167,9 @@ const Page: NextPage = () => {
                 </div>
             </div>
 
-        <div className='p-body w-fit mx-auto'>
+        <div className='p-body mx-auto w-full md:min-w-150'>
             <button 
-            className='bg-accent-red text-white text-xs py-3 w-full rounded disabled:opacity-70 md:min-w-150'
+            className='bg-accent-red text-white text-xs py-3 w-full rounded disabled:opacity-70 '
             disabled={isSubmiting}
             >
                 {

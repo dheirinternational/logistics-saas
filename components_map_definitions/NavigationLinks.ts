@@ -1,5 +1,5 @@
 import { IconType } from "react-icons"
-import { CgProfile } from "react-icons/cg"
+import { CgProfile, CgShoppingCart } from "react-icons/cg"
 import { FaShip, FaWarehouse } from "react-icons/fa"
 import { FaShop, FaUsers } from "react-icons/fa6"
 import { LuPackage } from "react-icons/lu"
@@ -41,6 +41,11 @@ export const navLinks: NavLink[] = [
         name: "Marketplace",
         path: "/admin/marketplace",
         logo: FaShop
+    },
+    {
+        name: "Orders",
+        path: "/admin/orders",
+        logo: CgShoppingCart
     },
     {
         name: "Profile",

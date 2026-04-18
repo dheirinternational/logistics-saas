@@ -2,11 +2,13 @@
 
 import SearchComponent from '@/components/admin/packages/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
-import { Package } from '@/types/entityTypeDef'
+import { Package, PackageImage } from '@/types/entityTypeDef'
 import { PackageStatus } from '@/types/statusTypes'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
+import { FaX } from 'react-icons/fa6'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
@@ -22,6 +24,8 @@ const Page: NextPage = ({}) => {
     const [packages, setpackages] = useState<Package[]>([]);
     const [isDataLoading, setIsDataLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [selectedPackage, setSelectedPackage] = useState<Package | null>(null)
+    const [isModalActive, setIsModalActive] = useState(false)
     
     const [filterValues, setFilterValues] = useState<FilterValues>({
         search: "",
@@ -85,6 +89,20 @@ const Page: NextPage = ({}) => {
         columnHelper.accessor("stored_at", {
             header: "Stored At",
             cell: ({getValue}) => <p>{new Date(getValue()).toDateString()}</p>
+        }),
+        columnHelper.display({
+            id: "action-btns",
+            cell: ({row}) => <div>
+                <button
+                onClick={() => {
+                    setIsModalActive(true)
+                    setSelectedPackage(row.original)
+                }}
+                >
+                    view
+                </button>
+                {/* <span>/</span> */}
+            </div>
         })
     ]
 
@@ -153,7 +171,106 @@ const Page: NextPage = ({}) => {
             )}
         </div>
     </div>
+    {
+        isModalActive && selectedPackage &&
+        <Modal 
+        setModal={() => {setIsModalActive(false)}} 
+        packag={selectedPackage}/>
+    }
   </div>
+}
+
+
+const Modal = ({setModal, packag} : {setModal : () => void, packag: Package | null }) => {
+
+    const [packageImages, setPackageImages] = useState<PackageImage[]>([])
+    const [isImagesLoading, setIsImagesLoading] = useState(false)
+
+    // Fetch Package Images
+    useEffect(() => {
+        async function fetchProductImages(){
+            setIsImagesLoading(true)
+            try{
+                const res = await fetch(`/api/packages/images/${packag?.id}`)
+                const result = await res.json()
+
+                if(!res.ok){
+                    toast.error("Error Fetching Images")
+                    return
+                }
+
+                setPackageImages(result.data)
+            }
+            catch(err){
+                console.error("Error Fetching Images", err)
+            }
+            finally{
+                setIsImagesLoading(false)
+            }
+        }
+
+        fetchProductImages()
+    }, [])
+
+
+  return <div className='w-screen h-dvh bg-dark/40 fixed top-0 right-0  center-items'>
+        <div className='w-80 h-100 bg-light rounded p-4 relative'>
+            <button 
+            className='text-sm absolute right-4 top-4'
+            onClick={() => {
+                setModal()
+            }}
+            >
+                <FaX />
+            </button>
+            {/* Product Name */}
+            <div className=''>
+                <h2 className='font-bold'>
+                    {packag?.package_name}
+                </h2>
+            </div>
+            <div className='h-82 overflow-y-auto mt-4 '>
+                
+                {/* Images */}
+                <div className='h-30 bg-amber-50 flex gap-2 overflow-x-auto'>
+                    {
+                        isImagesLoading ? 
+                        <BeatLoader color=' #f26430' size={12}/> :
+                        packageImages.map( x =>  
+                            <figure
+                            key={x.id} 
+                            className='h-30 w-30 min-w-30 overflow-hidden rounded relative border-2 border-dark/30'>
+                                <Image
+                                src={x.image_url}
+                                alt='product-images'
+                                fill
+                                className='object-cover'
+                                />
+                            </figure>
+                        )
+                    }
+                </div>
+
+                {/* Price */}
+                <div className='mt-4 relative'>
+                    
+                    <div className='text-xs flex flex-col gap-2 justify-between p-3'>
+                        <p className='space-x-3'>Customer Code: <span>{packag?.customer_code}</span></p>
+                        <p className='space-x-3'>Incoming Package Id: <span>{packag?.incoming_package_id || "nil"}</span></p>
+                        <p className='space-x-3'>Received At:<span className='ml-2'>{new Date(packag?.received_at || "").toDateString()}</span></p>
+                        <p className='space-x-3'>Status:<span className='ml-2'>  {packag?.status} </span></p>
+                        <p className='space-x-3 '>Warehouse Id:<span className='ml-2'>{packag?.warehouse_id}</span></p>
+                        <p className='space-x-3 '>Weight:<span className='ml-2'>{packag?.weight}</span></p>
+                    </div>
+                </div>
+                    <hr className='border-dark/40 my-2'/>
+                <div className='space-y-2'>
+         
+                </div>
+                {/*  */}
+            </div>
+        </div>
+    </div>
 }
 
 export default Page

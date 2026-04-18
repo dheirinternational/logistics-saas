@@ -141,6 +141,15 @@ export type ShippingRequest = {
     shipping_note: string
 }
 
+
+export type PackageImage = {
+    id: number // unique
+    package_id: number // (FK -> Proudtc)
+    image_url: string // unique
+    alt_text: string
+    created_at: string
+}
+
 // Processed means it's been converted to processed
 
 
@@ -175,6 +184,7 @@ export type PricingRule = {
     carrier_id: string // (FK -> shipment)
 }
 
+
 export type Notification = {
     id: string // unique
     user_id: string // (Fk -> User)
@@ -186,14 +196,14 @@ export type Notification = {
     created_at: string
 }
 
-export type ActivityLog = {
-    id: string // unique
-    user_id: string // (FK -> User)
-    action: string
-    entity: string
-    entity_id: string
-    time_stamp: string
-}
+// export type ActivityLog = {
+//     id: string // unique
+//     user_id: string // (FK -> User)
+//     action: string
+//     entity: string
+//     entity_id: string
+//     time_stamp: string
+// }
 
 export type Country = {
     id: string // unique
@@ -239,9 +249,29 @@ export type ProductCategory = {
 }
 
 export type ProductImage = {
-    id: string // unique
+    id: number // unique
     product_id: number // (FK -> Proudtc)
     image_url: string // unique
     alt_text: string
     created_at: string
+}
+
+
+
+export type Order = {
+
+    id: number // unique
+    order_id: string // unique
+    user_id: number // FK -> users(id)
+    customer_code: string // FK -> customers(id)
+    total_price: number
+    extra_charges: number
+    delivery_fee: number
+    destination_address: string
+    payment_type: "transfer"
+    status: "Confirmed" | "preparing" | "shipped" | "delivered"
+    product_ids: string[]
+    created_at: string
+    updated_at: string
+    updated_by: string // Fk -> users(id)
 }

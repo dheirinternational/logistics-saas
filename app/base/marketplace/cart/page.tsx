@@ -19,6 +19,7 @@ const Page: NextPage = () => {
     const [address, setAddress] = useState<Address | null>(null)
     const [isModalActive, setIsModalActive] = useState(false)
     const [totalPrice, setTotalPrice] = useState(0)
+    const [alternateAddress, setIsAlternateAddress] = useState("")
 
     const router = useRouter()
 
@@ -65,6 +66,8 @@ const Page: NextPage = () => {
         fetchUserData()
     }, [])
 
+    console.log(cart)
+
     // Initialize Payment with Paystack
     const initializePayment = async (amount: number) => {
     
@@ -77,7 +80,7 @@ const Page: NextPage = () => {
                 },
                 body: JSON.stringify({
                     email: userEmail,
-                    amount: amount * 100,
+                    amount: amount,
                     metadata: {
                         products: [
                             ...(cart.map(x => 
@@ -88,7 +91,9 @@ const Page: NextPage = () => {
                                 })
                             ))
                         ]
-                    }
+                    },
+                    destination_address: !alternateAddress ? ` ${address?.street}, ${address?.city}, ${address?.state}, ${address?.postal_code}` : alternateAddress,
+                    cart_items: cart
                 })
             })
     
@@ -142,7 +147,7 @@ const Page: NextPage = () => {
         </div>
     </div>
 
-    <div className='bg-light p-body'>
+    <div className='bg-light p-body pb-20'>
         <button 
         className='bg-accent-red w-full text-white py-3 rounded ' 
         // onClick={() => initializePayment(totalPrice)} 
@@ -168,9 +173,13 @@ const Page: NextPage = () => {
                     Shipping Address:
                 </p>
                 
-                <p className='text-xs italic '> 
-                    {address?.street}, {address?.city}, {address?.state}, {address?.postal_code}
-                </p>
+                <textarea 
+                className='text-xs italic resize-none border border-dark/20 p-2 w-60 h-60 min-h-50' 
+                value={!alternateAddress ? ` ${address?.street}, ${address?.city}, ${address?.state}, ${address?.postal_code}` : alternateAddress}
+                onChange={(e) => {setIsAlternateAddress(e.currentTarget.value)}}
+                /> 
+                    
+                {/* </textarea> */}
             </div>
             <div className='flex justify-between'>
                 <p>

@@ -5,5 +5,6 @@ export default function MarktePlaceLayout({children}: {children: ReactNode}) {
         <div className='max-h-[calc(100dvh-56px)] h-[calc(100dvh-56px)] overflow-y-auto p-body space-y-4'>
             {children}
         </div>
+        
     )
 }
