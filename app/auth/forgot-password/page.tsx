@@ -1,29 +1,46 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { FormEvent, useState } from "react"
+import { Suspense, useState } from "react"
 import { BeatLoader } from "react-spinners"
 import { toast } from "react-toastify"
 
-export default function Page({ searchParams }: any){
+export default function Page(){
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <Forgotpassword />
+        </Suspense>
+    )
+}
 
-    const params = searchParams
+
+function Forgotpassword(){
+
+    
     const router = useRouter() 
+    const searchParams = useSearchParams()
 
     const [isChangingPassword, setIsChangingPassword] = useState(false)
-    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
 
-    const changePassword = async (newPassword: string) => {
+    const changePassword = async () => {
         setIsChangingPassword(true)
-        const token = params.get("token")
+
+        const token = searchParams.get("token")
+
         try {
-            const res = await fetch(`/api/auth/change-password/forgot-password?token=${token}`, {
+            const res = await fetch(`/api/auth/forgot-password`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
                     "Content-Type" : "application/json" 
                 },
-                body: JSON.stringify({newPassword})
+                body: JSON.stringify(
+                    {
+                        password,
+                        token
+                    }
+                )
             })
 
             const result = await res.json()
@@ -46,19 +63,10 @@ export default function Page({ searchParams }: any){
         }
     }
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        const data = Object.fromEntries(formData)
-
-        changePassword(data.password as string)
-    }
-
 
     return(
         <div className="w-screen h-dvh center-items">
             <form 
-            onSubmit={handleSubmit}
             className="bg-light p-body rounded shadow flex flex-col gap-3">
                 
                 <input 
@@ -67,12 +75,14 @@ export default function Page({ searchParams }: any){
                 required
                 name="password"
                 placeholder="Input New Password..."
-                value={email}
-                onChange={(e) => {setEmail(e.currentTarget.value)}}
+                value={password}
+                onChange={(e) => {setPassword(e.currentTarget.value)}}
                 />
                 
                 <button 
+                type="button"
                 disabled={isChangingPassword}
+                onClick={changePassword}
                 className="bg-accent-red text-white text-xs py-2 rounded">
                     {
                         isChangingPassword ?

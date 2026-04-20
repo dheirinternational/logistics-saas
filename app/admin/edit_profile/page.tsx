@@ -7,40 +7,37 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { FaCamera, FaChevronLeft, FaUser } from 'react-icons/fa'
-import { BeatLoader } from 'react-spinners'
+import { FaCamera, FaCheckCircle, FaChevronLeft, FaUser } from 'react-icons/fa'
+import { BeatLoader, ClipLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
 
 type BasicDetails = Omit<User, "id" | "password" | "role" | "created_at" | "email" | "profile_img">
+interface UserWithVerified extends User {
+    email_verified: boolean
+}
 
 const Page: NextPage = () => {
 
     const [isEditButtonActive, setIsEditButtonActive] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [isEditLoading, setIsEditLoading] = useState(false)
+    const [isSendingEmailVerification, setIsSendingEmailVerification] = useState(false)
+    const [isSendingEmailChangeVerification, setSendingEmailChangeVerification] = useState(false)
+    const [isSendingPasswordChangeVerification, setIsSendingPasswordChangeVerification] = useState(false)
     const [isImageUploading, setIsImageUploading] = useState(false)
-    const [user, setUser] = useState<null | User>(null)
+    const [user, setUser] = useState<null | UserWithVerified>(null)
     const [image, setImage] = useState<string | null>(null)
 
 
 
-    const [userDetails, setUserDetails] = useState<BasicDetails>({
-        first_name: "",
-        last_name: "",
-        phone: ""
-    })
+    const [userDetails, setUserDetails] = useState<BasicDetails>({ first_name: "", last_name: "", phone: "" })
 
-    const [email, setEmail] = useState({
-        email: ""
-    })
+    const [email, setEmail] = useState({ email: "" })
 
-    const [password, setPassword] = useState({
-        password: ""
-    })
+    const [password, setPassword] = useState({ password: "" })
 
-    // Fetch User Related Data ------------------------------------------------ 
-
+    // Fetch User Related Data  
     const fetchData = async () => {
         try{
             const res = await fetch("/api/users/my-data", {
@@ -73,93 +70,118 @@ const Page: NextPage = () => {
         }
     }
 
-    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+   const profileImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        
         setIsImageUploading(true)
+        const file = e.target.files?.[0]
+        if (!file) return
+        
+        try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const res = await fetch('/api/upload-user-image', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+        })
+
+        const data = await res.json()
+
+        if (!data.success) {
+            toast.error(data.message ?? 'Error uploading image')
+            return
+        }
+
+        setImage(data.imageUrl)  // instant UI update
+        router.refresh()         // re-fetch server components
+        toast.success('Profile image updated!')
+
+        } catch (err) {
+        console.error('Upload error:', err)
+        toast.error('Something went wrong uploading your image')
+        }finally {
+            setIsImageUploading(false)
+        }
+    }
+
+     // Initialize email Verification
+    const initializeEmailVerification = async () => {
+        setIsSendingEmailVerification(true)
+
         try{
-
-            if(!e.target.files) {
-                throw new Error("Image must be selected")
-            }
-
-            if(e.target.files?.length < 1) return
-
-            console.log("Stage one")
-
-            const file = e.target.files[0]
-
-            const sigRes = await fetch("/api/sign-cloudinary", {
-                method: "POST",
-                credentials: "include",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    folder: "avatars",
-                    public_id: user?.id
-                })
-            })
-
-            console.log("Stage Two")
-
-            const {timestamp, signature, apiKey, cloudName} = await sigRes.json()
-
-            if (file.size > (5 * 1024 * 1024)) {
-                toast.error("Image size should not exceed 5mb")
-                throw new Error("Image size should not exceed 5mb")
-            }
-
-            console.log("Stage three")
-
-            const formData = new FormData()
-            formData.append("file", file)
-            formData.append("timestamp", timestamp)
-            formData.append("signature", signature)
-            formData.append("api_key", apiKey)
-            formData.append("folder", "avatars")
-            formData.append("public_id", `${user?.id}`)
-
-            const image_url = await fetch(
-                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                { method: "POST", body: formData }
-            ).then( (r) => r.json())
-
-
-            console.log("Stage Four")
-            
-            const res = await fetch("/api/users/upload-profile-picture", {
-                headers: {
-                    "Content-Type" : "application/json", 
-                },
-                method: "PUT",
-                credentials: "include",
-                body: JSON.stringify({image_url: image_url.secure_url})
-            })
-
+            const res = await fetch("/api/auth/verify-email-initialization")
             const result = await res.json()
-
+            
             if(!res.ok){
-                console.error(result.message)
                 toast.error(result.message)
                 return
             }
 
-
-            setImage(image_url.secure_url)
-            toast.success("Image succesfully uploaded")
-        
+            toast.success("Email Verification Link Sent to your email")
         }
         catch(err){
-            console.log("Issue uploading profile image", err)
-            toast.error("Issue uploading profile image")
-            return
+            toast.error("ERR:: Initializing Verification")
+            console.error("ERR:: Initializing Verification", err)
         }
         finally{
-            setIsImageUploading(false)
+            setIsSendingEmailVerification(false)
         }
     }
-    
+
+    // Send Email Change Confirmation link to email
+    const initializeEmailChangeConfirmation = async () => {
+        setSendingEmailChangeVerification(true)
+        try{
+            const res = await fetch(`/api/auth/change-email/initialize-change`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            toast.success(result.message)
+        }
+        catch(err){ 
+            toast.error("ERR:: Sending Email Change Confirmation, try again")
+            console.error("ERR:: Sending Email Change Confirmation", err)
+        }
+        finally{
+            setSendingEmailChangeVerification(false)
+        }
+    }
+
+     // Send Password Change Confirmation link to email
+    const initializePasswordChangeConfirmation = async () => {
+        setIsSendingPasswordChangeVerification(true)
+        try{
+            const res = await fetch(`/api/auth/change-password/initialize-change`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            toast.success(result.message)
+        }
+        catch(err){ 
+            toast.error("ERR:: Sending Password Change Confirmation, try again")
+            console.error("ERR:: Sending Password Change Confirmation", err)
+        }
+        finally{
+            setIsSendingPasswordChangeVerification(false)
+        }
+    }
+
+
+    // Effect for fetching data
     useEffect(() => {
         fetchData()
     }, [])
 
+    // Set Profile Edit State
     useEffect(() => {
         if (!user) return
 
@@ -179,13 +201,8 @@ const Page: NextPage = () => {
     }, [user, userDetails])
 
 
-
-    // ------------------------------------------------------------------------
-    
-
     const router = useRouter()
 
-    // ------------------------------------------------------------------------
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -229,11 +246,11 @@ const Page: NextPage = () => {
   return <div className='h-full w-full'>
     {
     isLoading ? 
-    <div className='flex h-full w-full center-items'>
+    <div className='flex h-full w-full center-items md:max-w-125 md:mx-auto'>
         <BeatLoader color='#f26430' size={15} speedMultiplier={0.5}/>
     </div> :
     <>
-        <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
+        <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between md:max-w-125 md:mx-auto'>
             <button 
             className='flex gap-2 flex-1 justify-start'
             onClick={() => {router.back()}}
@@ -251,26 +268,26 @@ const Page: NextPage = () => {
             </Link>
         </div>
 
-        <div className='p-body bg-light mt-2 text-sm space-y-4'>
+        <div className='p-body bg-light mt-2 text-sm space-y-4 md:max-w-125 md:mx-auto'>
             <div className='relative w-fit h-fit mx-auto space-y-2'>
                 <figure className='w-31 h-31 bg-red-300 rounded-full mx-auto relative overflow-hidden'>
                     {
-                        user?.profile_img ?
+                        (image || user?.profile_img) ?
                         <Image
-                        src={image ?? user?.profile_img}
+                        src={image ?? user?.profile_img ?? ""}
                         alt='User Profile'
                         fill
                         className='object-cover'
                         loading='eager'
                         /> :
                         <div className='bg-white/50 absolute top-0 left-0 w-full h-full border rounded-full center-items border-dark/20'>
-                            <FaUser className='text-white text-4xl'/>
+                            <FaUser className='text-4xl'/>
                         </div>
                     }
                     {
                         isImageUploading && 
                         <div className='bg-white/50 absolute top-0 left-0 w-full h-full border rounded-full center-items border-dark/20'>
-                            <BeatLoader speedMultiplier={0.5}/>
+                            <ClipLoader speedMultiplier={0.5}/>
                         </div>
                     }
                 </figure>
@@ -280,14 +297,14 @@ const Page: NextPage = () => {
                     type="file"
                     accept='image/*'
                     className='absolute w-full h-full bg-white rounded-full opacity-0' 
-                    onChange={ e => {handleImageUpload(e)}}
+                    onChange={ e => {profileImageUpload(e)}}
                     disabled={isImageUploading}
                     />
                 </div>
             </div>
 
             {/* Details */}
-            <form className='w-full px-4 mt-4 space-y-2' onSubmit={handleSubmit}>
+            <form className='w-full px-4 mt-4 space-y-2 md:max-w-125 md:mx-auto' onSubmit={handleSubmit}>
                 <div className='flex gap-2'>
                     <InputComponent 
                     name='first_name'
@@ -324,7 +341,7 @@ const Page: NextPage = () => {
 
         </div>
 
-        <div className='bg-light p-body mt-2 space-y-3'>
+        <div className='bg-light p-body mt-2 space-y-3 md:max-w-125 md:mx-auto'>
             <div className='flex justify-between items-end'>
                 <div className='w-50'>
                     <InputComponent 
@@ -337,10 +354,54 @@ const Page: NextPage = () => {
                     />
                 </div>
 
-                <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
-                    Change Email
-                </button>
+                <div className='space-x-2'>
+
+                 
+
+                    <button 
+                    className='text-[9px] px-3 py-2 bg-dark/20 rounded h-fit'
+                    disabled={isSendingEmailChangeVerification}
+                    onClick={() => {
+                      initializeEmailChangeConfirmation()
+                    }}
+                    >
+                        {
+                            isSendingEmailChangeVerification ?
+                            <BeatLoader color='orange' size={10}/> :
+                            "Change Email"
+                        }
+                    </button>
+
+                </div>
             </div>
+
+
+
+            {/* Verify Email Button */}
+
+            {
+                !user?.email_verified ?
+                <button
+                disabled={isSendingEmailVerification} 
+                className={`
+                    text-[10px] px-4 py-2 rounded h-fit border border-dark/20
+                    
+                `}
+                onClick={() => {
+                    initializeEmailVerification()
+                }}
+                >
+                    {
+                        isSendingEmailVerification ?
+                        <BeatLoader color='orange' size={10}/> :
+                        "Verify Email"
+                    }
+                </button> :
+                <p className='text-[10px] flex gap-1 items-center'>
+                    Email Verified
+                    <FaCheckCircle className='text-green-300 text-[10px]'/>
+                </p>
+            }
 
             <div className='flex justify-between items-end'>
                 <div className='w-50'>
@@ -354,20 +415,28 @@ const Page: NextPage = () => {
                     />
                 </div>
 
-                <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
-                    Change Password
+                <button 
+                className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'
+                disabled={isSendingPasswordChangeVerification}
+                onClick={initializePasswordChangeConfirmation}
+                >
+                    {
+                        isSendingPasswordChangeVerification ? 
+                        <BeatLoader color='orange' size={10}/> :
+                        "Change Password"
+                    }
                 </button>
             </div>
         </div>
 
-        <div className='bg-light p-body mt-2 flex justify-between items-center'>
+        {/* <div className='bg-light p-body mt-2 flex justify-between items-center md:max-w-125 md:mx-auto pb-26'>
             <p className='text-red-500 text-xs'>
                 Delete my Account
             </p>
             <button className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'>
                 Delete Account
             </button>
-        </div>
+        </div> */}
     </>}
   </div>
 }

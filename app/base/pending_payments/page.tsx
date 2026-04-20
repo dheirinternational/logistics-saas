@@ -151,44 +151,45 @@ const PaymentCard = ({ payment, userEmail }: { payment: Payment, userEmail: stri
     // Initialize payment on paystack
     const initializePayment = async (order_id: string, amount: number) => {
 
-    setIsPaymentLoading(true)
-    try{
-        const res = await fetch("/api/paystack/initialize-payment", {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email: userEmail,
-                amount: amount * 100,
-                order_id: order_id,
-                metadata: {
-                    shipment_tracking_number: payment.shipment_tracking_number
-                }
+        setIsPaymentLoading(true)
+        try{
+            const res = await fetch("/api/paystack/initialize-payment", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: userEmail,
+                    amount: amount * 100,
+                    order_id: order_id,
+                    reference: payment.transaction_ref,
+                    metadata: {
+                        shipment_tracking_number: payment.shipment_tracking_number
+                    }
+                })
             })
-        })
 
-        const result = await res.json()
+            const result = await res.json()
 
-        if(!res.ok){
-            toast.error(result.message)
-            return
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            console.log("Payment Initialization Result", result)
+            
+            if(result.data.status){
+                router.push(result.data.data.authorization_url)   
+            }
         }
-
-        console.log("Payment Initialization Result", result)
-        
-        if(result.data.status){
-            router.push(result.data.data.authorization_url)   
+        catch(err){
+            toast.error("ERR:: Initializing Payment")
+            console.error("ERR:: Initializing Payment", err)
+        }
+        finally{
+            setIsPaymentLoading(false)
         }
     }
-    catch(err){
-        toast.error("ERR:: Initializing Payment")
-        console.error("ERR:: Initializing Payment", err)
-    }
-    finally{
-        setIsPaymentLoading(false)
-    }
-}
 
     return(
         <div className='border border-dark/20 p-4 py-3 space-y-2 rounded'>

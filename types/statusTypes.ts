@@ -34,3 +34,11 @@ export type IncomingPackageStatus =
     | "received" 
     | "cancelled" 
     | "stored"
+
+
+export type OrderStatus =
+  | "Confirmed"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";

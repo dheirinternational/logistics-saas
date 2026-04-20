@@ -1,7 +1,7 @@
 "use client"
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
-import { Order, Shipment } from '@/types/entityTypeDef'
+import { Order } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'

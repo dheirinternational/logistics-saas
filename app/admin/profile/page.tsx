@@ -6,6 +6,7 @@ import { getSession } from '@/lib/db/session'
 import { NextPage } from 'next'
 import { FaUser } from 'react-icons/fa'
 import { HiSpeakerWave } from 'react-icons/hi2'
+import Image from 'next/image'
 
 
 const Page: NextPage = async() => {
@@ -15,7 +16,7 @@ const Page: NextPage = async() => {
     console.log(userId)
 
     const data = await pool.query(`
-        SELECT u.first_name, u.last_name, c.code 
+        SELECT u.first_name, u.last_name, c.code, u.profile_img 
         FROM users u
         JOIN customers c ON u.id = c.user_id
         WHERE u.id = $1
@@ -29,25 +30,29 @@ const Page: NextPage = async() => {
 
     <div className='bg-accent-red h-30 flex items-center '>
         <div className='p-body flex gap-4'>
-            <figure className='bg-[#adadad] h-18 w-18 rounded-full border-2 border-white/70 center-items overflow-hidden'>
-                <FaUser className='text-6xl relative -bottom-2 text-white'/>
+            <figure className='bg-[#adadad] h-18 w-18 rounded-full border-2 border-white/70 center-items overflow-hidden relative'>
+                {
+                    !userData.profile_img ?
+                    <FaUser className='text-6xl relative -bottom-2 text-white'/> :
+                    <Image 
+                    src={userData.profile_img}
+                    alt='Profile Img'
+                    className='object-cover'
+                    fill
+                    />
+                }
             </figure>
             <div className='flex items-start flex-col justify-center gap-2'>
                 <span className='text-white font-semibold'>
                     {userData.first_name}{userData.last_name}
                 </span>
-                {/* <div className='w-fit py-xs px-4 bg-white rounded-full'>
-                    <span className='text-xs'>
-                        Member Code: {userData.code}
-                    </span>
-                </div> */}
             </div>
         </div>
     </div>
 
     {/* Announcement */}
 
-    <div className='p-body bg-white shadow shadow-dark/10 flex'>
+    {/* <div className='p-body bg-white shadow shadow-dark/10 flex'>
         <div className=' h-full w-7 '>
             <HiSpeakerWave className='text-2xl' />
         </div>
@@ -56,7 +61,7 @@ const Page: NextPage = async() => {
                 Announcement: Work Hours Notice
             </p>
         </div>
-    </div>
+    </div> */}
     
     {/* Profile Management */}
     <div className='bg-white shadow shadow-dark/10'>

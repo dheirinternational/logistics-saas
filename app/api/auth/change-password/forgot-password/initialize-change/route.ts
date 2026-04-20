@@ -37,7 +37,7 @@ export async function POST(req: Request){
             );
         }
 
-        const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/forgot-password?token=${rawToken}`;
+        const verificationUrl = `${process.env.BASE_URL}/auth/forgot-password?token=${rawToken}`;
 
         await resend.emails.send({
             from: "D_Heir Logistics <onboarding@resend.dev>", // default test sender

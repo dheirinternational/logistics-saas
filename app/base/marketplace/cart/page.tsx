@@ -16,6 +16,7 @@ const Page: NextPage = () => {
 
     const [isPaymentLoading, setIsPaymentLoading] = useState(false)
     const [userEmail, setUserEmail] = useState("")
+    const [userCode, setUserCode] = useState("")
     const [address, setAddress] = useState<Address | null>(null)
     const [isModalActive, setIsModalActive] = useState(false)
     const [totalPrice, setTotalPrice] = useState(0)
@@ -46,6 +47,7 @@ const Page: NextPage = () => {
                 const res = await fetch("/api/users/my-data")
                 const addr = await fetch("/api/addresses/user")
                 const result = await res.json() 
+                console.log(result)
                 const addrResult = await addr.json()
                 if(!res.ok){
                     toast.error(result.message)
@@ -57,6 +59,7 @@ const Page: NextPage = () => {
                 }
                 setUserEmail(result.data.email)
                 setAddress(addrResult.data[0])
+                setUserCode(result.data.code)
             }
             catch(err){
                 toast.error("ERR:: Fetching User Data")
@@ -66,7 +69,9 @@ const Page: NextPage = () => {
         fetchUserData()
     }, [])
 
-    console.log(cart)
+    useEffect(() => {
+        console.log(userCode)
+    }, [userCode])
 
     // Initialize Payment with Paystack
     const initializePayment = async (amount: number) => {
@@ -93,7 +98,8 @@ const Page: NextPage = () => {
                         ]
                     },
                     destination_address: !alternateAddress ? ` ${address?.street}, ${address?.city}, ${address?.state}, ${address?.postal_code}` : alternateAddress,
-                    cart_items: cart
+                    cart_items: cart,
+                    customer_code: userCode
                 })
             })
     

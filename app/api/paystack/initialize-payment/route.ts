@@ -13,10 +13,13 @@ export async function POST (req: NextRequest){
         if(!session){
             return NextResponse.json({ 
                 message: "Unauthorized"
-            })
+            }, {status: 401})
         }
 
-        const {email, amount, metadata} = await req.json()
+        const {email, amount, metadata, reference} = await req.json()
+
+        // const user_id = session.user_id
+
 
         const res = await fetch("https://api.paystack.co/transaction/initialize", {
             method: "POST",
@@ -27,22 +30,26 @@ export async function POST (req: NextRequest){
             body: JSON.stringify({
                 email,
                 amount,
+                reference,
                 callback_url: `${origin}/base/verify_payment`,
-                metadata
+                metadata: {
+                    ...metadata,
+                    type: "shipment_payment"
+                }
             })
         })
 
+        const result = await res.json()
+
         if(!res.ok){
-            const errorData = await res.json()
-            console.error("Error Initializing Payment", errorData)  
+            console.error("Error Initializing Payment", result)  
         
             return NextResponse.json({
                 message: "Error Initializing Payment",
-                data: errorData
+                data: result
             }, {status: 500})       
         }     
 
-        const result = await res.json()
         console.log("Payment Initialization Result", result)
 
         return NextResponse.json({

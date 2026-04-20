@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
-import { FaTruck } from 'react-icons/fa'
 import { toast } from 'react-toastify'
-import { BeatLoader, ClipLoader } from 'react-spinners'
+import { BeatLoader } from 'react-spinners'
 import Image from 'next/image'
 
 const Page: NextPage = () => {
@@ -20,6 +19,8 @@ const Page: NextPage = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [isSendingPasswordChangeVerification, setIsSendingPasswordChangeVerification] = useState(false)
     const [page, setPage] = useState<"login" | "forgot-password">("login")
+
+    const [changePasswordEmail, setChangePasswordEmail] = useState("")
 
     useEffect(()=>{
         handleSession()
@@ -49,7 +50,15 @@ const Page: NextPage = () => {
     const initializePasswordChangeConfirmation = async () => {
         setIsSendingPasswordChangeVerification(true)
         try{
-            const res = await fetch(`/api/auth/change-password/initialize-change`)
+            const res = await fetch(`/api/auth/forgot-password/initialize`, {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({email: changePasswordEmail})
+            })
+
             const result = await res.json()
 
             if(!res.ok){
@@ -57,6 +66,7 @@ const Page: NextPage = () => {
                 return
             }
 
+            setPage("login")
             toast.success(result.message)
         }
         catch(err){ 
@@ -202,12 +212,26 @@ const Page: NextPage = () => {
                 type="email"
                 name='email' 
                 className='outline-0 border border-dark/20 rounded w-full text-xs px-3 py-2'
+                value={changePasswordEmail}
+                onChange={(e) => {setChangePasswordEmail(e.currentTarget.value)}}
                 required
                 />
-                <button className='bg-accent-blue text-white text-[10px] py-2 w-full rounded'>
-                    Send Link
+
+                <button 
+                disabled={isSendingPasswordChangeVerification}
+                className='bg-accent-blue text-white text-[10px] py-2 w-full rounded'
+                onClick={() => {initializePasswordChangeConfirmation()}}
+                >
+                    {
+                        isSendingPasswordChangeVerification ?
+                        <BeatLoader color='white' size={10}/> :
+                        "Send Link"
+                    }
                 </button>
-                <button className='bg-accent-red text-white text-[10px] py-2 w-full rounded'
+
+                <button 
+                className='bg-accent-red text-white text-[10px] py-2 w-full rounded'
+                disabled={isSendingPasswordChangeVerification}
                 onClick={() => {setPage("login")}}
                 >
                     Go Back

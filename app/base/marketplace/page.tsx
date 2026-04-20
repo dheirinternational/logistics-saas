@@ -71,9 +71,6 @@ const Page: NextPage = ({}) => {
       }
     })
 
-    console.log(cate)
-    console.log(products)
-
   return <div className='h-full w-full space-y-1'>
     <MarketSearch />
     
@@ -133,7 +130,7 @@ const Page: NextPage = ({}) => {
           }
         </div>
 
-        <div className='p-2 flex flex-wrap  gap-6 max-w-full overflow-auto justify-start'>
+        <div className='p-2 flex flex-wrap  gap-6 max-w-full overflow-auto justify-start pb-20'>
             {
               isDataLoading ? 
               <BeatLoader color='#f26430' size={10}/> :

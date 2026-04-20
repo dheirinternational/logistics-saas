@@ -2,7 +2,7 @@ import { IconType } from "react-icons"
 
 interface StatusStatCardProps {
     count: number
-    status: "stored" | "assigned_to_shipment" | "delivered" | "requested_for",
+    status: string, //"stored" | "assigned_to_shipment" | "delivered" | "requested_for" | "processing",
     icon: IconType  
 }
 

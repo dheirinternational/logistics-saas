@@ -50,3 +50,24 @@ export async function GET(req: Request, {params}:{params: Promise<{id: string}>}
         }, {status: 500})
     }
 }
+
+export async function PATCH(req: Request, { params }: {params: Promise<{id: string}>}) {
+    const { id } = await params
+    const { status } = await req.json()
+
+    console.log(id, status)
+
+    await pool.query(
+        `
+        UPDATE orders
+        SET status = $1,
+            updated_at = NOW()
+        WHERE order_id = $2
+        `,
+        [status, id]
+    )
+
+    return NextResponse.json({
+        message: "Order updated"
+    })
+}

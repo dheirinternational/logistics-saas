@@ -65,7 +65,7 @@ const ProductCard = (props: Product) => {
             {name}
         </p>
         <p className="text-lg font-semibold">
-            # {discount_price ?? price}k
+            ₦ {discount_price ?? price}k
         </p>
         <p className="text-[10px] line-clamp-1 text-ellipsis">
             {stock_quantity} units left

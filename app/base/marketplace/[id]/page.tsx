@@ -97,7 +97,7 @@ export default function ProductDisplay(){
                         {product?.name}
                     </h2>
                     <p className="text-2xl mt-3 font-semibold">
-                        # {product?.price}
+                        ₦ {product?.price}
                     </p>
 
                     <span className="mt-3 block w-fit text-xs opacity-60">
@@ -106,13 +106,13 @@ export default function ProductDisplay(){
 
                     {/* Rating */}
 
-                    <div className="flex gap-1 mt-4 text-gray-400">
+                    {/* <div className="flex gap-1 mt-4 text-gray-400">
                         <FaStar/>
                         <FaStar/>
                         <FaStar/>
                         <FaStar/>
                         <FaStar/>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Product Description */}

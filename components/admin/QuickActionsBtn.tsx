@@ -1,13 +1,23 @@
-import { FaPlus } from "react-icons/fa"
+import Link from "next/link"
+import { IconType } from "react-icons"
 
-const QuickActionsBtn = () => {
+type props = {
+  link: string
+  icon: IconType
+  title: string
+}
+
+const QuickActionsBtn = ({link, icon: Icon, title}: props) => {
   return (
-    <button className="bg-primary w-16 h-16 rounded-lg center-items flex-col gap-y-1">
-        <FaPlus/>
+    <Link 
+    href={link} 
+    className="bg-primary w-16 h-16 rounded-lg center-items flex-col gap-y-1"
+    >
+        <Icon />
         <span className="text-xs">
-            Create
+            {title}
         </span>
-    </button>
+    </Link>
   )
 }
 

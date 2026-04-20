@@ -1,13 +1,61 @@
-import PendingAlerts from '@/components/admin/PendingAlerts'
+"use client"
+
+// import PendingAlerts from '@/components/admin/PendingAlerts'
 import QuickActionsBtn from '@/components/admin/QuickActionsBtn'
-import RecentActivity from '@/components/admin/RecentActivity'
-import RecentShipmentCard from '@/components/admin/RecentShipmentCard'
-import RevenueSnapshot from '@/components/admin/RevenueSnapshot'
+// import RecentActivity from '@/components/admin/RecentActivity'
+// import RecentShipmentCard from '@/components/admin/RecentShipmentCard'
+// import RevenueSnapshot from '@/components/admin/RevenueSnapshot'
 import StatusStatCard from '@/components/admin/StatusStatCard'
+import { buttonsProps } from '@/components_map_definitions/quickActionsBtns'
 import { NextPage } from 'next'
-import { Fa42Group } from 'react-icons/fa6'
+import { useEffect, useState } from 'react'
+import { BiCheck, BiExport } from 'react-icons/bi'
+import { FaCheckCircle, FaTruck } from 'react-icons/fa'
+import { Fa42Group, FaShip } from 'react-icons/fa6'
+import { FcProcess } from 'react-icons/fc'
+// import { GrDeliver } from 'react-icons/gr'
+import { toast } from 'react-toastify'
+
+
+type ShipmentCount = {
+    total_active_count: number,
+    processing: number,
+    shipped: number,
+    in_transit: number,
+    delivered: number 
+}
+
 
 const Page: NextPage = () => {
+
+    const [shipmentCounts, setShipmentCounts] = useState<ShipmentCount | null>(null)
+
+    
+    useEffect(() => {
+
+        // Fetch Active shipments records
+        const fetchActiveShipmentRecords = async () => {
+            try{
+                const shipmentCountRes = await fetch(`/api/shipments/count`)
+                const shipmentCountResult = await shipmentCountRes.json()
+                
+                console.log(shipmentCountResult)
+                setShipmentCounts(shipmentCountResult.data)
+    
+            }
+            catch(err){
+                console.error("ERR:: Fetching shipment result count", err)
+                toast.error("ERR:: Fetching shipment result count")
+            }
+        }
+
+        fetchActiveShipmentRecords()
+
+    }, [])
+    
+    
+
+
   return (
     <div className='max-h-[calc(100dvh-56px)] h-[calc(100dvh-56px)] overflow-y-auto p-body space-y-4'>
 
@@ -17,7 +65,7 @@ const Page: NextPage = () => {
                 System Snapshot
             </span>
             <h3 className='font-bold text-4xl mt-4'>
-                1250
+                {shipmentCounts?.total_active_count}
             </h3>
             <p className='text-sm opacity-80 mt-1'>
                 Total active shipment record
@@ -41,10 +89,10 @@ const Page: NextPage = () => {
             
             {/* STATS Components Ctn */}
             <div className='flex my-body space-x-2 overflow-x-auto'>
-                <StatusStatCard count={0} status='delivered' icon={Fa42Group} />
-                <StatusStatCard count={0} status='delivered' icon={Fa42Group} />
-                <StatusStatCard count={0} status='delivered' icon={Fa42Group} />
-                <StatusStatCard count={0} status='delivered' icon={Fa42Group} />
+                <StatusStatCard count={shipmentCounts?.processing || 0} status='processing' icon={FcProcess} />
+                <StatusStatCard count={shipmentCounts?.shipped || 0} status="shipped" icon={BiExport} />
+                <StatusStatCard count={shipmentCounts?.in_transit || 0} status='in_transit' icon={FaTruck} />
+                <StatusStatCard count={shipmentCounts?.delivered || 0} status='delivered' icon={FaCheckCircle} />
             </div>
         </div>
 
@@ -60,15 +108,14 @@ const Page: NextPage = () => {
 
             {/* Actions button container */}
             <div className='flex justify-center gap-3'>
-                <QuickActionsBtn />
-                <QuickActionsBtn />
-                <QuickActionsBtn />
-                <QuickActionsBtn />
+                {buttonsProps.map( (button, i) => 
+                    <QuickActionsBtn key={i} {...button} />
+                )}
             </div>
         </div>
 
         {/* View Recent Shipments */}
-        <div className='p-body bg-light rounded-lg space-y-body'>
+        {/* <div className='p-body bg-light rounded-lg space-y-body'>
             <div className='flex justify-between items-center'>
                 <h2 className='text-sm font-bold'>
                     Recent Shipments
@@ -84,22 +131,22 @@ const Page: NextPage = () => {
                 <RecentShipmentCard />
                 <RecentShipmentCard />
             </div>
-        </div>
+        </div> */}
 
         {/* STATUS OVERVIEW */}
 
-        <div className='p-body bg-light rounded-lg space-y-body'>
+        {/* <div className='p-body bg-light rounded-lg space-y-body'>
             <h2 className='text-sm font-bold'>
                 Status Overview
             </h2>
             <div>
                 chart
             </div>
-        </div>
+        </div> */}
 
         {/* Recent Activity */}
 
-        <div className='p-body bg-light rounded-lg space-y-body'>
+        {/* <div className='p-body bg-light rounded-lg space-y-body'>
             <h2 className='text-sm font-bold'>
                 Recent Activity
             </h2>
@@ -112,9 +159,9 @@ const Page: NextPage = () => {
                 <RecentActivity />
                 <RecentActivity />
             </div>
-        </div>
+        </div> */}
 
-        <div className='p-body bg-light rounded-lg space-y-body'> 
+        {/* <div className='p-body bg-light rounded-lg space-y-body'> 
             <h2 className='text-sm font-bold'>
                 Pending Alerts
             </h2>
@@ -127,9 +174,9 @@ const Page: NextPage = () => {
                 <PendingAlerts/>
                 <PendingAlerts/>
             </div>
-        </div>
+        </div> */}
 
-        <div className='p-body bg-light rounded-lg space-y-body'>  
+        {/* <div className='p-body bg-light rounded-lg space-y-body'>  
             <h2 className='text-sm font-bold'>
                 Revenue Snapshot
             </h2>
@@ -138,7 +185,7 @@ const Page: NextPage = () => {
                 <RevenueSnapshot />
                 <RevenueSnapshot />
             </div>
-        </div>
+        </div> */}
 
     </div>
   )

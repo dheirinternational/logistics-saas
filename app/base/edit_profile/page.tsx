@@ -29,9 +29,6 @@ const Page: NextPage = () => {
     const [error, setError] = useState("")
     const [user, setUser] = useState<null | UserWithVerified>(null)
     const [image, setImage] = useState<string | null>(null)
-    const [emailEditBtnState, setEmailEditBtnState] = useState<"change" | "save">("change")
-    const [emailReadOnly, setEmailReadOnly] = useState(true)
-
     const router = useRouter()
 
     const [userDetails, setUserDetails] = useState<BasicDetails>({
@@ -39,12 +36,8 @@ const Page: NextPage = () => {
         last_name: "",
         phone: ""
     })
-    const [email, setEmail] = useState({
-        email: ""
-    })
-    const [password, setPassword] = useState({
-        password: ""
-    })
+    const [email, setEmail] = useState({ email: "" })
+    const [password, setPassword] = useState({ password: "" })
 
     // Fetch User Related Data
     const fetchData = async () => {
@@ -72,7 +65,8 @@ const Page: NextPage = () => {
             setEmail({email: fetchedUser.email})
         }
         catch(err){
-            setError(err instanceof Error ? err.message : "Something Went wrong")
+            toast.error("ERR:: Uploading User Details")
+            console.error("ERR:: Uploading User Details", err)
         }
         finally{
             setIsLoading(false)
@@ -361,7 +355,7 @@ const Page: NextPage = () => {
                     setState={setEmail}
                     title='Email'
                     type='email'
-                    readonly={emailReadOnly}
+                    readonly
                     />
                 </div>
 

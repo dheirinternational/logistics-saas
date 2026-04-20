@@ -46,7 +46,7 @@ export async function GET(){
         }
 
         const email = rows[0].email
-        const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/change-email?token=${rawToken}`;
+        const verificationUrl = `${process.env.BASE_URL}/auth/change-email?token=${rawToken}`;
 
         await resend.emails.send({
             from: "D_Heir Logistics <onboarding@resend.dev>", // default test sender

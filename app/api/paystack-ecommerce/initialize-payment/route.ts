@@ -20,7 +20,7 @@ export async function POST (req: NextRequest){
             })
         }
 
-        const { email, amount, metadata, delivery_fee = 0, extra_charges = 0, destination_address, customer_code="KRC0013", cart_items} = await req.json();
+        const { email, amount, metadata, delivery_fee = 0, extra_charges = 0, destination_address, customer_code, cart_items} = await req.json();
 
         const user_id = session.user_id
         const order_id = generateOrderTrackingNumber()
@@ -109,6 +109,7 @@ export async function POST (req: NextRequest){
                 metadata: {
                     ...metadata,
                     order_id,
+                    type: "order_payment"
                 }
             })
         })
