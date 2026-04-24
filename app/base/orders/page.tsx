@@ -55,7 +55,7 @@ const Page: NextPage = () => {
         onClick={() => {router.back()}}
         >
             <FaChevronLeft />
-            <span className='text-xs font-semiboldd'>
+            <span className='text-xs font-semibold'>
                 Go Back
             </span>
         </button>

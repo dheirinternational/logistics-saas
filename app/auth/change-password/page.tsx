@@ -1,13 +1,21 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { FormEvent, useState } from "react"
+import { FormEvent, Suspense, useState } from "react"
 import { BeatLoader } from "react-spinners"
 import { toast } from "react-toastify"
 
-export default function Page({ searchParams }: any){
+export default function Page(){
+    return(
+        <Suspense fallback={<div>Loading...</div>}>
+            <ChangePassword />
+        </Suspense>
+    )
+}
 
-    const params = searchParams
+function ChangePassword(){
+
+    const searchParams = useSearchParams()
     const router = useRouter() 
 
     const [isChangingPassword, setIsChangingPassword] = useState(false)
@@ -15,7 +23,7 @@ export default function Page({ searchParams }: any){
 
     const changePassword = async (newPassword: string) => {
         setIsChangingPassword(true)
-        const token = params.get("token")
+        const token = searchParams.get("token")
         try {
             const res = await fetch(`/api/auth/change-password?token=${token}`, {
                 method: "POST",

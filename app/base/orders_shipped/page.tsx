@@ -54,8 +54,7 @@ const Page: NextPage = () => {
         className='flex gap-2 flex-1 justify-start'
         onClick={() => {router.back()}}
         >
-            <FaChevronLeft />
-            <span className='text-xs font-semiboldd'>
+            <span className='text-xs font-semibold'>
                 Go Back
             </span>
         </button>

@@ -7,7 +7,7 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { FaChevronLeft, FaUser } from 'react-icons/fa'
+import { FaUser } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
@@ -19,9 +19,9 @@ const Page: NextPage = () => {
     const [isDataLoading, setIsDataLoading] = useState(false)
     const [isPostingData, setIsPostingData] = useState(false)
     const [isConfirmModal, setIsConfirmModal] = useState(false)
-    const [wrappingMethod, setWrappingMethod] = useState<"bubble" | "normal">("normal")
-    const [shippingMethod, setShippingMethod] = useState<"air" | "sea">("air")
-    const [shippingPayment, setShippingPayment] = useState<"before" | "after">("after")
+    const [wrappingMethod, setWrappingMethod] = useState<"bubble" | "standard">("standard")
+    const [shippingMethod, setShippingMethod] = useState<"air" | "sea" | "express">("air")
+    const [shippingPayment, setShippingPayment] = useState<"pay_before_shipment" | "pay_after_shipment">("pay_before_shipment")
 
     const [filterValues, setFilterValues] = useState({
         warehouse_id: "",
@@ -29,6 +29,32 @@ const Page: NextPage = () => {
     })
 
     const router = useRouter()
+
+  
+
+    const fetchPackages = async () => {
+        setIsDataLoading(true)
+        try{
+            const res = await fetch("/api/packages/user")
+            const result = await res.json()
+
+            if (!res.ok) {
+                toast.error(result.message)
+                return
+            }
+
+            setPackages(result.data)
+        }
+        catch(err){
+            console.error("ERR Fetching packages", err)
+            toast.error("ERR fetchng packages")
+            return
+        }
+        finally{
+            setIsDataLoading(false)
+        }
+    }
+
 
     const handleSubmit = async () => {
         setIsPostingData(true)
@@ -45,7 +71,8 @@ const Page: NextPage = () => {
                     customer_code: selectedPackages[0].customer_code,
                     channel: shippingMethod,
                     wrapping: wrappingMethod,
-                    payment_time: shippingPayment 
+                    payment_time: shippingPayment,
+                    total_weight: selectedPackages.reduce((acc, pack) => acc + pack.weight, 0)
                 })
             })
             const result = await res.json()
@@ -55,6 +82,7 @@ const Page: NextPage = () => {
                 return
             }
 
+            fetchPackages()
             toast.success("Shipment Request Successfully made")
         }
         catch(err){ 
@@ -67,46 +95,27 @@ const Page: NextPage = () => {
         }
     }
 
+
+
     // Fetch Packages
     useEffect(() => {
-        const fetchPackages = async () => {
-            setIsDataLoading(true)
-            try{
-                const res = await fetch("/api/packages/user")
-                const result = await res.json()
-
-                if (!res.ok) {
-                    toast.error(result.message)
-                    return
-                }
-
-                setPackages(result.data)
-            }
-            catch(err){
-                console.error("ERR Fetching packages", err)
-                toast.error("ERR fetchng packages")
-                return
-            }
-            finally{
-                setIsDataLoading(false)
-            }
-        }
-
+   
         fetchPackages()
         
     }, [])
 
-    const data = packages.filter( x => x.incoming_package_id.toLowerCase().includes(filterValues.tracking_id.toLowerCase()) || x.package_name.toLowerCase().includes(filterValues.tracking_id.toLowerCase()))
+    const data = packages
+        .filter( x => x.incoming_package_id.toLowerCase().includes(filterValues.tracking_id.toLowerCase()) || x.package_name.toLowerCase().includes(filterValues.tracking_id.toLowerCase()))
+        .filter(x => x.status === "stored")
 
   return <div className='h-full w-full space-y-2'>
     {/* Header */}
     <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
         <button 
-        className='flex gap-2 flex-1 justify-start'
+        className='flex flex-1 justify-start w-fit gap-1'
         onClick={() => {router.back()}}
         >
-            <FaChevronLeft />
-            <span className='text-xs font-semiboldd'>
+            <span className='text-xs font-semibold'>
                 Go Back
             </span>
         </button>
@@ -149,13 +158,13 @@ const Page: NextPage = () => {
         <fieldset className='text-xs flex gap-4 mt-2'>
             <span>Wrapping Method :</span>
             <label className='flex items-center gap-2'>
-                <span>Normal</span>
+                <span>Standard</span>
                 <input 
                 type="radio" 
                 name='wrapping'
-                value={"normal"}
-                checked={wrappingMethod === "normal"}
-                onChange={(e) => setWrappingMethod(e.target.value as "normal")}
+                value={"standard"}
+                checked={wrappingMethod === "standard"}
+                onChange={(e) => setWrappingMethod(e.target.value as "standard")}
                 />
             </label>
             <label className='flex items-center gap-2'>
@@ -193,29 +202,40 @@ const Page: NextPage = () => {
                 onChange={(e) => setShippingMethod(e.target.value as "sea")}
                 />
             </label>
+            <label className='flex items-center gap-2'>
+                <span>Express</span>
+                <input 
+                type="radio" 
+                name='shipping'
+                value={"express"}
+                checked={shippingMethod === "express"}
+                onChange={(e) => setShippingMethod(e.target.value as "express")}
+                />
+            </label>
+            
         </fieldset>
 
         {/* Payment Type */}
-        <fieldset className='text-xs flex gap-4 mt-2'>
-            <span>Payment Time:</span>
+        <fieldset className='text-xs flex gap-2 mt-2'>
+            <span className='whitespace-nowrap'>Payment Time:</span>
             <label className='flex items-center gap-2'>
-                <span>Before</span>
+                <span className='whitespace-nowrap'>Pay Before Shipment</span>
                 <input 
                 type="radio" 
                 name='payment_time'
-                value={"before"}
-                checked={shippingPayment === "before"}
-                onChange={(e) => setShippingPayment(e.target.value as "before")}
+                value={"pay_before_shipment"}
+                checked={shippingPayment === "pay_before_shipment"}
+                onChange={(e) => setShippingPayment(e.target.value as "pay_before_shipment")}
                 />
             </label>
             <label className='flex items-center gap-2'>
-                <span>After</span>
+                <span className='whitespace-nowrap'>Pay After Shipment</span>
                 <input 
                 type="radio" 
                 name='payment_time'
-                value={"after"}
-                checked={shippingPayment === "after"}
-                onChange={(e) => setShippingPayment(e.target.value as "after")}
+                value={"pay_after_shipment"}
+                checked={shippingPayment === "pay_after_shipment"}
+                onChange={(e) => setShippingPayment(e.target.value as "pay_after_shipment")}
                 />
             </label>
         </fieldset>
@@ -223,10 +243,10 @@ const Page: NextPage = () => {
 
     <div className='bg-light p-4 min-h-68 h-68 max-h-68 space-y-2 overflow-y-scroll md:max-w-150 md:mx-auto'>
         {
-            // packages.length < 1 && 
-            // <p className='text-xs italic'>
-            //     ...There are no incoming packages
-            // </p>
+            data.length < 1 && 
+            <p className='text-xs italic'>
+                ...No package available for request mail. Be sure to have at least one package with status {"stored"} to be able to make a shipment request.
+            </p>
         }
         {
             !isDataLoading ?

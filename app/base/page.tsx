@@ -1,4 +1,5 @@
 import { faqs } from '@/assets/faqs/faqs'
+import { Announcements } from '@/components/base/Announcements'
 import Carousel from '@/components/base/Carousel'
 import CTARedirectButton from '@/components/base/CTARedirectButton'
 import FAQ from '@/components/base/FAQ'
@@ -10,6 +11,8 @@ const Page: NextPage = ({}) => {
   return <>
     {/* Carousel */}
       <Carousel />
+
+      <Announcements />
 
       {/* CTA Redirect */}
       <div className="p-body bg-light/90 flex flex-wrap gap-6 justify-center">

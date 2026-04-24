@@ -31,7 +31,7 @@ export function Table <T,>({importedData, columnDef, globalFilter }: TableProps<
 
     return(
         <div className="w-full max-w-full h-full max-h-full">
-            <div className="w-full max-w-full overflow-auto max-h-80 h-200 bg-yellow-50 ">
+            <div className="w-full max-w-full overflow-auto max-h-80 h-200 ">
                 <table className="table-auto min-w-80 w-full text-[10px] whitespace-nowrap">
                     <thead>
                         {table.getHeaderGroups().map( headerGroup => 
@@ -49,9 +49,9 @@ export function Table <T,>({importedData, columnDef, globalFilter }: TableProps<
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map(row => 
-                            <tr key={row.id}>
+                            <tr key={row.id} className="border-b border-dark/10">
                                 {row.getVisibleCells().map(cell => 
-                                    <td key={cell.id} className="p-2">
+                                    <td key={cell.id} className="p-2 py-4">
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 )}

@@ -1,6 +1,6 @@
 "use client"
 
-import SearchComponent from '@/components/admin/packages/SearchComponent'
+import SearchComponent from '@/components/admin/orders/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
 import { Order } from '@/types/entityTypeDef'
 import { OrderStatus } from '@/types/statusTypes'
@@ -14,7 +14,7 @@ import { toast } from 'react-toastify'
 
 type FilterValues = {
     search: string
-    status: OrderStatus | ""
+    status: string
 }
 
 const Page: NextPage = () => {
@@ -104,6 +104,9 @@ const Page: NextPage = () => {
     const filteredData = orders
         .filter(x =>
             x.order_id.toLowerCase().includes(filterValues.search.toLowerCase())
+        )
+        .filter( x =>  
+            x.status.toLowerCase().includes(filterValues.status.toLowerCase())
         )
 
 

@@ -17,7 +17,7 @@ type Props<T extends Record<string, InputSafe>> = {
 
 const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}: Props<T>) => {
 
-    const [warehouses, setWareHouses] = useState<Warehouse[]>([])
+    // const [warehouses, setWareHouses] = useState<Warehouse[]>([])
 
     
     
@@ -26,36 +26,36 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         e.preventDefault()
     }
 
-    useEffect(() => {
-        const fetchWarehouses = async () => {
-            try{
-                const res = await fetch("/api/warehouses", {
-                    method: "GET",
-                    credentials: "include"
-                })
+    // useEffect(() => {
+    //     const fetchWarehouses = async () => {
+    //         try{
+    //             const res = await fetch("/api/warehouses", {
+    //                 method: "GET",
+    //                 credentials: "include"
+    //             })
 
-                const result = await res.json()
-                if(!res.ok){
-                    toast.error(result.message)
-                    return
-                }
+    //             const result = await res.json()
+    //             if(!res.ok){
+    //                 toast.error(result.message)
+    //                 return
+    //             }
 
-                setWareHouses(result.data)
-                setState( prev => ({...prev, ["warehouses"]: result.data[0].id}))
+    //             setWareHouses(result.data)
+    //             setState( prev => ({...prev, ["warehouses"]: result.data[0].id}))
                 
-            }
-            catch(err){
-                console.error("Error Fetching Warehouses", err)
-                toast.error("Error fetching warehouses")
-            }
-        }
+    //         }
+    //         catch(err){
+    //             console.error("Error Fetching Warehouses", err)
+    //             toast.error("Error fetching warehouses")
+    //         }
+    //     }
 
-        fetchWarehouses()
-    }, [])
+    //     fetchWarehouses()
+    // }, [])
 
 
   return (
-    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col gap-4'>
+    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4'>
 
 
         <InputComponent 
@@ -75,7 +75,9 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         setState={setState}
         readonly
         select
+        overshadow
         selectValues={[
+            {name: "-- none --", value: ""},
             {name: "Processing", value: "processing"}, 
             {name: "Shipped", value: "shipped"},
             {name: "In Transit", value: "in_transit"},
@@ -83,9 +85,11 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
             {name: "Out for delivery", value: "out_for_delivery"},
             {name: "Delivered", value: "delivered"}
         ]}
+        placeHolder="select shipment status"
+
         />
 
-        <InputComponent 
+        {/* <InputComponent 
         name="warehouse" 
         title="Warehouse" 
         type="number" 
@@ -98,7 +102,9 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         }))}
         overshadow
         />
-        
+         */}
+
+
     </form>
   )
 }

@@ -1,99 +1,114 @@
+import { calculateShippingFee } from "@/lib/calculators/calculateShippingFee";
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
 import { generateTrackingNumber } from "@/lib/generators/generateTrackingNumber";
 import { NextRequest, NextResponse } from "next/server";
 
 
-export async function POST(req: NextRequest){
-    try{
+export async function POST(req: NextRequest) {
+    const client = await pool.connect()
+
+    try {
         const session = await getSession()
 
-        if(!session){
+        if (!session) {
             return NextResponse.json({
                 success: false,
-                messgae: "Unauthorized"
-            }, {status: 401})
+                message: "Unauthorized"
+            }, { status: 401 })
         }
 
-        if(session.role !== "admin"){
+        if (session.role !== "admin") {
             return NextResponse.json({
                 success: false,
-                messgae: "Forbidden"
-            }, {status: 403})
+                message: "Forbidden"
+            }, { status: 403 })
         }
 
         const body = await req.json()
-        const {customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_request_id, shipment_note, user_id, payment_time, package_ids} = body
+
+        const {
+            customer_code,
+            origin_warehouse_id,
+            destination_warehouse_id,
+            channel,
+            shipment_request_id,
+            shipment_note,
+            user_id,
+            payment_time,
+            package_ids,
+            total_weight,
+            wrapping
+        } = body
+
+        const totalPrice = await calculateShippingFee(Number(total_weight), 1, channel, wrapping, payment_time)
+
+        console.log(totalPrice)
 
         const tracking_number = generateTrackingNumber()
 
-        const res = await pool.query(`
-            INSERT INTO shipments
-            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        `, [tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids])
+        // 🔐 Start transaction
+        await client.query("BEGIN")
 
-        await pool.query(`
+        const shipmentRes = await client.query(`
+            INSERT INTO shipments
+            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+            RETURNING *
+        `, [
+            tracking_number,
+            customer_code,
+            origin_warehouse_id,
+            destination_warehouse_id,
+            channel,
+            totalPrice,
+            shipment_note,
+            user_id,
+            payment_time,
+            package_ids,
+            total_weight
+        ])
+
+
+        await client.query(`
             UPDATE shipment_requests
-                SET status = 'accepted'
-                WHERE id = $1
+            SET status = 'accepted'
+            WHERE id = $1
         `, [shipment_request_id])
 
-        await pool.query(`
+        await client.query(`
             UPDATE packages
-                SET status = 'assigned_to_shipment'
-                WHERE id = ANY($1)
+            SET status = 'assigned_to_shipment'
+            WHERE id = ANY($1)
         `, [package_ids])
 
-        await pool.query(`
-            INSERT INTO payments (user_id, customer_code, shipment_tracking_number, amount, status,  created_at)
-            VALUES ($1, $2, $3, $4, $5, NOW())
-        `, [user_id, customer_code, tracking_number, total_cost, 'pending']) 
+        await client.query(`
+            INSERT INTO payments (user_id, customer_code, shipment_tracking_number, amount, status, created_at, transaction_ref)
+            VALUES ($1, $2, $3, $4, $5, NOW(), $6)
+        `, [user_id, customer_code, tracking_number, totalPrice, 'pending', tracking_number])
 
-        
-            // const createPaymentRecord = async(userId: number, customerCode: string, shipmentTrackingNumber: string, amount: number) => {
-            //     try{
-            //         const res = await fetch("/api/payments/initialize", {
-            //             method: "POST",
-            //             credentials: "include",
-            //             headers: {
-            //                 "Content-Type": "application/json"
-            //             },
-            //             body: JSON.stringify({
-            //                 user_id: userId,
-            //                 customer_code: customerCode,
-            //                 shipment_tracking_number: shipmentTrackingNumber,
-            //                 amount: amount
-            //             })
-            //         })
-        
-            //         const result = await res.json()
-        
-            //         if(!res.ok){
-            //             toast.error(result.message)
-            //             return
-            //         }
-        
-            //         toast.success("Payment record created successfully")
-            //         router.refresh()
-            //     }
-            //     catch(err){
-            //         toast.error("ERR:: Creating Payment Record")
-            //         console.error(err)
-            //     }
-            // }
+        // ✅ Commit if everything works
+        await client.query("COMMIT")
 
         return NextResponse.json({
             success: true,
-            data: res.rows[0]
+            data: shipmentRes.rows[0]
         })
-    }
-    catch(err){
-        console.error("Error Creating Shipment Requests", err)
+
+    } catch (err) {
+        // ❌ Rollback if anything fails
+        await client.query("ROLLBACK")
+
+        console.error("Error Creating Shipment", err)
+
         return NextResponse.json({
             success: false,
             message: "Something went wrong"
-        }, {status: 500})
+        }, { status: 500 })
+
+    } finally {
+        // 🔌 Always release client
+        client.release()
     }
 }
 

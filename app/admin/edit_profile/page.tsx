@@ -196,14 +196,13 @@ const Page: NextPage = () => {
             setIsEditButtonActive(false)
         }
 
-        console.log(user)
-
     }, [user, userDetails])
 
 
     const router = useRouter()
 
 
+    // Change user details
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
@@ -250,13 +249,13 @@ const Page: NextPage = () => {
         <BeatLoader color='#f26430' size={15} speedMultiplier={0.5}/>
     </div> :
     <>
-        <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between md:max-w-125 md:mx-auto'>
+        {/* <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between md:max-w-125 md:mx-auto'>
             <button 
             className='flex gap-2 flex-1 justify-start'
             onClick={() => {router.back()}}
             >
                 <FaChevronLeft />
-                <span className='text-xs font-semiboldd'>
+                <span className='text-xs font-semibold'>
                     Go Back
                 </span>
             </button>
@@ -266,7 +265,7 @@ const Page: NextPage = () => {
             <Link href={"/base/profile"} className='flex-1 flex justify-end'>
                 <FaUser />
             </Link>
-        </div>
+        </div> */}
 
         <div className='p-body bg-light mt-2 text-sm space-y-4 md:max-w-125 md:mx-auto'>
             <div className='relative w-fit h-fit mx-auto space-y-2'>

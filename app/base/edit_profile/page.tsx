@@ -260,8 +260,7 @@ const Page: NextPage = () => {
             className='flex gap-2 flex-1 justify-start'
             onClick={() => {router.back()}}
             >
-                <FaChevronLeft />
-                <span className='text-xs font-semiboldd'>
+f                <span className='text-xs font-semibold'>
                     Go Back
                 </span>
             </button>
@@ -408,7 +407,7 @@ const Page: NextPage = () => {
                 </p>
             }
 
-            <div className='flex justify-between items-end'>
+            <div className='flex justify-between items-end pb-30'>
                 <div className='w-50'>
                     <InputComponent 
                     name='password'

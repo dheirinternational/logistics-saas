@@ -17,9 +17,9 @@ const Page: NextPage = ({}) => {
   const [isDataLoading, setIsDataLoading] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<ProductCategory[]>([])
-  const [filterValue, setFilterValue] = useState<{search: string, category: null | number}>({
+  const [filterValue, setFilterValue] = useState<{search: string, category: string}>({
     search: "",
-    category: null
+    category: ""
   })
 
   
@@ -63,10 +63,10 @@ const Page: NextPage = ({}) => {
   const filteredProducts = products
     .filter( x => x.name.toLowerCase().includes(filterValue.search.toLowerCase()))
     .filter( x => {
-      if(filterValue.category === null){
+      if(filterValue.category === ""){
         return true
       }
-      else if(Number(x.category_id) === filterValue.category){
+      else if(x.category_id.toString().toLowerCase().includes(filterValue.category.toLowerCase()) ){
         return true
       }
     })
@@ -114,29 +114,29 @@ const Page: NextPage = ({}) => {
 
         <div className='flex text-xs overflow-auto w-full gap-4 px-2  pb-2'>
           <button 
-            onClick={() => setFilterValue(prev => ({...prev, category: null}))}
-            className={`${filterValue.category === null && "text-accent-red font-semibold"}`}
+            onClick={() => setFilterValue(prev => ({...prev, category: ""}))}
+            className={`${filterValue.category === "" && "text-accent-red font-semibold"}`}
             > 
               {"All"}
           </button>
           {
             cate.map( x => <button 
             key={x.value}
-            onClick={() => setFilterValue(prev => ({...prev, category: x.value}))}
-            className={`${x.value === filterValue.category && "text-accent-red font-semibold"}`}
+            onClick={() => setFilterValue(prev => ({...prev, category: x.value.toString()}))}
+            className={`${x.value.toString().toLowerCase() === filterValue.category.toLowerCase() && "text-accent-red font-semibold"}`}
             > 
               {x.name}
             </button>)
           }
         </div>
 
-        <div className='p-2 flex flex-wrap  gap-6 max-w-full overflow-auto justify-start pb-20'>
+        <div className='p-2 flex flex-wrap  gap-6 max-w-full overflow-auto justify-start min-h-150'>
             {
               isDataLoading ? 
               <BeatLoader color='#f26430' size={10}/> :
               (
                 !filterValue.search.trim() ?
-                products.map((product) => (
+                filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     {...product}

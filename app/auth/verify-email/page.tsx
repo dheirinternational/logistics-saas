@@ -1,16 +1,24 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function VerifyEmailPage({ searchParams }: any) {
-    const params = searchParams
+export default function Page(){
+    return(
+        <Suspense fallback={<div>Loading...</div>}>
+            <VerifyEmailPage />
+        </Suspense>
+    )
+}
+
+function VerifyEmailPage() {
+    const searchParams = useSearchParams()
     const router = useRouter()
 
     const [status, setStatus] = useState("verifying")
 
     useEffect(() => {
-        const token = params.get("token")
+        const token = searchParams.get("token")
 
         const verify = async () => {
             try {

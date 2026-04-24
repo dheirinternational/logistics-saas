@@ -9,10 +9,11 @@ import StatusStatCard from '@/components/admin/StatusStatCard'
 import { buttonsProps } from '@/components_map_definitions/quickActionsBtns'
 import { NextPage } from 'next'
 import { useEffect, useState } from 'react'
-import { BiCheck, BiExport } from 'react-icons/bi'
+import { BiExport } from 'react-icons/bi'
 import { FaCheckCircle, FaTruck } from 'react-icons/fa'
-import { Fa42Group, FaShip } from 'react-icons/fa6'
 import { FcProcess } from 'react-icons/fc'
+import { MdDelete } from 'react-icons/md'
+import { BeatLoader } from 'react-spinners'
 // import { GrDeliver } from 'react-icons/gr'
 import { toast } from 'react-toastify'
 
@@ -29,7 +30,59 @@ type ShipmentCount = {
 const Page: NextPage = () => {
 
     const [shipmentCounts, setShipmentCounts] = useState<ShipmentCount | null>(null)
+    const [announcements, setAnnouncements] = useState<{id: number, title: string, message: string}[]>([])
 
+
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState<{id: number, title: string, message: string} | null>()
+
+    const [currentAnnouncementPage, setCurrentAnnouncementPage] = useState<"view" | "add" >("view")
+    // const [isListPage, setIsListPage] = useState(false)
+
+
+
+    const fetchAnnouncements = async () => {
+    try{
+        const res = await fetch('/api/announcements')
+        const result = await res.json()
+
+        setAnnouncements(result.data)
+        console.log(result.data)
+    }
+    catch(err){
+        console.error("ERR:: Fetching Announcement Data", err)
+        toast.error("ERR:: Fetching Announcement Data")
+    }
+}
+
+    
+    // DELETE Announcement
+    const deleteAnnouncement = async (id) => {
+        try{
+            const res = await fetch("/api/announcements", {
+                method: "DELETE",
+                credentials: "include",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                body: JSON.stringify({id})
+            })
+
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+            }
+
+            toast.success(result.message)
+            fetchAnnouncements()
+
+        }
+        catch(err){
+            toast.error("ERR:: Deleting announcement")
+            console.error("ERR:: Deleting announcement", err)
+        }
+    }
+    
     
     useEffect(() => {
 
@@ -49,7 +102,9 @@ const Page: NextPage = () => {
             }
         }
 
+   
         fetchActiveShipmentRecords()
+        fetchAnnouncements()
 
     }, [])
     
@@ -60,7 +115,7 @@ const Page: NextPage = () => {
     <div className='max-h-[calc(100dvh-56px)] h-[calc(100dvh-56px)] overflow-y-auto p-body space-y-4'>
 
         {/* System Snapshot */}
-        <div className='bg-accent-blue p-4 rounded-lg text-white relative'>
+        <div className='bg-accent-blue p-4 rounded-lg text-white relative md:max-w-125 md:mx-auto'>
             <span className=' text-xs'>
                 System Snapshot
             </span>
@@ -77,7 +132,7 @@ const Page: NextPage = () => {
         </div>
 
         {/* Stats */}
-        <div>
+        <div className='md:max-w-125 md:mx-auto'>
             <div className='flex justify-between items-center'>
                 <h2 className='font-bold text-sm'>
                     STATS <span className='text-[10px]'>(today)</span>
@@ -98,7 +153,7 @@ const Page: NextPage = () => {
 
         {/* QuicK actions */}
 
-        <div className='p-body bg-light rounded-lg space-y-body'>
+        <div className='p-body bg-light rounded-lg space-y-body md:max-w-125 md:mx-auto'>
             <div className='flex justify-between'>
                 <h2 className='text-sm font-bold'>
                     Quick Actions
@@ -111,6 +166,64 @@ const Page: NextPage = () => {
                 {buttonsProps.map( (button, i) => 
                     <QuickActionsBtn key={i} {...button} />
                 )}
+            </div>
+        </div>
+
+
+        <div className='p-body bg-light rounded-lg space-y-body md:max-w-125 md:mx-auto'>
+            <div className='flex justify-between'>
+                
+                <h2 className='text-xs font-bold'>
+                    Announcements
+                </h2>
+
+                <button 
+                className='text-xs'
+                onClick={() => setCurrentAnnouncementPage( prev => prev === "add" ? "view" : "add" )}
+                >
+                    {currentAnnouncementPage}
+                </button>
+
+            </div>
+            <div className='border border-dark/20 p-2 h-100 min-h-100 rounded overflow-y-auto space-y-2 relative'>
+                {
+                    currentAnnouncementPage === "view" ?
+                    <>
+                        <span className='text-[10px] opacity-70 mb-3 block'>
+                        Click on an announcement to edit or delete. 
+                        </span>
+                        {announcements.map( x => 
+                            <button
+                            key={x.id} 
+                            className='border border-dark/10 text-xs w-full text-left p-2 rounded active:bg-accent-red flex items-center justify-between'
+                            onClick={() => setSelectedAnnouncement(x)}
+                            >
+                                <span>
+                                    {x.title}
+                                </span>
+
+                                
+                                <MdDelete
+                                onClick={() => {deleteAnnouncement(x.id)}}
+                                />
+
+                            </button>
+                        )}
+                        
+                    </> :
+                    <>
+                        <span className='text-[10px] opacity-70 mb-3 block'>
+                            Create new announcements to keep your customers informed about important updates, promotions, or news related to your logistics services.
+                        </span> 
+                        <AddAnnouncement fetchAnnouncements={fetchAnnouncements} />
+                    </>
+                    
+                }
+                {
+                    selectedAnnouncement && 
+                    <UpdateAnnouncement announcement={selectedAnnouncement} setSelectedAnnouncement={setSelectedAnnouncement} fetchAnnouncements={fetchAnnouncements} />
+                }
+                
             </div>
         </div>
 
@@ -190,5 +303,158 @@ const Page: NextPage = () => {
     </div>
   )
 }
+
+
+const UpdateAnnouncement = ({announcement, setSelectedAnnouncement, fetchAnnouncements} : {announcement: {id: number, title: string, message: string}, setSelectedAnnouncement: (announcement: {id: number, title: string, message: string} | null) => void, fetchAnnouncements: () => void}) => {
+    
+    const [title, setTitle] = useState(announcement.title)
+    const [message, setMessage] = useState(announcement.message)
+
+    const [isEditing, setIsEditing] = useState(false)
+
+    const editAnnouncement = async () => {  
+        setIsEditing(true)
+        try{
+            const res = await fetch("/api/announcements", {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                body: JSON.stringify({id: announcement.id, title, message})
+            })
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }   
+            toast.success(result.message)
+            setSelectedAnnouncement(null)
+            fetchAnnouncements()
+        } catch (error) {
+            toast.error("ERR:: An error occurred while updating the announcement.")
+            console.error("ERR:: An error occurred while updating the announcement.", error)    
+        } finally {
+            setIsEditing(false)
+        }
+
+    }
+    
+    return <div className='absolute w-full h-full bg-light top-0 left-0 p-2 text-xs'>
+        <div>
+            <button 
+            className='text-xs border border-dark/10 p-2 rounded py-1 bg-accent-blue text-white'
+            onClick={() => {setSelectedAnnouncement(null)}}
+            >
+                Go back
+            </button>
+        </div>
+        <div className='mt-4'>
+            <input 
+            type="text" 
+            value={title}
+            onChange={(e) => setTitle(e.currentTarget.value)}
+            // onBlur={() => setTimeout(() => {setTitle(announcement.title)} , 1000)}
+            className='border border-dark/10 p-2 text-sm rounded  outline-0'
+            />
+        </div>
+        <div className='mt-4'>
+            <textarea  
+            value={message}
+            onChange={(e) => setMessage(e.currentTarget.value)}
+            // onBlur={() => setTimeout(() => {setMessage(announcement.message)} , 1000)}
+            className='border border-dark/10 p-2 text-sm rounded  outline-0 w-full h-30 resize-none'
+            />
+        </div>
+        <button 
+        disabled={title === announcement.title && message === announcement.message ? true : isEditing}
+        className='mt-3 py-3 w-full bg-accent-red text-white rounded disabled:opacity-30'
+        onClick={() => editAnnouncement()}
+        >
+            {
+                isEditing ? 
+                <BeatLoader size={10} color='white'/> : 
+                "Update Announcement"   
+            }
+        </button>
+    </div>
+} 
+
+
+const AddAnnouncement = ({fetchAnnouncements} : {fetchAnnouncements: () => void}) => {
+
+    const [title, setTitle] = useState("")
+    const [message, setMessage] = useState("")
+
+    const [isCreating, setIsCreating] = useState(false)
+
+    const createAnnouncement = async () => {
+        setIsCreating(true)
+        try{   
+            const res = await fetch(`/api/announcements`, {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({title, message})
+            })
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+            toast.success(result.message)
+            setTitle("")
+            setMessage("")
+            fetchAnnouncements()
+        }
+        catch(err){
+            toast.error("ERR:: Creating Announcement")
+            console.error("ERR:: Creating Announcement", err)
+        } finally { 
+            setIsCreating(false)
+        }
+    }
+
+
+    return <div className='text-xs'>
+         
+        <div className='mt-4'>
+            <input 
+            type="text" 
+            value={title}
+            onChange={(e) => setTitle(e.currentTarget.value)}
+            // onBlur={() => setTimeout(() => {setTitle(announcement.title)} , 1000)}
+            className='border border-dark/10 p-2 text-sm rounded  outline-0'
+            placeholder='Input Title'
+            />
+        </div>
+        <div className='mt-4'>
+            <textarea  
+            value={message}
+            onChange={(e) => setMessage(e.currentTarget.value)}
+            placeholder='Input Message'
+            // onBlur={() => setTimeout(() => {setMessage(announcement.message)} , 1000)}
+            className='border border-dark/10 p-2 text-sm rounded  outline-0 w-full h-30 resize-none'
+            />
+        </div>
+        <button 
+        disabled={!title.trim() && !message.trim() ? true : isCreating}
+        className='mt-3 py-3 w-full bg-accent-red text-white rounded disabled:opacity-30'
+        onClick={() => createAnnouncement()}
+        >
+            {
+                isCreating ? 
+                <BeatLoader size={10} color='white'/> : 
+                "Create Announcement"   
+            }
+        </button>
+    </div>
+}
+
+
 
 export default Page

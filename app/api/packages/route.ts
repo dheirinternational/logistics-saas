@@ -48,6 +48,7 @@ export async function POST(req: NextRequest){
             received_at: formData.get("received_at"),
             stored_at: formData.get("stored_at"),
             inp_status: formData.get("inp_status"),
+            number_of_items: Number(formData.get("number_of_items"))
         }
 
         console.log(data)
@@ -71,11 +72,11 @@ export async function POST(req: NextRequest){
 
         const res = await client.query(`
             INSERT INTO packages(
-                incoming_package_id, package_name, user_id, customer_code, warehouse_id, weight, condition, status, received_at, stored_at, created_at 
+                incoming_package_id, package_name, user_id, customer_code, warehouse_id, weight, condition, status, received_at, stored_at, created_at, number_of_items
             )     
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
             RETURNING id
-        `, [data.incoming_package_id, data.package_name, data.user_id, data.customer_code, data.warehouse_id, data.weight, data.condition, data.status, data.received_at, data.stored_at ])
+        `, [data.incoming_package_id, data.package_name, data.user_id, data.customer_code, data.warehouse_id, data.weight, data.condition, data.status, data.received_at, data.stored_at, data.number_of_items])
 
         await client.query(`
             UPDATE incoming_packages

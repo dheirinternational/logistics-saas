@@ -24,8 +24,10 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
         customer_code: props.customer_code,
         warehouse_id: props.warehouse_id,
         user_id: props.user_id,
-        incoming_package_id: props.incoming_tracking_number
+        incoming_package_id: props.incoming_tracking_number,
+        number_of_items: props.declared_item_quantity
     })
+    
     const [images, setImages] = useState<File[]>([])
     const [previews,setPreviews] = useState<string[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)

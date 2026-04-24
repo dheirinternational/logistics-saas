@@ -1,0 +1,112 @@
+"use client"
+
+import { Dispatch, FormEvent, SetStateAction, useState} from "react"
+import InputComponent from "../shipments/InputComponent"
+import { Warehouse } from "@/types/entityTypeDef"
+
+type InputSafe = string | number 
+
+type Props<T extends Record<string, InputSafe>> = {
+    state: T,
+    setState: Dispatch<SetStateAction<T>>,
+    globalFilter?: string
+    onGlobalFilterChange?: (value: string) => void;
+}
+
+
+const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}: Props<T>) => {
+
+    const [warehouses, setWareHouses] = useState<Warehouse[]>([])
+
+    
+    
+    
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+    }
+
+    // useEffect(() => {
+    //     const fetchWarehouses = async () => {
+    //         try{
+    //             const res = await fetch("/api/warehouses", {
+    //                 method: "GET",
+    //                 credentials: "include"
+    //             })
+
+    //             const result = await res.json()
+    //             if(!res.ok){
+    //                 toast.error(result.message)
+    //                 return
+    //             }
+
+    //             setWareHouses(result.data)
+    //             setState( prev => ({...prev, ["warehouses"]: result.data[0].id}))
+                
+    //         }
+    //         catch(err){
+    //             console.error("Error Fetching Warehouses", err)
+    //             toast.error("Error fetching warehouses")
+    //         }
+    //     }
+
+    //     fetchWarehouses()
+    // }, [])
+
+    // const warehouseSelectValues = warehouses.map( x => ({
+    //     name: x.name, value: x.id.toString()
+    // }))
+
+
+  return (
+    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4'>
+
+
+        <InputComponent 
+        name="search" 
+        title="Search" 
+        type="text" 
+        state={state} 
+        setState={setState}
+        placeHolder="Tracking Number, Customer Code, Package Name..."        
+        />
+
+        <InputComponent 
+        name="status" 
+        title="Status" 
+        type="text" 
+        state={state} 
+        setState={setState}
+        readonly
+        select
+        overshadow
+        placeHolder="Select package status..."
+        selectValues={[
+            {name: "-- none --", value: ""},
+            {name: "Confirmed", value: "confirmed"}, 
+            {name : "Preparing", value: "preparing"},
+            {name: "Shipped", value: "shipped"},
+            {name: "Delivered", value: "delivered"},
+        ]}
+        />
+{/* 
+        <InputComponent 
+        name="warehouse_id" 
+        title="Warehouse" 
+        type="number" 
+        state={state} 
+        setState={setState}
+        readonly
+        select
+        selectValues={[
+            {name: "-- none --", value: ""},
+            ...warehouseSelectValues
+        ]}
+        placeHolder="Select Warehouse"
+        overshadow
+        /> */}
+        
+    </form>
+  )
+}
+
+export default SearchComponent

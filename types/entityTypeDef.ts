@@ -42,6 +42,7 @@ export type Shipment = {
     channel: ShippingType
     shipping_note: string
     total_cost: number
+    total_weight?: number
     payment_time: "before" | "after"
     paid_for: boolean
     created_at: string
@@ -60,7 +61,8 @@ export type Package = {
     status: PackageStatus
     received_at: string
     stored_at: string
-    created_at: string    
+    created_at: string
+    number_of_items: number    
 }
 
 export type Warehouse = {
@@ -139,6 +141,7 @@ export type ShippingRequest = {
     created_at: string
     payment_time: "before" | "after"
     shipping_note: string
+    total_weight: number
 }
 
 

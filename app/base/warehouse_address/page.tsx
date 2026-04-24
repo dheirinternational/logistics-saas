@@ -13,7 +13,7 @@ export default function Page() {
 
     const router = useRouter()
 
-    const [filterValues, setFilterValues] = useState({country: "china", id: 0})
+    const [filterValues, setFilterValues] = useState<{id: string}>({id: ""})
     // const [coordinates, setCoordinates] = useState({coordinates: ""})
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
     const [error, setError] = useState("")
@@ -49,7 +49,8 @@ export default function Page() {
         fetchWarehouses()
     }, [])
 
-    const currentlySelectedWarehouse = warehouses.find( warehouse => warehouse.id === filterValues.id)
+    const currentlySelectedWarehouse = warehouses.find( warehouse => warehouse.id.toString().includes(filterValues.id))
+    const warehouseMapSelectValues = warehouses.map((x) => ({name: x.name, value: x.id.toString()}))
 
   return (
     <div className='h-full w-full space-y-1 '>
@@ -64,8 +65,7 @@ export default function Page() {
                 className='flex gap-2 flex-1 justify-start'
                 onClick={() => {router.back()}}
                 >
-                    <FaChevronLeft />
-                    <span className='text-xs font-semiboldd'>
+                    <span className='text-xs font-semibold'>
                         Go Back
                     </span>
                 </button>
@@ -89,6 +89,7 @@ export default function Page() {
                     selectValues={["china", "nigeria"]}
                     />
                 </div> */}
+
                 <div className='w-60 -mt-2'>
                     <InputComponent
                     name='id'
@@ -97,7 +98,7 @@ export default function Page() {
                     setState={setFilterValues}
                     readonly
                     select
-                    selectValues={warehouses.map((x) => ({name: x.name, value: x.id}))}
+                    selectValues={warehouseMapSelectValues}
                     overshadow
                     />
                 </div>

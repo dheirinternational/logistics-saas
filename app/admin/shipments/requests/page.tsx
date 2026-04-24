@@ -16,8 +16,8 @@ import { toast } from 'react-toastify'
 
 export type SearchProps = {
     search: string,
-    status: "pending" | "approved",
-    warehouse_id: number
+    status: string,
+    warehouse_id: string
 }
 
 const columnHelper = createColumnHelper<ShippingRequest>()
@@ -30,8 +30,8 @@ const Page: NextPage = () => {
     const [isCreatingShipmentData, setIsCreatingShipmentData] = useState(false)
     const [filterValues, setFilterValues] = useState<SearchProps>({
         search: "",
-        warehouse_id: 0,
-        status: "pending"
+        warehouse_id: "",
+        status: ""
     })
     const [isModalActive, setIsModalActive] = useState(false)
 
@@ -39,6 +39,32 @@ const Page: NextPage = () => {
 
 
     const [modalSelectedRequest, setModalSelectedRequest] = useState<null | ShippingRequest>(null)
+    console.log(modalSelectedRequest)
+
+    const fetchShipmentData = async () => {
+        try{
+            const res = await fetch(`/api/shipment-requests`, {
+                method: "GET",
+                credentials: "include"
+            })
+
+            const data = await res.json()
+            
+            if(!res.ok){
+                toast.error(data.message)
+                return
+            }
+
+            setShipmentRequests(data.data)
+        }
+        catch(err){
+            toast.error("Cannot fetch Shipment Data")
+            console.error(err)
+        }
+        finally{
+            setIsDataLoading(false) 
+        }
+    }
 
     const createShipment = async () => {
         setIsCreatingShipmentData(true)
@@ -54,12 +80,13 @@ const Page: NextPage = () => {
                     origin_warehouse_id: 1,
                     destination_warehouse_id: 2,
                     channel: modalSelectedRequest?.channel,
-                    total_cost: 50000,
+                    wrapping: modalSelectedRequest?.wrapping,
                     shipment_request_id: modalSelectedRequest?.id,
                     shipment_note: modalSelectedRequest?.shipping_note,
                     user_id: modalSelectedRequest?.user_id,
                     payment_time: modalSelectedRequest?.payment_time,
-                    package_ids: modalSelectedRequest?.package_ids
+                    package_ids: modalSelectedRequest?.package_ids,
+                    total_weight: Number(modalSelectedRequest?.total_weight)
                 })
             })
 
@@ -71,6 +98,7 @@ const Page: NextPage = () => {
             }
 
             toast.success("Shipment Initialized Succesfully")
+            fetchShipmentData()
             router.refresh()
 
         }
@@ -102,6 +130,10 @@ const Page: NextPage = () => {
         columnHelper.accessor("status", {
             header: "Status"
         }),
+        columnHelper.accessor("total_weight", {
+            header: "Total Weight",
+            cell: ({getValue}) => <p>{getValue()} kg</p>,
+        }),
         columnHelper.display({
             id: "Details",
             cell: ({row}) => 
@@ -116,37 +148,15 @@ const Page: NextPage = () => {
         })
     ]
 
+
+
     useEffect(() => {
-        const fetchShipmentData = async () => {
-            try{
-                const res = await fetch(`/api/shipment-requests`, {
-                    method: "GET",
-                    credentials: "include"
-                })
-
-                const data = await res.json()
-                
-                if(!res.ok){
-                    toast.error(data.message)
-                    return
-                }
-
-                setShipmentRequests(data.data)
-            }
-            catch(err){
-                toast.error("Cannot fetch Shipment Data")
-                console.error(err)
-            }
-            finally{
-                setIsDataLoading(false) 
-            }
-        }
-
+    
         fetchShipmentData()
     
     }, [])
 
-    const data = shipmentRequests.filter( x => x.status === filterValues.status )
+    const data = shipmentRequests.filter( x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()))
 
   return <div className='space-y-body'>
     {isDataLoading ? <div className='w-screen h-[calc(100dvh-80px)] center-items'>

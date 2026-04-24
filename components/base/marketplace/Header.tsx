@@ -18,7 +18,6 @@ const Header = () => {
         className='flex gap-2 flex-1 justify-start'
         onClick={() => {router.back()}}
         >
-            <FaChevronLeft />
             <span className='text-xs font-semiboldd'>
                 Go Back
             </span>

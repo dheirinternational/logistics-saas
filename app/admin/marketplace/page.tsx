@@ -18,8 +18,8 @@ const columnHelper = createColumnHelper<Product>()
 
 type FilterValue = {
     search: string
-    status: ProductStatus,
-    category: number
+    status: string
+    category: string
 }
 
 
@@ -30,8 +30,8 @@ const Page: NextPage = ({}) => {
     const [isDataLoading, setIsDataLoading] = useState(false)
     const [filterValue, setFilterValue] = useState<FilterValue>({
         search: "",
-        status: "active",
-        category: 0,
+        status: "",
+        category: "",
     })
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
     const [isModalActive, setIsModalActive] = useState(false)
@@ -77,13 +77,19 @@ const Page: NextPage = ({}) => {
             header: "Product Name"
         }),
         columnHelper.accessor("price", {
-            header: "Price"
+            header: "Price",
+            cell: ({getValue}) => <span>
+                 ₦ {getValue()}
+            </span>
         }),
         columnHelper.accessor("status", {
             header: "Status"
         }),
         columnHelper.accessor("weight", {
-            header: "Status"
+            header: "Weight",
+            cell: ({getValue}) => <p>
+                {getValue()} kg
+            </p>
         }),
         columnHelper.accessor("is_featured", {
             header: "Featured"
@@ -118,7 +124,7 @@ const Page: NextPage = ({}) => {
 
     // Categories
     const cate = categories.length > 0 ? categories.map( x => 
-        ({name: `${x.name.charAt(0).toUpperCase()}${x.name.slice(1)}`, value: x.id})) 
+        ({name: `${x.name.charAt(0).toUpperCase()}${x.name.slice(1)}`, value: x.id.toString()})) 
         : []
     
     // View Information Modal
@@ -165,7 +171,7 @@ const Page: NextPage = ({}) => {
     </div>
 
     {/* SEACRH Component */}
-    <div className='p-body px-8 bg-light rounded-lg flex flex-col gap-2'>
+    <div className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4'>
         
         {/* Search Values */}
         <InputComponent 
@@ -177,38 +183,39 @@ const Page: NextPage = ({}) => {
         />
 
         {/* Status and Category */}
-        <div className="flex gap-3">
             
-            {/* Status */}
-            <InputComponent 
-            name="status" 
-            title="Status" 
-            type="text" 
-            state={filterValue} 
-            setState={setFilterValue}
-            readonly
-            overshadow
-            select
-            selectValues={[
-                {name: "Active", value: "active"}, 
-                {name: "Inactive", value: "inactive"},
-                {name: "Out_Of_Stock", value: "out_of_stock"}
-            ]}
-            />
+        {/* Status */}
+        <InputComponent 
+        name="status" 
+        title="Status" 
+        type="text" 
+        state={filterValue} 
+        setState={setFilterValue}
+        readonly
+        overshadow
+        select
+        placeHolder='select product status'
+        selectValues={[
+            {name: "-- none --", value: "" },
+            {name: "Active", value: "active"}, 
+            {name: "Inactive", value: "inactive"},
+            {name: "Out_Of_Stock", value: "out_of_stock"}
+        ]}
+        />
 
-            {/* Category */}
-            <InputComponent
-            name="category"
-            title="Category"
-            type="text"
-            state={filterValue}
-            setState={setFilterValue}
-            readonly
-            overshadow
-            select
-            selectValues={cate}
-            />
-        </div>
+        {/* Category */}
+        <InputComponent
+        name="category"
+        title="Category"
+        type="text"
+        state={filterValue}
+        setState={setFilterValue}
+        readonly
+        overshadow
+        select
+        selectValues={[{name: "-- none --", value: "" }, ...cate]}
+        placeHolder='select product category'
+        />
     </div>
 
     {/* Table */}

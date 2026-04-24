@@ -9,6 +9,7 @@ import { FaUser } from 'react-icons/fa'
 import { HiSpeakerWave } from 'react-icons/hi2'
 import { Address } from '@/types/entityTypeDef'
 import Image from 'next/image'
+import { Announcements } from '@/components/base/Announcements'
 
 
 const Page: NextPage = async() => {
@@ -73,16 +74,7 @@ const Page: NextPage = async() => {
 
     {/* Announcement */}
 
-    <div className='p-body bg-white shadow shadow-dark/10 flex md:max-w-125 md:mx-auto'>
-        <div className=' h-full w-7 '>
-            <HiSpeakerWave className='text-2xl' />
-        </div>
-        <div className='w-[calc(100%-46px)] bg-amber-500 h-full'>
-            <p className='text-sm'>
-                Announcement: Work Hours Notice
-            </p>
-        </div>
-    </div>
+    <Announcements />
 
     {/* Shipment Control */}
     <div className='p-body bg-white shadow shadow-dark/10 flex flex-wrap gap-5 justify-center md:max-w-125 md:mx-auto'>

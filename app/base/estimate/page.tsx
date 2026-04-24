@@ -1,9 +1,11 @@
 "use client"
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
+import { calculateShippingFee } from '@/lib/calculators/calculateShippingFee'
 import { ShippingType } from '@/types/miscallaneous'
 import { NextPage } from 'next'
 import { useState } from 'react'
+import { BeatLoader } from 'react-spinners'
 
 type CalculateParametersType = {
     type: ShippingType
@@ -19,7 +21,34 @@ const Page: NextPage = ({}) => {
         amount: 0,
     })
 
+    const [isCalculating, setIsCalculating] = useState(false)
+
+    const [totalPrice, setTotalPrice] = useState<number | null>(null)
+
     const shippingTypeValues: ShippingType[] = ["air", "sea", "express"]
+
+    const handleSubmit = async () => {
+        setIsCalculating(true)
+        try{
+            const res = await calculateShippingFee(
+                calculateParameters.weight,
+                calculateParameters.amount,
+                calculateParameters.type
+            )
+
+            setTotalPrice(res)
+
+        }
+        catch(err){
+            console.error("ERR calculating shipping fee", err)
+        }
+        finally{
+            setIsCalculating(false)
+        }
+        
+
+    }
+
   return <>
     <div className='h-full w-full p-body space-y-body'>
         <div className='bg-accent-blue h-fit rounded-lg p-body md:max-w-150 md:mx-auto'>
@@ -78,11 +107,20 @@ const Page: NextPage = ({}) => {
         </div>
         <div className='md:max-w-150 md:mx-auto'>
             <button 
-            className='w-full bg-accent-red text-white py-2 rounded'
-            onClick={() => console.log(calculateParameters.amount, calculateParameters.type, calculateParameters.weight)}
+            className='w-full bg-accent-red text-white py-2 rounded disabled:opacity-50'
+            onClick={handleSubmit}
+            disabled={isCalculating}
             >
-                Estimate
+                {
+                    isCalculating ?
+                    <BeatLoader color='#fff' size={10}/> :
+                    "Estimate"
+                }
             </button>
+        </div>
+
+        <div className='mt-4 p-body bg-light rounded-lg text-xs md:max-w-150 md:mx-auto'>
+            <p>Total Price: ₦ {totalPrice?.toFixed(2) || "0.00"}</p>
         </div>
     </div>
   </>

@@ -4,7 +4,7 @@ export default async function VerifyPayment({searchParams}: {searchParams: Promi
 
     const { reference } = await searchParams
     // ${process.env.NEXT_PUBLIC_APP_URL}
-    await fetch(`/api/paystack/verify-payment/${reference}`)
+    await fetch(`${process.env.BASE_URL}/api/paystack/verify-payment/${reference}`)
 
     return(
         <div className="p-body">

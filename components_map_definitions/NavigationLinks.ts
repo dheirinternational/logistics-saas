@@ -1,7 +1,8 @@
 import { IconType } from "react-icons"
 import { CgProfile, CgShoppingCart } from "react-icons/cg"
-import { FaShip, FaWarehouse } from "react-icons/fa"
-import { FaShop, FaUsers } from "react-icons/fa6"
+import { CiLocationOn } from "react-icons/ci"
+import { FaDollarSign, FaShip, FaWarehouse } from "react-icons/fa"
+import { FaNairaSign, FaShop, FaUsers } from "react-icons/fa6"
 import { LuPackage } from "react-icons/lu"
 import { MdDashboard } from "react-icons/md"
 
@@ -46,6 +47,16 @@ export const navLinks: NavLink[] = [
         name: "Orders",
         path: "/admin/orders",
         logo: CgShoppingCart
+    },
+    {
+        name: "Delivery Zones",
+        path: "/admin/delivery_zones",
+        logo: CiLocationOn
+    },
+    {
+        name: "Pricing List",
+        path: "/admin/pricing_list",
+        logo: FaNairaSign
     },
     {
         name: "Profile",

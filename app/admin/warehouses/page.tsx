@@ -10,6 +10,8 @@ import { FaPlus } from 'react-icons/fa'
 import { useEffect, useState } from 'react'
 import { ClipLoader } from 'react-spinners'
 
+// ! Search component later
+
 
 const Page: NextPage = ({}) => {
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
@@ -25,9 +27,9 @@ const Page: NextPage = ({}) => {
         columnHelper.accessor("type", {
             header: "Type"
         }),
-        columnHelper.accessor("manager_id", {
-            header: "Manager",
-        }),
+        // columnHelper.accessor("manager_id", {
+        //     header: "Manager",
+        // }),
         columnHelper.accessor("phone", {
             header: "Phone"
         })
@@ -74,22 +76,22 @@ const Page: NextPage = ({}) => {
     </div>
 
     {/* Add Warehouse BTN */}
-    <div className='bg-light rounded-lg '>
+    {/* <div className='bg-light rounded-lg '>
         <Link href={'/admin/warehouses/add_warehouse'} className='rounded-lg border border-dark/20 flex w-full items-center justify-center gap-3 text-sm py-3 font-bold'>
             <FaPlus/>
             Add Warehouse
         </Link>
-    </div>
+    </div> */}
 
     {/* SEARCH COMPONENT */}
-    <SearchComponent />
+    {/* <SearchComponent /> */}
 
     {/* Table */}
     <div className='bg-light p-body rounded-lg'>
         <p className='text-xs mt-2 opacity-70'>
             A list of all Warehouses in the system.
         </p>
-        <div className='max-w-full w-full bg-red-100 mt-4'>
+        <div className='max-w-full w-full mt-4'>
             {loading ? (
                 <div className='flex justify-center items-center py-8'>
                     <ClipLoader color="#3B82F6" size={30} />
@@ -97,7 +99,7 @@ const Page: NextPage = ({}) => {
                 </div>
             ) : error ? (
                 <div className='text-center py-8'>
-                    <p className='text-red-500 text-sm'>{error}</p>
+                    <p className='text-sm'>{error}</p>
                 </div>
             ) : (
                 <Table 

@@ -20,7 +20,7 @@ import { toast } from 'react-toastify'
 
 export type SearchProps = {
     search: string,
-    status: ShipmentStatus,
+    status: string,
 }
 
 type currentSelectedStatus = {
@@ -36,7 +36,7 @@ const Page: NextPage = () => {
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [filterValues, setFilterValues] = useState<SearchProps>({
         search: "",
-        status: "processing"
+        status: ""
     })
     const [isModalActive, setIsModalActive] = useState(false)
     
@@ -150,7 +150,7 @@ const Page: NextPage = () => {
         }
     }
 
-    const data = shipments.filter( x => x.status === filterValues.status )
+    const data = shipments.filter( x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()))
 
 
   return <div className='space-y-body'>

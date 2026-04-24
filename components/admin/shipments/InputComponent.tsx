@@ -21,11 +21,12 @@ type InputProps<T extends Record<string, InputSafe>> = {
     required?: boolean
     overshadow?: boolean
     nullable?: boolean
+    defaultValue?: {name: string, value: string} | null
 }
 
 
 
-const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, type, state, setState, readonly, select, selectValues=[], unit, placeHolder, textarea, required, overshadow, nullable=false}: InputProps<T>) => {
+const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, type, state, setState, readonly, select, selectValues=[], unit, placeHolder, textarea, required, overshadow, nullable=false, defaultValue}: InputProps<T>) => {
 
     const [isDropDownActive, setIsDropDownActive] = useState(false)
     const [overshadowText, setOvershadowText] = useState("")
@@ -80,9 +81,9 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
                 />
             </>}
 
-            {overshadow && 
+            {overshadow && state[key] && 
                 <div className={`whitespace-nowrap w-[70%] h-7.5 left-3 absolute flex items-center pointer-events-none bg-[#e5e5e5] outline-0  ${title ? "top-6.5" : "top-px"}`}>
-                    {overshadowText}
+                    {defaultValue?.name ??  overshadowText}
                 </div>
             }
 

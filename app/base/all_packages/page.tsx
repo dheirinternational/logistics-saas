@@ -10,7 +10,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaChevronLeft, FaUser, FaWarehouse } from 'react-icons/fa'
-import { FaHand } from 'react-icons/fa6'
 import { GiShakingHands } from 'react-icons/gi'
 import { MdAssignmentAdd, MdCheckCircle } from 'react-icons/md'
 import { BeatLoader } from 'react-spinners'
@@ -19,7 +18,7 @@ import { toast } from 'react-toastify'
 
 type FilterValues = {
     tracking_id: string,
-    status: PackageStatus
+    status: string
 }
 
 
@@ -32,7 +31,7 @@ const Page: NextPage = () => {
 
     const [filterValues, setFilterValues] = useState<FilterValues>({
         tracking_id: "",
-        status: "stored",
+        status: "",
     })
 
     const router = useRouter()
@@ -70,7 +69,7 @@ const Page: NextPage = () => {
     const data = packages.filter( x => 
         (x.incoming_package_id.toLowerCase().includes(filterValues.tracking_id.toLowerCase()) || 
         x.package_name.toLowerCase().includes(filterValues.tracking_id.toLowerCase())) && 
-        x.status === filterValues.status )
+        x.status.toLowerCase().includes(filterValues.status.toLowerCase()) )
 
   return <div className='h-full w-full space-y-2'>
     {/* Header */}
@@ -79,8 +78,7 @@ const Page: NextPage = () => {
         className='flex gap-2 flex-1 justify-start'
         onClick={() => {router.back()}}
         >
-            <FaChevronLeft />
-            <span className='text-xs font-semiboldd'>
+            <span className='text-xs font-semibold'>
                 Go Back
             </span>
         </button>
@@ -104,11 +102,13 @@ const Page: NextPage = () => {
             readonly
             select
             selectValues={[
+                {name: "-- none --", value: ""},
                 {name: "Stored", value: "stored"},
                 {name: "Requested For", value: "requested_for"},
                 {name: "Assigned To Shipment", value: "assigned_to_shipment"},
                 {name: "Delivered", value: "delivered"},
             ]}
+            placeHolder='select package status...'
             overshadow
             />
         </div>
@@ -129,7 +129,7 @@ const Page: NextPage = () => {
     
 
     {/* Input Fields */}
-    <div className='bg-light px-4 py-2 flex justify-center gap-3 md:max-w-150 md:mx-auto'>
+    <div className='bg-light px-4 py-2 flex justify-center gap-3 md:max-w-150 md:mx-auto overflow-x-auto w-full pl-20'>
         <StatusStatCard count={packages.filter(p => p.status === "stored").length} status="stored" icon={FaWarehouse} />
         <StatusStatCard count={packages.filter(p => p.status === "requested_for").length} status="requested_for" icon={GiShakingHands} />
         <StatusStatCard count={packages.filter(p => p.status === "assigned_to_shipment").length} status="assigned_to_shipment" icon={MdAssignmentAdd} />

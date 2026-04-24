@@ -1,6 +1,6 @@
 "use client"
 
-import SearchComponent from '@/components/admin/packages/SearchComponent'
+import SearchComponent from '@/components/admin/orders/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
 import { Package, PackageImage } from '@/types/entityTypeDef'
 import { PackageStatus } from '@/types/statusTypes'
@@ -15,7 +15,8 @@ import { toast } from 'react-toastify'
 
 type FilterValues = {
     search: string
-    status: PackageStatus | ""
+    status: string
+    warehouse_id: string
 }
 
 
@@ -29,7 +30,8 @@ const Page: NextPage = ({}) => {
     
     const [filterValues, setFilterValues] = useState<FilterValues>({
         search: "",
-        status: ""
+        status: "",
+        warehouse_id: ""
     })
 
     useEffect(() => {
@@ -109,7 +111,7 @@ const Page: NextPage = ({}) => {
 
     const filteredData = packages
         .filter( x => x.package_name.toLowerCase().includes(filterValues.search.toLowerCase()) || x.incoming_package_id.toLowerCase().includes(filterValues.search.toLowerCase()) || x.customer_code.toLowerCase().includes(filterValues.search.toLowerCase()))
-        .filter( x => x.status === filterValues.status)
+        .filter( x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()) && x.warehouse_id.toString().includes(filterValues.warehouse_id))
     
 
 
@@ -255,12 +257,12 @@ const Modal = ({setModal, packag} : {setModal : () => void, packag: Package | nu
                 <div className='mt-4 relative'>
                     
                     <div className='text-xs flex flex-col gap-2 justify-between p-3'>
-                        <p className='space-x-3'>Customer Code: <span>{packag?.customer_code}</span></p>
-                        <p className='space-x-3'>Incoming Package Id: <span>{packag?.incoming_package_id || "nil"}</span></p>
-                        <p className='space-x-3'>Received At:<span className='ml-2'>{new Date(packag?.received_at || "").toDateString()}</span></p>
-                        <p className='space-x-3'>Status:<span className='ml-2'>  {packag?.status} </span></p>
-                        <p className='space-x-3 '>Warehouse Id:<span className='ml-2'>{packag?.warehouse_id}</span></p>
-                        <p className='space-x-3 '>Weight:<span className='ml-2'>{packag?.weight}</span></p>
+                        <p className='space-x-3 font-semibold'>Customer Code: <span className='font-normal'>{packag?.customer_code}</span></p>
+                        <p className='space-x-3 font-semibold'>Incoming Package Id: <span className='font-normal'>{packag?.incoming_package_id || "nil"}</span></p>
+                        <p className='space-x-3 font-semibold'>Received At:<span className='ml-2 font-normal'>{new Date(packag?.received_at || "").toDateString()}</span></p>
+                        <p className='space-x-3 font-semibold'>Status:<span className='ml-2 font-normal'>  {packag?.status} </span></p>
+                        <p className='space-x-3 font-semibold '>Warehouse Id:<span className='ml-2 font-normal'>{packag?.warehouse_id}</span></p>
+                        <p className='space-x-3 font-semibold '>Weight:<span className='ml-2 font-normal'>{packag?.weight} kg</span></p>
                     </div>
                 </div>
                     <hr className='border-dark/40 my-2'/>

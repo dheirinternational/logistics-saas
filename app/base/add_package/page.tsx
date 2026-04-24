@@ -92,8 +92,7 @@ const Page: NextPage = () => {
         className='flex gap-2 flex-1 justify-start'
         onClick={() => {router.back()}}
         >
-            <FaChevronLeft />
-            <span className='text-xs font-semiboldd'>
+            <span className='text-xs font-semibold'>
                 Go Back
             </span>
         </button>
@@ -167,7 +166,7 @@ const Page: NextPage = () => {
                 </div>
             </div>
 
-        <div className='p-body mx-auto w-full md:min-w-150'>
+        <div className='p-body mx-auto w-full md:max-w-150 md:mx-auto'>
             <button 
             className='bg-accent-red text-white text-xs py-3 w-full rounded disabled:opacity-70 '
             disabled={isSubmiting}

@@ -1,5 +1,5 @@
 import type { CTARedirectButton } from "@/components/base/CTARedirectButton";
-import { BsBoxArrowInDown, BsBoxArrowUp, BsList } from "react-icons/bs";
+import { BsBoxArrowInDown, BsBoxArrowUp, BsCart3, BsList } from "react-icons/bs";
 import { FaBoxes, FaShippingFast, FaUserEdit } from "react-icons/fa";
 import { FaMapLocationDot, FaUserTag } from "react-icons/fa6";
 import { GrDocument, GrOrderedList } from "react-icons/gr";
@@ -24,11 +24,11 @@ export const ctaButtonsProps: CTARedirectButton[] = [
         path: "/base/pending_payments"
     },
 
-    {
-        title: "New User Ordering Process",
-        icon: FaUserTag,
-        path: "/in_development"
-    },
+    // {
+    //     title: "New User Ordering Process",
+    //     icon: FaUserTag,
+    //     path: "/in_development"
+    // },
 ]
 
 export const profileCtaButtonsProps: CTARedirectButton[] = [
@@ -71,6 +71,11 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
         title: "Pending Payments",
         icon: MdPendingActions, 
         path: "/base/pending_payments"
+    },
+    {
+        title: "Orders",
+        icon: BsCart3, 
+        path: "/base/orders"
     }
 ]
 

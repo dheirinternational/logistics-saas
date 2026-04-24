@@ -54,4 +54,20 @@ a{
 
 }
 
-/* Some petty changes */
+
+.announcements-scrollbar {
+    animation: animate-announcements 30s linear infinite;
+}
+
+
+
+
+
+@keyframes animate-announcements {
+    from{
+        transform: translateX(0);
+    }
+    to{
+        transform: translateX(-100%);   
+    }
+}

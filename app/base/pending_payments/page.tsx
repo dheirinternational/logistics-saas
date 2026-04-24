@@ -29,45 +29,44 @@ export default function PendingPayments(){
         status: ""
     })
 
+    const fetchPayments = async() => { 
+        setIsDataLoading(true)
+        try{
+
+            // Fetch User Data
+            const userRes = await fetch("/api/users/my-data")
+            const userData = await userRes.json()
+            if(!userRes.ok){
+                toast.error(userData.message)
+            }
+
+
+            // Fetch Payments Data
+            const res = await fetch("/api/payments/user")
+            const result = await res.json()
+
+            if(!res.ok){ 
+                console.error("Error Fetching Payments", result)
+                return
+            }
+
+            setPayments(result.data.filter((payment: Payment) => payment.status === "pending"))
+            setUser(userData.data)
+
+
+        }
+        catch(err){
+            console.error("Error Fetching Payments", err)
+            toast.error("Error Fetching Payments")
+        }
+        finally{
+            setIsDataLoading(false)
+        }
+    }
 
     // ! Still need work - Fetch Unpaid Payments 
     useEffect(() => {
         
-        const fetchPayments = async() => { 
-            setIsDataLoading(true)
-            try{
-
-                // Fetch User Data
-                const userRes = await fetch("/api/users/my-data")
-                const userData = await userRes.json()
-                if(!userRes.ok){
-                    toast.error(userData.message)
-                }
-
-
-                // Fetch Payments Data
-                const res = await fetch("/api/payments/user")
-                const result = await res.json()
-
-                if(!res.ok){ 
-                    console.error("Error Fetching Payments", result)
-                    return
-                }
-
-                setPayments(result.data.filter((payment: Payment) => payment.status === "pending"))
-                setUser(userData.data)
-
-
-            }
-            catch(err){
-                console.error("Error Fetching Payments", err)
-                toast.error("Error Fetching Payments")
-            }
-            finally{
-                setIsDataLoading(false)
-            }
-        }
-
         fetchPayments()
     }, [])
 
@@ -84,8 +83,7 @@ export default function PendingPayments(){
                 className='flex gap-2 flex-1 justify-start'
                 onClick={() => {router.back()}}
                 >
-                    <FaChevronLeft />
-                    <span className='text-xs font-semiboldd'>
+                    <span className='text-xs font-semibold'>
                         Go Back
                     </span>
                 </button>
@@ -179,8 +177,10 @@ const PaymentCard = ({ payment, userEmail }: { payment: Payment, userEmail: stri
             console.log("Payment Initialization Result", result)
             
             if(result.data.status){
-                router.push(result.data.data.authorization_url)   
+                window.location.href = result.data.data.authorization_url  
             }
+
+            console.log(result)
         }
         catch(err){
             toast.error("ERR:: Initializing Payment")
@@ -207,11 +207,7 @@ const PaymentCard = ({ payment, userEmail }: { payment: Payment, userEmail: stri
             <div className='text-xs flex items-end justify-between'>
                 <div className="flex-col flex gap-1 border border-dark/20 rounded p-3 w-40 ">
                     <p className='whitespace-nowrap'>
-                        Amount: ₦ {payment.amount}K
-                    </p>
-
-                    <p className='whitespace-nowrap'>
-                        method: {payment.channel}
+                        Amount: ₦ {payment.amount}
                     </p>
 
                     <p className='whitespace-nowrap'>

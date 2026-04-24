@@ -53,9 +53,12 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         fetchWarehouses()
     }, [])
 
+    // const warehouseSelectValues = warehouses.map( x => ({
+    //     name: x.name, value: x.id.toString()
+    // }))
 
   return (
-    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col gap-4'>
+    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4'>
 
 
         <InputComponent 
@@ -75,10 +78,11 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         setState={setState}
         readonly
         select
-        selectValues={[{name: "Pending", value: "pending"}, {name: "Accepted", value: "accepted"}]}
+        selectValues={[{name: "-- none --", value: ""}, {name: "Pending", value: "pending"}, {name: "Accepted", value: "accepted"}]}
+        placeHolder="select shipment Status"
         />
 
-        <InputComponent 
+        {/* <InputComponent 
         name="warehouse" 
         title="Warehouse" 
         type="number" 
@@ -86,12 +90,10 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         setState={setState}
         readonly
         select
-        selectValues={warehouses.map( x => ({
-            name: x.name, value: x.id
-        }))}
+        selectValues={[{name: "-- none --", value: ""}, ...warehouseSelectValues]}
         overshadow
-        />
-        
+        />*/}
+
     </form>
   )
 }

@@ -15,8 +15,8 @@ import { toast } from 'react-toastify'
 
 export type SearchProps = {
     search: string,
-    status: "expected" | "received",
-    warehouse_id: number
+    status: string,
+    warehouse_id: string
 }
 
 const columnHelper = createColumnHelper<IncomingPackage>()
@@ -24,7 +24,10 @@ const columnHelper = createColumnHelper<IncomingPackage>()
 const incomingPackageColumnDef = [
     columnHelper.accessor("incoming_tracking_number", {
         header: "Tracking Id",
-        cell: ({getValue}) => getValue()
+        cell: ({getValue}) => 
+            <p className='max-w-40 w-40 whitespace-nowrap overflow-hidden text-ellipsis'>
+                {getValue()}
+            </p>
     }),
     columnHelper.accessor("customer_code", {
         header: "Customer Code",
@@ -70,8 +73,8 @@ const Page: NextPage = () => {
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [filterValues, setFilterValues] = useState<SearchProps>({
         search: "",
-        warehouse_id: 0,
-        status: "expected"
+        warehouse_id: "",
+        status: ""
     })
 
     // const [globalFilter, setGlobalFilter] = useState("")
@@ -109,8 +112,7 @@ const Page: NextPage = () => {
     }, [])
 
 
-
-    const data = incomingPackages.filter(x => x.status === filterValues.status)
+    const data = incomingPackages.filter(x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()) && x.warehouse_id.toString().includes(filterValues.warehouse_id))
 
 
   return <div className='space-y-body'>
@@ -161,8 +163,16 @@ const Page: NextPage = () => {
         </div>
 
         {/* SEARCH COMPONENT  */}
-        <SearchComponent state={filterValues} setState={setFilterValues} />
-
+        <div className='bg-light'>
+            <SearchComponent state={filterValues} setState={setFilterValues} />
+            <div className='p-16'>
+                <input 
+                type="text" 
+                name='status'
+                />
+            </div>
+        </div>
+        
         {/* Table */}
         <div className='bg-light p-body rounded-lg'>
             <h2 className='text-sm font-bold'>

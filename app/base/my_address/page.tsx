@@ -123,7 +123,7 @@ export default function MyAddressPage(){
                 onClick={() => {router.back()}}
                 >
                     <FaChevronLeft />
-                    <span className='text-xs font-semiboldd'>
+                    <span className='text-xs font-semibold'>
                         Go Back
                     </span>
                 </button>
@@ -135,51 +135,53 @@ export default function MyAddressPage(){
                 </Link>
             </div>
 
-            <div className="p-4 space-y-3 bg-light">
-                <InputComponent
-                title="Country"
-                name="country"
-                type="text"
-                state={address}
-                setState={setAddress}
-                />
-                <InputComponent
-                title="State"
-                name="state"
-                type="text"
-                state={address}
-                setState={setAddress}
-                />
-                <InputComponent
-                title="City"
-                name="city"
-                type="text"
-                state={address}
-                setState={setAddress}
-                />
-                <InputComponent
-                title="Street"
-                name="street"
-                type="text"
-                state={address}
-                setState={setAddress}
-                />
-                <InputComponent
-                title="Postal Code"
-                name="postal_code"
-                type="text"
-                state={address}
-                setState={setAddress}
-                />
-            </div>
+            <div className="md:max-w-125 md:mx-auto">
+                <div className="p-4 space-y-3 bg-light">
+                    <InputComponent
+                    title="Country"
+                    name="country"
+                    type="text"
+                    state={address}
+                    setState={setAddress}
+                    />
+                    <InputComponent
+                    title="State"
+                    name="state"
+                    type="text"
+                    state={address}
+                    setState={setAddress}
+                    />
+                    <InputComponent
+                    title="City"
+                    name="city"
+                    type="text"
+                    state={address}
+                    setState={setAddress}
+                    />
+                    <InputComponent
+                    title="Street"
+                    name="street"
+                    type="text"
+                    state={address}
+                    setState={setAddress}
+                    />
+                    <InputComponent
+                    title="Postal Code"
+                    name="postal_code"
+                    type="text"
+                    state={address}
+                    setState={setAddress}
+                    />
+                </div>
 
-            <div className="pb-10 p-4">
-                <button 
-                className="bg-accent-red text-white w-full py-4 rounded text-xs"
-                onClick={isAddressExisting ? updateAddress : addAddress}
-                >
-                    {isUploadingAddress ? <BeatLoader color="#fff" size={10}/> : isAddressExisting ? "Update Address" : "Add Address"}  
-                </button>
+                <div className="pb-10 p-4">
+                    <button 
+                    className="bg-accent-red text-white w-full py-4 rounded text-xs"
+                    onClick={isAddressExisting ? updateAddress : addAddress}
+                    >
+                        {isUploadingAddress ? <BeatLoader color="#fff" size={10}/> : isAddressExisting ? "Update Address" : "Add Address"}  
+                    </button>
+                </div>
             </div>
             
         </div>
