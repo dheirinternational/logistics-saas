@@ -74,7 +74,7 @@ const Page: NextPage = () => {
                     />
                 </figure>
                 <p className='text-xs font-semibold'>
-                    D_Heir Internationals
+                    D_Heir International
                 </p>
             </div>
             <h1 className='my-2 font-bold text-2xl mt-6'>
