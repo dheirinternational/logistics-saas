@@ -20,31 +20,38 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
     const [warehouses, setWareHouses] = useState<Warehouse[]>([])
 
     
-    
-    
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
     }
 
+
     useEffect(() => {
-        const fetchWarehouses = async () => {
-            try{
-                const res = await fetch("/api/warehouses", {
-                    method: "GET",
-                    credentials: "include"
-                })
+    const fetchWarehouses = async () => {
+        try {
+            const res = await fetch("/api/warehouses", {
+                method: "GET",
+                credentials: "include"
+            })
 
-                const result = await res.json()
-                if(!res.ok){
-                    toast.error(result.message)
-                    return
-                }
+            const result = await res.json()
 
-                setWareHouses(result.data)
-                setState( prev => ({...prev, ["warehouses"]: result.data[0].id}))
-                
+            if (!res.ok) {
+                toast.error(result.message)
+                return
             }
-            catch(err){
+
+            setWareHouses(result.data)
+
+            const firstWarehouseId = result.data?.[0]?.id
+
+            if (firstWarehouseId) {
+                setState(prev => ({
+                    ...prev,
+                    warehouses: firstWarehouseId
+                }))
+            }
+
+        } catch (err) {
                 console.error("Error Fetching Warehouses", err)
                 toast.error("Error fetching warehouses")
             }
@@ -52,6 +59,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
 
         fetchWarehouses()
     }, [])
+
 
     
     const warehouseSelectValues = warehouses.map( x => ({

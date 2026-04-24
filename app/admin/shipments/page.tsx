@@ -52,17 +52,35 @@ const incomingPackageColumnDef = [
     columnHelper.display({
         header: "Add Product",
         id: "add-product",
-        cell: ({row}) => 
-        {
-            if (row.original.status === "stored") {
-                return null 
-            }else{
-                return <Link href={`/admin/packages/add_package/${row.original.id}`}
-                    className='bg-accent-blue/40 px-2 py-1 rounded text-white'
-                    >
-                        Add 
-                    </Link>
+        // cell: ({row}) => 
+        // {
+        //     if (row.original.status === "stored") {
+        //         return null 
+        //     }else{
+        //         return <Link href={`/admin/packages/add_package/${row.original.id ?? ""}`}
+        //             className='bg-accent-blue/40 px-2 py-1 rounded text-white'
+        //             >
+        //                 Add 
+        //             </Link>
+        //     }
+        // }
+        cell: ({ row }) => {
+            const item = row.original
+
+            if (!item || typeof item.id === "undefined") {
+                return "Peyyyy"
             }
+
+            if (item.status === "stored") return null
+
+            return (
+                <Link
+                href={`/admin/packages/add_package/${item.id}`}
+                className='bg-accent-blue/40 px-2 py-1 rounded text-white'
+                >
+                Add
+                </Link>
+            )
         }
     })
 ]
@@ -113,7 +131,6 @@ const Page: NextPage = () => {
 
 
     const data = incomingPackages.filter(x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()) && x.warehouse_id.toString().includes(filterValues.warehouse_id))
-
 
   return <div className='space-y-body'>
     {isDataLoading ? <div className='w-full h-[calc(100dvh-80px)] center-items'>
