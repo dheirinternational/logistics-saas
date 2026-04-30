@@ -1,13 +1,13 @@
 "use client"
 
-import InputComponent from '@/components/admin/shipments/InputComponent'
 import { useRouter } from 'next/navigation'
 import { NextPage } from 'next'
 import Link from 'next/link'
-import { FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { BeatLoader } from 'react-spinners'
+import { BeatLoader, ClipLoader } from 'react-spinners'
 import Image from 'next/image'
+import { FaEnvelope, FaEye, FaEyeSlash, FaLock } from 'react-icons/fa'
 
 const Page: NextPage = () => {
     const router = useRouter()
@@ -17,10 +17,12 @@ const Page: NextPage = () => {
         password: ""
     })
     const [isLoading, setIsLoading] = useState(false)
-    const [isSendingPasswordChangeVerification, setIsSendingPasswordChangeVerification] = useState(false)
+    // const [isSendingPasswordChangeVerification, setIsSendingPasswordChangeVerification] = useState(false)
     const [page, setPage] = useState<"login" | "forgot-password">("login")
-
     const [changePasswordEmail, setChangePasswordEmail] = useState("")
+    const [isSendingPasswordEmail, setIsSendingPasswordEmail] = useState(false)
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+
 
     useEffect(()=>{
         handleSession()
@@ -47,37 +49,73 @@ const Page: NextPage = () => {
         }
     }
 
-    const initializePasswordChangeConfirmation = async () => {
-        setIsSendingPasswordChangeVerification(true)
+    // const initializePasswordChangeConfirmation = async () => {
+    //     setIsSendingPasswordChangeVerification(true)
+    //     try{
+    //         const res = await fetch(`/api/auth/forgot-password/initialize`, {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type" : "application/json"
+    //             },
+    //             credentials: "include",
+    //             body: JSON.stringify({email: changePasswordEmail})
+    //         })
+
+    //         const result = await res.json()
+
+    //         if(!res.ok){
+    //             toast.error(result.message)
+    //             return
+    //         }
+
+    //         setPage("login")
+    //         toast.success(result.message)
+    //     }
+    //     catch(err){ 
+    //         toast.error("ERR:: Sending Password Change Confirmation, try again")
+    //         console.error("ERR:: Sending Password Change Confirmation", err)
+    //     }
+    //     finally{
+    //         setIsSendingPasswordChangeVerification(false)
+    //     }
+    // }
+
+
+    // Function to send Password Change page link
+    const handlePasswordChangeLink = async () => {
+        setIsSendingPasswordEmail(true)
         try{
-            const res = await fetch(`/api/auth/forgot-password/initialize`, {
+            const res = await fetch(`/api/auth/send-change-password-link`, {
                 method: "POST",
                 headers: {
                     "Content-Type" : "application/json"
                 },
-                credentials: "include",
-                body: JSON.stringify({email: changePasswordEmail})
+                body: JSON.stringify({
+                    email: changePasswordEmail
+                })
             })
-
             const result = await res.json()
 
             if(!res.ok){
-                toast.error(result.message)
+                toast.success(result.message)
                 return
             }
 
-            setPage("login")
             toast.success(result.message)
+            
+
         }
-        catch(err){ 
-            toast.error("ERR:: Sending Password Change Confirmation, try again")
-            console.error("ERR:: Sending Password Change Confirmation", err)
+        catch(err){
+            console.error("ERR:: Network Error", err)
+            toast.error("ERR:: Network Error")
         }
         finally{
-            setIsSendingPasswordChangeVerification(false)
+            setIsSendingPasswordEmail(false)
         }
     }
 
+
+    // Function to handle Log In
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
@@ -114,131 +152,188 @@ const Page: NextPage = () => {
     } 
 
 
-    const handleSubmitForgotPassword = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setIsSendingPasswordChangeVerification(true)
-        
-        const formData = new FormData(e.currentTarget)
-        const data = Object.fromEntries(formData)
-        console.log(data.email)
 
-        try{
-            
-        }
-        catch(err){
-            toast.error("ERR:: Sending Verification Link to Email")
-            console.error("ERR:: Sending Verification Link to Email", err)
-        }
-        finally{
-            setIsSendingPasswordChangeVerification(false)
-        }
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+
+        const { name, value } = e.currentTarget
+        setCredentials(prev => ({...prev, [name]: value}))
     }
 
 
-  return <div className='w-screen h-dvh max-h-screen center-items'>
-    {   
-        page === "login" ?
-        <div className=''>
-            <div className=''>
-                <figure className='relative h-20 w-20 '>
-                    <Image 
-                    src={"/d_heir_logo.png"}
-                    alt='company logo'
-                    fill
-                    />
-                </figure>
+  return <div className='w-screen h-dvh max-h-screen center-items flex max-sm:flex-col'>
 
-                <p className='text-xs font-semibold'>
-                    D_Heir International
-                </p>
-            </div>
-            <h1 className='my-2 font-bold text-2xl'>
-                Log in
-            </h1>
-            <form 
-            className='mt-8 space-y-4'
-            onSubmit={handleSubmit}
-            >
-                <div className='w-70'>
-                    <InputComponent 
-                    title='Email Address'
-                    name='email'
-                    type='email'
-                    state={credentials}
-                    setState={setCredentials}
-                    />
-                </div>
-                <div className='w-70'>
-                    <InputComponent 
-                    title='Password'
-                    name='password'
-                    type='password'
-                    state={credentials}
-                    setState={setCredentials}
-                    />
-                </div>
-                <div>
-                    <button className='w-full bg-accent-blue text-white mt-6 py-2 rounded text-sm'>
-                        {isLoading ? <BeatLoader color='#FFF' size={10} /> : "Log in"}
-                    </button>
-                </div>
-            </form>
-            <div className='flex gap-1 text-xs mt-3'>
-                <p className='opacity-40'>
-                    {"Don't"} Have an account?
-                </p>
-                <Link href={"/auth/signup"}>
-                    Sign Up
-                </Link>
+        <div className='flex-1 bg-light h-full max-sm:w-screen max-sm:h-dvh'>
+            <div className='center-items flex-col h-full'>
+                <div className={`
+                    h-110 w-70 max-w-70 overflow-x-hidden
+                `}>
+                    {/* Scroll Bar */}
+                    <div className={`
+                        w-fit flex transition-set
+                        ${page === "login" ? "translate-x-0" : "-translate-x-1/2"}
+                    `}>
+
+                        {/* LOGIN FORM */}
+                        <div>
+                            <div className=''>
+                                <figure className='relative h-20 w-20 '>
+                                    <Image 
+                                    src={"/d_heir_logo.png"}
+                                    alt='company logo'
+                                    fill
+                                    />
+                                </figure>
+
+                                <p className='text-xs text-dark/50 font-semibold'>
+                                    DHEIRINTERNATIONAL
+                                </p>
+                            </div>
+                            <h1 className='my-2 font-bold text-2xl mt-8'>
+                                Log in
+                            </h1>
+                            <form 
+                            className='mt-8 space-y-4'
+                            onSubmit={handleSubmit}
+                            >
+                                <div className='text-[10px] space-y-4 w-70'>
+                                    <label className='w-full flex flex-col relative'>
+                                        <span className='text-dark/60'>
+                                            Email Address
+                                        </span>
+                                        <input 
+                                        type="email" 
+                                        name="email" 
+                                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                                        value={credentials.email}
+                                        onChange={handleInputChange}
+                                        />
+                                        <FaEnvelope className='absolute left-1 bottom-2.5 text-dark/60'/>
+                                    </label>
+                                    <label className='w-full flex flex-col relative'>
+                                        <span className='text-dark/60'>
+                                            Password
+                                        </span>
+                                        <input 
+                                        type={isPasswordVisible ? "text" : "password"} 
+                                        name="password" 
+                                        className='border-b border-dark/10 p-2 pl-7 pr-6 outline-0 focus:border-dark transition-set'
+                                        value={credentials.password}
+                                        onChange={handleInputChange}
+                                        />
+                                        <FaLock className='absolute left-1 bottom-2.5 text-dark/60'/>
+                                        <button 
+                                            className='right-1 absolute bottom-0.5 rounded-full p-2'
+                                            type="button"
+                                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                        >
+                                            {
+                                                isPasswordVisible ?
+                                                <FaEyeSlash/> : 
+                                                <FaEye />
+                                            }
+                                        </button>
+                                    </label>
+                                </div>
+
+
+
+
+                                <div>
+                                    <button className='w-full bg-accent-blue text-white mt-6 py-2 rounded text-xs'>
+                                        {isLoading ? <ClipLoader color='#FFF' size={8} /> : "Log in"}
+                                    </button>
+                                </div>
+                            </form>
+                            <div className='flex gap-1 text-[10px] mt-8 mb-1'>
+                                <p className='opacity-40'>
+                                    {"Don't"} Have an account?
+                                </p>
+                                <Link href={"/auth/signup"}>
+                                    Sign Up
+                                </Link>
+                            </div> 
+                            <button 
+                            className={`
+                                text-[10px] flex gap-2 items-center underline text-red-500
+                            `}
+                            onClick={() => {setPage("forgot-password")}}
+                            >
+                                Forgot password
+                            </button>
+                        </div>
+
+
+
+
+
+
+                        {/* FORGOT PASSWORD */}
+                            
+                        <div className='w-70 h-110 center-items'>
+                            <div>
+                                <h2 className='font-semibold text-xl'>
+                                    Forgot Password
+                                </h2>
+                                <p className='text-[10px] mt-4 text-dark/60'>
+                                    Forgotten your password? Input your account email below. A redirection link to change your email will be sent to your email
+                                </p>
+
+                                <div className='mt-8'>
+                                    <label className='w-full flex flex-col relative text-[10px]'>
+                                        <span className='text-dark/60'>
+                                            Email Address
+                                        </span>
+                                        <input 
+                                        type="text" 
+                                        name="change_password" 
+                                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                                        value={changePasswordEmail}
+                                        onChange={(e) => {setChangePasswordEmail(e.currentTarget.value)}}
+                                        />
+                                        <FaEnvelope className='absolute left-1 bottom-2.5 text-dark/60'/>
+                                    </label>
+                                </div>
+
+                                {/* Submit Button */}
+                                <div>
+                                    <button 
+                                    className='bg-accent-blue w-full text-[10px] text-white py-2 rounded mt-4'
+                                    disabled={isSendingPasswordEmail}
+                                    onClick={handlePasswordChangeLink}
+                                    >
+                                        {
+                                            isSendingPasswordEmail ? 
+                                            <ClipLoader size={12} color='white'/> :
+                                            "Send Link"
+                                        }
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <button 
+                                    className='text-[10px] underline mt-6'
+                                    onClick={() => {setPage("login")}}
+                                    >
+                                        Go back
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                            
+                    </div>
+                    
+                </div>    
             </div> 
-            <button 
-            className={`
-                text-xs flex gap-2 items-center underline
-            `}
-            onClick={() => {setPage("forgot-password")}}
-            >
-                Forgot password
-            </button>
-        </div> :
-        // Forgot passwords
-        <div className='bg-light rounded p-body shadow w-70 space-y-3'>
-            <h1 className='text-sm font-semibold'>
-                Input Email
-            </h1>
-            <form onSubmit={handleSubmitForgotPassword}
-            className='space-y-3'
-            >
-                <input 
-                type="email"
-                name='email' 
-                className='outline-0 border border-dark/20 rounded w-full text-xs px-3 py-2'
-                value={changePasswordEmail}
-                onChange={(e) => {setChangePasswordEmail(e.currentTarget.value)}}
-                required
-                />
-
-                <button 
-                disabled={isSendingPasswordChangeVerification}
-                className='bg-accent-blue text-white text-[10px] py-2 w-full rounded'
-                onClick={() => {initializePasswordChangeConfirmation()}}
-                >
-                    {
-                        isSendingPasswordChangeVerification ?
-                        <BeatLoader color='white' size={10}/> :
-                        "Send Link"
-                    }
-                </button>
-
-                <button 
-                className='bg-accent-red text-white text-[10px] py-2 w-full rounded'
-                disabled={isSendingPasswordChangeVerification}
-                onClick={() => {setPage("login")}}
-                >
-                    Go Back
-                </button>
-            </form>
         </div>
-    }
+
+
+        
+        <div className='flex-1 max-sm:hidden'>
+
+        </div>
+
+    
   </div>
 }
 

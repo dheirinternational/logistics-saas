@@ -14,7 +14,14 @@ export async function GET(){
         }
 
         const result = await pool.query(`
-            SELECT * FROM delivery_zones
+            SELECT 
+                dz.id,
+                dz.price,
+                dz.state_id,
+                s.name AS state_name
+            FROM delivery_zones dz
+            JOIN states s ON dz.state_id = s.id
+            ORDER BY s.name
         `)
 
         return NextResponse.json({

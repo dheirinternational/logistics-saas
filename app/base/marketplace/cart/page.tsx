@@ -3,10 +3,11 @@
 import CheckoutCartCard from '@/components/base/marketplace/CheckoutCartCard'
 import Header from '@/components/base/marketplace/Header'
 import { useCartStore } from '@/store/cartStore'
-import { Address } from '@/types/entityTypeDef'
+import { Address, DeliveryZones, State } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { FaChevronDown } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
@@ -21,10 +22,17 @@ const Page: NextPage = () => {
     const [isModalActive, setIsModalActive] = useState(false)
     const [totalPrice, setTotalPrice] = useState(0)
     const [alternateAddress, setIsAlternateAddress] = useState("")
+    const [isStateSelectorActive, setIsStateSelectorActive] = useState(false)
+    
+    const [states, setStates] = useState<State[]>([])
+    const [pricingZones, setPricingZones] = useState<DeliveryZones[]>([])
+    const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null)
+
+    const [isFetchingStates, setIsFetchingStates] = useState(true)
+    const [isFetchingPricingZones, setIsFetchingPricingZones] = useState(true)
+
 
     const router = useRouter()
-
-    console.log(cart)
 
     // Calculate total price
     useEffect(() => {
@@ -40,7 +48,7 @@ const Page: NextPage = () => {
     }, [cart])
 
 
-    // Fetch User details for Payment Initialization
+    // Fetch User details for Payment Initialization, states and delivery zones
     useEffect(() => {
         const fetchUserData = async() => {
             try{
@@ -66,6 +74,53 @@ const Page: NextPage = () => {
                 console.error("ERR:: Fetching User Data", err)
             }   
         }
+
+        const fetchStates = async() => {
+            setIsFetchingStates(true)
+            try{
+                const res = await fetch(`/api/states`)
+                const result = await res.json()
+
+                if(!res.ok){
+                    toast.error(result.message)
+                    return
+                }
+
+                setStates(result.data)
+            }
+            catch(err){
+                console.error("Network Error", err)
+                toast.error("Network Error")
+            }
+            finally{
+                setIsFetchingStates(false)
+            }
+        }
+
+        const fetchZonePricing = async() => {
+            setIsFetchingPricingZones(true)
+            try{
+                const res = await fetch(`/api/delivery-zones`)
+                const result = await res.json()
+
+                if(!res.ok){
+                    toast.error(result.message)
+                    return
+                }
+
+                setPricingZones(result.data)
+            }
+            catch(err){
+                console.error("Network Error", err)
+                toast.error("Network Error")
+            }
+            finally{
+                setIsFetchingPricingZones(false)
+            }
+        }
+ 
+        fetchZonePricing()
+        fetchStates()
         fetchUserData()
     }, [])
 
@@ -126,110 +181,244 @@ const Page: NextPage = () => {
 
     }
 
-  return  <div className='h-full w-full space-y-1 text-sm'>
-    <Header />
-    <div className='p-body py-2 bg-light mt-2'>
-        <p className='tracking-wide'>
-            CART SUMMARY
-        </p>
-        <hr className='border border-dark/10 my-2' />
-        <div className='flex justify-between'>
-            <p>
-                Subtotal
-            </p>
-            <p>
-                ₦ {totalPrice}
-            </p>
-        </div>
-    </div>
-    <div className='bg-light max-h-90 h-90 overflow-auto'>
-        <p className='py-2 px-body bg-primary'>
-            Cart ({cart.length})
-        </p>
-        <div className='px-body py-3 space-y-3'>
-            {cart.map( x => 
-                <CheckoutCartCard key={x.id} {...x}/>
-            )}
-        </div>
-    </div>
-
-    <div className='bg-light p-body pb-20'>
-        <button 
-        className='bg-accent-red w-full text-white py-3 rounded ' 
-        // onClick={() => initializePayment(totalPrice)} 
-        onClick={() => setIsModalActive(true)}
-        disabled={cart.length === 0 || isPaymentLoading}>    
-            Checkout {`₦ (${totalPrice})`}
-        </button>
-    </div>
-
-    {/* Modal For confirming details before payment */}
-    {
-    isModalActive &&
-    <div className='absolute top-0 right-0 w-screen h-dvh bg-black/50 center-items'>
-        <div className='bg-white w-80 p-4 rounded space-y-3'>
-            <h1 className='font-semibold text-lg'>
-                Confirm Order Details
-            </h1>
-            <p className='text-xs'>
-                Please review your order details before proceeding to payment.
-            </p>    
-            <div className='flex items-center text-xs space-x-2'>
-                <p >
-                    Shipping Address:
-                </p>
-                
-                <textarea 
-                className='text-xs italic resize-none border border-dark/20 p-2 w-60 h-60 min-h-50' 
-                value={!alternateAddress ? ` ${address?.street}, ${address?.city}, ${address?.state}, ${address?.postal_code}` : alternateAddress}
-                onChange={(e) => {setIsAlternateAddress(e.currentTarget.value)}}
-                /> 
-                    
-                {/* </textarea> */}
-            </div>
-            <div className='flex justify-between'>
-                <p>
-                    Total Amount:    
-                </p>
-                <p className='font-bold'>
-                    ₦ {totalPrice}
-                </p>
-                <p>
-                    {/* Shipping Fee: ₦ 5,000 */}
-                </p>
-            </div>      
-            <div className='border border-dark/20 p-3 rounded max-h-40 overflow-auto'>
-                {cart.map(x => 
-                    <div key={x.id} className='flex justify-between text-xs'>
-                        <p> {x.name} x {x.amount_to_be_ordered } </p>
-                        <p> ₦ {x.discount_price ? x.discount_price * x.amount_to_be_ordered : x.price * x.amount_to_be_ordered} </p>
-                    </div>
-                )}
-
-            </div>
-            <div className='flex gap-2 mt-12'>
-                <button 
-                className='flex-1 py-2 border border-dark rounded'
-                onClick={() => setIsModalActive(false)}
-                >
-                    Cancel
-                </button>
-                <button 
-                className='flex-1 py-2 bg-accent-red text-white rounded'
-                onClick={() => {initializePayment(totalPrice)}}
-                >
-                    {isPaymentLoading ? 
-                    <BeatLoader color='#FFF' size={15}/> :
-                    <> 
-                        Order
-                    </>}
-                </button>
-
-            </div>
-            
-        </div>
-    </div>
+    // Handle Input Change - address
+    const handleInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        const {value, name} = e.currentTarget
+        setAddress( prev => {
+            if (!prev) return prev
+            return ({...prev, [name]: value})
+        } )
     }
+
+
+    console.log(pricingZones)
+
+
+  return  <div className='h-full max-h-full w-full text-sm '>
+        
+        <Header />
+
+        <div className='flex h-[calc(100%-56px)] max-h-[calc(100%-56px)]'>
+
+            <div className='flex-1 p-4 space-y-3 h-full max-h-full overflow-y-auto'>
+                <div className='p-body py-2 bg-light rounded shadow shadow-dark/5'>
+                    <p className='tracking-wide'>
+                        CART SUMMARY
+                    </p>
+                    <hr className='border border-dark/5 my-2' />
+                    <div className='flex justify-start gap-8 text-[10px] py-3 px-4'>
+                        <p>
+                            Subtotal
+                        </p>
+                        <p>
+                            ₦ {totalPrice}
+                        </p>
+                    </div>
+                </div>
+
+                
+                
+                <div className='bg-light max-h-90 h-90 overflow-auto rounded shadow shadow-dark/5'>
+                    <p className='py-2 px-body  text-xs font-semibold'>
+                        Cart ({cart.length})
+                    </p>
+                    <div className='px-body py-3 space-y-3'>
+                        {cart.map( x => 
+                            <CheckoutCartCard key={x.id} {...x}/>
+                        )}
+                    </div>
+                </div>
+
+
+
+                <div className='bg-light p-body pb-20'>
+                    <button 
+                    className='bg-accent-red w-full text-white py-3 rounded ' 
+                    // onClick={() => initializePayment(totalPrice)} 
+                    onClick={() => setIsModalActive(true)}
+                    disabled={cart.length === 0 || isPaymentLoading}>    
+                        Checkout {`₦ (${totalPrice})`}
+                    </button>
+                </div>
+            </div>
+
+
+
+            {/* Confirm Order Details */}
+
+            <div className='h-full border-l border-dark/10 overflow-y-auto max-h-full'>
+                <div className='h-full bg-black/50 '>
+                    <div className='bg-light w-80 p-4 space-y-3 h-full'>
+                        <h1 className='font-semibold text-lg'>
+                            Confirm Order Details
+                        </h1>
+                        <p className='text-[10px] text-dark/60'>
+                            Please review your order details before proceeding to payment.
+                        </p>    
+                        <div className='flex flex-col items-center text-xs space-x-2 gap-8'>
+                            
+                            <div className='flex text-[10px] gap-4'>
+
+                                <label className='w-34 flex flex-col relative flex-1'>
+                                    <span className='text-dark/60'>
+                                        Street
+                                    </span>
+                                    <input 
+                                    type="text" 
+                                    name="street" 
+                                    className='border-b border-dark/10 p-2 pl-1 outline-0 focus:border-dark transition-set pr-2'
+                                    value={address?.street}
+                                    onChange={handleInputChange}
+                                    />
+                                </label>
+                                
+                                <label className='w-34 flex flex-col relative flex-1'>
+                                    <span className='text-dark/60'>
+                                        City
+                                    </span>
+                                    <input 
+                                    type="text" 
+                                    name="city" 
+                                    className='border-b border-dark/10 p-2 pl-1 outline-0 focus:border-dark transition-set pr-2'
+                                    value={address?.city}
+                                    onChange={handleInputChange}
+                                    />
+                                </label>
+
+                            </div>                                
+                            <div className='flex text-[10px] gap-4'>
+    
+                                <label className='w-34 flex flex-col relative flex-1'>
+                                    <span className='text-dark/60'>
+                                        State
+                                    </span>
+                                    <input 
+                                    type="text" 
+                                    name="state" 
+                                    className='border-b border-dark/10 p-2 pl-1 outline-0 focus:border-dark transition-set pr-2'
+                                    value={address?.state}
+                                    onChange={handleInputChange}
+                                    />
+
+                                    <div 
+                                    className={`
+                                        w-full absolute -bottom-30 left-0  bg-light shadow shadow-dark/20 rounded transition-set origin-top h-30 max-h-30 p-2 overflow-y-auto
+                                        ${!isStateSelectorActive && "opacity-0 pointer-events-none translate-y-6"}
+                                    `}
+                                    >
+                                        {
+                                            states.map( (state, i )=> 
+                                                <button
+                                                key={state.id}
+                                                className={`
+                                                    w-full py-1
+                                                    ${i !== states.length - 1 && "border-b border-dark/6"}
+                                                `}
+                                                onClick={() => {
+                                                    setAddress( prev => {
+                                                        if(!prev) return prev
+                                                        return ({...prev, state: state.name})
+                                                    })
+                                                    setIsStateSelectorActive(false)
+                                                }}
+                                                >
+                                                    {state.name}
+                                                </button>    
+                                            )
+                                            
+                                        }
+                                    </div>
+
+                                    <button 
+                                    onClick={() => setIsStateSelectorActive(prev => !prev)}
+                                    className={`
+                                        absolute right-0 bottom-2.5
+                                        ${isStateSelectorActive && "rotate-180"}
+                                    `}>
+                                        <FaChevronDown />
+                                    </button>
+
+                                </label>
+
+                                <label className='w-34 flex flex-col relative flex-1'>
+                                    <span className='text-dark/60'>
+                                        Country
+                                    </span>
+                                    <input 
+                                    type="text" 
+                                    name="country" 
+                                    className='border-b border-dark/10 p-2 pl-1 outline-0 focus:border-dark transition-set pr-2'
+                                    value={address?.country}
+                                    onChange={handleInputChange}
+                                    readOnly
+                                    />
+                                </label>
+
+                            </div>                                
+                        </div> 
+                        
+                        <div className='border-5 border-dark/20 p-3 rounded max-h-40 h-40 overflow-auto px-8'>
+                            {cart.map(x => 
+                                <div key={x.id} className='flex justify-between text-xs'>
+                                    <p> {x.name} x {x.amount_to_be_ordered } </p>
+                                    <p> ₦ {x.discount_price ? Number(x.discount_price * x.amount_to_be_ordered).toLocaleString() : Number(x.price * x.amount_to_be_ordered).toLocaleString()} </p>
+                                </div>
+                            )}
+
+                        </div>
+
+
+                        <div className='my-6 space-y-1'>
+                            <div className='flex justify-start gap-10 text-[10px]'>
+                                <p className='text-dark/70'>
+                                    Delivery Fee:    
+                                </p>
+                                <p className=''>
+                                    ₦ {Number(5600).toLocaleString()}
+                                </p>
+                                <p>
+                                    {/* Shipping Fee: ₦ 5,000 */}
+                                </p>
+                            </div>     
+                            <div className='flex justify-start gap-10 text-[10px]'>
+                                <p className='text-dark/70'>
+                                    Total Amount:    
+                                </p>
+                                <p className=''>
+                                    ₦ {Number(totalPrice + 5600).toLocaleString()}
+                                </p>
+                                <p>
+                                    {/* Shipping Fee: ₦ 5,000 */}
+                                </p>
+                            </div>      
+                        </div>   
+
+                        <div className='flex gap-2 mt-2'>
+                            <button 
+                            className='flex-1 py-2 border border-dark rounded'
+                            onClick={() => setIsModalActive(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                            className='flex-1 py-2 bg-accent-red text-white rounded'
+                            onClick={() => {initializePayment(totalPrice)}}
+                            >
+                                {isPaymentLoading ? 
+                                <BeatLoader color='#FFF' size={15}/> :
+                                <> 
+                                    Order
+                                </>}
+                            </button>
+
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    
     </div>
 }
 

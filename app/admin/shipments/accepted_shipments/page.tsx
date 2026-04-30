@@ -154,29 +154,11 @@ const Page: NextPage = () => {
 
 
   return <div className='space-y-body'>
-    {isDataLoading ? <div className='w-screen h-[calc(100dvh-80px)] center-items'>
-        <BeatLoader color='#f26430' size={20}/>
+    {isDataLoading ? <div className='w-screen h-full max-h-full center-items'>
+        <BeatLoader color='#f26430' size={10}/>
     </div> :
     <>
-        <div className='p-4 bg-accent-red rounded-lg text-white'>
-            <span className='text-xs opacity-80'>
-                Admin/Operations
-            </span>
-            <h1 className='font-bold mt-4 mb-2 text-xl'>
-                Manage Shipments
-            </h1>
-            <div>
-                <p className='text-[10px] opacity-70'>
-                    Monitor, filter, and manage all outgoing shipments from one control deck.
-                </p>
-            </div>
-        </div>
-
-
         <div>
-            <h2 className='text-sm'>
-                STATS
-            </h2>
             <div className='flex my-body space-x-2 overflow-x-auto'>
 
                 <ShipmentStatusStatCard 

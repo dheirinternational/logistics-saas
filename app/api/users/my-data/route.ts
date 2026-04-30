@@ -21,6 +21,8 @@ export async function GET(){
             LIMIT 1    
         `, [session.user_id])
 
+        console.log(res)
+
         if (res.rows.length === 0){
             return NextResponse.json({
                 success: false,

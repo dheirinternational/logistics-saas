@@ -7,8 +7,8 @@ const ProfileMenu = ({path, title, icon: Icon} : CTARedirectButton) => {
   return (
     <Link href={path} className='py-4 px-4 flex w-full items-center justify-between'>
         <div className='flex gap-4'>
-            <Icon className='text-xl'/>
-            <span className='text-sm text-primary-text/80'>
+            <Icon className='text-base'/>
+            <span className='text-xs text-primary-text/80'>
                 {title}
             </span>
         </div>

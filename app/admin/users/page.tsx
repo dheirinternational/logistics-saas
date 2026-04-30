@@ -80,26 +80,16 @@ const Page: NextPage = () => {
     const filteredData = users.filter( x => x.email.toLowerCase().includes(filterValues.search.toLowerCase()) || x.code.toLowerCase().includes(filterValues.search.toLowerCase()) )
 
   return <div className='space-y-body'>
-    <div className='p-4 bg-accent-blue rounded-lg text-white'>
-        <span className='text-xs opacity-80'>
-            Admin/Operations
-        </span>
-        <h1 className='font-bold mt-4 mb-2 text-xl'>
-            Manage Users
-        </h1>
-        <div>
-            <p className='text-[10px] opacity-70'>
-                Monitor, filter, and manage all Users from one control deck.
-            </p>
-        </div>
-    </div>
+    <h2 className="text-2xl font-semibold">
+        Users
+    </h2>
+    <p className="text-xs text-dark/50 mt-2">
+        Manage and view all user related data.
+    </p>
 
 
     {/* USERS CARDS */}
     <div>
-        <h2 className='text-sm'>
-            USERS
-        </h2>
         <div className='flex my-body space-x-2 overflow-x-auto'>
             {/* <StatusStatCard />
             <StatusStatCard />
@@ -122,7 +112,9 @@ const Page: NextPage = () => {
         <div className='mt-3'>
             {
                 isDataLoading ? 
-                <BeatLoader color='orange' size={10}/> :
+                <div className='center-items p-4'>
+                    <BeatLoader color='orange' size={10}/> 
+                </div> :
                 <Table 
                 importedData={filteredData}
                 columnDef={columnDef}

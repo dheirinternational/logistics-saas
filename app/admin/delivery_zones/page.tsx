@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { BeatLoader } from "react-spinners"
 import { toast } from "react-toastify"
 
-type Delivery_Locations = {id: number, state: string, price: number}
+type Delivery_Locations = {id: number, state_name: string, price: number}
 
 const columnHelper = createColumnHelper<Delivery_Locations>()
 
@@ -48,7 +48,7 @@ export default function Page(){
     }, [])
 
     const columnDef = [
-        columnHelper.accessor("state", {
+        columnHelper.accessor("state_name", {
             header: "State"
         }),
         columnHelper.accessor("price", {
@@ -60,23 +60,19 @@ export default function Page(){
 
     ]
 
+    console.log(deliveryLocations)
 
-    return <div className="h-dvh p-body">
-        <div className='p-4 bg-accent-red rounded-lg text-white'>
-            <span className='text-xs opacity-80'>
-                Admin/Operations
-            </span>
-            <h1 className='font-bold mt-4 mb-2 text-xl'>
-                Manage Delivery Location and Pricing
-            </h1>
-            <div>
-                <p className='text-[10px] opacity-70'>
-                    Monitor, filter, and manage all Delivery Locations and pricing from one control deck.
-                </p>
-            </div>
-        </div>
+
+    return <div className="h-full max-h-full p-body">
+        <h2 className="text-2xl font-semibold">
+            Pricing List/Templates
+        </h2>
         
-        <div className='bg-light p-body rounded-lg mt-4'>
+        <p className="text-xs text-dark/50 mt-2">
+            Manage, edit and and manage all Pricing List from one control deck.
+        </p>
+        
+        <div className='bg-light p-body rounded-lg mt-12'>
             <h2 className='text-sm font-bold'>
                 Packages 
             </h2>
@@ -149,7 +145,7 @@ function PriceCell({fetchDeliveryLocations, row}){
             value={value}
             onChange={(e) => {setValue(Number(e.currentTarget.value))}}
             onBlur={() => {setTimeout(() => setValue(row.original.price), 2000) }}
-            className="outline-0 border-0 focus:border w-10 rounded  "
+            className="outline-0 border-0 focus:border w-16 rounded"
             />
         {
             value !== row.original.price &&

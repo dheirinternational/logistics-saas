@@ -1,5 +1,6 @@
 "use client"
 
+import { AirPricingTemplate, SeaPricingTemplate } from "@/types/entityTypeDef"
 import { useEffect, useState } from "react"
 import { BeatLoader } from "react-spinners"
 import { toast } from "react-toastify"
@@ -7,219 +8,42 @@ import { toast } from "react-toastify"
 
 export default function Page(){
 
-    const [shippingMethods, setShippingMethods] = useState<{id: number, name: string, price: number}[]>([])
-    const [wrappingMethods, setWrappingMethods] = useState<{id: number, name: string, price: number}[]>([])
-    const [itemPricinigMethods, setItemPricingMethods] = useState<{id: number, name: string, price_per_kg: number}[]>([])
-    const [otherPricingMethods, setOtherPricingMethods] = useState<{id: number, name: string, price: number}[]>([])
-
-    const [isShipmentMethodLoading, setIsShipmentMethodLoading] = useState(true)
-    const [isWrappingMethodLoading, setIsWrappingMethodLoading] = useState(true)
-    const [isItemPricingMethodLoading, setIsItemPricingMethodLoading] = useState(true)
-    const [isOtherPricingMethodLoading, setIsOtherPricingMethodLoading] = useState(true)
-
-
-    const fetchShippingMethods = async () => {
-        setIsShipmentMethodLoading(true)
-        try{
-            const res = await fetch("/api/pricing_methods/shipping")
-            const result = await res.json()
-            
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            setShippingMethods(result.data)
-        }
-        catch(err){
-            toast.error("ERR:: Fetching Shipment Method Pricing Data from Database")
-            console.error("ERR:: Fetching Shipment Method Pricing Data from Database", err)
-        }
-        finally{
-            setIsShipmentMethodLoading(false)
-        }
-    } 
-
-    const fetchWrappingMethods = async () => {
-        setIsWrappingMethodLoading(true)
-        try{
-            const res = await fetch("/api/pricing_methods/wrapping")
-            const result = await res.json()
-            
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            setWrappingMethods(result.data)
-        }
-        catch(err){
-            toast.error("ERR:: Fetching Wrapping Method Pricing Data from Database")
-            console.error("ERR:: Fetching Wrapping Method Pricing Data from Database", err)
-        }
-        finally{
-            setIsWrappingMethodLoading(false)
-        }
-    }
-
-    const fetchItemPricingMethods = async () => {
-        setIsItemPricingMethodLoading(true)
-        try{
-            const res = await fetch("/api/pricing_methods/item-pricing")
-            const result = await res.json()
-            
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            setItemPricingMethods(result.data)
-        }
-        catch(err){
-            toast.error("ERR:: Fetching Item Pricing Method Pricing Data from Database")
-            console.error("ERR:: Fetching Item Pricing Method Pricing Data from Database", err)
-        }
-        finally{
-            setIsItemPricingMethodLoading(false)
-        }
-    }
-
-    const fetchOtherPricingMethods = async () => {
-        setIsOtherPricingMethodLoading(true)
-        try{
-            const res = await fetch("/api/pricing_methods/others")
-            const result = await res.json()
-            
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            setOtherPricingMethods(result.data)
-        }
-        catch(err){
-            toast.error("ERR:: Fetching Other Pricing Method Pricing Data from Database")
-            console.error("ERR:: Fetching Other Pricing Method Pricing Data from Database", err)
-        }
-        finally{
-            setIsOtherPricingMethodLoading(false)
-        }
-    }
-
-
-    useEffect(() => {
-        fetchShippingMethods()
-        fetchWrappingMethods()
-        fetchItemPricingMethods()
-        fetchOtherPricingMethods()
-    }, [])
-
 
     return <div className="h-dvh p-body">
-        <div className='p-4 bg-accent-red rounded-lg text-white'>
-            <span className='text-xs opacity-80'>
-                Admin/Operations
-            </span>
-            <h1 className='font-bold mt-4 mb-2 text-xl'>
-                Manage Pricing List
-            </h1>
-            <div>
-                <p className='text-[10px] opacity-70'>
-                    Monitor, filter, and manage all Pricing List from one control deck.
-                </p>
-            </div>
-        </div>
-
-        <div className="mt-4 bg-white shadow shadow-dark/10 rounded p-4     ">
-            <div className="mt-4 text-xs">
-                <h2 className="font-bold">
-                    Shipping Method
-                </h2>
-
-                <ol className="list-decimal pl-6 mt-4 space-y-2">
-                    {
-                        isShipmentMethodLoading ? 
-                        <BeatLoader color="orange" size={10}/> :
-                        <>
-                            {
-                            shippingMethods.map( (method, i) =>  {
-                                return <PriceList key={i} index={i} method={method} fetchPricingList={fetchShippingMethods} type="shipping"/>
-                            }
-                            )
-                            }
-                        </>
-                    }
-                </ol>
-            </div>
-
-            <div className="mt-4 text-xs">
-                <h2 className="font-bold">
-                    Wrapping Method
-                </h2>
-
-                <ol className="list-decimal pl-6 mt-4 space-y-2">
-                    {
-                        isWrappingMethodLoading ? 
-                        <BeatLoader color="orange" size={10}/> :
-                        <>
-                            {
-                            wrappingMethods.filter(x => x.name !== "Gift Wrap").map( (method, i) =>  {
-                                return <PriceList key={i} index={i} method={method} fetchPricingList={fetchWrappingMethods  } type="wrapping"/>
-                            }
-                            )
-                            }
-                        </>
-                    }
-                </ol>
-            </div>
+        
+        <h2 className="text-2xl font-semibold">
+            Pricing List/Templates
+        </h2>
+        
+        <p className="text-xs text-dark/50 mt-2">
+            Manage, edit and and manage all Pricing List from one control deck.
+        </p>
 
 
-            <div className="mt-4 text-xs">
-                <h2 className="font-bold">
-                    Item Pricing Method
-                </h2>
+        <div className="w-full p-2 bg-light rounded mt-6">
+            <div className="bg-gray-100 p-2 rounded">
+                
+                <div className="p-4 bg-light rounded">
+                    <h2 className="font-semibold">
+                        Air Shipping Template
+                    </h2>
+                    <AirTemplateComponent />
+                </div>
 
-                <ol className="list-decimal pl-6 mt-4 space-y-2">
-                    {
-                        isItemPricingMethodLoading ? 
-                        <BeatLoader color="orange" size={10}/> :
-                        <>
-                            {
-                            itemPricinigMethods
-                                .map( (method, i) =>  {
-                                return <PriceList key={i} index={i} method={method} fetchPricingList={fetchItemPricingMethods} type="item-pricing"/>
-                                // .filter(x => {
-                                //     /* x.name === "Gift Wrap"*/
-                                //     return true
-                                // })
-                            }
-                            )
-                            }
-                        </>
-                    }
-                </ol>
-            </div>
+                <div className="p-4 bg-light rounded">
+                    <h2 className="font-semibold">
+                        Sea Shipping Template
+                    </h2>
+                    <SeaTemplateComponent />
+                </div>
+                
+                <div className="p-4 bg-light rounded">
+                    <h2 className="font-semibold">
+                        Express Shipping Template
+                    </h2>
+                    <ExpressTemplateComponent />
+                </div>
 
-            <div className="mt-4 text-xs">
-                <h2 className="font-bold">
-                    Other Pricing Methods
-                </h2>
-
-                <ol className="list-decimal pl-6 mt-4 space-y-2">
-                    {
-                        isOtherPricingMethodLoading ? 
-                        <BeatLoader color="orange" size={10}/> :
-                        <>
-                            {
-                            otherPricingMethods
-                                .map( (method, i) =>  {
-                                return <PriceList key={i} index={i} method={method} fetchPricingList={fetchOtherPricingMethods} type="others"/>
-                            }
-                            )
-                            }
-                        </>
-                    }
-                </ol>
             </div>
         </div>
         
@@ -229,86 +53,214 @@ export default function Page(){
 
 
 
-const PriceList = (
-    {index, method, fetchPricingList, type}: 
-    {index: number, method: { id: number; name: string; price?: number; price_per_kg?: number; }, fetchPricingList: () => void, type: "shipping" | "wrapping" | "item-pricing" | "others"
-}
-) => {
+const AirTemplateComponent = () => {
+    
+    const [airTemplate, setAirTemplate] = useState<AirPricingTemplate[]>()
+    const [isFetchingAirTemplate, setIsFetchingAirTemplate] = useState(true)
 
-    const [value, setValue] = useState(method.price ?? method.price_per_kg)
-    const [isEditingData, setIsEditingData] = useState(false) 
-
-    const price = method.price ?? method.price_per_kg
-
-    // console.log(index)
-
-    const editPricingMethod = async (id, price) => {
-        setIsEditingData(true)
-
+        const fetchAirTemplates = async () => {
+        setIsFetchingAirTemplate(true)
         try{
-            const res = await fetch(`/api/pricing_methods/${type}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type" : "application/json"
-                },
-                credentials: "include",
-                body: JSON.stringify({id, price})
-            })
-
+            const res = await fetch(`/api/pricing_template/air`)
             const result = await res.json()
-            
-            if (!res.ok){
+
+            if(!res.ok){
                 toast.error(result.message)
                 return
             }
 
-            toast.success("Successfully updated selected pricing list")
-            fetchPricingList()
+            setAirTemplate(result.data)
+            console.log(result.data)
         }
         catch(err){
-            toast.error("ERR:: Updating selected pricing list")
-            console.error("ERR:: Updating selected pricing list", err)
+            console.error("Network Error", err)
+            toast.error("Network Error")
         }
         finally{
-            setIsEditingData(false)
+            setIsFetchingAirTemplate(false)
         }
     }
 
-    return <li 
-    className="list-decimal flex gap-4"
-    >
-        <div className="flex">
-            <p className="w-26">
-                {index + 1}.  {method.name}
-            </p>
-            <div className="space-x-1">
-                <span>
-                    ₦
-                </span>
-                <input 
-                type="number" 
-                value={value}
-                onChange={(e) => {setValue(Number(e.currentTarget.value))}}
-                onBlur={() => {setTimeout(() => setValue(method.price), 2000) }}
-                className="outline-0 border-0 focus:border rounded  w-30 ml-1"
-                />
-            </div>
-        </div>
+
+    useEffect(() => {
+        fetchAirTemplates()
+    }, [])
+
+
+    return <div className="bg-gray-100 p-1 mt-2 rounded space-y-1">
         {
-            value !== price &&
-            <button 
-            className="underline"
-            disabled={isEditingData}
-            onClick={ () => editPricingMethod(method.id, value)}
-            >
-                {
-                    isEditingData ? 
-                    <BeatLoader size={10} color="blue"/> :  
-                    "Edit"
-                }
-            </button>
+            isFetchingAirTemplate ? 
+            <div className="p-3 center-items">
+                <BeatLoader color="orange" size={8}/> 
+            </div>:
+            airTemplate?.map( template => 
+                <div 
+                key={template.id}
+                className="p-2 bg-light"
+                >
+                    <h3 className="text-xs capitalize text-dark/70">
+                        {`${template.name.split("_").join(" ")}`}
+                    </h3>
+                    <hr className="my-3 border-dark/10"/>
+                    <div className="text-[10px] px-8 space-y-2">
+                        <p>
+                            Price per kg: ${template.price}
+                        </p>
+                        <p>
+                            Clearance Fee per kg: ₦{template.clearance}
+                        </p>
+                        <p>
+                            Minimum expected delivery: {template.min_duration} {template.duration_type}
+                        </p>
+                        <p>
+                            Maximum expected delivery: {template.max_duration} {template.duration_type}
+                        </p>
+                    </div>
+                    
+                </div>
+            )
         }
-    </li>
+    </div>
 }
 
 
+const SeaTemplateComponent = () => {
+    
+    const [seaTemplate, setSeaTemplate] = useState<SeaPricingTemplate[]>()
+    const [isFetchingSeaTemplate, setIsFetchingSeaTemplate] = useState(true)
+
+        const fetchSeaTemplates = async () => {
+        setIsFetchingSeaTemplate(true)
+        try{
+            const res = await fetch(`/api/pricing_template/sea`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            setSeaTemplate(result.data)
+            console.log(result.data)
+        }
+        catch(err){
+            console.error("Network Error", err)
+            toast.error("Network Error")
+        }
+        finally{
+            setIsFetchingSeaTemplate(false)
+        }
+    }
+
+
+    useEffect(() => {
+        fetchSeaTemplates()
+    }, [])
+
+
+    return <div className="bg-gray-100 p-1 mt-2 rounded space-y-1">
+        {
+            isFetchingSeaTemplate ? 
+            <div className="p-3 center-items">
+                <BeatLoader color="orange" size={8}/> 
+            </div>:
+            seaTemplate?.map( template => 
+                <div 
+                key={template.id}
+                className="p-2 bg-light"
+                >
+                    <h3 className="text-xs capitalize text-dark/70">
+                        {`${template.name.split("_").join(" ")}`}
+                    </h3>
+                    <hr className="my-3 border-dark/10"/>
+                    <div className="text-[10px] px-8 space-y-2">
+                        <p>
+                            Price per cbm: ₦{template.price}
+                        </p>
+                        <p>
+                            Clearance Fee per cbm: ₦{template.clearance}
+                        </p>
+                        <p>
+                            Minimum expected delivery: {template.min_duration} {template.duration_type}
+                        </p>
+                        <p>
+                            Maximum expected delivery: {template.max_duration} {template.duration_type}
+                        </p>
+                    </div>
+                    
+                </div>
+            )
+        }
+    </div>
+}
+
+
+const ExpressTemplateComponent = () => {
+    
+    const [expressTemplate, setExpressTemplate] = useState<SeaPricingTemplate[]>()
+    const [isFetchingExpressTemplate, setIsFetchingExpressTemplate] = useState(true)
+
+        const fetchExpressTemplates = async () => {
+        setIsFetchingExpressTemplate(true)
+        try{
+            const res = await fetch(`/api/pricing_template/express`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            setExpressTemplate(result.data)
+            console.log(result.data)
+        }
+        catch(err){
+            console.error("Network Error", err)
+            toast.error("Network Error")
+        }
+        finally{
+            setIsFetchingExpressTemplate(false)
+        }
+    }
+
+
+    useEffect(() => {
+        fetchExpressTemplates()
+    }, [])
+
+
+    return <div className="bg-gray-100 p-1 mt-2 rounded space-y-1">
+        {
+            isFetchingExpressTemplate ? 
+            <div className="p-3 center-items">
+                <BeatLoader color="orange" size={8}/> 
+            </div>:
+            expressTemplate?.map( template => 
+                <div 
+                key={template.id}
+                className="p-2 bg-light"
+                >
+                    <h3 className="text-xs capitalize text-dark/70">
+                        {`${template.name.split("_").join(" ")}`}
+                    </h3>
+                    <hr className="my-3 border-dark/10"/>
+                    <div className="text-[10px] px-8 space-y-2">
+                        <p>
+                            Price: ${template.price}
+                        </p>
+                        <p>
+                            Clearance Fee: ₦{template.clearance}
+                        </p>
+                        <p>
+                            Minimum expected delivery: {template.min_duration} {template.duration_type}
+                        </p>
+                        <p>
+                            Maximum expected delivery: {template.max_duration} {template.duration_type}
+                        </p>
+                    </div>
+                    
+                </div>
+            )
+        }
+    </div>
+}

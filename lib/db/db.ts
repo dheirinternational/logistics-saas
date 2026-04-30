@@ -21,6 +21,4 @@ export const pool =
         }
     });
 
-if(process.env.NODE_ENV !== "production") {
-    global.pgPool = pool
-}
+global.pgPool = pool

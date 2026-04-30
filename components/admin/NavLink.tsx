@@ -8,10 +8,10 @@ type NavLinksProp = {
   name: string
   path: string
   logo: IconType
-  setState: Dispatch<SetStateAction<boolean>>
+  // setState: Dispatch<SetStateAction<boolean>>
 }
 
-const NavLink = ({name, path, logo: Icon, setState}: NavLinksProp) => {
+const NavLink = ({name, path, logo: Icon}: NavLinksProp) => {
 
     const pathName = usePathname()
     
@@ -19,11 +19,11 @@ const NavLink = ({name, path, logo: Icon, setState}: NavLinksProp) => {
 
   return (
     <Link href={path} 
-    className={`flex items-center gap-2 text-white text-xs py-3 px-3
-    ${isActive ? "bg-white/20 font-semibold" : ""
+    className={`flex items-center gap-2 text-dark text-xs py-3 px-5
+    ${isActive ? "bg-accent-blue text-white font-semibold rounded-r-lg" : ""
     }
     `}
-    onClick={() => {setState(false)}}
+    // onClick={() => {setState(false)}}
     >
         <Icon className="text-lg"/>
         {name}

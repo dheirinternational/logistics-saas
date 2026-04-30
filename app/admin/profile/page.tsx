@@ -16,21 +16,31 @@ const Page: NextPage = async() => {
     console.log(userId)
 
     const data = await pool.query(`
-        SELECT u.first_name, u.last_name, c.code, u.profile_img 
+        SELECT u.first_name, u.last_name, u.profile_img, u.role, u.email 
         FROM users u
-        JOIN customers c ON u.id = c.user_id
         WHERE u.id = $1
     `, [userId])
+
+    console.log(data)
 
     const userData = data.rows[0]
     console.log(userData)
 
+
   return <div className='w-full h-full space-y-3'>
     {/* Profile */}
+    
+    <h2 className="text-2xl font-semibold">
+            Profile
+    </h2>
+    
+    <p className="text-xs text-dark/50 mt-2">
+        Manage and edit your user Information.
+    </p>
 
-    <div className='bg-accent-red h-30 flex items-center '>
+    <div className='bg-accent-red h-fit p-4 flex items-center rounded'>
         <div className='p-body flex gap-4'>
-            <figure className='bg-[#adadad] h-18 w-18 rounded-full border-2 border-white/70 center-items overflow-hidden relative'>
+            <figure className='bg-[#adadad] h-26 w-26 rounded-full border-2 border-white/70 center-items overflow-hidden relative'>
                 {
                     !userData.profile_img ?
                     <FaUser className='text-6xl relative -bottom-2 text-white'/> :
@@ -42,29 +52,22 @@ const Page: NextPage = async() => {
                     />
                 }
             </figure>
-            <div className='flex items-start flex-col justify-center gap-2'>
+            <div className='flex items-start flex-col justify-center gap-1'>
                 <span className='text-white font-semibold'>
                     {userData.first_name}{userData.last_name}
+                </span>
+                <span className='text-white text-xs'>
+                    {userData.role}
+                </span>
+                <span className='text-xs text-white/60'>
+                    {userData.email}
                 </span>
             </div>
         </div>
     </div>
-
-    {/* Announcement */}
-
-    {/* <div className='p-body bg-white shadow shadow-dark/10 flex'>
-        <div className=' h-full w-7 '>
-            <HiSpeakerWave className='text-2xl' />
-        </div>
-        <div className='w-[calc(100%-46px)] bg-amber-500 h-full'>
-            <p className='text-sm'>
-                Announcement: Work Hours Notice
-            </p>
-        </div>
-    </div> */}
     
     {/* Profile Management */}
-    <div className='bg-white shadow shadow-dark/10'>
+    <div className='bg-white shadow shadow-dark/10 rounded text-[10px]'>
         {adminProfileMenuCtaButtonsProps.map((link, i) => 
             <ProfileMenu key={i} {...link}/> 
         )}

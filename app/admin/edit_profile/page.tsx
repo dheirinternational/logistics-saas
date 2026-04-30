@@ -40,7 +40,7 @@ const Page: NextPage = () => {
     // Fetch User Related Data  
     const fetchData = async () => {
         try{
-            const res = await fetch("/api/users/my-data", {
+            const res = await fetch("/api/users/my-data/admin", {
                 method: "GET",
                 credentials: "include",
                 cache: "no-cache"
@@ -62,8 +62,8 @@ const Page: NextPage = () => {
             setEmail({email: fetchedUser.email})
         }
         catch(err){
-            toast.error("ERR:: Uploading User Details")
-            console.error("ERR:: Uploading User Details", err)
+            toast.error("ERR:: Fetching User Details")
+            console.error("ERR:: Fetching User Details", err)
         }
         finally{
             setIsLoading(false)
@@ -242,7 +242,7 @@ const Page: NextPage = () => {
     }
 
 
-  return <div className='h-full w-full'>
+  return <div className='h-full max-h-full w-full p-body'>
     {
     isLoading ? 
     <div className='flex h-full w-full center-items md:max-w-125 md:mx-auto'>
@@ -266,8 +266,14 @@ const Page: NextPage = () => {
                 <FaUser />
             </Link>
         </div> */}
+        <h2 className="text-2xl font-semibold">
+            Edit Profile
+        </h2>
+        <p className="text-xs text-dark/50 mt-2">
+            Make edits to your user information
+        </p>
 
-        <div className='p-body bg-light mt-2 text-sm space-y-4 md:max-w-125 md:mx-auto'>
+        <div className='p-body bg-light mt-2 text-sm space-y-4 flex h-60 items-center rounded'>
             <div className='relative w-fit h-fit mx-auto space-y-2'>
                 <figure className='w-31 h-31 bg-red-300 rounded-full mx-auto relative overflow-hidden'>
                     {
@@ -340,7 +346,7 @@ const Page: NextPage = () => {
 
         </div>
 
-        <div className='bg-light p-body mt-2 space-y-3 md:max-w-125 md:mx-auto'>
+        <div className='bg-light p-body mt-2 space-y-3 rounded'>
             <div className='flex justify-between items-end'>
                 <div className='w-50'>
                     <InputComponent 

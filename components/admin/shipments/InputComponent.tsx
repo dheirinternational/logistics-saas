@@ -61,8 +61,8 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
 
 
   return (
-    <div className="w-full relative">
-        <label className="text-xs relative">
+    <div className="w-full relative ">
+        <label className="text-xs relative h-fit">
             {!textarea && <>
                 <p className="font-semibold">{title}</p>
                 <input 

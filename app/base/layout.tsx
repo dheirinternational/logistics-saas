@@ -16,7 +16,7 @@ export default async function HomeLayout ({children} :{children: ReactNode}){
     }
     
     return(
-        <div className="min-h-dvh h-dvh">
+        <div className="min-h-dvh h-dvh max-h-dvh bg-gray-100">
             {children}
             <NavBar/>
         </div>

@@ -133,63 +133,34 @@ const Page: NextPage = () => {
     const data = incomingPackages.filter(x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()) && x.warehouse_id.toString().includes(filterValues.warehouse_id))
 
   return <div className='space-y-body'>
-    {isDataLoading ? <div className='w-full h-[calc(100dvh-80px)] center-items'>
-        <BeatLoader color='#f26430' size={20}/>
+    {isDataLoading ? <div className='w-full h-full center-items'>
+        <BeatLoader color='#f26430' size={10}/>
     </div> :
     <>
-        <div className='p-4 bg-accent-red rounded-lg text-white'>
-            <span className='text-xs opacity-80'>
-                Admin/Operations
-            </span>
-            <h1 className='font-bold mt-4 mb-2 text-xl'>
-                Manage Shipments
-            </h1>
+        <div className='flex-col items-center gap-4'>
+            {/* STATUS CARDS */}
             <div>
-                <p className='text-[10px] opacity-70'>
-                    Monitor, filter, and manage all outgoing shipments from one control deck.
-                </p>
+                <div className='flex my-body space-x-2 overflow-x-auto'>
+                    <ShipmentStatusStatCard 
+                    value={incomingPackages.filter(x => x.status === "expected").length}
+                    status='Expected'
+                    icon={FaTruckMoving}
+                    />
+
+                    <ShipmentStatusStatCard 
+                    value={incomingPackages.filter(x => x.status === "stored").length}
+                    status='Stored'
+                    icon={BiBox}
+                    />
+                </div>
+            </div>
+
+            {/* SEARCH COMPONENT  */}
+            <div className='bg-light flex-1 h-full rounded'>
+                <SearchComponent state={filterValues} setState={setFilterValues} />
             </div>
         </div>
 
-        {/* ADD SHIPMENT BUTTON */}
-        {/* <div className='bg-light rounded-lg '>
-            <Link href={'/admin/shipments/create_shipment'} className='rounded-lg border border-dark/20 flex w-full items-center justify-center gap-3 text-sm py-3 font-bold'>
-                <FaPlus/>
-                Create Shipment
-            </Link>
-        </div> */}
-
-        {/* STATUS CARDS */}
-        <div>
-            <h2 className='text-sm'>
-                STATS
-            </h2>
-            <div className='flex my-body space-x-2 overflow-x-auto'>
-                <ShipmentStatusStatCard 
-                value={incomingPackages.filter(x => x.status === "expected").length}
-                status='Expected'
-                icon={FaTruckMoving}
-                />
-
-                <ShipmentStatusStatCard 
-                value={incomingPackages.filter(x => x.status === "stored").length}
-                status='Stored'
-                icon={BiBox}
-                />
-            </div>
-        </div>
-
-        {/* SEARCH COMPONENT  */}
-        <div className='bg-light'>
-            <SearchComponent state={filterValues} setState={setFilterValues} />
-            <div className='p-16'>
-                <input 
-                type="text" 
-                name='status'
-                />
-            </div>
-        </div>
-        
         {/* Table */}
         <div className='bg-light p-body rounded-lg'>
             <h2 className='text-sm font-bold'>

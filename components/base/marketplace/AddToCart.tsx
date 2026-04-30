@@ -2,6 +2,7 @@
 
 import { useCartStore } from "@/store/cartStore"
 import { CartProduct } from "@/types/entityTypeDef"
+import { BiCartAdd } from "react-icons/bi"
 import { toast } from "react-toastify"
 
 const AddToCart = (product: CartProduct) => {
@@ -10,7 +11,7 @@ const AddToCart = (product: CartProduct) => {
 
   return (
     <button 
-    className="bg-accent-red text-white w-full py-3 mb-22 rounded disabled:opacity-60"
+    className="bg-accent-red text-white w-full py-3  rounded disabled:opacity-60 flex justify-center items-center gap-2 text-sm"
     disabled={product.quantity < 1}
     onClick={() => {
     
@@ -24,6 +25,7 @@ const AddToCart = (product: CartProduct) => {
       toast.success("Added to cart")
     }}
     >
+        <BiCartAdd className="text-xl"/>
         {
           product.quantity < 1 ? 
           "Out of stock":

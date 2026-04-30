@@ -228,7 +228,7 @@ export type Product = {
     low_stock_threshold: number
     weight: number
     status: ProductStatus
-    is_featured: string
+    is_featured: boolean
     created_by: string
     updated_by: string
     created_at: string
@@ -278,4 +278,60 @@ export type Order = {
     created_at: string
     updated_at: string
     updated_by: string // Fk -> users(id)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export type AirPricingTemplate = {
+    id: number,
+    name: "normal_goods" | "special_goods",
+    price: number,
+    min_duration: number,
+    max_duration: number,
+    clearance: number 
+    duration_type: "days" | "weeks" | "months"
+} 
+
+export type ExpressPricingTemplate = {
+    id: number,
+    name: string,
+    price: number,
+    min_duration: number,
+    max_duration: number,
+    clearance: number 
+    duration_type: "days" | "weeks" | "months"
+}
+
+export type SeaPricingTemplate = {
+    id: number,
+    name: string,
+    price: number,
+    min_duration: number,
+    max_duration: number,
+    clearance: number 
+    duration_type: "days" | "weeks" | "months"
+}
+
+export type State = {
+    id: number
+    name: string
+}
+
+
+export type DeliveryZones = {
+    id: number
+    state_id: number
+    price: number
 }

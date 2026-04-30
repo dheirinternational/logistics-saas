@@ -11,6 +11,7 @@ type CartStore = {
     resetTotal: (value: number) => void
     increaseAmount: (productId: number) => void
     decreaseAmount: (productId: number) => void
+    editIndividualItem: (amountToBeOrdered: number, id:number) => void
 }
 
 export const useCartStore = create<CartStore>((set) => ({
@@ -40,6 +41,17 @@ export const useCartStore = create<CartStore>((set) => ({
             return { cart: [...filtered, product] }
         })
     },
+    editIndividualItem: (amount, id) => {
+    set((state) => {
+        return {
+            cart: state.cart.map((product) =>
+                product.id === id
+                    ? { ...product, amount_to_be_ordered: Math.max(1, amount)}
+                    : product
+            )
+        }
+    })
+},
     removeProduct: (id) => {
         set((state) => ({cart: state.cart.filter(x => x.id !== id)}))
     },

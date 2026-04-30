@@ -2,12 +2,12 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 import { Product, ProductCategory} from "@/types/entityTypeDef"
-import InputComponent from "../shipments/InputComponent"
 import { toast } from "react-toastify"
 import { IoCreate } from "react-icons/io5"
 import Image from "next/image"
 import { BeatLoader } from "react-spinners"
 import { useRouter } from "next/navigation"
+import { FaChevronDown } from "react-icons/fa"
 
 type ProductValues = Omit<Product, "id" | "status" | "created_at" | "created_by" | "updated_by" | "created_at" | "updated_at" | "discount_price">
 
@@ -19,20 +19,23 @@ type ImagePreview = {
 const AddProduct = () => {
 
     const [productValues, setProductValues] = useState<ProductValues>({
-        name: "",
+        name: "", //
         description: "",
         category_id: 0,
-        price: 0,
-        cost_price: 0,
-        stock_quantity: 0,
-        low_stock_threshold: 0,
-        weight: 0,
-        is_featured: "",
+        price: 0, //
+        cost_price: 0, //
+        stock_quantity: 0, //
+        low_stock_threshold: 0, //
+        weight: 0, //
+        is_featured: false,
     })
 
     const [categories, setCategories] = useState<ProductCategory[]>([])
     const [images, setImages] = useState<ImagePreview[]>([])
     const [isAddingPackage, setIsAddingPackage] = useState(false)
+
+    const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false)
+
 
     const router = useRouter()
 
@@ -49,6 +52,23 @@ const AddProduct = () => {
             formData.append("images", image.file)
         })
 
+        if (productValues.price === 0){
+            toast.error("Price cannot be 0")
+            setIsAddingPackage(false)
+            return
+        }
+        if(productValues.stock_quantity === 0){
+            toast.error("Stock in inventory cannot be zero")
+            setIsAddingPackage(false)
+            return
+        }
+        if(productValues.weight === 0){
+            toast.error("Product Weight cannot be equal to or less than 0")
+            setIsAddingPackage(false)
+            return
+        }
+
+
         try{
             const res = await fetch("/api/products", {
                 method: "POST",
@@ -63,6 +83,8 @@ const AddProduct = () => {
 
             toast.success("Product Successfully Added to System")
             router.push("/admin/marketplace")
+            // console.log(Object.fromEntries(formData))
+            
         }
         catch(err){
             toast.error("ERR:: Adding Product to System")
@@ -112,6 +134,7 @@ const AddProduct = () => {
                 }
 
                 setCategories(result.data)
+                setProductValues( prev => ({...prev, category_id: result.data[0].id}))
 
             }
             catch(err){
@@ -124,10 +147,6 @@ const AddProduct = () => {
     }, [])
 
 
-    const cate = categories.length > 0 ? categories.map( x => 
-        ({name: `${x.name.charAt(0).toUpperCase()}${x.name.slice(1)}`, value: x.id})) 
-        : []
-
     // Clean up object Url
     useEffect(() => {
         return () => {
@@ -135,113 +154,235 @@ const AddProduct = () => {
         }
     }, [images])
 
+
+
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+
+        const { name } = e.currentTarget
+        let { value } = e.currentTarget
+        value = value.replace(/^0+(?=\d)/, "");
+        setProductValues( prev => ({...prev, [name]: value}) )
+    }
+
+    console.log(categories)
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {/* Product Name */}
-        <InputComponent 
-        name="name" 
-        type="text" 
-        title="Product Name" 
-        state={productValues} 
-        setState={setProductValues}
-        required
-        />
+     
+        <div className="flex gap-4">
 
-        {/* Description */}
-        <InputComponent 
-        name="description" 
-        type="text" 
-        title="Description" 
-        state={productValues} 
-        setState={setProductValues} 
-        textarea
-        required
-        />
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Product Name
+                </span>
+                <input 
+                type="text" 
+                name="name" 
+                className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                value={productValues.name}
+                onChange={handleInputChange}
+                required
+                />
+            </label>
 
-        {/* Category Ids */}
-        <InputComponent 
-        name="category_id" 
-        type="text" 
-        title="Category ID" 
-        state={productValues} 
-        setState={setProductValues}
-        readonly
-        select
-        selectValues={[...cate]}
-        overshadow
-        required
-        />
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Price
+                </span>
+                <input 
+                type="number" 
+                name="price" 
+                className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                value={productValues.price}
+                onChange={handleInputChange}
+                min={0}
+                required
+                />
+                <span className="absolute left-1 bottom-2">
+                    ₦
+                </span>
+            </label>
 
-        {/* Price */}
-        <InputComponent 
-        name="price" 
-        type="number" 
-        title="Price" 
-        state={productValues} 
-        setState={setProductValues}
-        required
-        />
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Cost Price
+                </span>
+                <input 
+                type="number" 
+                name="cost_price" 
+                className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                value={productValues.cost_price}
+                onChange={handleInputChange}
+                min={0}
+                />
+                <span className="absolute left-1 bottom-2">
+                    ₦
+                </span>
+            </label>
 
-        {/* Cost Price? */}
-        <InputComponent 
-        name="cost_price" 
-        type="number" 
-        title="Cost Price" 
-        state={productValues} 
-        setState={setProductValues}
-        />
+        </div>
 
-        {/* Quantity */}
-        <InputComponent 
-        name="stock_quantity" 
-        type="number" 
-        title="Stock Quantity" 
-        state={productValues} 
-        setState={setProductValues}
-        required
-        />
+        <div className="flex gap-4">
+
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Stock Quantity
+                </span>
+                <input 
+                type="number" 
+                name="stock_quantity" 
+                className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                value={productValues.stock_quantity}
+                onChange={handleInputChange}
+                min={0}
+                required
+                />
+            </label>
+
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Low Stock Threshold
+                </span>
+                <input 
+                type="number" 
+                name="low_stock_threshold" 
+                className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                value={productValues.low_stock_threshold}
+                onChange={handleInputChange}
+                min={0}
+                required
+                />
+            </label>
+
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Weight
+                </span>
+                <input 
+                type="number" 
+                name="weight" 
+                className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                value={productValues.weight}
+                onChange={handleInputChange}
+                min={0}
+                required
+                />
+                <span className="text-dark/60 absolute bottom-2 right-1">
+                    Kg
+                </span>
+            </label>
+
+        </div>
+
+        <div className="flex gap-4">
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Description
+                </span>
+                <input 
+                type="text" 
+                name="description" 
+                className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-2'
+                value={productValues.description}
+                onChange={handleInputChange}
+                required
+                />
+            </label>
+
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Category
+                </span>
+                <input 
+                type="number" 
+                name="category_id" 
+                className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                value={productValues.category_id}
+                onChange={handleInputChange}
+                min={0}
+                required
+                readOnly
+                />
+                <div className="absolute right-1 bottom-2">
+                    <button
+                    className={`${isCategoryMenuOpen && "rotate-180"}`}
+                    onClick={() => {setIsCategoryMenuOpen(!isCategoryMenuOpen)}}
+                    type="button"
+                    >
+                        <FaChevronDown/>
+                    </button>
+
+                    <div className={`
+                        absolute right-0 top-10 p-3 w-40 rounded bg-light shadow z-1000 transition-set flex flex-col max-h-64 overflow-y-auto
+                        ${!isCategoryMenuOpen && "opacity-0 pointer-events-none translate-y-6"}    
+                    `}>
+                        {
+                            categories.map( (cat, i) => 
+                                {
+                                    console.log(cat)
+                                return <button
+                                    key={cat.id}
+                                    className={`
+                                        py-3 
+                                        ${productValues.category_id === cat.id && "bg-dark text-white rounded"}
+                                        ${i !== categories.length - 1 && "border-b border-dark/8"}
+                                    `}
+                                    onClick={() => {
+                                        setProductValues( prev => ({...prev, category_id: cat.id}))
+                                        setIsCategoryMenuOpen(false)
+                                    }}
+                                    type="button"
+                                    >
+                                        {cat.name}
+                                    </button>
+                                }
+                             )
+                        }
+                    </div>
+                </div>
+
+                {/* Overlay */}
+                <div className="bg-gray-100 w-fit absolute bottom-2 left-6">
+                    {categories.find( cat => cat.id === productValues.category_id )?.name}
+                </div>
+            </label>
+        </div>
+
+        <div className="flex gap-8 mt-10">
+            <label className="text-[10px] center-items gap-1">
+                Add to Featured
+                <input 
+                type="checkbox"
+                name="is_featured"
+                checked={productValues.is_featured}
+                value={"true"}
+                onChange={(e) => {
+
+                    const isChecked = e.currentTarget.checked
+                    console.log(isChecked)
+                    const value = isChecked
+                    console.log(value)
+                    setProductValues( prev => ({...prev, is_featured: value}))
+                }}
+                />
+            </label>
+
+            <label>
+                <input 
+                type="file" 
+                accept="image/*"
+                multiple
+                className="bg-light/70 border border-dark/20 text-xs p-2 w-fit"
+                onChange={hanldeImageChange}
+                required
+                />
+            </label>
+        </div>
         
-        {/* Threshold */}
-        <InputComponent 
-        name="low_stock_threshold" 
-        type="number" 
-        title="Low Stock Threshold" 
-        state={productValues} 
-        setState={setProductValues}
-        required
-        />
 
-        {/* Weight */}
-        <InputComponent 
-        name="weight" 
-        type="number" 
-        title="Weight" 
-        state={productValues} 
-        setState={setProductValues}
-        required
-        />
+    
 
-        {/* Is Featured */}
-        <InputComponent 
-        name="is_featured" 
-        type="text" 
-        title="Featured Product" 
-        state={productValues} 
-        setState={setProductValues}
-        readonly
-        select
-        selectValues={[{name: "True", value: "true"}, {name: "False", value: "false"}]}
-        required
-        />
-
-        <input 
-        type="file" 
-        accept="image/*"
-        multiple
-        className="bg-light/70 border border-dark/20 text-xs p-2 w-fit"
-        onChange={hanldeImageChange}
-        required
-        />
+        
 
         <div className="w-full max-w-full overflow-auto flex gap-2">
             {
@@ -258,16 +399,16 @@ const AddProduct = () => {
             }
         </div>
 
-        <div className="pb-10">
-            <button className="flex items-center justify-center gap-1 bg-accent-blue px-4 py-3 rounded-lg mt-4 float-right text-white" 
+        <div className="">
+            <button className="flex items-center justify-center gap-1 bg-accent-blue px-8 py-3 rounded-lg mt-4 float-right text-white" 
             disabled={isAddingPackage}
             >
                 {
                     isAddingPackage ?
-                    <BeatLoader color="#fff" size={10}/> :
+                    <BeatLoader color="#fff" size={9}/> :
                     <>
-                        <IoCreate/>
-                        <p className="text-xs font-bold">
+                        <IoCreate className="text-[12px]"/>
+                        <p className="text-[10px] font-bold">
                             Add
                         </p>
                     </>

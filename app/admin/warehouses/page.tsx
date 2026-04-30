@@ -61,27 +61,12 @@ const Page: NextPage = ({}) => {
 
 
   return <div className='space-y-body'>
-    <div className='p-4 bg-accent-red rounded-lg text-white'>
-        <span className='text-xs opacity-80'>
-            Admin/Operations
-        </span>
-        <h1 className='font-bold mt-4 mb-2 text-xl'>
-            Manage Warehouses
-        </h1>
-        <div>
-            <p className='text-[10px] opacity-70'>
-                Monitor, filter, and manage all Warehouses from one control deck.
-            </p>
-        </div>
-    </div>
-
-    {/* Add Warehouse BTN */}
-    {/* <div className='bg-light rounded-lg '>
-        <Link href={'/admin/warehouses/add_warehouse'} className='rounded-lg border border-dark/20 flex w-full items-center justify-center gap-3 text-sm py-3 font-bold'>
-            <FaPlus/>
-            Add Warehouse
-        </Link>
-    </div> */}
+    <h2 className="text-2xl font-semibold">
+        Warehouses
+    </h2>
+    <p className="text-xs text-dark/50 mt-2">
+        Manage, edit and view all warehouse related data.
+    </p>
 
     {/* SEARCH COMPONENT */}
     {/* <SearchComponent /> */}

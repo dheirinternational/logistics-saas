@@ -15,8 +15,8 @@ const LogoutButton = () => {
       onClick={handleLogout}
     >
       <div className='flex gap-4'>
-        <LuLogOut className='text-xl'/>
-        <span className='text-sm text-primary-text/80'>
+        <LuLogOut className='text-base'/>
+        <span className='text-xs text-primary-text/80'>
           Log Out
         </span>
       </div>

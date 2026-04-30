@@ -111,19 +111,14 @@ const Page: NextPage = () => {
 
 
     return (
-        <div className='h-full p-body'>
+        <div className='h-full space-y-4'>
 
-            <div className='p-4 bg-accent-red rounded-lg text-white'>
-                <span className='text-xs opacity-80'>
-                    Admin / Orders
-                </span>
-                <h1 className='font-bold mt-4 mb-2 text-xl'>
-                    Manage Orders
-                </h1>
-                <p className='text-[10px] opacity-70'>
-                    Monitor, filter, and manage all orders from one dashboard.
-                </p>
-            </div>
+            <h2 className="text-2xl font-semibold">
+                Orders
+            </h2>
+            <p className="text-xs text-dark/50 mt-2">
+                Manage, edit and view all Orders.
+            </p>
 
             {/* SEARCH COMPONENT */}
             <SearchComponent state={filterValues} setState={setFilterValues} />

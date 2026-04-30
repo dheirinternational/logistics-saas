@@ -67,7 +67,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
     }))
 
   return (
-    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4'>
+    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4 h-fit '>
 
 
         <InputComponent 

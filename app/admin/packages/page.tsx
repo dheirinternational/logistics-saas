@@ -115,26 +115,16 @@ const Page: NextPage = ({}) => {
     
 
 
-  return <div className=' h-full p-body'>
-    <div className='p-4 bg-accent-red rounded-lg text-white'>
-        <span className='text-xs opacity-80'>
-            Admin/Operations
-        </span>
-        <h1 className='font-bold mt-4 mb-2 text-xl'>
-            Manage Packages
-        </h1>
-        <div>
-            <p className='text-[10px] opacity-70'>
-                Monitor, filter, and manage all Packages from one control deck.
-            </p>
-        </div>
-    </div>
+  return <div className=' h-full '>
+    <h2 className="text-2xl font-semibold">
+        Packages
+    </h2>
+    <p className="text-xs text-dark/50 mt-2">
+        Monitor, filter, and manage all outgoing shipments from one control deck.
+    </p>
 
     {/* STATUS CARDS */}
     <div className='mt-4'>
-        <h2 className='text-sm'>
-            STATS
-        </h2>
         <div className='flex my-body space-x-2 overflow-x-auto'>
             {/* <StatusStatCard />
             <StatusStatCard />

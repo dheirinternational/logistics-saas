@@ -22,7 +22,7 @@ const SearchComponent = ({filter, setFilter} : Props) => {
     }
 
   return (
-    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col gap-4'>
+    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col gap-4 w-1/2'>
         <InputComponent name="search" type="text" state={filter} setState={setFilter} placeHolder="Search Customer code, email"/>
         
     </form>

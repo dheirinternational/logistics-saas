@@ -3,7 +3,7 @@ export const runtime = "nodejs"
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { createClient } from "@supabase/supabase-js"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!, 
@@ -45,6 +45,8 @@ export async function POST(req: Request){
             weight: Number(formData.get("weight")),
             is_featured: formData.get("is_featured") === "true"
         }
+
+        console.log(data.is_featured)
 
         if(data.price === 0){
             return NextResponse.json({
@@ -128,7 +130,7 @@ export async function POST(req: Request){
 }
 
 
-export async function GET(){
+export async function GET(req: NextRequest){
     try{
         const session = await getSession()
 
@@ -139,10 +141,19 @@ export async function GET(){
             }, {status: 401})
         }
 
+        const { searchParams } = new URL(req.url)
+        const search = searchParams.get("search")
 
-        const res = await pool.query(`
-            SELECT * FROM products    
-        `)
+        let query = `SELECT * FROM products`
+        let values: any[] = []
+        values = []
+
+        if (search) {
+            query += ` WHERE name ILIKE $1`
+            values.push(`%${search}%`)
+        }
+
+        const res = await pool.query(query, values)
 
         return NextResponse.json({
             message: "Products succesfully fetched from database",

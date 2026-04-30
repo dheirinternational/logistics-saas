@@ -135,39 +135,19 @@ const Page: NextPage = ({}) => {
     }
 
   return <div className='space-y-body relative'>
-    <div className='p-4 bg-accent-red rounded-lg text-white'>
-        <span className='text-xs opacity-80'>
-            Admin/Operations
-        </span>
-        <h1 className='font-bold mt-4 mb-2 text-xl'>
-            Manage MarketPlace
-        </h1>
-        <div>
-            <p className='text-[10px] opacity-70'>
-                Manage inventory, pricing, and product visibility.
-            </p>
-        </div>
-    </div>
+    <h2 className="text-2xl font-semibold">
+        MarketPlace
+    </h2>
+    <p className="text-xs text-dark/50 mt-2">
+        Manage, edit and view all products in inventory.
+    </p>
 
     {/* Add Product BTN */}
-    <div className='bg-light rounded-lg '>
-        <Link href={'/admin/marketplace/add_product'} className='rounded-lg border border-dark/20 flex w-full items-center justify-center gap-3 text-sm py-3 font-bold'>
+    <div className='rounded-lg '>
+        <Link href={'/admin/marketplace/add_product'} className='rounded-lg border border-dark/20 flex w-30 items-center justify-center gap-3 text-xs py-3 bg-light'>
             <FaPlus />
             Add Product
         </Link>
-    </div>
-
-    {/* STATUS CARDS */}
-    <div>
-        <h2 className='text-sm'>
-            STATS
-        </h2>
-        <div className='flex space-x-2 overflow-x-auto'>
-            {/* <StatusStatCard />
-            <StatusStatCard />
-            <StatusStatCard />
-            <StatusStatCard /> */}
-        </div>
     </div>
 
     {/* SEACRH Component */}
@@ -423,7 +403,7 @@ const EditModal = ({setModal, product, setProduct, categories, fetchProducts} : 
             </div>
             
             {/* Inputs */}
-            <div className='h-70 max-h-70 overflow-y-auto pt-3 space-y-3'>
+            {/* <div className='h-70 max-h-70 overflow-y-auto pt-3 space-y-3'>
                 <InputComponent
                 name='name'
                 state={product}
@@ -521,7 +501,7 @@ const EditModal = ({setModal, product, setProduct, categories, fetchProducts} : 
                 title='Status'
                 textarea
                 />
-                
+                 */}
                 {/* 
                 export type Product = {
                 // id: number // unique
@@ -541,7 +521,7 @@ const EditModal = ({setModal, product, setProduct, categories, fetchProducts} : 
                 created_at: string
                 updated_at: string 
             } */}
-            </div>
+            {/* </div> */}
 
              {/* Submit BTN */}
             <div  className='mt-2'>

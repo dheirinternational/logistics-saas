@@ -23,7 +23,7 @@ const ProductCard = (props: Product) => {
       setImages(result.data)
     }
     catch(err){
-      console.error(`ERR:: Error fetching product image with product id-${props.id}`)
+      console.error(`ERR:: Error fetching product image with product id-${props.id}`, err)
     }
     finally{
       setIsImageLoading(false)
@@ -42,7 +42,8 @@ const ProductCard = (props: Product) => {
              <FaStar className="text-[10px] text-accent-blue"/>
           </div>
         }
-        <figure className="w-27 h-27 bg-red-500 rounded relative overflow-hidden ">
+
+        <figure className="w-23 h-23 bg-red-500 rounded relative overflow-hidden ">
             {
               isImageLoading ? (
               <BeatLoader color="#FFF"  size={10}/> ) :
@@ -56,18 +57,19 @@ const ProductCard = (props: Product) => {
             }
         </figure>
 
+
         {discount_price && discount_price < price && (
           <span className="block w-fit bg-[#ffebcf] p-px px-1 rounded absolute top-0 right-0 text-accent-red">
               -{Math.round(((price - discount_price) / price) * 100)}%
           </span>
         )}
-        <p className="text-[10px] mt-2">
+        <p className="text-[9px] mt-2 mb-1">
             {name}
         </p>
-        <p className="text-lg font-semibold">
-            ₦ {discount_price ?? price}k
+        <p className="text-sm font-semibold">
+            ₦ {Number(discount_price ?? price).toLocaleString()}
         </p>
-        <p className="text-[10px] line-clamp-1 text-ellipsis">
+        <p className="text-[10px] line-clamp-1 text-ellipsis text-dark/60">
             {stock_quantity} units left
         </p>
     </Link>

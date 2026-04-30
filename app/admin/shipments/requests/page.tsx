@@ -39,7 +39,6 @@ const Page: NextPage = () => {
 
 
     const [modalSelectedRequest, setModalSelectedRequest] = useState<null | ShippingRequest>(null)
-    console.log(modalSelectedRequest)
 
     const fetchShipmentData = async () => {
         try{
@@ -159,37 +158,13 @@ const Page: NextPage = () => {
     const data = shipmentRequests.filter( x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()))
 
   return <div className='space-y-body'>
-    {isDataLoading ? <div className='w-screen h-[calc(100dvh-80px)] center-items'>
-        <BeatLoader color='#f26430' size={20}/>
+    {isDataLoading ? <div className='h-full max-h-full center-items'>
+        <BeatLoader color='#f26430' size={10}/>
     </div> :
+    
     <>
-        <div className='p-4 bg-accent-red rounded-lg text-white'>
-            <span className='text-xs opacity-80'>
-                Admin/Operations
-            </span>
-            <h1 className='font-bold mt-4 mb-2 text-xl'>
-                Manage Shipments
-            </h1>
-            <div>
-                <p className='text-[10px] opacity-70'>
-                    Monitor, filter, and manage all outgoing shipments from one control deck.
-                </p>
-            </div>
-        </div>
-
-        {/* ADD SHIPMENT BUTTON */}
-        {/* <div className='bg-light rounded-lg '>
-            <Link href={'/admin/shipments/create_shipment'} className='rounded-lg border border-dark/20 flex w-full items-center justify-center gap-3 text-sm py-3 font-bold'>
-                <FaPlus/>
-                Create Shipment
-            </Link>
-        </div> */}
-
         {/* STATUS CARDS */}
         <div>
-            <h2 className='text-sm'>
-                STATS
-            </h2>
             <div className='flex my-body space-x-2 overflow-x-auto'>
                 <ShipmentStatusStatCard 
                 value={shipmentRequests.filter(x => x.status === "pending").length}

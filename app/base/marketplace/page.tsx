@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Product, ProductCategory } from '@/types/entityTypeDef'
 import { BeatLoader } from 'react-spinners'
-import InputComponent from '@/components/admin/shipments/InputComponent'
+
 
 const Page: NextPage = ({}) => {
   // Get featured products for discounted sale section
@@ -82,7 +82,7 @@ const Page: NextPage = ({}) => {
                 Featured Products
             </p>
         </div>
-        <div className='p-2 flex gap-4 max-w-full overflow-auto min-h-36 h-45'>
+        <div className='p-2 flex gap-4 max-w-full overflow-auto min-h-36 h-40'>
             {
               isDataLoading ? 
               <BeatLoader color='#f26430' size={10}/> :
@@ -102,20 +102,11 @@ const Page: NextPage = ({}) => {
                 Products
             </p>
         </div>
-        <div className=' h-10 w-50 p-2 mb-3'>
-            <InputComponent
-            name='search'
-            state={filterValue}
-            setState={setFilterValue}
-            placeHolder='Search Product...'
-            type='text'
-            />
-        </div>
 
-        <div className='flex text-xs overflow-auto w-full gap-4 px-2  pb-2'>
+        <div className='flex text-xs overflow-auto w-full gap-4 px-2  pb-2 mt-4'>
           <button 
             onClick={() => setFilterValue(prev => ({...prev, category: ""}))}
-            className={`${filterValue.category === "" && "text-accent-red font-semibold"}`}
+            className={`${filterValue.category === "" ? "text-accent-red font-semibold" : "text-dark/60 text-[10px]"}`}
             > 
               {"All"}
           </button>
@@ -123,33 +114,35 @@ const Page: NextPage = ({}) => {
             cate.map( x => <button 
             key={x.value}
             onClick={() => setFilterValue(prev => ({...prev, category: x.value.toString()}))}
-            className={`${x.value.toString().toLowerCase() === filterValue.category.toLowerCase() && "text-accent-red font-semibold"}`}
+            className={`${x.value.toString().toLowerCase() === filterValue.category.toLowerCase() ? "text-accent-red font-semibold" : "text-dark/60 text-[10px]"}`}
             > 
               {x.name}
             </button>)
           }
         </div>
 
-        <div className='p-2 flex flex-wrap  gap-6 max-w-full overflow-auto justify-start min-h-150'>
-            {
-              isDataLoading ? 
-              <BeatLoader color='#f26430' size={10}/> :
-              (
-                !filterValue.search.trim() ?
-                filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    {...product}
-                  />
-                )) :
-                filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    {...product}
-                  />
-                ))
-              )
-            }
+        <div className='p-2 gap-6 max-w-full overflow-auto justify-start min-h-150 h-[calc(100dvh-100px)] max-h-[calc(100dvh-100px)] mt-5 bg-light'>
+            <div className='flex flex-wrap gap-4'>
+              {
+                isDataLoading ? 
+                <BeatLoader color='#f26430' size={10}/> :
+                (
+                  !filterValue.search.trim() ?
+                  filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      {...product}
+                    />
+                  )) :
+                  filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      {...product}
+                    />
+                  ))
+                )
+              }
+            </div>
         </div>
     </div>
   </div>
