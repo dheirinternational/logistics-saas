@@ -49,22 +49,6 @@ export type Shipment = {
     user_id: number // FK -> Users(id)
 }
 
-export type Package = {
-    id: number // unique
-    incoming_package_id: string  // FK -> IncomingPackage(id)
-    package_name: string
-    user_id: number  // Fk -> Users(id)
-    customer_code: string // Fk -> Customers(code)
-    warehouse_id: string // Fk -> Warehouses(id)
-    weight: number
-    condition: "good" | "damaged"
-    status: PackageStatus
-    received_at: string
-    stored_at: string
-    created_at: string
-    number_of_items: number    
-}
-
 export type Warehouse = {
     id: number  // unique
     name: string 
@@ -127,6 +111,22 @@ export type IncomingPackage = {
     declared_item_name: string
     declared_item_quantity: number
     declared_item_weight: number 
+    created_at: string
+}
+
+export type Package = {
+    id: number // unique
+    incoming_package_id: string  // FK -> IncomingPackage(id)
+    package_name: string
+    user_id: number  // Fk -> Users(id)
+    customer_code: string // Fk -> Customers(code)
+    warehouse_id: number // Fk -> Warehouses(id)
+    weight: number
+    amount: number
+    condition: "good" | "damaged"
+    status: PackageStatus
+    received_at: string
+    stored_at: string
     created_at: string
 }
 
@@ -222,7 +222,7 @@ export type Product = {
     description: string
     category_id: number
     price: number
-    discount_price?: number | null
+    discount_price?: number
     cost_price: number
     stock_quantity: number
     low_stock_threshold: number
@@ -239,7 +239,7 @@ export type CartProduct = {
     id: number // unique
     name: string
     price: number
-    discount_price?: number | null
+    discount_price?: number
     quantity: number
     image: string
     amount_to_be_ordered: number

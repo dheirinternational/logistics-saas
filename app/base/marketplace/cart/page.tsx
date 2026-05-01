@@ -40,13 +40,12 @@ const Page: NextPage = () => {
         setTotalPrice(0)
 
         cart.forEach( item => {
-            totalPriceCalculated += item.discount_price ? item.discount_price * item.amount_to_be_ordered : item.price * item.amount_to_be_ordered
+            totalPriceCalculated += item.discount_price !== 0 ? item.price * item.amount_to_be_ordered:  item.discount_price * item.amount_to_be_ordered 
         })
 
         setTotalPrice(totalPriceCalculated)
 
     }, [cart])
-
 
     // Fetch User details for Payment Initialization, states and delivery zones
     useEffect(() => {
@@ -191,7 +190,6 @@ const Page: NextPage = () => {
     }
 
 
-    console.log(pricingZones)
 
 
   return  <div className='h-full max-h-full w-full text-sm '>

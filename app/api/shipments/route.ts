@@ -38,13 +38,10 @@ export async function POST(req: NextRequest) {
             payment_time,
             package_ids,
             total_weight,
-            wrapping
+            price
         } = body
 
-        const totalPrice = await calculateShippingFee(Number(total_weight), 1, channel, wrapping, payment_time)
-
-        console.log(totalPrice)
-
+        const totalPrice = price 
         const tracking_number = generateTrackingNumber()
 
         // 🔐 Start transaction

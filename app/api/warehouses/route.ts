@@ -19,14 +19,16 @@ export async function GET(){
 
         return NextResponse.json({
             success: true,
+            message: "Successfully fetched warehouses",
             data: res.rows
         }, {status: 200})
 
     }
     catch(err){
-        console.error("ERROR_GETTING_WAREHOUSE_DATA", err)
+        console.error("Internal Server Error, could not fetch warehouses", err)
         return NextResponse.json({
-            error: "Something went wrong"
+            success: false,
+            message: "Internal Server Error, could not fetch warehouses"
         }, {status: 500})
     }
     
@@ -71,13 +73,14 @@ export async function POST(request: Request){
 
         return NextResponse.json({
             success: true,
-            warehouse: res.rows[0]
+            data: res.rows[0]
         }, {status: 201})
     }
     catch(err){
-        console.error("WAREHOUSE_CREATE_ERROR", err)
+        console.error("Internal server Error, could not add warehouse", err)
         return NextResponse.json({
-            error: "Something went wrong"
+            success: false,
+            message: "Internal Server Error"
         }, {status: 500})
     }
 }

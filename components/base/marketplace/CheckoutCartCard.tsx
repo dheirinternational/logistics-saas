@@ -22,7 +22,7 @@ const CheckoutCartCard = (props: CartProduct) => {
             />
         </figure>
         <div className='px-4'>
-            
+
             <p className='text-xs text-primary-text/60'>
                 {props.name}
             </p>
@@ -30,9 +30,9 @@ const CheckoutCartCard = (props: CartProduct) => {
             <p className={`text-xl font-semibold flex gap-2`}>
                 <span className={`${props.discount_price && "opacity-50"} relative`}>
                     ₦ {Number(props.price).toLocaleString()}
-                    <span className={`absolute left-0 border-dark border-b w-full top-1/2 -translate-y-1/2 ${!props.discount_price && "opacity-0"}`} />
+                    <span className={`absolute left-0 border-dark border-b w-full top-1/2 -translate-y-1/2 ${props.discount_price === 0 && "opacity-0"}`} />
                 </span>
-                {props.discount_price && "₦" + Number(props.discount_price).toLocaleString()}
+                {props.discount_price !== 0 && "₦" + Number(props.discount_price).toLocaleString() || ""}
             </p>
 
             <p className='text-xs text-primary-text/60 italic'>

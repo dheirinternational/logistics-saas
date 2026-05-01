@@ -155,7 +155,7 @@ const AddProduct = () => {
     }, [images])
 
 
-
+    // Handle Input Change
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
 
         const { name } = e.currentTarget

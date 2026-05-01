@@ -2,12 +2,15 @@ import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!, 
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest){
 
@@ -48,17 +51,7 @@ export async function POST(req: NextRequest){
             received_at: formData.get("received_at"),
             stored_at: formData.get("stored_at"),
             inp_status: formData.get("inp_status"),
-            number_of_items: Number(formData.get("number_of_items"))
-        }
-
-        console.log(data)
-        // const {incoming_package_id, package_name, user_id, customer_code, warehouse_id, weight, condition, status, received_at, stored_at, inp_status, images} = body
-
-        if(data.inp_status === "stored"){
-            return NextResponse.json({
-                success: false,
-                message: "Record already exists in database"
-            }, {status: 409})
+            amount: Number(formData.get("amount"))
         }
 
         if(fileImages.length < 4 || fileImages.length > 4){
@@ -72,11 +65,11 @@ export async function POST(req: NextRequest){
 
         const res = await client.query(`
             INSERT INTO packages(
-                incoming_package_id, package_name, user_id, customer_code, warehouse_id, weight, condition, status, received_at, stored_at, created_at, number_of_items
+                incoming_package_id, package_name, user_id, customer_code, warehouse_id, weight, condition, status, received_at, stored_at, created_at, amount
             )     
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
             RETURNING id
-        `, [data.incoming_package_id, data.package_name, data.user_id, data.customer_code, data.warehouse_id, data.weight, data.condition, data.status, data.received_at, data.stored_at, data.number_of_items])
+        `, [data.incoming_package_id, data.package_name, data.user_id, data.customer_code, data.warehouse_id, data.weight, data.condition, data.status, data.received_at, data.stored_at, data.amount])
 
         await client.query(`
             UPDATE incoming_packages
@@ -125,9 +118,63 @@ export async function POST(req: NextRequest){
                 INSERT INTO package_images (package_id, image_url, is_primary)
                 VALUES ${rowsSql.join(", ")}
             `, values)
-        }    
+        }  
+        
+        // Get user email
+        const userRes = await client.query(
+            `SELECT email FROM users WHERE id = $1`,
+            [data.user_id]
+        );
+
+        const userEmail = userRes.rows[0]?.email;
 
         await client.query("COMMIT")
+
+
+         if (userEmail) {
+            try {
+                await resend.emails.send({
+                    from: "Logistics <onboarding@resend.dev>",
+                    to: [userEmail],
+                    subject: "📦 Your Package Has Been Received!",
+                    html: `
+                        <div style="font-family: Arial, sans-serif; background:#f9fafb; padding:20px;">
+                            <div style="max-width:600px;margin:auto;background:white;padding:24px;border-radius:10px;">
+                                
+                                <h2 style="color:#111827;">📦 Package Received</h2>
+
+                                <p>Hello,</p>
+
+                                <p>Your package has arrived and is now safely stored in our warehouse.</p>
+
+                                <div style="background:#f3f4f6;padding:15px;border-radius:8px;">
+                                    <p><strong>Package:</strong> ${data.package_name}</p>
+                                    <p><strong>Tracking ID:</strong> ${data.incoming_package_id}</p>
+                                    <p><strong>Status:</strong> Stored</p>
+                                </div>
+
+                                <p style="margin-top:20px;">
+                                    You can now proceed with shipping whenever you're ready.
+                                </p>
+
+                                <p style="color:#6b7280;font-size:13px;margin-top:30px;">
+                                    Need help? Contact support anytime.
+                                </p>
+
+                                <p style="font-weight:bold;">
+                                    — Your Logistics Team 🚚
+                                </p>
+
+                            </div>
+                        </div>
+                    `
+                });
+            } catch (err) {
+                console.error("Email failed:", err);
+            }
+        }
+
+
 
         return NextResponse.json({
             success: true,

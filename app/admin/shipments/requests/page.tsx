@@ -25,18 +25,22 @@ const columnHelper = createColumnHelper<ShippingRequest>()
 
 const Page: NextPage = () => {
 
+    const router = useRouter()
+
+    const [totalPrice, setTotalPrice] = useState(0) 
+    const [totalWeight, setTotalWeight] = useState(0)
     const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
+
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [isCreatingShipmentData, setIsCreatingShipmentData] = useState(false)
+    const [isModalActive, setIsModalActive] = useState(false)
+    
+    
     const [filterValues, setFilterValues] = useState<SearchProps>({
         search: "",
         warehouse_id: "",
         status: ""
     })
-    const [isModalActive, setIsModalActive] = useState(false)
-
-    const router = useRouter()
-
 
     const [modalSelectedRequest, setModalSelectedRequest] = useState<null | ShippingRequest>(null)
 
@@ -66,6 +70,12 @@ const Page: NextPage = () => {
     }
 
     const createShipment = async () => {
+
+        if(totalWeight < 1 || totalWeight < 1){
+            toast.error("Input Price and Weight")
+            return 
+        }
+
         setIsCreatingShipmentData(true)
         try{
             const res = await fetch("/api/shipments", {
@@ -85,7 +95,8 @@ const Page: NextPage = () => {
                     user_id: modalSelectedRequest?.user_id,
                     payment_time: modalSelectedRequest?.payment_time,
                     package_ids: modalSelectedRequest?.package_ids,
-                    total_weight: Number(modalSelectedRequest?.total_weight)
+                    total_weight: totalWeight,
+                    price: totalPrice
                 })
             })
 
@@ -228,9 +239,36 @@ const Page: NextPage = () => {
                         <p><span className='font-semibold'>Customer Code:</span> {modalSelectedRequest?.customer_code}</p>
                         <p><span className='font-semibold'>Package Wrapping:</span> {modalSelectedRequest?.wrapping}</p>
                         <p><span className='font-semibold'>Payment Time:</span> {modalSelectedRequest?.payment_time} shipping</p>
+
+                        <div className='space-y-2'>
+
+                            <label className='text-[10px] flex gap-2 items-center'>
+                                Total Price
+                                <input 
+                                type="number" 
+                                value={totalPrice}
+                                onChange={(e) => {setTotalPrice(Number(e.currentTarget.value))}}
+                                min={0}
+                                className='border border-dark/10 rounded px-2 py-1 outline-0'
+                                />
+                            </label>
+
+                            <label className='text-[10px] flex gap-2 items-center'>
+                                Weight (kg)
+                                <input 
+                                type="number" 
+                                value={totalWeight}
+                                onChange={(e) => {setTotalWeight(Number(e.currentTarget.value))}}
+                                min={0}
+                                className='border border-dark/10 rounded px-2 py-1 outline-0'
+                                />
+                            </label>
+
+                        </div>
+
                         <div className='mt-3 space-y-1'>
                             <span>Customer Note</span>
-                            <p className='border border-dark/20 h-26 mt-2 p-3 rounded-lg overflow-y-auto'>
+                            <p className='border border-dark/20 h-16 mt-2 p-3 rounded-lg overflow-y-auto'>
                                 {modalSelectedRequest?.shipping_note}
                             </p>
                         </div>

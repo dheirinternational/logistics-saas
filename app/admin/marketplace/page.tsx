@@ -2,15 +2,12 @@
 
 import InputComponent from '@/components/admin/shipments/InputComponent'
 import { Table } from '@/components/admin/table/Table'
-import { Product, ProductCategory, ProductImage } from '@/types/entityTypeDef'
-import { ProductStatus } from '@/types/statusTypes'
+import { Product, ProductCategory } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { FaPlus, FaStar } from 'react-icons/fa'
-import { FaX } from 'react-icons/fa6'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { FaChevronDown, FaPlus } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
@@ -27,16 +24,20 @@ const Page: NextPage = ({}) => {
 
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<ProductCategory[]>([])
-    const [isDataLoading, setIsDataLoading] = useState(false)
     const [filterValue, setFilterValue] = useState<FilterValue>({
         search: "",
         status: "",
         category: "",
     })
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-    const [isModalActive, setIsModalActive] = useState(false)
-    const [isEditModalActive, setIsEditModalActive] = useState(true)
+    const [productCategoryName, setProductCategoryName] = useState("")
 
+    const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false) 
+    const [isEditStatusDropDownActive, setIsEditStatusDropDownActive] = useState(false)
+    const [isEditFeaturedDropDownActive, setIsEditFeaturedDropDownActive] = useState(false)
+
+    const [isDataLoading, setIsDataLoading] = useState(false)
+    const [isSubmittingEditedData, setIsSubmittingEditedData] = useState(false)
 
     const fetchProducts = async () => {
         setIsDataLoading(true)
@@ -67,6 +68,16 @@ const Page: NextPage = ({}) => {
     useEffect(() => {
         fetchProducts()
     }, [])
+
+    // Find Category Name based by id
+    useEffect(() => {
+        if(selectedProduct){
+            console.log(categories)
+            console.log(selectedProduct.category_id)
+            const name = categories.find( cat => cat.id === Number(selectedProduct.category_id) )?.name || ""
+            setProductCategoryName(name)
+        }
+    }, [selectedProduct])
 
     // Table Def
     const productsTableDef = [
@@ -100,18 +111,9 @@ const Page: NextPage = ({}) => {
                 return <div className='space-x-2'> 
                     <button className='underline' 
                     onClick={() => {
-                        setIsModalActive(true)
                         setSelectedProduct(row.original)
                     }}>
                         view
-                    </button>
-                    <span>/</span>
-                    <button className='underline' 
-                    onClick={() => {
-                        setIsEditModalActive(true)
-                        setSelectedProduct(row.original)
-                    }}>
-                        edit
                     </button>
                 </div>
             })
@@ -127,244 +129,32 @@ const Page: NextPage = ({}) => {
         ({name: `${x.name.charAt(0).toUpperCase()}${x.name.slice(1)}`, value: x.id.toString()})) 
         : []
     
-    // View Information Modal
-    const modalProps = {
-        setModal: () => setIsModalActive(false),
-        product: selectedProduct,
-        categories
-    }
 
-  return <div className='space-y-body relative'>
-    <h2 className="text-2xl font-semibold">
-        MarketPlace
-    </h2>
-    <p className="text-xs text-dark/50 mt-2">
-        Manage, edit and view all products in inventory.
-    </p>
+    // Handle Input Change
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
 
-    {/* Add Product BTN */}
-    <div className='rounded-lg '>
-        <Link href={'/admin/marketplace/add_product'} className='rounded-lg border border-dark/20 flex w-30 items-center justify-center gap-3 text-xs py-3 bg-light'>
-            <FaPlus />
-            Add Product
-        </Link>
-    </div>
-
-    {/* SEACRH Component */}
-    <div className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4'>
+        const { name, type } = e.currentTarget
+        let { value } = e.currentTarget
+        value = value.replace(/^0+(?=\d)/, "");
         
-        {/* Search Values */}
-        <InputComponent 
-        name="search" 
-        title="Search" 
-        type="text" 
-        state={filterValue} 
-        setState={setFilterValue}
-        />
-
-        {/* Status and Category */}
-            
-        {/* Status */}
-        <InputComponent 
-        name="status" 
-        title="Status" 
-        type="text" 
-        state={filterValue} 
-        setState={setFilterValue}
-        readonly
-        overshadow
-        select
-        placeHolder='select product status'
-        selectValues={[
-            {name: "-- none --", value: "" },
-            {name: "Active", value: "active"}, 
-            {name: "Inactive", value: "inactive"},
-            {name: "Out_Of_Stock", value: "out_of_stock"}
-        ]}
-        />
-
-        {/* Category */}
-        <InputComponent
-        name="category"
-        title="Category"
-        type="text"
-        state={filterValue}
-        setState={setFilterValue}
-        readonly
-        overshadow
-        select
-        selectValues={[{name: "-- none --", value: "" }, ...cate]}
-        placeHolder='select product category'
-        />
-    </div>
-
-    {/* Table */}
-    <div className='bg-light p-body rounded-lg'>
-        <h2 className='text-sm font-bold'>
-            Products
-        </h2>
-        <p className='text-xs mt-2 opacity-70'>
-            A list of all Products in the system.
-        </p>
-        <div className='mt-3 h-80 max-h-80 w-full max-w-full'>
-            {
-                isDataLoading ?
-                <BeatLoader color='#f26430' size={12}/> :
-                <Table 
-                importedData={data}
-                columnDef={productsTableDef}
-                globalFilter=''
-                />
-            }
-        </div>
-    </div>
-    {
-        isModalActive &&
-        <Modal {...modalProps} />
+        setSelectedProduct( prev => {
+            if (!prev) return prev
+            return ({...prev, [name]: type === "number" ? Number(value) : value})
+        })
     }
-    {
-        isEditModalActive && selectedProduct &&
-        <EditModal 
-            setModal={() => setIsEditModalActive(false)}
-            product={selectedProduct}
-            setProduct={setSelectedProduct as Dispatch<SetStateAction<Product>>}
-            categories={categories}
-            fetchProducts={fetchProducts}
-        />
-    }
-  </div>
-}
 
 
-const Modal = ({setModal, product, categories} : {setModal : () => void, product: Product | null, categories: ProductCategory[]}) => {
-
-    const [productImages, setProductImages] = useState<ProductImage[]>([])
-    const [isImagesLoading, setIsImagesLoading] = useState(false)
-
-    // Fetch Product Images
-    useEffect(() => {
-        async function fetchProductImages(){
-            setIsImagesLoading(true)
-            try{
-                const res = await fetch(`/api/products/images/${product?.id}`)
-                const result = await res.json()
-
-                if(!res.ok){
-                    toast.error("Error Fetching Images")
-                    return
-                }
-
-                setProductImages(result.data)
-            }
-            catch(err){
-                console.error("Error Fetching Images", err)
-            }
-            finally{
-                setIsImagesLoading(false)
-            }
-        }
-
-        fetchProductImages()
-    }, [])
-
-    const category = categories.filter( x => x.id === Number(product?.category_id) )
-
-  return <div className='w-screen h-dvh bg-dark/40 fixed top-0 right-0  center-items'>
-        <div className='w-80 h-100 bg-light rounded p-4 relative'>
-            <button 
-            className='text-sm absolute right-4 top-4'
-            onClick={() => {
-                setModal()
-            }}
-            >
-                <FaX />
-            </button>
-            {/* Product Name */}
-            <div className=''>
-                <h2 className='font-bold'>
-                    {product?.name}
-                </h2>
-            </div>
-            <div className='h-82 overflow-y-auto mt-4 '>
-                
-                {/* Images */}
-                <div className='h-30 bg-amber-50 flex gap-2 overflow-x-auto'>
-                    {
-                        isImagesLoading ? 
-                        <BeatLoader color=' #f26430' size={12}/> :
-                        productImages.map( x =>  
-                            <figure
-                            key={x.id} 
-                            className='h-30 w-30 min-w-30 overflow-hidden rounded relative border-2 border-dark/30'>
-                                <Image
-                                src={x.image_url}
-                                alt='product-images'
-                                fill
-                                className='ob'
-                                />
-                            </figure>
-                        )
-                    }
-                </div>
-
-                {/* Price */}
-                <div className='mt-4 relative'>
-                    <p className='font-bold text-sm'>
-                        Prices
-                    </p>
-                    <div className='text-xs flex justify-between p-3'>
-                        <p className='space-x-3'>Price: ₦<span>{product?.price}</span></p>
-                        <p className='space-x-3'>Discount: ₦<span>{product?.discount_price || "nil"}</span></p>
-                        <p className='space-x-3'>Cost: ₦<span>{product?.cost_price || "nil"}</span></p>
-                    </div>
-
-                    {/* Is featured */}
-                    {
-                        product?.is_featured && 
-                        <p className='bg-green-100 flex items-center gap-2 text-xs p-2 rounded-full w-fit px-4 absolute -right-2 -top-2 scale-70'>
-                            <FaStar/>
-                            featured
-                        </p>
-                    }
-                </div>
-                    <hr className='border-dark/40 my-2'/>
-                <div className='space-y-2'>
-                    <p className='text-xs'>
-                        <span className='font-semibold'>Category: </span>
-                        {category[0].name}
-                    </p>
-                    <p className='text-xs mb-5'>
-                        <span className='font-semibold'>Stock Quantity: </span>
-                        {product?.stock_quantity}
-                    </p>
-                    <span className="text-xs font-bold italic ">Description</span>
-                    <p className='border border-dark/20 p-2 text-xs rounded mt-2'>
-                        {product?.description}
-                    </p>
-                </div>
-                {/*  */}
-            </div>
-        </div>
-    </div>
-}
-
-const EditModal = ({setModal, product, setProduct, categories, fetchProducts} : {setModal : () => void, product: Product, setProduct: Dispatch<SetStateAction<Product >>, categories: ProductCategory[], fetchProducts: () => Promise<void>}) => {
-
-    const [isUpdatingProuduct, setIsUpdatingProduct] = useState(false) 
-
-
-    const handleProductUpdate = async () => {
-        setIsUpdatingProduct(true)
+    // Submit edited Data  
+    const updateProduct = async () => {
+        setIsSubmittingEditedData(true)
         try{
-            const res = await fetch("/api/products", {
+            const res = await fetch(`/api/products`, {
                 method: "PUT",
                 headers: {
                     "Content-Type" : "application/json"
                 },
-                credentials: "include",
-                body: JSON.stringify(product)
+                body: JSON.stringify(selectedProduct)
             })
-
             const result = await res.json()
 
             if(!res.ok){
@@ -372,175 +162,462 @@ const EditModal = ({setModal, product, setProduct, categories, fetchProducts} : 
                 return
             }
 
-            fetchProducts()
-            toast.success(result.message)
-            setModal()
-            
+            toast.success(`${selectedProduct?.name} successfully edited`)
+            setSelectedProduct(null)
         }
         catch(err){
-            console.error("ERR:: Updating Product details", err)
-            toast.error("ERR:: Updating Product details")
+            console.error("Network Error", err)
+            toast.error("Network Error")
+        }
+        finally{
+            setIsSubmittingEditedData(false)
         }
     }
 
-    return <div className='w-screen h-dvh bg-dark/40 fixed top-0 right-0  center-items'>
-        <div className='w-80 h-100 bg-light rounded p-4 relative'>
+
+
+
+  return <div className='max-h-full h-full relative flex overflow-y-hidden'>
+    <div className="h-full max-h-full overflow-y-auto flex-1 p-body space-y-body"> 
+
+        <h2 className="text-2xl font-semibold">
+            MarketPlace
+        </h2>
+        <p className="text-xs text-dark/50 mt-2">
+            View all products in inventory.
+        </p>
+
+        {/* Add Product BTN */}
+        <div className='rounded-lg '>
+            <Link href={'/admin/marketplace/add_product'} className='rounded-lg border border-dark/20 flex w-30 items-center justify-center gap-3 text-xs py-3 bg-light'>
+                <FaPlus />
+                Add Product
+            </Link>
+        </div>
+
+        {/* SEACRH Component */}
+        <div className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4'>
             
-            {/* Close Button */}
-            <div className='flex justify-between mb-2'>
-                <h2 className='font-bold'>
-                    Edit Product
-                </h2>
-                <button 
-                className='text-sm'
-                disabled={isUpdatingProuduct}
-                onClick={() => {
-                    setModal()
-                }}
-                >
-                    <FaX />
-                </button>
-            </div>
-            
-            {/* Inputs */}
-            {/* <div className='h-70 max-h-70 overflow-y-auto pt-3 space-y-3'>
-                <InputComponent
-                name='name'
-                state={product}
-                setState={setProduct}
-                type='text'
-                title='Name'
-                />
+            {/* Search Values */}
+            <InputComponent 
+            name="search" 
+            title="Search" 
+            type="text" 
+            state={filterValue} 
+            setState={setFilterValue}
+            />
 
-                <div className='flex gap-4'>
-                    <InputComponent
-                    name='price'
-                    state={product}
-                    setState={setProduct}
-                    type='number'
-                    title='Price'
-                    />
-
-                    <InputComponent
-                    name='discount_price'
-                    state={product}
-                    setState={setProduct}
-                    type='number'
-                    title='Discount Price'
-                    />
-
-                    <InputComponent
-                    name='cost_price'
-                    state={product}
-                    setState={setProduct}
-                    type='number'
-                    title='Cost Price'
-                    />
-                </div>
-
-                <div className='flex gap-4'>    
-
-                    <InputComponent
-                    name='stock_quantity'
-                    state={product}
-                    setState={setProduct}
-                    type='number'
-                    title='Stock Quantity'
-                    />
-
-                    <InputComponent
-                    name='low_stock_threshold'
-                    state={product}
-                    setState={setProduct}
-                    type='number'
-                    title='Low Stock Threshold'
-                    />
-
-                </div>
-
-                <div className='flex gap-4'>
+            {/* Status and Category */}
                 
-                    <InputComponent
-                    name='is_featured'
-                    state={product}
-                    setState={setProduct}
-                    type="text"
-                    title='Is Featured'
-                    readonly
-                    select selectValues={[{name: "True", value: "true"}, {name: "False", value: 'false'}]}
-                    />
+            {/* Status */}
+            <InputComponent 
+            name="status" 
+            title="Status" 
+            type="text" 
+            state={filterValue} 
+            setState={setFilterValue}
+            readonly
+            overshadow
+            select
+            placeHolder='select product status'
+            selectValues={[
+                {name: "-- none --", value: "" },
+                {name: "Active", value: "active"}, 
+                {name: "Inactive", value: "inactive"},
+                {name: "Out_Of_Stock", value: "out_of_stock"}
+            ]}
+            />
 
-                    <InputComponent
-                    name='status'
-                    state={product}
-                    setState={setProduct}
-                    type='text'
-                    title='Status'
-                    readonly
-                    select
-                    selectValues={[
-                        {name: "Active", value: "active"},
-                        {name: "Inactive", value: "inactive"},
-                        {name: "Out Of Stock", value: "out_of_stock"}
-                    ]}
-                    />
+            {/* Category */}
+            <InputComponent
+            name="category"
+            title="Category"
+            type="text"
+            state={filterValue}
+            setState={setFilterValue}
+            readonly
+            overshadow
+            select
+            selectValues={[{name: "-- none --", value: "" }, ...cate]}
+            placeHolder='select product category'
+            />
+        </div>
 
-                    <InputComponent
-                    name='weight'
-                    state={product}
-                    setState={setProduct}
-                    type='number'
-                    title='Weight'
+        {/* Table */}
+        <div className='bg-light p-body rounded-lg'>
+            <h2 className='text-sm font-bold'>
+                Products
+            </h2>
+            <p className='text-xs mt-2 opacity-70'>
+                A list of all Products in the system.
+            </p>
+            <div className='mt-3 h-80 max-h-80 w-full max-w-full'>
+                {
+                    isDataLoading ?
+                    <BeatLoader color='#f26430' size={12}/> :
+                    <Table 
+                    importedData={data}
+                    columnDef={productsTableDef}
+                    globalFilter=''
                     />
-                </div>
-                <InputComponent
-                name='description'
-                state={product}
-                setState={setProduct}
-                type='text'
-                title='Status'
-                textarea
-                />
-                 */}
-                {/* 
-                export type Product = {
-                // id: number // unique
-                // name: string
-                // description: string
-                // category_id: number
-                // price: number
-                // discount_price?: number | null
-                // cost_price: number
-                // stock_quantity: number
-                low_stock_threshold: number
-                weight: number
-                status: ProductStatus
-                is_featured: string
-                created_by: string
-                updated_by: string
-                created_at: string
-                updated_at: string 
-            } */}
-            {/* </div> */}
-
-             {/* Submit BTN */}
-            <div  className='mt-2'>
-                <button 
-                className='h-13 w-full bg-accent-red rounded text-white'
-                disabled={isUpdatingProuduct}
-                onClick={handleProductUpdate}
-                >
-                    {
-                    isUpdatingProuduct ?
-                    <BeatLoader color='#fff' size={10} speedMultiplier={0.5}/> :
-                    "Submit Edit"
-                    }
-                </button>
+                }
             </div>
-        </div> 
-    </div>
-}
+        </div>
 
+    </div>
+
+
+
+    <div className="h-full max-h-full bg-light w-70 p-body space-y-4 overflow-y-auto overflow-x-hidden min-h-180">
+        <div>
+            <h2 className='font-semibold'>
+                Product Information
+            </h2>          
+            <p className='text-[10px] text-dark/60 my-3'>
+                Manage and edit products in inventory
+            </p>
+        </div>  
+        <div className='mt-8'>
+            {
+                selectedProduct &&
+                <div className='space-y-4'>
+                     
+                     {/* product name */}
+                    <div>
+                    <label className='w-full flex flex-col relative text-[10px]'>
+                        <span className='text-dark/60'>
+                            Product Name
+                        </span>
+                        <input 
+                        type="text" 
+                        name="name" 
+                        className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
+                        value={selectedProduct.name}
+                        onChange={handleInputChange}
+                        required
+                        />
+                    </label>
+                    </div>
+
+                    {/* Category */}
+                    <div>
+                        <label className='w-full flex flex-col relative text-[10px]'>
+                            <span className='text-dark/60'>
+                                Category
+                            </span>
+                            <input 
+                            type="number" 
+                            name="category_id" 
+                            className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.category_id}
+                            onChange={handleInputChange}
+                            min={0}
+                            required
+                            readOnly
+                            />
+
+                            <div className="absolute right-1 bottom-2">
+                                <button
+                                className={`${isCategoryMenuOpen && "rotate-180"} p-1`}
+                                onClick={() => {setIsCategoryMenuOpen(!isCategoryMenuOpen)}}
+                                type="button"
+                                
+                                >
+                                    <FaChevronDown />
+                                </button>
+            
+                                <div className={`
+                                    absolute right-0 top-10 p-3 w-40 rounded bg-light shadow z-1000 transition-set flex flex-col max-h-64 overflow-y-auto
+                                    ${!isCategoryMenuOpen && "opacity-0 pointer-events-none translate-y-6"}    
+                                `}>
+                                    {
+                                        categories.map( (cat, i) => 
+                                            {
+                                            return <button
+                                                key={cat.id}
+                                                className={`
+                                                    py-3 
+                                                    ${selectedProduct.category_id === cat.id && "bg-dark text-white rounded"}
+                                                    ${i !== categories.length - 1 && "border-b border-dark/8"}
+                                                `}
+                                                onClick={() => {
+                                                    setSelectedProduct( prev => {
+                                                        if(!prev) return prev   
+                                                        return ({...prev, category_id: cat.id})
+                                                    })
+                                                    setIsCategoryMenuOpen(false)
+                                                }}
+                                                type="button"
+                                                >
+                                                    {cat.name}
+                                                </button>
+                                            }
+                                        )
+                                    }
+                                </div>
+                            </div>
+            
+                            {/* Overlay */}
+                            <div className="bg-light w-fit absolute bottom-2 left-2">
+                                {productCategoryName}
+                            </div>
+                        </label>
+                    </div>
+                    
+                    {/* Price and discount price */}
+                    <div className='flex gap-3'>
+                        <label className='flex flex-col relative text-[10px] flex-1 min-w-20'>
+                            <span className='text-dark/60'>
+                                Price
+                            </span>
+                            <input 
+                            type="number" 
+                            name="price" 
+                            className='border-b border-dark/10 p-2 pl-4 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.price}
+                            onChange={handleInputChange}
+                            required
+                            />
+
+                            <span className='absolute left-1 bottom-2.25'>
+                                ₦
+                            </span>
+                        </label>
+
+                        <label className='flex flex-col relative text-[10px] flex-1 min-w-20'>
+                            <span className='text-dark/60'>
+                                Discount Price
+                            </span>
+                            <input 
+                            type="number" 
+                            name="discount_price" 
+                            className='border-b border-dark/10 p-2 pl-4 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.discount_price}
+                            onChange={handleInputChange}
+                            required
+                            />
+
+                            <span className='absolute left-1 bottom-2.25'>
+                                ₦
+                            </span>
+                        </label>
+
+                        <label className='flex flex-col relative text-[10px] flex-1 min-w-20'>
+                            <span className='text-dark/60'>
+                                Cost Price
+                            </span>
+                            <input 
+                            type="number" 
+                            name="cost_price" 
+                            className='border-b border-dark/10 p-2 pl-4 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.cost_price}
+                            onChange={handleInputChange}
+                            required
+                            />
+
+                            <span className='absolute left-1 bottom-2.25'>
+                                ₦
+                            </span>
+                        </label>
+                     </div>
+
+                     {/* Stock Quantity, low_stock_threshold, weight */}
+                    <div className='flex gap-3'>
+                        <label className='flex flex-col relative text-[10px] flex-1 min-w-20'>
+                            <span className='text-dark/60'>
+                                Weight
+                            </span>
+                            <input 
+                            type="number" 
+                            name="weight" 
+                            className='border-b border-dark/10 p-2 pr-4 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.weight}
+                            onChange={handleInputChange}
+                            required
+                            />
+
+                            <span className='absolute right-1 bottom-2.25'>
+                                kg
+                            </span>
+                        </label>
+
+                        <label className='flex flex-col relative text-[10px] flex-1 min-w-20'>
+                            <span className='text-dark/60'>
+                                Stock Quantity
+                            </span>
+                            <input 
+                            type="number" 
+                            name="discount_price" 
+                            className='border-b border-dark/10 p-2 pl-4 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.stock_quantity}
+                            onChange={handleInputChange}
+                            required
+                            />
+                        </label>
+
+                        <label className='flex flex-col relative text-[10px] flex-1 min-w-20'>
+                            <span className='text-dark/60'>
+                                Threshold
+                            </span>
+                            <input 
+                            type="number" 
+                            name="low_stock_threshold" 
+                            className='border-b border-dark/10 p-2 pl-4 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.low_stock_threshold}
+                            onChange={handleInputChange}
+                            required
+                            />
+                        </label>
+                    </div>
+                    
+                    {/* Description */}
+                    <div>
+                        <label className='w-full flex flex-col relative text-[10px]'>
+                            <span className='text-dark/60'>
+                                Description
+                            </span>
+                            <input 
+                            type="text" 
+                            name="description" 
+                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.description}
+                            onChange={handleInputChange}
+                            required
+                            />
+                        </label>
+                    </div>
+
+                    {/* Featured and  Status*/}
+                    <div className='flex gap-2'>
+                        <label className='w-full flex flex-col relative text-[10px] max-w-30'>
+                            <span className='text-dark/60'>
+                                Status
+                            </span>
+                            <input 
+                            type="text" 
+                            name="status" 
+                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
+                            value={selectedProduct.status}
+                            onChange={handleInputChange}
+                            required
+                            readOnly
+                            />
+
+                            <div className='absolute right-0 bottom-2.25'>
+                                <button 
+                                className={`${isEditStatusDropDownActive && "rotate-180"}`}
+                                onClick={() => setIsEditStatusDropDownActive(prev => !prev)}
+                                >
+                                    <FaChevronDown />
+                                </button>
+                            </div>
+
+                            <div className={`
+                                absolute right-0 top-10 p-3 w-25 rounded bg-light shadow z-1000 transition-set flex flex-col max-h-64 overflow-y-auto
+                                ${!isEditStatusDropDownActive && "opacity-0 pointer-events-none translate-y-6"}    
+                            `}>
+                                {
+                                    [ "active", "inactive", "out_of_stock"].map( (cat, i) => 
+                                        {
+                                        return <button
+                                            key={cat}
+                                            className={`
+                                                py-3 
+                                                ${selectedProduct.status === cat && "bg-dark text-white rounded"}
+                                                ${i !== categories.length - 1 && "border-b border-dark/8"}
+                                            `}
+                                            onClick={() => {
+                                                setSelectedProduct( prev => {
+                                                    if(!prev) return prev   
+                                                    return ({...prev, status: cat as "active" | "inactive" | "out_of_stock"})
+                                                })
+                                                setIsEditStatusDropDownActive(false)
+                                            }}
+                                            type="button"
+                                            >
+                                                {cat}
+                                            </button>
+                                        }
+                                    )
+                                }
+                            </div>
+                        </label>
+
+                        <label className='w-full flex flex-col relative text-[10px] max-w-30'>
+                            <span className='text-dark/60'>
+                                Featured
+                            </span>
+                            <input 
+                            type="text" 
+                            name="is_featured" 
+                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2 capitalize'
+                            value={String(selectedProduct.is_featured)}
+                            onChange={handleInputChange}
+                            required
+                            readOnly
+                            />
+
+                            <div className='absolute right-0 bottom-2.25'>
+                                <button 
+                                className={`${isEditFeaturedDropDownActive && "rotate-180"}`}
+                                onClick={() => setIsEditFeaturedDropDownActive(prev => !prev)}
+                                >
+                                    <FaChevronDown />
+                                </button>
+                            </div>
+
+                            <div className={`
+                                absolute right-0 top-10 p-3 w-25 rounded bg-light shadow z-1000 transition-set flex flex-col max-h-64 overflow-y-auto capitalize
+                                ${!isEditFeaturedDropDownActive && "opacity-0 pointer-events-none translate-y-6"}    
+                            `}>
+                                {
+                                    [ "true", "false"].map( (cat, i) => 
+                                        {
+                                        return <button
+                                            key={cat}
+                                            className={`
+                                                py-3 capitalize
+                                                ${String(selectedProduct.is_featured) === cat && "bg-dark text-white rounded"}
+                                                ${i !== categories.length - 1 && "border-b border-dark/8"}
+                                            `}
+                                            onClick={() => {
+                                                setSelectedProduct( prev => {
+                                                    if(!prev) return prev   
+                                                    return ({...prev, is_featured: cat === "true" ? true : false})
+                                                })
+                                                setIsEditFeaturedDropDownActive(false)
+                                            }}
+                                            type="button"
+                                            >
+                                                {cat}
+                                            </button>
+                                        }
+                                    )
+                                }
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div className='mt-14'>
+                        <button 
+                        className='bg-accent-red py-2 text-[10px] text-white w-full rounded '
+                        onClick={updateProduct}
+                        >
+                            {
+                                isSubmittingEditedData ?
+                                <BeatLoader color='white' size={8}/> :
+                                "Submit"
+                            }
+                        </button>
+                    </div>
+
+                </div>
+            }
+        </div>    
+    </div>
+
+  </div>
+}
 
 
 export default Page

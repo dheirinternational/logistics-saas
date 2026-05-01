@@ -1,13 +1,11 @@
 "use client"
 
 import AddToCart from "@/components/base/marketplace/AddToCart"
-import Header from "@/components/base/marketplace/Header"
 import MarketSearch from "@/components/base/marketplace/MarketSearch"
 import { CartProduct, Product, ProductImage } from "@/types/entityTypeDef"
 import Image from "next/image"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { FaStar } from "react-icons/fa"
 import { BeatLoader } from "react-spinners"
 import { toast } from "react-toastify"
 
@@ -42,11 +40,11 @@ export default function ProductDisplay(){
 
             const productDetails: Product = producta.data
             setCartItem({
-                id: productDetails.id ,
+                id: Number(productDetails.id) ,
                 name: productDetails.name,
-                price: productDetails.price,
-                discount_price: productDetails.discount_price,
-                quantity: productDetails.stock_quantity,
+                price: Number(productDetails.price),
+                discount_price: Number(productDetails.discount_price),
+                quantity: Number(productDetails.stock_quantity),
                 image: images.data[0].image_url,
                 amount_to_be_ordered: 1
             })
@@ -137,13 +135,15 @@ export default function ProductDisplay(){
                     <div className="p-4 border-dark/8 border rounded mt-4">
                         <p className="text-3xl font-semibold flex items-center flex-wrap gap-2 max-sm:flex-col max-sm:items-start">
                             <span className="whitespace-nowrap">
-                                ₦ {Number(product?.discount_price || product?.price || 0).toLocaleString()}
+                                ₦ {
+                                    Number(Number(product?.discount_price) === 0 ? Number(product?.price) : product?.discount_price).toLocaleString()
+                                }
                             </span>
                             {
-                                product?.discount_price &&
+                                Number(product?.discount_price) !== 0 ?
                                 <span className="whitespace-nowrap text-xl line-through font-normal">    
-                                    ₦ ${Number(product?.price || 0).toLocaleString()}
-                                </span>
+                                    ₦ {Number(product?.price || 0).toLocaleString()}
+                                </span> : ""
                             }
                         </p>
                         <span className="mt-1 block w-fit text-[10px] opacity-60 ">

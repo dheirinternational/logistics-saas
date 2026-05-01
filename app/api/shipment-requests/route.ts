@@ -26,14 +26,13 @@ export async function POST(req: NextRequest){
                 customer_code,
                 package_ids,
                 channel,
-                wrapping,
                 payment_time
             )
             VALUES (
-                $1, $2, $3, $4, $5, $6
+                $1, $2, $3, $4, $5
             )
             RETURNING *     
-        `, [user_id,customer_code, package_ids, channel, wrapping, payment_time])
+        `, [user_id,customer_code, package_ids, channel, payment_time])
 
         await pool.query(`
             UPDATE packages
@@ -85,10 +84,10 @@ export async function GET(){
 
     }
     catch(err){
-        console.error("Error Creating Shipment Requests", err)
+        console.error("Internal Server Error", err)
         return NextResponse.json({
             success: false,
-            message: "Something went wrong"
+            message: "Internal Server Error"
         }, {status: 500})
     }
 }

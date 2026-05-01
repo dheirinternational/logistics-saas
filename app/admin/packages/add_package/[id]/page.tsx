@@ -27,7 +27,7 @@ export default async function Page({params}: {params: {id: string}}){
 
 
     {/* FORM */}
-    <AddPackage props={data}/>
+    {/* <AddPackage props={data}/> */}
 
     
   </div>

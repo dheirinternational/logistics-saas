@@ -34,6 +34,8 @@ const ProductCard = (props: Product) => {
     fetchImages()
   }, [props.id])
 
+  console.log(price, discount_price)
+
   return (
     <Link href={`/base/marketplace/${id}`} className="relative">
         {
@@ -58,16 +60,17 @@ const ProductCard = (props: Product) => {
         </figure>
 
 
-        {discount_price && discount_price < price && (
+        {Number(discount_price) && Number(discount_price) < Number(price) && Number(discount_price) !== 0 && (
           <span className="block w-fit bg-[#ffebcf] p-px px-1 rounded absolute top-0 right-0 text-accent-red">
-              -{Math.round(((price - discount_price) / price) * 100)}%
+              -{Math.round(((Number(price) - Number(discount_price)) / Number(price)) * 100)}%
           </span>
-        )}
+        ) || ""}
         <p className="text-[9px] mt-2 mb-1">
             {name}
         </p>
         <p className="text-sm font-semibold">
-            ₦ {Number(discount_price ?? price).toLocaleString()}
+            ₦ {Number(Number(discount_price) === 0 ? price : discount_price).toLocaleString()}
+            
         </p>
         <p className="text-[10px] line-clamp-1 text-ellipsis text-dark/60">
             {stock_quantity} units left

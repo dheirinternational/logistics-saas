@@ -19,7 +19,6 @@ const Page: NextPage = () => {
     const [isDataLoading, setIsDataLoading] = useState(false)
     const [isPostingData, setIsPostingData] = useState(false)
     const [isConfirmModal, setIsConfirmModal] = useState(false)
-    const [wrappingMethod, setWrappingMethod] = useState<"bubble" | "standard">("standard")
     const [shippingMethod, setShippingMethod] = useState<"air" | "sea" | "express">("air")
     const [shippingPayment, setShippingPayment] = useState<"pay_before_shipment" | "pay_after_shipment">("pay_before_shipment")
 
@@ -70,7 +69,6 @@ const Page: NextPage = () => {
                     user_id: selectedPackages[0].user_id,
                     customer_code: selectedPackages[0].customer_code,
                     channel: shippingMethod,
-                    wrapping: wrappingMethod,
                     payment_time: shippingPayment,
                     total_weight: selectedPackages.reduce((acc, pack) => acc + pack.weight, 0)
                 })
@@ -154,31 +152,6 @@ const Page: NextPage = () => {
             Selected Packages: <span className='text-accent-red font-bold text-sm'>{selectedPackages.length}</span> 
         </span>
         
-        {/* Wrapping method */}
-        <fieldset className='text-xs flex gap-4 mt-2'>
-            <span>Wrapping Method :</span>
-            <label className='flex items-center gap-2'>
-                <span>Standard</span>
-                <input 
-                type="radio" 
-                name='wrapping'
-                value={"standard"}
-                checked={wrappingMethod === "standard"}
-                onChange={(e) => setWrappingMethod(e.target.value as "standard")}
-                />
-            </label>
-            <label className='flex items-center gap-2'>
-                <span>Bubble</span>
-                <input 
-                type="radio" 
-                name='wrapping'
-                value={"bubble"}
-                checked={wrappingMethod === "bubble"}
-                onChange={(e) => setWrappingMethod(e.target.value as "bubble")}
-                />
-            </label>
-        </fieldset>
-
         {/* Shipping method */}
         <fieldset className='text-xs flex gap-4 mt-2'>
             <span>Shipping Method :</span>

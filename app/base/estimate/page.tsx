@@ -232,8 +232,55 @@ export default function Page(){
                             Notice:
                         </h3>
                         <p className="text-[10px]">
-                            - The quotation generated is an estimate and may not reflect the final price. The final price may vary based on additional factors such as fuel surcharges, taxes, and any special handling requirements.
-                            - 
+                            China to Nigeria🇳🇬
+                            <br />
+                            Updated fee. 
+                            <br />
+                            Shipping fee: please note below prices are subject to change due to influctuations in exchange rate and clearing fee.
+                            <br />
+                            Air: <br />
+                            Normal goods $11.9 per kg <br /> 
+                            Duration 7-10 days <br />
+                            Special goods $12.7 per kg <br />
+                            Duration 2-3 weeks <br />
+                            Clearance 1,000 per kg <br />
+                            <br />
+                            Express: <br />
+                            Duration 3-5days <br />
+                            Phone $20.5 per <br />
+                            Laptop $35.8 per <br />
+                            Tablet below 1kg $25.5 <br />
+                            Tablet above $25.5 <br />
+                            Clearance 1200 per kg <br />
+                            Items above 20kg $14 per kg <br />
+                            Items less than 20kg $16 per kg clearance 1600 per kg
+
+
+                            Sea: <br />
+                            Normal goods N550,000 per cbm inclusive clearing. <br />
+                            Special goods 580,000 <br />
+                            Duration: 2-3 month (-/+) <br />
+
+                            <br />
+                            Warehouse:<br />
+                            Guangzhou: for Consolidation.<br />
+                            Foshan: no consolidation, immediate loading. <br />
+                            CBM: 0.1<br />
+                            <br />
+                            Interstate,  
+                            Onitsha, 
+                            Kano and other states are waybill. <br />
+                            <br />
+                            Notice <br />
+                            No missing items <br />
+                            Inspection of few packages based on request from 1cbm above <br />
+                            We give accurate CBM <br />
+                            We repack goods together/consolidate <br /> 
+                            We pack goods into freezers and washing machines <br />
+                            {"We're no longer shipping any lithium batteries like power bank and co."} <br />
+                            <br />
+                            Important notice: <br />
+                            your name and phone number must be written on your packages.<br />
                         </p>
 
                     </div>

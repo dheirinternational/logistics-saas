@@ -3,6 +3,7 @@
 import SearchComponent from '@/components/admin/shipments/SearchComponent'
 import ShipmentStatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
+import { usePackageStore } from '@/store/incomingPackagesStore'
 import { IncomingPackage } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
@@ -21,72 +22,10 @@ export type SearchProps = {
 
 const columnHelper = createColumnHelper<IncomingPackage>()
 
-const incomingPackageColumnDef = [
-    columnHelper.accessor("incoming_tracking_number", {
-        header: "Tracking Id",
-        cell: ({getValue}) => 
-            <p className='max-w-40 w-40 whitespace-nowrap overflow-hidden text-ellipsis'>
-                {getValue()}
-            </p>
-    }),
-    columnHelper.accessor("customer_code", {
-        header: "Customer Code",
-        cell: ({getValue}) => getValue()
-    }),
-    columnHelper.accessor("declared_item_name", {
-        header: "Item Name",
-        cell: ({getValue}) => getValue(),
-        enableColumnFilter: false
-    }),
-    columnHelper.accessor("declared_item_quantity", {
-        header: "Quantity",
-        cell: ({getValue}) => getValue(),
-        enableColumnFilter: false
-
-    }),
-    columnHelper.accessor("status", {
-        header: "Status",
-        cell: ({getValue}) => getValue(),
-        enableColumnFilter: false
-    }),
-    columnHelper.display({
-        header: "Add Product",
-        id: "add-product",
-        // cell: ({row}) => 
-        // {
-        //     if (row.original.status === "stored") {
-        //         return null 
-        //     }else{
-        //         return <Link href={`/admin/packages/add_package/${row.original.id ?? ""}`}
-        //             className='bg-accent-blue/40 px-2 py-1 rounded text-white'
-        //             >
-        //                 Add 
-        //             </Link>
-        //     }
-        // }
-        cell: ({ row }) => {
-            const item = row.original
-
-            if (!item || typeof item.id === "undefined") {
-                return "Peyyyy"
-            }
-
-            if (item.status === "stored") return null
-
-            return (
-                <Link
-                href={`/admin/packages/add_package/${item.id}`}
-                className='bg-accent-blue/40 px-2 py-1 rounded text-white'
-                >
-                Add
-                </Link>
-            )
-        }
-    })
-]
-
 const Page: NextPage = () => {
 
+    const {setSelectedPackage} = usePackageStore()
+    
     const [incomingPackages, setIncomingPackages] = useState<IncomingPackage[]>([])
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [filterValues, setFilterValues] = useState<SearchProps>({
@@ -94,8 +33,6 @@ const Page: NextPage = () => {
         warehouse_id: "",
         status: ""
     })
-
-    // const [globalFilter, setGlobalFilter] = useState("")
 
 
     useEffect(() => {
@@ -129,6 +66,72 @@ const Page: NextPage = () => {
     
     }, [])
 
+    // Table Column Def
+    const incomingPackageColumnDef = [
+        columnHelper.accessor("incoming_tracking_number", {
+            header: "Tracking Id",
+            cell: ({getValue}) => 
+                <p className='max-w-40 w-40 whitespace-nowrap overflow-hidden text-ellipsis'>
+                    {getValue()}
+                </p>
+        }),
+        columnHelper.accessor("customer_code", {
+            header: "Customer Code",
+            cell: ({getValue}) => getValue()
+        }),
+        columnHelper.accessor("declared_item_name", {
+            header: "Item Name",
+            cell: ({getValue}) => getValue(),
+            enableColumnFilter: false
+        }),
+        columnHelper.accessor("declared_item_quantity", {
+            header: "Quantity",
+            cell: ({getValue}) => getValue(),
+            enableColumnFilter: false
+
+        }),
+        columnHelper.accessor("status", {
+            header: "Status",
+            cell: ({getValue}) => getValue(),
+            enableColumnFilter: false
+        }),
+        columnHelper.display({
+            header: "Add Product",
+            id: "add-product",
+            cell: ({ row }) => {
+                const item = row.original
+
+                if (!item || typeof item.id === "undefined") {
+                    return "Peyyyy"
+                }
+
+                if (item.status === "stored") return null
+
+                return (
+                    <button
+                    className='underline'
+                    onClick={() => setSelectedPackage({
+                        id: 0,
+                        incoming_package_id: item.incoming_tracking_number,
+                        package_name: item.declared_item_name,
+                        user_id: Number(item.user_id),
+                        customer_code: item.customer_code,
+                        warehouse_id: Number(item.warehouse_id),
+                        weight: Number(item.declared_item_weight) || 0,
+                        condition: "good",
+                        status: "stored",
+                        received_at: "",
+                        stored_at: "",
+                        created_at: "",
+                        amount: item.declared_item_quantity
+                    })}
+                    >
+                        Add
+                    </button>
+                )
+            }
+        })
+    ]
 
     const data = incomingPackages.filter(x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()) && x.warehouse_id.toString().includes(filterValues.warehouse_id))
 
