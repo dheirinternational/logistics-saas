@@ -134,7 +134,7 @@ export async function POST(req: NextRequest){
          if (userEmail) {
             try {
                 await resend.emails.send({
-                    from: "Logistics <onboarding@resend.dev>",
+                    from: "Logistics <no-reply@dheirinternational.com>",
                     to: [userEmail],
                     subject: "📦 Your Package Has Been Received!",
                     html: `

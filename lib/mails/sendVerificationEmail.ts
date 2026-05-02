@@ -8,7 +8,7 @@ export async function sendVerificationEmail(email: string, token: string) {
     const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${token}`;
 
     await resend.emails.send({
-        from: "D_Heir Logistics <onboarding@resend.dev>", // default test sender
+        from: "D_Heir Logistics <no-reply@dheirinternational.com>", // default test sender
         to: email,
         subject: "Verify your email",
         html: `

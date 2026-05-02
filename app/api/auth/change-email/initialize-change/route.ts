@@ -49,7 +49,7 @@ export async function GET(){
         const verificationUrl = `${process.env.BASE_URL}/auth/change-email?token=${rawToken}`;
 
         await resend.emails.send({
-            from: "D_Heir Logistics <onboarding@resend.dev>", // default test sender
+            from: "D_Heir Logistics <no-reply@dheirinternational.com>", // default test sender
             to: email,
             subject: "Email Change Requested",
             html: `

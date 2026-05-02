@@ -31,7 +31,7 @@ export async function POST(req: NextRequest){
         const resetLink = `${process.env.BASE_URL}/auth/change-password?token=${token}&email=${encodedEmail}`
 
         await resend.emails.send({
-            from: "D_Heir Logistics <onboarding@resend.dev>", // default test sender
+            from: "D_Heir Logistics <no-reply@dheirinternational.com>", // default test sender
             to: email,
             subject: "DHEIRLOGISTICS Password Reset Link",
             html: `
