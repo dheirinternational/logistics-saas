@@ -15,7 +15,10 @@ export default async function AdminLayout({children}: {children: ReactNode}){
     return(
         <div className="max-h-dvh h-dvh flex">
             <SideBar />
-            <div className="w-[calc(100vw-200px)] h-dvh overflow-y-auto">
+            <div className="
+                w-[calc(100vw-200px)] h-dvh overflow-y-auto
+                max-sm:w-full    
+            ">
                 <Header />
                 <div className="h-dvh max-h-dvh max-sm:h-[calc(100dvh-56px)] max-sm:max-h-[calc(100dvh-56px)] bg-gray-100">
                     {children}
