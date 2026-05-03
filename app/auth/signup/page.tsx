@@ -50,7 +50,7 @@ const Page: NextPage = () => {
         setIsCreatingAccount(true)
         
         const formData = new FormData(e.currentTarget)
-        formData.append("role", "admin")
+        formData.append("role", "customer")
         formData.append("email_verified", String(isEmailVerified))
         const data = Object.fromEntries(formData)
 

@@ -1,4 +1,5 @@
 import { Shipment } from "@/types/entityTypeDef"
+import { ShipmentStatus } from "@/types/statusTypes"
 import { ChangeEvent } from "react"
 import { create } from "zustand"
 
@@ -7,6 +8,9 @@ type StoreType = {
     setSelectedShipment: (value: Shipment) => void
     handleSelectedShipmentInput : (e: ChangeEvent<HTMLInputElement>) => void
     resetSelectedShipment: () => void
+    setShipmentStatus: (value: ShipmentStatus) => void
+    shipmentTrigger: number
+    setShipmentrigger: () => void
 }
 
 
@@ -37,5 +41,13 @@ export const useShipmentStore = create<StoreType>((set) => ({
             }
         })
     },
+    setShipmentStatus: (value) => set((state) => {
+
+        if(!state.selectedShipment) return state
+
+        return {selectedShipment: {...state.selectedShipment, status: value}}
+    }),
     resetSelectedShipment: () => set({selectedShipment: null}),
+    shipmentTrigger: 0,
+    setShipmentrigger: () => set((state) => ({shipmentTrigger: state.shipmentTrigger + 1}))
 }))

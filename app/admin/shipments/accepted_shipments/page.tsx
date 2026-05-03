@@ -5,6 +5,7 @@ import InputComponent from '@/components/admin/shipments/InputComponent'
 import ShipmentStatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
 import { generateTrackingNumber } from '@/lib/generators/generateTrackingNumber'
+import { useShipmentStore } from '@/store/shipmentsStore'
 import { Shipment } from '@/types/entityTypeDef'
 import { ShipmentStatus } from '@/types/statusTypes'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -32,21 +33,26 @@ const columnHelper = createColumnHelper<Shipment>()
 
 const Page: NextPage = () => {
 
+    const {setSelectedShipment, shipmentTrigger} = useShipmentStore()
+
     const [shipments, setShipments] = useState<Shipment[]>([])
-    const [isDataLoading, setIsDataLoading] = useState(true)
     const [filterValues, setFilterValues] = useState<SearchProps>({
         search: "",
         status: ""
     })
+
+
     const [isModalActive, setIsModalActive] = useState(false)
-    
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const [isUpdatingShipmentStatus, setIsUpdatingShipmentStatus] = useState(false)
+
+
     
     const [modalSelectedShipment, setModalSelectedShipmodalSelectedShipment] = useState<null | Shipment>(null)
     const [currentStatus, setCurrentStatus] = useState<currentSelectedStatus>({
         status: ""
     })
 
-    const [isUpdatingShipmentStatus, setIsUpdatingShipmentStatus] = useState(false)
 
     const router = useRouter()
 
@@ -74,8 +80,9 @@ const Page: NextPage = () => {
             cell: ({row}) => 
             <button 
             onClick={() => {
-                setModalSelectedShipmodalSelectedShipment(row.original)
-                setIsModalActive(true)
+                // setModalSelectedShipmodalSelectedShipment(row.original)
+                // setIsModalActive(true)
+                setSelectedShipment(row.original)
             }}>
                 View Shipment
             </button>
@@ -85,6 +92,7 @@ const Page: NextPage = () => {
     generateTrackingNumber()
 
 
+    // Fetch Shipment 
     useEffect(() => {
         const fetchShipmentData = async () => {
             try{
@@ -113,9 +121,11 @@ const Page: NextPage = () => {
 
         fetchShipmentData()
     
-    }, [])
+    }, [shipmentTrigger])
 
 
+
+    // Update Shipment Status
     const updateShipmentStatus = async() => {
         setIsUpdatingShipmentStatus(true)
         try{
@@ -154,7 +164,7 @@ const Page: NextPage = () => {
 
 
   return <div className='space-y-body'>
-    {isDataLoading ? <div className='w-screen h-full max-h-full center-items'>
+    {isDataLoading ? <div className='w-full h-full max-h-full center-items'>
         <BeatLoader color='#f26430' size={10}/>
     </div> :
     <>
