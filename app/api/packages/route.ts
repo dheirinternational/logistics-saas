@@ -54,10 +54,10 @@ export async function POST(req: NextRequest){
             amount: Number(formData.get("amount"))
         }
 
-        if(fileImages.length < 4 || fileImages.length > 4){
+        if(fileImages.length < 1 ){
             return NextResponse.json({
                 success: false,
-                message: "Must Select only four images"
+                message: "No Images Selected"
             }, {status: 400})
         }
 
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest){
         await client.query("COMMIT")
 
 
-         if (userEmail) {
+        if (userEmail) {
             try {
                 await resend.emails.send({
                     from: "Logistics <no-reply@dheirinternational.com>",

@@ -209,10 +209,6 @@ const IncomingPackageEditComponent = () => {
             toast.error("Select Images")
             return
         }
-        else if(files.length !== 4){
-            toast.error("Select Just Four images")
-            return
-        }
 
         const urls = files.map( file => URL.createObjectURL(file) )
         setPreviews(urls)

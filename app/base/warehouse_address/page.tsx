@@ -141,7 +141,7 @@ export default function Page() {
                 <div className='space-y-2'>
                 <CopyWarehouseDetails title='Recipient' text={`${currentlySelectedWarehouse?.name || ""}`}/>
                 <CopyWarehouseDetails title='Contact' text={`${currentlySelectedWarehouse?.phone || ""}`}/>
-                <CopyWarehouseDetails title='Address' text={`${currentlySelectedWarehouse?.country === "CN" ? "China" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code}`} />
+                <CopyWarehouseDetails title='Address' text={`${currentlySelectedWarehouse?.country === "CN" ? "China" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code}`}  />
                 <CopyWarehouseDetails title='Postal Code' text={`${currentlySelectedWarehouse?.postal_code || ""}`}/>
                 </div>
                 {/* <div className='mt-6 h-75'>
