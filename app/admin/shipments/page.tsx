@@ -24,7 +24,7 @@ const columnHelper = createColumnHelper<IncomingPackage>()
 
 const Page: NextPage = () => {
 
-    const {setSelectedPackage} = usePackageStore()
+    const {setSelectedPackage, trigger} = usePackageStore()
     
     const [incomingPackages, setIncomingPackages] = useState<IncomingPackage[]>([])
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -64,7 +64,7 @@ const Page: NextPage = () => {
 
         fetchShipmentData()
     
-    }, [])
+    }, [trigger])
 
     // Table Column Def
     const incomingPackageColumnDef = [

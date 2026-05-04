@@ -8,6 +8,8 @@ type StoreType = {
     handleSelectedPackageInput : (e: ChangeEvent<HTMLInputElement>) => void
     setPackageWarehouse: (value: number) => void
     resetSelectedPackage: () => void
+    trigger: number
+    setTrigger: () => void
 }
 
 
@@ -50,5 +52,7 @@ export const usePackageStore = create<StoreType>((set) => ({
             }
         })
     },
+    trigger: 0,
+    setTrigger: () => set((state) => ({trigger: state.trigger + 1})),
     resetSelectedPackage: () => set({selectedPackage: null}),
 }))

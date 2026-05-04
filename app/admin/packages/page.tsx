@@ -2,6 +2,7 @@
 
 import SearchComponent from '@/components/admin/orders/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
+import { usePackageStore } from '@/store/incomingPackagesStore'
 import { Package, PackageImage } from '@/types/entityTypeDef'
 import { PackageStatus } from '@/types/statusTypes'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -21,6 +22,9 @@ type FilterValues = {
 
 
 const Page: NextPage = ({}) => {
+
+    const {trigger, setSelectedPackage: setPackage} = usePackageStore()
+
     
     const [packages, setpackages] = useState<Package[]>([]);
     const [isDataLoading, setIsDataLoading] = useState(false)
@@ -97,8 +101,8 @@ const Page: NextPage = ({}) => {
             cell: ({row}) => <div>
                 <button
                 onClick={() => {
-                    setIsModalActive(true)
-                    setSelectedPackage(row.original)
+                    // setIsModalActive(true)
+                    setPackage(row.original)
                 }}
                 >
                     view

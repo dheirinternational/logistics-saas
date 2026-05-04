@@ -29,32 +29,21 @@ type ShipmentCount = {
 
 const Page: NextPage = () => {
 
-    const [shipmentCounts, setShipmentCounts] = useState<ShipmentCount | null>(null)
+
+    // Arrays
     const [announcements, setAnnouncements] = useState<{id: number, title: string, message: string}[]>([])
 
-
+    
+    // Selected Objects
+    const [currentAnnouncementPage, setCurrentAnnouncementPage] = useState<"view" | "add" >("view")
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<{id: number, title: string, message: string} | null>()
 
-    const [currentAnnouncementPage, setCurrentAnnouncementPage] = useState<"view" | "add" >("view")
-    // const [isListPage, setIsListPage] = useState(false)
 
-
-
-    const fetchAnnouncements = async () => {
-    try{
-        const res = await fetch('/api/announcements')
-        const result = await res.json()
-
-        setAnnouncements(result.data)
-        console.log(result.data)
-    }
-    catch(err){
-        console.error("ERR:: Fetching Announcement Data", err)
-        toast.error("ERR:: Fetching Announcement Data")
-    }
-}
+    // Counts
+    const [shipmentCounts, setShipmentCounts] = useState<ShipmentCount | null>(null)
 
     
+
     // DELETE Announcement
     const deleteAnnouncement = async (id) => {
         try{
@@ -82,11 +71,26 @@ const Page: NextPage = () => {
             console.error("ERR:: Deleting announcement", err)
         }
     }
-    
-    
-    useEffect(() => {
 
-        // Fetch Active shipments records
+    // FETCH Announcements 
+    const fetchAnnouncements = async () => {
+        try{
+            const res = await fetch('/api/announcements')
+            const result = await res.json()
+
+            setAnnouncements(result.data)
+            console.log(result.data)
+        }
+        catch(err){
+            console.error("ERR:: Fetching Announcement Data", err)
+            toast.error("ERR:: Fetching Announcement Data")
+        }
+    }
+    
+
+
+    // Fetch Active shipments records and existing announcements
+    useEffect(() => {
         const fetchActiveShipmentRecords = async () => {
             try{
                 const shipmentCountRes = await fetch(`/api/shipments/count`)
@@ -113,192 +117,133 @@ const Page: NextPage = () => {
 
   return (
     <div className='max-h-[calc(100dvh-56px)] h-[calc(100dvh-56px)] overflow-y-auto p-body space-y-4'>
+        <h2 className="text-2xl font-semibold">
+            Dashboards
+        </h2>
+        <p className="text-xs text-dark/50 mt-2">
+            View Shipments summary and add announcements 
+        </p>
 
-        {/* System Snapshot */}
-        <div className='bg-accent-blue p-4 rounded-lg text-white relative md:max-w-125 md:mx-auto'>
-            <span className=' text-xs'>
-                System Snapshot
-            </span>
-            <h3 className='font-bold text-4xl mt-4'>
-                {shipmentCounts?.total_active_count}
-            </h3>
-            <p className='text-sm opacity-80 mt-1'>
-                Total active shipment record
-            </p>
-            <div className='flex items-center gap-x-2 text-xs bg-black/70 w-fit px-3 rounded-full py-1 absolute right-4 bottom-4'>
-                <div className='w-2 h-2 bg-white rounded-full'/>
-                <span>live</span>
-            </div>
-        </div>
-
-        {/* Stats */}
-        <div className='md:max-w-125 md:mx-auto'>
-            <div className='flex justify-between items-center'>
-                <h2 className='font-bold text-sm'>
-                    STATS <span className='text-[10px]'>(today)</span>
-                </h2>
-                <button className='text-xs font-bold'>
-                    See all
-                </button>
-            </div>
-            
-            {/* STATS Components Ctn */}
-            <div className='flex my-body space-x-2 overflow-x-auto'>
-                <StatusStatCard count={shipmentCounts?.processing || 0} status='processing' icon={FcProcess} />
-                <StatusStatCard count={shipmentCounts?.shipped || 0} status="shipped" icon={BiExport} />
-                <StatusStatCard count={shipmentCounts?.in_transit || 0} status='in_transit' icon={FaTruck} />
-                <StatusStatCard count={shipmentCounts?.delivered || 0} status='delivered' icon={FaCheckCircle} />
-            </div>
-        </div>
-
-        {/* QuicK actions */}
-
-        <div className='p-body bg-light rounded-lg space-y-body md:max-w-125 md:mx-auto'>
-            <div className='flex justify-between'>
-                <h2 className='text-sm font-bold'>
-                    Quick Actions
-                </h2>
-                {/* ? <button className='text-xs'>See all</button> */}
+        {/* System Snapshot & Stats */}
+        <div className='flex gap-4 max-sm:flex-col'>
+            {/* Snapshots */}
+            <div className='flex-1 bg-accent-blue p-4 rounded-lg text-white relative '>
+                <span className=' text-xs'>
+                    System Snapshot
+                </span>
+                <h3 className='font-bold text-4xl mt-4'>
+                    {shipmentCounts?.total_active_count}
+                </h3>
+                <p className='text-sm opacity-80 mt-1'>
+                    Total active shipment record
+                </p>
+                <div className='flex items-center gap-x-2 text-xs bg-black/70 w-fit px-3 rounded-full py-1 absolute right-4 bottom-4'>
+                    <div className='w-2 h-2 bg-white rounded-full'/>
+                    <span>live</span>
+                </div>
             </div>
 
-            {/* Actions button container */}
-            <div className='flex justify-center gap-3'>
-                {buttonsProps.map( (button, i) => 
-                    <QuickActionsBtn key={i} {...button} />
-                )}
-            </div>
-        </div>
 
-
-        <div className='p-body bg-light rounded-lg space-y-body md:max-w-125 md:mx-auto'>
-            <div className='flex justify-between'>
+            {/* STATS */}
+            <div className='flex-1'>
+                <div className='flex justify-between items-center'>
+                    <h2 className='font-bold text-sm'>
+                        STATS <span className='text-[10px]'>(today)</span>
+                    </h2>
+                </div>
                 
-                <h2 className='text-xs font-bold'>
-                    Announcements
-                </h2>
-
-                <button 
-                className='text-xs'
-                onClick={() => setCurrentAnnouncementPage( prev => prev === "add" ? "view" : "add" )}
-                >
-                    {currentAnnouncementPage}
-                </button>
-
+                {/* STATS Components Ctn */}
+                <div className='flex my-body space-x-2 overflow-x-auto'>
+                    <StatusStatCard count={shipmentCounts?.processing || 0} status='processing' icon={FcProcess} />
+                    <StatusStatCard count={shipmentCounts?.shipped || 0} status="shipped" icon={BiExport} />
+                    <StatusStatCard count={shipmentCounts?.in_transit || 0} status='in_transit' icon={FaTruck} />
+                    <StatusStatCard count={shipmentCounts?.delivered || 0} status='delivered' icon={FaCheckCircle} />
+                </div>
             </div>
-            <div className='border border-dark/20 p-2 h-100 min-h-100 rounded overflow-y-auto space-y-2 relative'>
-                {
-                    currentAnnouncementPage === "view" ?
-                    <>
-                        <span className='text-[10px] opacity-70 mb-3 block'>
-                        Click on an announcement to edit or delete. 
-                        </span>
-                        {announcements.map( x => 
-                            <button
-                            key={x.id} 
-                            className='border border-dark/10 text-xs w-full text-left p-2 rounded active:bg-accent-red flex items-center justify-between'
-                            onClick={() => setSelectedAnnouncement(x)}
-                            >
-                                <span>
-                                    {x.title}
-                                </span>
 
-                                
-                                <MdDelete
-                                onClick={() => {deleteAnnouncement(x.id)}}
-                                />
+        </div>
+        
 
-                            </button>
-                        )}
-                        
-                    </> :
-                    <>
-                        <span className='text-[10px] opacity-70 mb-3 block'>
-                            Create new announcements to keep your customers informed about important updates, promotions, or news related to your logistics services.
-                        </span> 
-                        <AddAnnouncement fetchAnnouncements={fetchAnnouncements} />
-                    </>
+
+        {/* Add announcements & Quick Actions */}
+        <div className='flex gap-4 max-sm:flex-col-reverse'>
+
+            {/* Announcements */}
+            <div className=' flex-1 p-body bg-light rounded-lg space-y-body'>
+                <div className='flex justify-between'>
                     
-                }
-                {
-                    selectedAnnouncement && 
-                    <UpdateAnnouncement announcement={selectedAnnouncement} setSelectedAnnouncement={setSelectedAnnouncement} fetchAnnouncements={fetchAnnouncements} />
-                }
-                
+                    <h2 className='text-xs font-bold'>
+                        Announcements
+                    </h2>
+
+                    <button 
+                    className='text-xs'
+                    onClick={() => setCurrentAnnouncementPage( prev => prev === "add" ? "view" : "add" )}
+                    >
+                        {currentAnnouncementPage}
+                    </button>
+
+                </div>
+                <div className='border border-dark/20 p-2 h-60 min-h-60 rounded overflow-y-auto space-y-2 relative'>
+                    {
+                        currentAnnouncementPage === "view" ?
+                        <>
+                            <span className='text-[10px] opacity-70 mb-3 block'>
+                            Click on an announcement to edit or delete. 
+                            </span>
+                            {announcements.map( x => 
+                                <button
+                                key={x.id} 
+                                className='border border-dark/10 text-xs w-full text-left p-2 rounded active:bg-accent-red flex items-center justify-between'
+                                onClick={() => setSelectedAnnouncement(x)}
+                                >
+                                    <span>
+                                        {x.title}
+                                    </span>
+
+                                    
+                                    <MdDelete
+                                    onClick={() => {deleteAnnouncement(x.id)}}
+                                    />
+
+                                </button>
+                            )}
+                            
+                        </> :
+                        <>
+                            <span className='text-[10px] opacity-70 mb-3 block'>
+                                Create new announcements to keep your customers informed about important updates, promotions, or news related to your logistics services.
+                            </span> 
+                            <AddAnnouncement fetchAnnouncements={fetchAnnouncements} />
+                        </>
+                        
+                    }
+                    {
+                        selectedAnnouncement && 
+                        <UpdateAnnouncement announcement={selectedAnnouncement} setSelectedAnnouncement={setSelectedAnnouncement} fetchAnnouncements={fetchAnnouncements} />
+                    }
+                    
+                </div>
             </div>
-        </div>
 
-        {/* View Recent Shipments */}
-        {/* <div className='p-body bg-light rounded-lg space-y-body'>
-            <div className='flex justify-between items-center'>
-                <h2 className='text-sm font-bold'>
-                    Recent Shipments
-                </h2>
-                <button className='text-xs'>
-                    see all
-                </button>
-            </div>
-            <div className='h-70 max-h-70 space-y-2 overflow-auto'>
-                <RecentShipmentCard />
-                <RecentShipmentCard />
-                <RecentShipmentCard />
-                <RecentShipmentCard />
-                <RecentShipmentCard />
-            </div>
-        </div> */}
+            {/* Quick Actions */}
+            <div className='flex-1 p-body bg-light rounded-lg space-y-body'>
+                <div className='flex justify-between'>
+                    <h2 className='text-sm font-bold'>
+                        Quick Actions
+                    </h2>
+                    {/* ? <button className='text-xs'>See all</button> */}
+                </div>
 
-        {/* STATUS OVERVIEW */}
+                {/* Actions button container */}
+                <div className='flex justify-center gap-3'>
+                    {buttonsProps.map( (button, i) => 
+                        <QuickActionsBtn key={i} {...button} />
+                    )}
+                </div>
+            </div>  
 
-        {/* <div className='p-body bg-light rounded-lg space-y-body'>
-            <h2 className='text-sm font-bold'>
-                Status Overview
-            </h2>
-            <div>
-                chart
-            </div>
-        </div> */}
-
-        {/* Recent Activity */}
-
-        {/* <div className='p-body bg-light rounded-lg space-y-body'>
-            <h2 className='text-sm font-bold'>
-                Recent Activity
-            </h2>
-
-            <div className=' h-25 max-h-25 overflow-y-auto pl-[8.5px] relative space-y-2.5'>
-                <div className='absolute h-full w-0 border-l border-accent-red/80 left-3 z-10 '/>
-                <RecentActivity />
-                <RecentActivity />
-                <RecentActivity />
-                <RecentActivity />
-                <RecentActivity />
-            </div>
-        </div> */}
-
-        {/* <div className='p-body bg-light rounded-lg space-y-body'> 
-            <h2 className='text-sm font-bold'>
-                Pending Alerts
-            </h2>
-            <div className='space-y-2 h-47 max-h-47 min-h-47 overflow-y-scroll'>
-                <PendingAlerts/>
-                <PendingAlerts/>
-                <PendingAlerts/>
-                <PendingAlerts/>
-                <PendingAlerts/>
-                <PendingAlerts/>
-                <PendingAlerts/>
-            </div>
-        </div> */}
-
-        {/* <div className='p-body bg-light rounded-lg space-y-body'>  
-            <h2 className='text-sm font-bold'>
-                Revenue Snapshot
-            </h2>
-            <div className='flex gap-2'>
-                <RevenueSnapshot />
-                <RevenueSnapshot />
-                <RevenueSnapshot />
-            </div>
-        </div> */}
+        </div>        
 
     </div>
   )
@@ -420,7 +365,7 @@ const AddAnnouncement = ({fetchAnnouncements} : {fetchAnnouncements: () => void}
     }
 
 
-    return <div className='text-xs'>
+    return <div className='text-xs p-4'>
          
         <div className='mt-4'>
             <input 
@@ -428,7 +373,7 @@ const AddAnnouncement = ({fetchAnnouncements} : {fetchAnnouncements: () => void}
             value={title}
             onChange={(e) => setTitle(e.currentTarget.value)}
             // onBlur={() => setTimeout(() => {setTitle(announcement.title)} , 1000)}
-            className='border border-dark/10 p-2 text-sm rounded  outline-0'
+            className='border border-dark/10 p-2 text-[10px] rounded outline-0 '
             placeholder='Input Title'
             />
         </div>
@@ -438,12 +383,12 @@ const AddAnnouncement = ({fetchAnnouncements} : {fetchAnnouncements: () => void}
             onChange={(e) => setMessage(e.currentTarget.value)}
             placeholder='Input Message'
             // onBlur={() => setTimeout(() => {setMessage(announcement.message)} , 1000)}
-            className='border border-dark/10 p-2 text-sm rounded  outline-0 w-full h-30 resize-none'
+            className='border border-dark/10 p-2 rounded outline-0 w-full h-20 resize-none text-[10px]'
             />
         </div>
         <button 
         disabled={!title.trim() && !message.trim() ? true : isCreating}
-        className='mt-3 py-3 w-full bg-accent-red text-white rounded disabled:opacity-30'
+        className='mt-3 py-3 w-full bg-accent-red text-white rounded disabled:opacity-30 text-[10px]'
         onClick={() => createAnnouncement()}
         >
             {

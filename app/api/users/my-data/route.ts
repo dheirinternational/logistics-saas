@@ -32,6 +32,7 @@ export async function GET(){
 
         return NextResponse.json({
             success: true,
+            message: "Successfully retrieved user details",
             data: res.rows[0]            
         }, {status: 201})
     }
