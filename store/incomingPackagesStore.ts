@@ -10,6 +10,9 @@ type StoreType = {
     resetSelectedPackage: () => void
     trigger: number
     setTrigger: () => void
+    readonly: boolean
+    setReadOnly: () => void
+    resetReadOnly: () => void
 }
 
 
@@ -55,4 +58,7 @@ export const usePackageStore = create<StoreType>((set) => ({
     trigger: 0,
     setTrigger: () => set((state) => ({trigger: state.trigger + 1})),
     resetSelectedPackage: () => set({selectedPackage: null}),
+    readonly: true,
+    setReadOnly: () => set({readonly: false}),
+    resetReadOnly: () => set({readonly: true})
 }))

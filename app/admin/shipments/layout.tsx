@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from "react";
-import { FaChevronDown, FaGlobe, FaImage } from "react-icons/fa";
+import { FaChevronDown, FaGlobe, FaImage, FaPlus } from "react-icons/fa";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 
@@ -31,6 +31,7 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
 
     const pathName = usePathname()
     const {isModalActive, setIsModalActive} = useEditModalStore()
+    const {setSelectedPackage, setReadOnly} = usePackageStore()
 
 
     const [currentPage, setCurrentPage] = useState<"expected_shipments" | "shipment_requests" | "accepted_requests" | "">("")
@@ -81,53 +82,82 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
                 </p>
                 
                 {/* Page Selector */}
-                <div className="mt-8 mb-6">
-                    <label className='w-full flex flex-col relative max-w-70 text-xs'>
-                        <span className='text-dark/80'>
-                            Page
-                        </span>
-                        <input 
-                        type="text" 
-                        name="current_page" 
-                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
-                        value={currentPage}
-                        readOnly
-                        onChange={ (e) => setCurrentPage(e.currentTarget.value as "expected_shipments" | "shipment_requests" | "accepted_requests")}
-                        />
-                        <FaGlobe className='absolute left-1 bottom-2.5 text-dark/60'/>
-                        <div className="absolute right-1 bottom-1.5">
-                            <button
-                            onClick={() => setIsPageSelectorActive(prev => !prev)}
-                            className={`${isPageSelectorActive && "rotate-180"} transition-set`}
-                            >
-                                <FaChevronDown/>
-                            </button>
+                <div>
+                    <div className="mt-8 mb-6 flex gap-6 justify-start">
+                        <label className='w-full flex flex-col relative max-w-70 text-xs'>
+                            <span className='text-dark/80'>
+                                Page
+                            </span>
+                            <input 
+                            type="text" 
+                            name="current_page" 
+                            className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
+                            value={currentPage}
+                            readOnly
+                            onChange={ (e) => setCurrentPage(e.currentTarget.value as "expected_shipments" | "shipment_requests" | "accepted_requests")}
+                            />
+                            <FaGlobe className='absolute left-1 bottom-2.5 text-dark/60'/>
+                            <div className="absolute right-1 bottom-1.5">
+                                <button
+                                onClick={() => setIsPageSelectorActive(prev => !prev)}
+                                className={`${isPageSelectorActive && "rotate-180"} transition-set`}
+                                >
+                                    <FaChevronDown/>
+                                </button>
 
 
-                            {/* LINKS */}
-                            <div className={`
-                                absolute right-0 top-[110%] bg-light shadow shadow-dark/20 p-2 z-1000 rounded w-40 transition-set flex flex-col gap-1
-                                ${!isPageSelectorActive && "opacity-0 translate-y-8 pointer-events-none"}
-                            `}>
-                                {
-                                    pages.map( (x, i) => 
-                                        <Link 
-                                        key={x.name} 
-                                        href={x.link} 
-                                        className={`z-50 relative border-dark/20 px-3 py-2 text-center
-                                        ${pathName === x.link && "bg-dark text-white rounded"}
-                                        ${i !== 2 && "border-b"}
-                                        `}
-                                        
-                                        onClick={() => setIsPageSelectorActive(false)}
-                                        >
-                                            {`${x.name.charAt(0).toUpperCase() + x.name.slice(1)}`.split("_").join(" ")}
-                                        </Link>
-                                    )
-                                }
+                                {/* LINKS */}
+                                <div className={`
+                                    absolute right-0 top-[110%] bg-light shadow shadow-dark/20 p-2 z-1000 rounded w-40 transition-set flex flex-col gap-1
+                                    ${!isPageSelectorActive && "opacity-0 translate-y-8 pointer-events-none"}
+                                `}>
+                                    {
+                                        pages.map( (x, i) => 
+                                            <Link 
+                                            key={x.name} 
+                                            href={x.link} 
+                                            className={`z-50 relative border-dark/20 px-3 py-2 text-center
+                                            ${pathName === x.link && "bg-dark text-white rounded"}
+                                            ${i !== 2 && "border-b"}
+                                            `}
+                                            
+                                            onClick={() => setIsPageSelectorActive(false)}
+                                            >
+                                                {`${x.name.charAt(0).toUpperCase() + x.name.slice(1)}`.split("_").join(" ")}
+                                            </Link>
+                                        )
+                                    }
+                                </div>
                             </div>
-                        </div>
-                    </label>
+                        </label>
+                        {
+                            currentPage === "expected_shipments" &&
+                            <button 
+                            className={"bg-light px-4 py-2 text-[10px] shadow shadow-dark/8 rounded flex items-center gap-1"}
+                            onClick={() => {
+                                setReadOnly()
+                                setSelectedPackage({
+                                    id: 0, 
+                                    incoming_package_id: "", 
+                                    package_name: "",
+                                    user_id: 0,  
+                                    customer_code: "", 
+                                    warehouse_id: 0, 
+                                    weight: 0,
+                                    amount: 0,
+                                    condition: "good",
+                                    status: "stored",
+                                    received_at: "",
+                                    stored_at: "",
+                                    created_at: "",
+                                })
+                            }}
+                            >
+                                <FaPlus className=""/>
+                                Add Package 
+                            </button>
+                        }
+                    </div>
                 </div>
 
                 {children}
@@ -152,7 +182,7 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
 const IncomingPackageEditComponent = () => {
 
     const {setIsModalActive} = useEditModalStore()
-    const {selectedPackage, handleSelectedPackageInput, setPackageWarehouse, resetSelectedPackage, setTrigger} = usePackageStore()
+    const {selectedPackage, handleSelectedPackageInput, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly} = usePackageStore()
 
     // Arrays
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
@@ -302,9 +332,9 @@ const IncomingPackageEditComponent = () => {
                             name="package_name" 
                             className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
                             value={selectedPackage.package_name}
-                            // onChange={handleInputChange}
+                            onChange={handleSelectedPackageInput}
                             required
-                            readOnly
+                            readOnly={readonly}
                             />
                         </label>
                     </div>
@@ -313,7 +343,7 @@ const IncomingPackageEditComponent = () => {
                     <div>
                         <label className='w-full flex flex-col relative text-[10px]'>
                             <span className='text-dark/60'>
-                                Category
+                                Warehouse
                             </span>
                             <input 
                             type="number" 
@@ -370,12 +400,7 @@ const IncomingPackageEditComponent = () => {
                                 </div>
                         </label>
                     </div>
-
-                    {/* Package user_id */}
-                    <div>
-                        
-                    </div>
-                    
+                  
                     {/* Customer Code */}
                     <div>
                         <label className='w-full flex flex-col relative text-[10px]'>
@@ -387,9 +412,9 @@ const IncomingPackageEditComponent = () => {
                             name="customer_code" 
                             className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
                             value={selectedPackage.customer_code}
-                            // onChange={handleInputChange}
+                            onChange={handleSelectedPackageInput}
                             required
-                            readOnly
+                            readOnly={readonly}
                             />
                         </label>
                     </div>
@@ -405,9 +430,9 @@ const IncomingPackageEditComponent = () => {
                             name="incoming_package_id" 
                             className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
                             value={selectedPackage.incoming_package_id}
-                            // onChange={handleInputChange}
+                            onChange={handleSelectedPackageInput}
                             required
-                            readOnly
+                            readOnly={readonly}
                             />
                         </label>
                     </div>
@@ -513,7 +538,7 @@ const IncomingPackageEditComponent = () => {
                             />
                         </div>
                         <div className="border border-dark/40 rounded py-2 mt-4">
-                            <div className="flex justify-center w-full gap-4">
+                            <div className="flex justify-center w-full gap-4 max-w-full overflow-x-auto">
                                 {previews.map( (x, i) => 
                                 <figure key={i} className="w-10 h-10 bg-accent-red rounded overflow-hidden relative">
                                     <Image

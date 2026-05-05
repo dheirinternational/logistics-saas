@@ -10,7 +10,7 @@ const FAQ = ({question, answer}: FAQ) => {
     const [isActive, setIsActive] = useState(false)
   return (
     <div>
-        <div className="h-fit text-sm">
+        <div className="h-fit text-xs">
             <div className="bg-accent-red p-2 rounded-lg text-white flex justify-between items-center relative z-50">
               <span>
                 {question}

@@ -3,12 +3,13 @@
 import SearchComponent from '@/components/admin/orders/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
 import { usePackageStore } from '@/store/incomingPackagesStore'
-import { Package, PackageImage } from '@/types/entityTypeDef'
+import { Package, PackageImage, Warehouse } from '@/types/entityTypeDef'
 import { PackageStatus } from '@/types/statusTypes'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useEffectEvent, useState } from 'react'
+import { FaChevronDown } from 'react-icons/fa'
 import { FaX } from 'react-icons/fa6'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
@@ -16,9 +17,12 @@ import { toast } from 'react-toastify'
 
 type FilterValues = {
     search: string
-    status: string
-    warehouse_id: string
+    status: PackageStatus | ""
+    warehouse_id: number
 }
+
+const columnHelper = createColumnHelper<Package>()
+
 
 
 const Page: NextPage = ({}) => {
@@ -27,17 +31,42 @@ const Page: NextPage = ({}) => {
 
     
     const [packages, setpackages] = useState<Package[]>([]);
-    const [isDataLoading, setIsDataLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+
+
+    const [error, setError] = useState<string | null>(null)    
     const [selectedPackage, setSelectedPackage] = useState<Package | null>(null)
-    const [isModalActive, setIsModalActive] = useState(false)
-    
     const [filterValues, setFilterValues] = useState<FilterValues>({
         search: "",
         status: "",
-        warehouse_id: ""
+        warehouse_id: 0
     })
 
+    
+
+
+    const [isModalActive, setIsModalActive] = useState(false)
+    const [isDataLoading, setIsDataLoading] = useState(false)
+    
+
+
+    // Handle Filter Values Change
+    const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const {value, name} = e.currentTarget
+        setFilterValues( prev => ({...prev, [name]: value}))
+    }
+
+    // handle Warehouse Change
+    const handleWarehouseChange = (value: number) => {
+        setFilterValues(prev => ({...prev, warehouse_id: value}))
+    }
+
+    // handle status change
+    const handleStatusChange = (value: PackageStatus | "") => {
+        setFilterValues(prev => ({...prev, status: value}))
+    }
+
+
+    // Fetch Packages upon initial page load
     useEffect(() => {
 
         const fetchShipments = async () => {
@@ -68,10 +97,14 @@ const Page: NextPage = ({}) => {
 
         fetchShipments()
 
-    }, [])
+    }, [trigger])
 
-    const columnHelper = createColumnHelper<Package>()
+    useEffect(() => {
+        console.log(filterValues.search)
+    }, [filterValues.search])
 
+
+    // Table column def
     const columnDef = [
         columnHelper.accessor("package_name", {
             header: "Name"
@@ -113,9 +146,13 @@ const Page: NextPage = ({}) => {
     ]
 
 
-    const filteredData = packages
+    const filteredDat = packages
         .filter( x => x.package_name.toLowerCase().includes(filterValues.search.toLowerCase()) || x.incoming_package_id.toLowerCase().includes(filterValues.search.toLowerCase()) || x.customer_code.toLowerCase().includes(filterValues.search.toLowerCase()))
-        .filter( x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()) && x.warehouse_id.toString().includes(filterValues.warehouse_id))
+        
+    const filteredData = packages
+        .filter( pack => Number(pack.warehouse_id) === Number(filterValues.warehouse_id))
+        .filter( pack => pack.incoming_package_id.toLowerCase().includes(filterValues.search.toLowerCase()) || pack.package_name.toLowerCase().includes(filterValues.search.toLowerCase()) || pack.customer_code.toLowerCase().includes(filterValues.search.toLowerCase()))
+        .filter( pack => pack.status.toLowerCase().includes(filterValues.status.toLowerCase()) )
     
 
 
@@ -138,7 +175,7 @@ const Page: NextPage = ({}) => {
     </div>
 
     {/* SEARCH COMPONENT  */}
-    <SearchComponent state={filterValues} setState={setFilterValues} />
+    <Search {...{state: filterValues, handleChange: handleFilterChange, handleWarehouseChange, handleStatusChange}} />
 
     {/* Table */}
     <div className='bg-light p-body rounded-lg mt-4'>
@@ -151,8 +188,8 @@ const Page: NextPage = ({}) => {
         <div className='mt-4'>
             {isDataLoading ? (
                 <div className='flex justify-center items-center py-8'>
-                    <BeatLoader color="#3B82F6" size={15} />
-                    <span className='ml-2 text-sm'>Loading warehouses...</span>
+                    <BeatLoader color="#3B82F6" size={8} />
+                    <span className='ml-2 text-sm'>Loading Packages...</span>
                 </div>
             ) : error ? (
                 <div className='text-center py-8'>
@@ -268,5 +305,224 @@ const Modal = ({setModal, packag} : {setModal : () => void, packag: Package | nu
         </div>
     </div>
 }
+
+
+
+
+
+// Search Component
+const Search = ({state, handleChange, handleWarehouseChange, handleStatusChange} : {state: FilterValues, handleChange: (e: ChangeEvent<HTMLInputElement>) => void, handleWarehouseChange: (value: number) => void, handleStatusChange: (value: PackageStatus | "") => void}) => {
+
+    // Arrays
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+
+
+    // Selected Values 
+    const [warehouseId, setWarehouseId] = useState(0)
+    const [warehouseName, setWarehouseName] = useState("")
+
+
+    // Fetching Data Indicators
+    const [isFetchingWarehouses, setIsFetchingWarehouses] = useState(true)
+    
+    
+    // Drop Down Indicators
+    const [isWarehouseDropDownActive, setIsWarehouseDropDownActice] = useState(false)
+    const [isStatusDropDownActive, setIsStatusDropDownActive] = useState(false)
+
+
+    // Fetch Warehouses
+    const fetchWarehouses = async () => {
+        setIsFetchingWarehouses(true)
+        try{
+            const res = await fetch(`/api/warehouses`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            setWarehouses(result.data)
+            setWarehouseId(result.data[0].id)
+        }
+
+
+        catch(err){
+            console.error("Network Error", err)
+            toast.error("Could not fetch Warehouses")
+        }
+        finally{
+            setIsFetchingWarehouses(false)
+        }
+    }
+
+
+
+    // Fetch Warehouses upon initial load
+    useEffect(() => {
+        fetchWarehouses()
+    }, [])
+
+    // Show selected Warehouse data
+    useEffect(() => {
+        const warehouse = warehouses.find( x => x.id === warehouseId )
+        setWarehouseName(warehouse?.name || "")
+        handleWarehouseChange(warehouse?.id || 0)
+    }, [warehouseId])
+
+
+
+    return <div className="w-full p-5 bg-white rounded flex gap-8">
+       
+        {/* Search  */}
+        <div className='max-w-50 min-w-50 flex-1'>
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Search
+                </span>
+                <input 
+                type="text" 
+                name="search" 
+                className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
+                value={state.search}
+                onChange={handleChange}
+                required
+                placeholder='Input Package Name, Id or customer code'
+                />
+            </label>
+        </div>
+
+        
+        {/* Warehouse filter */}
+        <div className='max-w-50 min-w-50 flex-1'>
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Warehouse
+                </span>
+                <input 
+                type="number" 
+                name="warehouse_id" 
+                className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
+                value={warehouseId}
+                // onChange={handleChange}
+                min={0}
+                required
+                readOnly
+                />
+
+                <div className="absolute right-1 bottom-2">
+                    <button
+                    className={`${isWarehouseDropDownActive && "rotate-180"} p-1`}
+                    onClick={() => {setIsWarehouseDropDownActice(!isWarehouseDropDownActive)}}
+                    type="button"
+                    
+                    >
+                        <FaChevronDown />
+                    </button>
+
+                    <div className={`
+                        absolute right-0 top-10 p-3 w-40 rounded bg-light shadow z-1000 transition-set flex flex-col max-h-64 overflow-y-auto
+                        ${!isWarehouseDropDownActive && "opacity-0 pointer-events-none translate-y-6"}    
+                    `}>
+                        {
+                            warehouses.map( (warehouse, i) => 
+                                {
+                                return <button
+                                    key={warehouse.id}
+                                    className={`
+                                        py-3 
+                                        ${state.warehouse_id === warehouse.id && "bg-dark text-white rounded"}
+                                        ${i !== warehouses.length - 1 && "border-b border-dark/8"}
+                                    `}
+                                    onClick={() => {
+                                        setWarehouseId(warehouse.id)
+                                        handleWarehouseChange(warehouse.id)
+
+                                        setIsWarehouseDropDownActice(false)
+                    
+                                    }}
+                                    type="button"
+                                    >
+                                        {warehouse.name}
+                                    </button>
+                                }
+                            )
+                        }
+                    </div>
+                </div>
+
+                {/* Overlay */}
+                    <div className="bg-light w-fit absolute bottom-2 left-2">
+                        {warehouseName}
+                    </div>
+            </label>
+        </div>
+
+
+
+        {/* Status */}
+        <div className='max-w-50 min-w-50 flex-1'>
+            <label className='w-full flex flex-col relative text-[10px]'>
+                <span className='text-dark/60'>
+                    Warehouse
+                </span>
+                <input 
+                type="text" 
+                name="status" 
+                className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
+                value={state.status}
+                // onChange={handleChange}
+                required
+                readOnly
+                />
+
+                <div className="absolute right-1 bottom-2">
+                    <button
+                    className={`${isStatusDropDownActive && "rotate-180"} p-1`}
+                    onClick={() => {setIsStatusDropDownActive(!isStatusDropDownActive)}}
+                    type="button"
+                    
+                    >
+                        <FaChevronDown />
+                    </button>
+
+                    <div className={`
+                        absolute right-0 top-10 p-3 w-40 rounded bg-light shadow z-1000 transition-set flex flex-col max-h-64 overflow-y-auto
+                        ${!isStatusDropDownActive && "opacity-0 pointer-events-none translate-y-6"}    
+                    `}>
+                        {
+                            [ "", "stored", "requested_for", "assigned_to_shipment", "delivered"].map( (status, i, array) => 
+                                {
+                                return <button
+                                    key={status}
+                                    className={`
+                                        py-3 
+                                        ${state.status === status && "bg-dark text-white rounded"}
+                                        ${i !== array.length - 1 && "border-b border-dark/8"}
+                                    `}
+                                    onClick={() => {
+                                        handleStatusChange(status as PackageStatus | "")
+
+                                        setIsStatusDropDownActive(false)
+                    
+                                    }}
+                                    type="button"
+                                    >
+                                        {status === "" ? "-- none --" : status}
+                                    </button>
+                                }
+                            )
+                        }
+                    </div>
+                </div>
+            </label>
+        </div>
+
+        
+
+    </div>
+}
+
 
 export default Page

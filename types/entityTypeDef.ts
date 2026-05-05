@@ -335,3 +335,12 @@ export type DeliveryZones = {
     state_id: number
     price: number
 }
+
+
+export type Reviews = {
+    id: number,
+    review: string
+    name: string
+    user_id: number // fk -> users(id)
+    created_at: Date 
+}

@@ -5,6 +5,7 @@ export type CTARedirectButton = {
     title: string
     path: string
     icon: IconType
+    totalCount?: number
 }
 
 const CTARedirectButton = ({title, path, icon: Icon}: CTARedirectButton) => {

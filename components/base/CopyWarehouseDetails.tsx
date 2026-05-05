@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { FaCheck } from "react-icons/fa"
 
-const CopyWarehouseDetails = ({text, title} : {text: string, title: string}) => {
+const CopyWarehouseDetails = ({text, title, ignoreText} : {text: string, title: string, ignoreText?: boolean}) => {
 
     const [isCopied, setIsCopied] = useState(false)
 
@@ -27,16 +27,19 @@ const CopyWarehouseDetails = ({text, title} : {text: string, title: string}) => 
 
   return (
     <div className="text-sm flex items-center justify-between flex-wrap gap-3">
-        <p className="">
-            <span className="font-semibold">{title}:</span> {text}
-        </p>
+        {
+            !ignoreText &&
+            <p className="">
+                <span className="font-semibold">{title}:</span> {text}
+            </p>
+        }
         <button 
         className="text-xs w-16 h-7 bg-accent-red text-secondary-text rounded-full justify-center flex items-center disabled:bg-accent-red/40"
         disabled={isCopied}
         onClick={handleCopy}
         >
             {
-                isCopied ? <FaCheck/> : "copy"
+                isCopied ? <FaCheck/> : !ignoreText ? "copy" : "copy all"
             }
         </button>
     </div>

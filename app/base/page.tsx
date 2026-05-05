@@ -1,3 +1,5 @@
+"use client"
+
 import { faqs } from '@/assets/faqs/faqs'
 import { Announcements } from '@/components/base/Announcements'
 import Carousel from '@/components/base/Carousel'
@@ -6,9 +8,16 @@ import FAQ from '@/components/base/FAQ'
 import { ctaButtonsProps } from '@/components_map_definitions/ctaRedirectButtons'
 import { NextPage } from 'next'
 import Link from 'next/link'
+import { useState } from 'react'
 
 const Page: NextPage = ({}) => {
-  return <>
+
+  // States
+  const [isFaqBoxExpanded, setIsFaqBoxExpanded] = useState(false)
+  const [isReviewBoxActive, setIsReviewBoxActive] = useState(false)
+
+
+  return <div className='h-full max-h-full pb-50'>
     {/* Carousel */}
       <Carousel />
 
@@ -84,14 +93,18 @@ const Page: NextPage = ({}) => {
           </div>
         </div>
       </div>
-      <div className="p-body min-h-160 bg-light/90">
-        <h2 className="tracking-wide font-semibold text-accent-red">
-          FAQ
-        </h2>
-        <p className="text-primary-text/60 text-base leading-relaxed mt-4 mb-8">
-          Below are some of our frequently asked questions
-        </p>
-        <div className="space-y-4 md:max-w-100">
+
+      {/* FAQ */}
+      <div className="p-body min-h-160 bg-light/90 flex justify-center flex-col items-center">
+        <div>
+          <h2 className="tracking-wide font-semibold text-accent-red text-3xl text-center">
+            FAQ
+          </h2>
+          <p className="text-primary-text/60 text-base leading-relaxed mt-4 mb-8 text-[10px]">
+            Below are some of our frequently asked questions
+          </p>
+        </div>
+        <div className="space-y-4 md:max-w-100 max-h-80 overflow-y-hidden mt-12">
           
           {
             faqs.map( (faq, i) => 
@@ -102,8 +115,59 @@ const Page: NextPage = ({}) => {
           
         </div>
       </div>
+
+
+
+      {/* Reviews */}
+
+      <div className='bg-red-400/10 p-body mb-20 min-h-70'>
+        <div>
+          <h2 className='text-center text-2xl font-semibold'>
+            Customer Reviews
+          </h2>
+          <p className="text-primary-text/60 text-base leading-relaxed mt-4 mb-8 text-[11px] text-center">
+            Here is what some of our clients have to say about our services 
+          </p>
+        </div>
+
+        <div className='h-130 center-items'>
+
+          <div className='w-60 h-60 bg-light shadow-dark/10 shadow rounded-lg flex flex-col p-body gap-15 items-stretch pt-10 justify-between'>
+            <div className='center-items flex-col gap-4'>
+              <h2 className='text-sm w-full font-semibold'>
+                Title of review
+              </h2>
+              <p className='text-[10px] text-dark/70'>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Placeat, ducimus corporis, neque at excepturi officiis reiciendis voluptate nemo tempore 
+              </p>
+            </div>
+            
+            <div className='text-[10px] text-dark/60'>
+              <p>-- Name of the Commenter --</p>
+            </div>
+          </div>
+
+          
+        </div>
+        <div className='center-items'>
+          <button className='mb-20 mx-auto'
+          onClick={() => setIsReviewBoxActive(prev => !prev)}
+          >
+            Add Review...
+          </button>
+          {
+            isReviewBoxActive &&
+            <div className='bg-white'>
+
+              <label>
+                
+              </label>
+            </div>
+          }
+        </div>
+      </div>
  
-  </>
+  </div>
 }
 
 export default Page

@@ -13,29 +13,65 @@ import { Announcements } from '@/components/base/Announcements'
 
 
 const Page: NextPage = async() => {
+    let address;
+    let userData;
+    let sum;
+    try{
+        const session = await getSession()
+        const userId = session.user_id
+        console.log(userId)
 
-    const session = await getSession()
-    const userId = session.user_id
-    console.log(userId)
+        const data = await pool.query(`
+            SELECT u.first_name, u.last_name, c.code, u.profile_img
+            FROM users u
+            JOIN customers c ON u.id = c.user_id
+            WHERE u.id = $1
+        `, [userId])
 
-    const data = await pool.query(`
-        SELECT u.first_name, u.last_name, c.code, u.profile_img
-        FROM users u
-        JOIN customers c ON u.id = c.user_id
-        WHERE u.id = $1
-    `, [userId])
+        userData = data.rows[0]
+        console.log(userData)
 
-    const userData = data.rows[0]
-    console.log(userData)
+        const addressData = await pool.query(`
+            SELECT country, state, city, street, postal_code
+            FROM addresses
+            WHERE user_id = $1
+            LIMIT 1
+        `, [userId])
+        
+        address = addressData.rows[0] as Address
 
-    const addressData = await pool.query(`
-        SELECT country, state, city, street, postal_code
-        FROM addresses
-        WHERE user_id = $1
-        LIMIT 1
-    `, [userId])
+        const result = await pool.query(`
+            SELECT
+                (SELECT COUNT(*) FROM incoming_packages 
+                WHERE status != 'stored' AND user_id = $1) AS waiting_to_be_stored,
+
+                (SELECT COUNT(*) 
+                FROM shipments 
+                WHERE status != 'delivered') AS shipment,
+
+                (SELECT COUNT(*) 
+                FROM payments 
+                WHERE status = 'pending') AS pending_payments,
+
+                (SELECT COUNT(*) 
+                FROM shipment_requests 
+                WHERE status != 'accepted') AS request_mail,
+
+                (SELECT COUNT(*) 
+                FROM packages WHERE status != 'assigned_to_shipment') AS total_packages;
+                
+        `, [userId])
+        
+        console.log(result.rows)
+        sum = result.rows[0]
+        console.log(sum.waiting_to_be_stored)
+
+
+    }
+    catch(err){
+        console.error("ERROR", err)
+    }
     
-    const address = addressData.rows[0] as Address
 
   return <div className='w-full h-full space-y-3'>
     {/* Profile */}
@@ -78,9 +114,61 @@ const Page: NextPage = async() => {
 
     {/* Shipment Control */}
     <div className='p-body bg-white shadow shadow-dark/10 flex flex-wrap gap-5 justify-center md:max-w-125 md:mx-auto'>
-        {profileCtaButtonsProps.map((btn, i) => 
+        {/* {profileCtaButtonsProps.map((btn, i) => 
             <CTARedirectButton key={i} {...btn}/>
-        )}
+        )} */}
+        <div className='w-fit h-fit relative'>
+            <CTARedirectButton {...profileCtaButtonsProps[0]}/>
+        </div>
+        <div className='h-fit relative'>
+            <div className='w-5 h-5 absolute left-1/2 -translate-x-1/2 -top-2.5 rounded-full '>
+                <div className='w-full h-full rounded-full bg-black relative left-6 center-items text-white text-[10px]'>
+                    {sum.waiting_to_be_stored}
+                </div>
+            </div>
+            <CTARedirectButton {...profileCtaButtonsProps[1]}/>
+        </div>
+        <div className='w-fit h-fit relative'>
+            <div className='w-5 h-5 absolute left-1/2 -translate-x-1/2 -top-2.5 rounded-full '>
+                <div className='w-full h-full rounded-full bg-black relative left-6 center-items text-white text-[10px]'>
+                    {sum.total_packages}
+                </div>
+            </div>
+            <CTARedirectButton {...profileCtaButtonsProps[2]}/>
+        </div>
+        <div className='w-fit h-fit relative'>
+            <CTARedirectButton {...profileCtaButtonsProps[3]}/>
+        </div>
+        <div className='w-fit h-fit relative'>
+            <div className='w-5 h-5 absolute left-1/2 -translate-x-1/2 -top-2.5 rounded-full '>
+                <div className='w-full h-full rounded-full bg-black relative left-6 center-items text-white text-[10px]'>
+                    {sum.request_mail}
+                </div>
+            </div>
+            <CTARedirectButton {...profileCtaButtonsProps[4]}/>
+        </div>
+        <div className='w-fit h-fit relative'>
+            <div className='w-5 h-5 absolute left-1/2 -translate-x-1/2 -top-2.5 rounded-full '>
+                <div className='w-full h-full rounded-full bg-black relative left-6 center-items text-white text-[10px]'>
+                    {sum.shipment}
+                </div>
+            </div>
+            <CTARedirectButton {...profileCtaButtonsProps[5]}/>
+        </div>
+        <div className='w-fit h-fit relative'>
+            <CTARedirectButton {...profileCtaButtonsProps[6]}/>
+        </div>
+        <div className='w-fit h-fit relative'>
+            <div className='w-5 h-5 absolute left-1/2 -translate-x-1/2 -top-2.5 rounded-full '>
+                <div className='w-full h-full rounded-full bg-black relative left-6 center-items text-white text-[10px]'>
+                    {sum.pending_payments}
+                </div>
+            </div>
+            <CTARedirectButton {...profileCtaButtonsProps[7]}/>
+        </div>
+        <div className='w-fit h-fit relative'>
+            <CTARedirectButton {...profileCtaButtonsProps[8]}/>
+        </div>
     </div>
     
     {/* Profile Management */}

@@ -42,7 +42,7 @@ export async function POST(req: NextRequest){
         const data = {
             package_name: formData.get("package_name"),
             incoming_package_id: formData.get("incoming_package_id"),
-            user_id: Number(formData.get("user_id")),
+            // user_id: Number(formData.get("user_id")),
             customer_code: formData.get("customer_code"),
             warehouse_id: Number(formData.get("warehouse_id")),
             weight: Number(formData.get("weight")),
@@ -63,13 +63,26 @@ export async function POST(req: NextRequest){
 
         await client.query("BEGIN")
 
+        const userId = await client.query(
+            `SELECT user_id FROM customers WHERE code = $1`,
+            [data.customer_code]
+        );
+
+        if (userId.rows.length === 0){
+            return NextResponse.json({
+                success: false,
+                message: `User with Customer code ${data.customer_code} was not found`
+            }, {status: 404})
+        }
+
+
         const res = await client.query(`
             INSERT INTO packages(
                 incoming_package_id, package_name, user_id, customer_code, warehouse_id, weight, condition, status, received_at, stored_at, created_at, amount
             )     
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
             RETURNING id
-        `, [data.incoming_package_id, data.package_name, data.user_id, data.customer_code, data.warehouse_id, data.weight, data.condition, data.status, data.received_at, data.stored_at, data.amount])
+        `, [data.incoming_package_id, data.package_name, userId.rows[0].user_id, data.customer_code, data.warehouse_id, data.weight, data.condition, data.status, data.received_at, data.stored_at, data.amount])
 
         await client.query(`
             UPDATE incoming_packages
@@ -123,7 +136,7 @@ export async function POST(req: NextRequest){
         // Get user email
         const userRes = await client.query(
             `SELECT email FROM users WHERE id = $1`,
-            [data.user_id]
+            [userId.rows[0].user_id]
         );
 
         const userEmail = userRes.rows[0]?.email;

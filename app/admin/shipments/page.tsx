@@ -24,7 +24,7 @@ const columnHelper = createColumnHelper<IncomingPackage>()
 
 const Page: NextPage = () => {
 
-    const {setSelectedPackage, trigger} = usePackageStore()
+    const {setSelectedPackage, trigger, resetReadOnly} = usePackageStore()
     
     const [incomingPackages, setIncomingPackages] = useState<IncomingPackage[]>([])
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -110,21 +110,24 @@ const Page: NextPage = () => {
                 return (
                     <button
                     className='underline'
-                    onClick={() => setSelectedPackage({
-                        id: 0,
-                        incoming_package_id: item.incoming_tracking_number,
-                        package_name: item.declared_item_name,
-                        user_id: Number(item.user_id),
-                        customer_code: item.customer_code,
-                        warehouse_id: Number(item.warehouse_id),
-                        weight: Number(item.declared_item_weight) || 0,
-                        condition: "good",
-                        status: "stored",
-                        received_at: "",
-                        stored_at: "",
-                        created_at: "",
-                        amount: item.declared_item_quantity
-                    })}
+                    onClick={() => {
+                        resetReadOnly()
+                        setSelectedPackage({
+                            id: 0,
+                            incoming_package_id: item.incoming_tracking_number,
+                            package_name: item.declared_item_name,
+                            user_id: Number(item.user_id),
+                            customer_code: item.customer_code,
+                            warehouse_id: Number(item.warehouse_id),
+                            weight: Number(item.declared_item_weight) || 0,
+                            condition: "good",
+                            status: "stored",
+                            received_at: "",
+                            stored_at: "",
+                            created_at: "",
+                            amount: item.declared_item_quantity
+                        })
+                    }}
                     >
                         Add
                     </button>

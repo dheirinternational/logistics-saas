@@ -119,6 +119,7 @@ const PackageEditComponent = () => {
             setTrigger()
             resetSelectedPackage()
             setIsModalActive()
+            setImages([])
         }
         catch(err){
             toast.error("Network Error")

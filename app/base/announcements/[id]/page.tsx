@@ -22,7 +22,7 @@ const Announcements = () => {
     const params = useParams()
     const router = useRouter()
 
-    const [announcement, setAnnouncement] = useState<{id: string, title: string, message: string} | null>(null)
+    const [announcement, setAnnouncement] = useState<{id: string, title: string, message: string, created_at: string} | null>(null)
     const [isDataFeching, setIsDataFetching] = useState(true)
     
     useEffect(() => {
@@ -75,11 +75,14 @@ const Announcements = () => {
                     <BeatLoader color="orange" size={10}/>
                 </div>  :
                 announcement ? (
-                <div className='w-full h-full flex flex-col gap-3 p-body'>
+                <div className='w-full h-full flex flex-col gap-3 p-8'>
                     <h2 className='text-lg font-semibold'>             
                          {announcement.title}
                     </h2>
-                    <p className='text-gray-600 text-sm'>{announcement.message}
+                    <p className="text-xs">
+                       {new Date(announcement?.created_at || "").toLocaleDateString()} 
+                    </p>
+                    <p className='text-gray-600 text-[10px]'>{announcement.message}
                         {announcement.message}
                     </p>
                 </div>
