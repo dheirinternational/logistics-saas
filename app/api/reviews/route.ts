@@ -41,3 +41,25 @@ export async function POST(req: NextRequest){
         })
     }
 }
+
+
+export async function GET(){
+    try{
+        const reviews = await pool.query(`
+            SELECT * FROM reviews   
+        `)
+
+        return NextResponse.json({
+            success: true,
+            message: "Successfully Retrieved Reviews",
+            data: reviews.rows
+        })
+    }
+    catch(err){
+        console.error("Internal Server Error, could not get reviews", err)
+        return NextResponse.json({
+            success: false,
+            message: "Internal Server Error, could not get reviews"
+        })
+    }
+}

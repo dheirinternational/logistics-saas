@@ -6,15 +6,94 @@ import Carousel from '@/components/base/Carousel'
 import CTARedirectButton from '@/components/base/CTARedirectButton'
 import FAQ from '@/components/base/FAQ'
 import { ctaButtonsProps } from '@/components_map_definitions/ctaRedirectButtons'
+import { Reviews } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { BeatLoader } from 'react-spinners'
+import { toast } from 'react-toastify'
 
 const Page: NextPage = ({}) => {
+
+  // Arrays
+  const [reviews, setReviews] = useState<Reviews[]>()
+
+
+  // placeholders
+  const [newReview, setNewReview] = useState("")
+
 
   // States
   const [isFaqBoxExpanded, setIsFaqBoxExpanded] = useState(false)
   const [isReviewBoxActive, setIsReviewBoxActive] = useState(false)
+  
+
+
+  // Loading States 
+  const [isPostingReview, setIsPostingReview] = useState(false)
+  const [isFetchingReviews, setIsFetchingReviews] = useState(false)
+
+
+
+
+  // Function to post review to backend
+  const handleReviewPost = async () => {
+    if(newReview.length < 15){
+      toast.error("Review cannot be less than 15 characters")
+      return
+    }
+    setIsPostingReview(true)
+    try{
+      const res = await fetch(`/api/reviews`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type" : "application/json"
+        },
+        body: JSON.stringify({
+          review: newReview
+        })
+      })
+    }
+    catch(err){
+      console.error("Network Error", err)
+      toast.error("Network Error")
+    }
+    finally{
+      setIsPostingReview(false)
+    }
+  }
+
+  // Function to fetch User reviews
+  const fetchReviews = async () => {
+    setIsFetchingReviews(true)
+    try{
+      const res = await fetch(`/api/reviews`)
+      const result = await res.json()
+
+      if (!res.ok){
+        toast.error(result.message)
+        return 
+      }
+
+      setReviews(result.data)
+    }
+
+    catch(err){
+      console.error("Network Error", err)
+      toast.error("Network Error")
+    }
+    finally{
+      setIsFetchingReviews(false)
+    }
+  }
+
+  
+  // Fetch Reviews
+  useEffect(() => {
+    fetchReviews()
+  }, [])
+
 
 
   return <div className='h-full max-h-full pb-50'>
@@ -130,38 +209,60 @@ const Page: NextPage = ({}) => {
           </p>
         </div>
 
-        <div className='h-130 center-items'>
+        <div className='h-130 center-items flex max-w-full overflow-x-auto'>
+          {
+            isFetchingReviews ?
+            <BeatLoader color='orange' size={8}/> :
+            reviews?.map( review => 
+              <div key={review.id} className='w-60 h-60 bg-light shadow-dark/10 shadow rounded-lg flex flex-col p-body gap-15 items-stretch pt-10 justify-between'>
+                <div className='center-items flex-col gap-4'>
+                  <p className='text-sm text-dark/90'>
+                    {review.review}
+                  </p>
+                </div>
+                
+                <div className='text-[10px] text-dark/60'>
+                  <p>-- {review.name} --</p>
+                  <p>{new Date(review.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+            )
+          }
 
-          <div className='w-60 h-60 bg-light shadow-dark/10 shadow rounded-lg flex flex-col p-body gap-15 items-stretch pt-10 justify-between'>
-            <div className='center-items flex-col gap-4'>
-              <h2 className='text-sm w-full font-semibold'>
-                Title of review
-              </h2>
-              <p className='text-[10px] text-dark/70'>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Placeat, ducimus corporis, neque at excepturi officiis reiciendis voluptate nemo tempore 
-              </p>
-            </div>
-            
-            <div className='text-[10px] text-dark/60'>
-              <p>-- Name of the Commenter --</p>
-            </div>
-          </div>
+          
 
           
         </div>
-        <div className='center-items'>
-          <button className='mb-20 mx-auto'
+        <div className='center-items mb-40 space-x-8'>
+          <button className=''
           onClick={() => setIsReviewBoxActive(prev => !prev)}
           >
-            Add Review...
+            {isReviewBoxActive ? "Close" : "Add"} Review...
           </button>
           {
             isReviewBoxActive &&
-            <div className='bg-white'>
+            <div className='flex center-items gap-2 h-fit'>
 
               <label>
-                
+                <input 
+                type="text" 
+                name='review'
+                value={newReview}
+                onChange={(e) => setNewReview(e.currentTarget.value)}
+                className='rounded bg-white text-[10px] py-2.5 min-w-50 px-2 outline-0'
+                />
               </label>
+
+              <button 
+              className='bg-[orange] text-[10px] text-white h-full px-3 py-2.5 rounded '
+              onClick={handleReviewPost}
+              >
+                {
+                  isPostingReview ? 
+                  <BeatLoader color={"white"} size={8} /> :
+                  "Submit"
+                }
+              </button>
             </div>
           }
         </div>
