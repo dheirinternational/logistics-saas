@@ -1,6 +1,9 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: Request){
     try{
@@ -23,6 +26,16 @@ export async function POST(request: Request){
             }, {status: 400})
         }
 
+        const userRes = await pool.query(
+            `
+            SELECT email FROM users
+            WHERE id = $1
+        `,
+            [session.user_id]
+        );
+
+        const userEmail = userRes.rows[0]?.email
+
         const weight = body.declared_item_weight === 0 ? null : body.declared_item_weight
         const customer_note = body?.customer_note?.trim() || null
 
@@ -42,6 +55,85 @@ export async function POST(request: Request){
 
         const result = res.rows[0]
 
+        if (userEmail) {
+            try {
+                await resend.emails.send({
+                    from: "Logistics <no-reply@dheirinternational.com>",
+                    to: [userEmail],
+                    subject: "📦 Incoming Package Registered",
+                    html: `
+                        <div style="font-family: Arial, sans-serif; background:#f9fafb; padding:20px;">
+                            <div style="max-width:600px;margin:auto;background:white;padding:24px;border-radius:10px;">
+
+                                <h2 style="color:#111827;">
+                                    📦 Incoming Package Registered
+                                </h2>
+
+                                <p>Hello,</p>
+
+                                <p>
+                                    Your incoming package has been successfully registered in our system.
+                                </p>
+
+                                <div style="background:#f3f4f6;padding:15px;border-radius:8px;">
+
+                                    <p>
+                                        <strong>Item Name:</strong>
+                                        ${result.declared_item_name}
+                                    </p>
+
+                                    <p>
+                                        <strong>Tracking Number:</strong>
+                                        ${result.incoming_tracking_number}
+                                    </p>
+
+                                    <p>
+                                        <strong>Quantity:</strong>
+                                        ${result.declared_item_quantity}
+                                    </p>
+
+                                    ${
+                                        result.declared_item_weight
+                                            ? `
+                                            <p>
+                                                <strong>Weight:</strong>
+                                                ${result.declared_item_weight}kg
+                                            </p>
+                                        `
+                                            : ""
+                                    }
+
+                                    <p>
+                                        <strong>Status:</strong>
+                                        Expected
+                                    </p>
+
+                                </div>
+
+                                <p style="margin-top:20px;">
+                                    We’ll notify you once the package arrives at the warehouse.
+                                </p>
+
+                                <p style="color:#6b7280;font-size:13px;margin-top:30px;">
+                                    Need help? Contact support anytime.
+                                </p>
+
+                                <p style="font-weight:bold;">
+                                    — Your Logistics Team 🚚
+                                </p>
+
+                            </div>
+                        </div>
+                    `,
+                });
+            } catch (emailErr) {
+                console.error("EMAIL ERROR", emailErr);
+            }
+        }
+
+
+
+
         return NextResponse.json({
             success: true,
             data: result
@@ -54,6 +146,8 @@ export async function POST(request: Request){
         }, {status: 500})
     }
 }
+
+
 
 
 export async function GET(){
