@@ -465,7 +465,7 @@ const Search = ({state, handleChange, handleWarehouseChange, handleStatusChange}
         <div className='max-w-50 min-w-50 flex-1'>
             <label className='w-full flex flex-col relative text-[10px]'>
                 <span className='text-dark/60'>
-                    Warehouse
+                    Status
                 </span>
                 <input 
                 type="text" 
