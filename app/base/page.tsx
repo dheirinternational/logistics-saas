@@ -10,6 +10,7 @@ import { Reviews } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { FaQuoteLeft } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
@@ -214,16 +215,25 @@ const Page: NextPage = ({}) => {
             isFetchingReviews ?
             <BeatLoader color='orange' size={8}/> :
             reviews?.map( review => 
-              <div key={review.id} className='w-60 h-60 bg-light shadow-dark/10 shadow rounded-lg flex flex-col p-body gap-15 items-stretch pt-10 justify-between'>
-                <div className='center-items flex-col gap-4'>
-                  <p className='text-sm text-dark/90'>
-                    {review.review}
+              <div key={review.id} className='w-60 h-60 bg-light shadow-dark/10 shadow rounded-lg flex flex-col p-body items-stretch pt-10 '>
+                <div className='flex justify-end text-2xl text-orange-400 '>
+                  <FaQuoteLeft/>
+                </div>
+                <div>
+                  <p className='font-bold mt-4'>
+                    {review.name}
                   </p>
                 </div>
-                
-                <div className='text-[10px] text-dark/60'>
-                  <p>-- {review.name} --</p>
-                  <p>{new Date(review.created_at).toLocaleDateString()}</p>
+                <div className='h-40 flex flex-col justify-between'>
+                  <div className='center-items flex-col gap-4 mt-4'>
+                    <p className='text-[10px] text-dark/90 italic'>
+                      {`"`}{review.review}{`"`}
+                    </p>
+                  </div>
+                  
+                  <div className='text-[10px] text-dark/60'>
+                    <p>{new Date(review.created_at).toLocaleDateString()}</p>
+                  </div>
                 </div>
               </div>
             )
