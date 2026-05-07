@@ -55,6 +55,17 @@ const Page: NextPage = ({}) => {
           review: newReview
         })
       })
+      const result = await res.json()
+
+      if(!res.ok){
+        toast.error(result.message)
+        return
+      }
+
+      toast.success(result.message)
+      setIsReviewBoxActive(false)
+      setNewReview("")
+      fetchReviews()
     }
     catch(err){
       console.error("Network Error", err)
@@ -184,7 +195,7 @@ const Page: NextPage = ({}) => {
             Below are some of our frequently asked questions
           </p>
         </div>
-        <div className="space-y-4 md:max-w-100 max-h-80 overflow-y-hidden mt-12">
+        <div className="space-y-4 md:max-w-100 max-h-80 overflow-y-scroll mt-12">
           
           {
             faqs.map( (faq, i) => 
@@ -210,12 +221,12 @@ const Page: NextPage = ({}) => {
           </p>
         </div>
 
-        <div className='h-130 center-items flex max-w-full overflow-x-auto'>
+        <div className='h-fit mb-12 pb-2 flex gap-3 max-w-full overflow-x-auto'>
           {
             isFetchingReviews ?
             <BeatLoader color='orange' size={8}/> :
             reviews?.map( review => 
-              <div key={review.id} className='w-60 h-60 bg-light shadow-dark/10 shadow rounded-lg flex flex-col p-body items-stretch pt-10 '>
+              <div key={review.id} className='w-60 h-60 bg-light shadow-dark/10 shadow rounded-lg flex flex-col p-body pt-10  min-w-60'>
                 <div className='flex justify-end text-2xl text-orange-400 '>
                   <FaQuoteLeft/>
                 </div>
@@ -266,6 +277,7 @@ const Page: NextPage = ({}) => {
               <button 
               className='bg-[orange] text-[10px] text-white h-full px-3 py-2.5 rounded '
               onClick={handleReviewPost}
+              disabled={isPostingReview}
               >
                 {
                   isPostingReview ? 
