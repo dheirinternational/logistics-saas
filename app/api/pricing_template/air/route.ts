@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 
 
@@ -33,5 +33,48 @@ export async function GET(){
             success: false,
             message: "Internal Server Error, Cannot get air pricing template"
         }, {status: 500})
+    }
+}
+
+
+export async function PATCH(req: NextRequest){
+    try{
+        const session = await getSession()
+        if(!session){
+            return NextResponse.json({
+                success: false,
+                message: "unauthorized"
+            }, {status: 401})
+        }
+
+        if(session.role !== "admin"){
+            return NextResponse.json({
+                success: false,
+                message: "Forbidden"
+            }, {status: 403})
+        }
+
+        const body = await req.json()
+
+
+        await pool.query(`
+          UPDATE air_pricing_templates
+            SET price = COALESCE($1, price),
+                clearance = COALESCE($2, clearance)
+            WHERE id = $3
+        `, [body.price, body.clearance, body.id])
+
+        return NextResponse.json({
+            success: true,
+            message: "Successfully updated air pricing templates"
+        })
+
+    }
+    catch(err){
+        console.error("Internal Server Error, cannot update air pricing list", err)
+        return NextResponse.json({
+            success: true,
+            message: "Internal Server Error, cannot update air pricing list"
+        })
     }
 }
