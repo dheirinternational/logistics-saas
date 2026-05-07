@@ -112,6 +112,7 @@ export type IncomingPackage = {
     declared_item_quantity: number
     declared_item_weight: number 
     created_at: string
+    customer_note: string
 }
 
 export type Package = {
@@ -142,6 +143,7 @@ export type ShippingRequest = {
     payment_time: "before" | "after"
     shipping_note: string
     total_weight: number
+    customer_note: string
 }
 
 

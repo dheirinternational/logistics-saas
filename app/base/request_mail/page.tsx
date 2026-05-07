@@ -21,11 +21,14 @@ const Page: NextPage = () => {
     const [isConfirmModal, setIsConfirmModal] = useState(false)
     const [shippingMethod, setShippingMethod] = useState<"air" | "sea" | "express">("air")
     const [shippingPayment, setShippingPayment] = useState<"pay_before_shipment" | "pay_after_shipment">("pay_before_shipment")
+    const [customerNote, setCustomerNote] = useState("")
+    const [isAgreeChecked, setIsAgreeChecked] = useState(false)
 
     const [filterValues, setFilterValues] = useState({
         warehouse_id: "",
         tracking_id: "" 
     })
+
 
     const router = useRouter()
 
@@ -56,6 +59,16 @@ const Page: NextPage = () => {
 
 
     const handleSubmit = async () => {
+        if(!isAgreeChecked){
+            toast.error("Agree to terms and conditions")
+            return 
+        }
+
+        if(customerNote.trim().length === 0){
+            toast.info("Put in note for shipping in customer note")
+            return
+        }
+
         setIsPostingData(true)
         try{
             const res = await fetch("/api/shipment-requests", {
@@ -70,7 +83,8 @@ const Page: NextPage = () => {
                     customer_code: selectedPackages[0].customer_code,
                     channel: shippingMethod,
                     payment_time: shippingPayment,
-                    total_weight: selectedPackages.reduce((acc, pack) => acc + pack.weight, 0)
+                    total_weight: selectedPackages.reduce((acc, pack) => acc + pack.weight, 0),
+                    customer_note: customerNote
                 })
             })
             const result = await res.json()
@@ -252,18 +266,105 @@ const Page: NextPage = () => {
     {
         isConfirmModal &&
         <div className='w-screen h-dvh fixed top-0 right-0 center-items bg-accent-blue/20'>
-            <div className=' w-[90%] max-w-125 h-70 bg-light border border-dark/10 shadow shadow-dark rounded p-4 text-[10px] flex flex-col justify-between'>
+            <div className=' w-[90%] max-w-125 h-70 bg-light border border-dark/10 shadow shadow-dark rounded p-4 text-[10px] flex flex-col justify-between overflow-y-auto'>
                 <div>
                     <hr className='border-dark/10 '/>
-                    <p className='mt-4'>
-                        Dear Customer, the following is a reminder to confirm the content of the item being mailed, be sure to comfirm it carefully!
-                    </p>
-                    <p className='mt-4'>
-                        Mail Item confirmation <span className='text-accent-red'>( the following three ) :</span>
-                    </p>
-                    <ol>
-                        
-                    </ol>
+                    <div>
+                        <p>Dear Customer,</p>
+
+                        ```
+                        <br/>
+                        <p>
+                            The following is a reminder to confirm the contents of the item being mailed.
+                            Please review and confirm carefully before shipment processing.
+                        </p>
+                        <br/>
+
+                        <h3>Mail Item Confirmation (Please confirm all three):</h3>
+                        <br/>
+
+                        <ol>
+                            <li>
+                                1. The package does not contain any prohibited, restricted, or dangerous items.
+                            </li>
+
+                            <li>
+                                2. The declared item description and value provided are accurate and complete.
+                            </li>
+
+                            <li>
+                                3. The package is securely sealed and properly prepared for international shipping.
+                            </li>
+                        </ol>
+
+                        <br/>
+                        <br/>
+                        <p>
+                            By proceeding with the shipment request, you agree to the following terms:
+                        </p>
+                        <br/>
+
+                        <ul>
+                            <li>
+                                1. You accept full responsibility for the accuracy of the shipment information submitted.
+                            </li>
+
+                            <li>
+                                2. Any customs delays, inspections, or additional charges caused by incorrect declarations will be borne by the sender.
+                            </li>
+
+                            <li>
+                                3. Fragile items not declared in advance may not qualify for compensation claims.
+                            </li>
+
+                            <li>
+                                4. Packages may be subject to random security inspection by shipping authorities.
+                            </li>
+
+                            <li>
+                                5. The shipping company reserves the right to refuse transportation of suspicious or non-compliant packages.
+                            </li>
+
+                            <li>
+                                6. Once shipment processing has begun, address changes or cancellations may not be guaranteed.
+                            </li>
+
+                            <li>
+                                7. The sender confirms that all items comply with local and international shipping regulations.
+                            </li>
+                        </ul>
+                        <br />
+                        <p>Please Check the box below to agree:</p>
+                        <br/>
+                        <br/>
+                        <label className='flex items-center gap-2'>
+                            Agree
+                            <input 
+                            type="checkbox"
+                            name='agree'
+                            checked={isAgreeChecked}
+                            onChange={() => {setIsAgreeChecked(!isAgreeChecked)}}
+                            />
+                        </label>
+                        <br/>
+                        <p>Thank you for your cooperation.</p>
+                        ```
+
+                        </div>
+
+                </div>
+
+                <div className='flex items-center gap-2 mb-6'>
+                    <span>
+                        Shipment Note: 
+                    </span>
+                    <input 
+                    type="text" 
+                    name='customer_note'
+                    value={customerNote}
+                    onChange={(e) => setCustomerNote(e.currentTarget.value)}
+                    className='text-[10px] border border-dark/20 rounded outline-0 px-2 py-1 w-60 focus:border-dark'
+                    />
                 </div>
 
                 <div className='flex justify-end space-x-2'>

@@ -269,7 +269,7 @@ const Page: NextPage = () => {
                         <div className='mt-3 space-y-1'>
                             <span>Customer Note</span>
                             <p className='border border-dark/20 h-16 mt-2 p-3 rounded-lg overflow-y-auto'>
-                                {modalSelectedRequest?.shipping_note}
+                                {modalSelectedRequest?.customer_note}
                             </p>
                         </div>
                     </div>
