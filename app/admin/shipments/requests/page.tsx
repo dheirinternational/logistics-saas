@@ -71,7 +71,7 @@ const Page: NextPage = () => {
 
     const createShipment = async () => {
 
-        if(totalWeight < 1 || totalWeight < 1){
+        if(Number(totalWeight || 0) < 1 || Number(totalWeight || 0) < 1){
             toast.error("Input Price and Weight")
             return 
         }
