@@ -38,7 +38,7 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
         path: "/base/add_package"
     },
     {
-        title: "Waiting To Be Stored",
+        title: "Waiting To Be Received",
         icon: BsBoxArrowInDown,
         path: "/base/waiting_to_be_stored"
     },
