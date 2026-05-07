@@ -237,7 +237,6 @@ const Page: NextPage = () => {
                         </p>
                         <p><span className='font-semibold'>Channel Requested:</span> {modalSelectedRequest?.channel}</p>
                         <p><span className='font-semibold'>Customer Code:</span> {modalSelectedRequest?.customer_code}</p>
-                        <p><span className='font-semibold'>Package Wrapping:</span> {modalSelectedRequest?.wrapping}</p>
                         <p><span className='font-semibold'>Payment Time:</span> {modalSelectedRequest?.payment_time} shipping</p>
 
                         <div className='space-y-2'>

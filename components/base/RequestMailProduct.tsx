@@ -50,9 +50,6 @@ const RequestMailProduct = ({prop, handlePackage}: Props) => {
                 <p className='text-xs flex-1 whitespace-nowrap border-r border-dark/20'>
                     Track: {prop.incoming_package_id}
                 </p>
-                <p className='flex-1 whitespace-nowrap flex justify-center border-r border-dark/20'>
-                    {prop.warehouse_id}
-                </p>
                 <p className='flex-1 whitespace-nowrap flex justify-end'>
                     {prop.created_at.slice(0, 10)}
                 </p>
