@@ -74,6 +74,13 @@ const Page: NextPage = () => {
         columnHelper.accessor("phone", {
             header: "Phone"
         }),
+        columnHelper.accessor("created_at", {
+            header: "Joined at",
+            cell: ({getValue}) => 
+                <span>
+                    {new Date(getValue()).toDateString()}
+                </span>
+        }),
     ]
 
     // Filter Data
