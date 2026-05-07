@@ -109,7 +109,7 @@ const Page: NextPage = () => {
                     <div key={request.id} className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
                         <div className='flex items-center justify-between'>
                             <p className='text-lg'>
-                                {request.channel}
+                                Channel: {request.channel}
                             </p>
                             <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
                                 <span className='text-[10px] text-accent-blue block'>
@@ -124,9 +124,6 @@ const Page: NextPage = () => {
                                 Packages No: {request.package_ids.length}
                             </p>
 
-                            <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20 px-2'>
-                                Wrapping: {request.wrapping}
-                            </p>
 
                             <p className='flex-1 whitespace-nowrap flex justify-end'>
                                 {request.created_at.slice(0, 10)}

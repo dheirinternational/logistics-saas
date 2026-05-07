@@ -27,8 +27,8 @@ const Page: NextPage = () => {
 
     const router = useRouter()
 
-    const [totalPrice, setTotalPrice] = useState(0) 
-    const [totalWeight, setTotalWeight] = useState(0)
+    const [totalPrice, setTotalPrice] = useState("") 
+    const [totalWeight, setTotalWeight] = useState("")
     const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
 
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -95,8 +95,8 @@ const Page: NextPage = () => {
                     user_id: modalSelectedRequest?.user_id,
                     payment_time: modalSelectedRequest?.payment_time,
                     package_ids: modalSelectedRequest?.package_ids,
-                    total_weight: totalWeight,
-                    price: totalPrice
+                    total_weight: Number(totalWeight || 0),
+                    price: Number(totalPrice || 0)
                 })
             })
 
@@ -247,7 +247,14 @@ const Page: NextPage = () => {
                                 <input 
                                 type="number" 
                                 value={totalPrice}
-                                onChange={(e) => {setTotalPrice(Number(e.currentTarget.value))}}
+                                onChange={(e) => {
+                                    let { value } = e.currentTarget
+                                    // remove leading zeros but keep single zero
+                                    value = value.replace(/^0+(?=\d)/, "")
+
+                                    setTotalPrice(value)
+                                }
+                                }
                                 min={0}
                                 className='border border-dark/10 rounded px-2 py-1 outline-0'
                                 />
@@ -258,7 +265,13 @@ const Page: NextPage = () => {
                                 <input 
                                 type="number" 
                                 value={totalWeight}
-                                onChange={(e) => {setTotalWeight(Number(e.currentTarget.value))}}
+                                onChange={(e) => {
+                                    let { value } = e.currentTarget
+                                    // remove leading zeros but keep single zero
+                                    value = value.replace(/^0+(?=\d)/, "")
+
+                                    setTotalWeight(value)
+                                }}
                                 min={0}
                                 className='border border-dark/10 rounded px-2 py-1 outline-0'
                                 />

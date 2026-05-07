@@ -53,7 +53,7 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
         path: "/base/request_mail"
     },
     {
-        title: "Waiting to be released",
+        title: "Shipment Requests",
         icon: BsBoxArrowUp,
         path: "/base/waiting_to_be_released"
     },
