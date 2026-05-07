@@ -47,18 +47,18 @@ const Page: NextPage = async() => {
 
                 (SELECT COUNT(*) 
                 FROM shipments 
-                WHERE status != 'delivered') AS shipment,
+                WHERE status != 'delivered' AND user_id = $1) AS shipment,
 
                 (SELECT COUNT(*) 
                 FROM payments 
-                WHERE status = 'pending') AS pending_payments,
+                WHERE status = 'pending' AND user_id = $1) AS pending_payments,
 
                 (SELECT COUNT(*) 
                 FROM shipment_requests 
-                WHERE status != 'accepted') AS request_mail,
+                WHERE status != 'accepted' AND user_id = $1) AS request_mail,
 
                 (SELECT COUNT(*) 
-                FROM packages WHERE status != 'assigned_to_shipment') AS total_packages;
+                FROM packages WHERE status != 'assigned_to_shipment' AND user_id = $1) AS total_packages;
                 
         `, [userId])
         
