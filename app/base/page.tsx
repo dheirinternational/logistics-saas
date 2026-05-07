@@ -10,7 +10,7 @@ import { Reviews } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { FaQuoteLeft } from 'react-icons/fa'
+import { FaQuoteLeft, FaWhatsapp } from 'react-icons/fa'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
@@ -113,6 +113,10 @@ const Page: NextPage = ({}) => {
       <Carousel />
 
       <Announcements />
+
+      <a href='https://wa.link/68r8i8' target='_blank' className='fixed bottom-28 right-8 w-fit h-fit p-3 rounded-full bg-white shadow hover:bg-accent-red cursor-pointer active:scale-95 transition-set'>
+        <FaWhatsapp className='text-green-500 text-3xl'/>
+      </a>
 
       {/* CTA Redirect */}
       <div className="p-body bg-light/90 flex flex-wrap gap-6 justify-center">
