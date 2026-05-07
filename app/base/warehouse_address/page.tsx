@@ -137,7 +137,7 @@ export default function Page() {
                         {currentlySelectedWarehouse?.name}
                     </h2>
 
-                    <CopyWarehouseDetails ignoreText title='Recipient' text={`${currentlySelectedWarehouse?.country === "CN" ? "China" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code} ${currentlySelectedWarehouse?.name || ""} ${currentlySelectedWarehouse?.phone || ""} ${currentlySelectedWarehouse?.postal_code || ""}`}/>
+                    <CopyWarehouseDetails ignoreText title='Recipient' text={`${currentlySelectedWarehouse?.country === "CN" ? "KRC2530" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code} ${currentlySelectedWarehouse?.name || ""} ${currentlySelectedWarehouse?.phone || ""} ${currentlySelectedWarehouse?.postal_code || ""}`}/>
                 
                 </div>
                 <hr className='my-4 border border-dark/10'/>
@@ -146,7 +146,7 @@ export default function Page() {
                 <div className='space-y-2'>
                 <CopyWarehouseDetails title='Recipient' text={`${currentlySelectedWarehouse?.name || ""}`}/>
                 <CopyWarehouseDetails title='Contact' text={`${currentlySelectedWarehouse?.phone || ""}`}/>
-                <CopyWarehouseDetails title='Address' text={`${currentlySelectedWarehouse?.country === "CN" ? "China" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code}`}  />
+                <CopyWarehouseDetails title='Address' text={`${currentlySelectedWarehouse?.country === "CN" ? "KRC2530" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code}`}  />
                 <CopyWarehouseDetails title='Postal Code' text={`${currentlySelectedWarehouse?.postal_code || ""}`}/>
                 </div>
                 {/* <div className='mt-6 h-75'>
