@@ -35,9 +35,9 @@ const Page: NextPage = () => {
 
     
     // Selected Objects
-    const [currentAnnouncementPage, setCurrentAnnouncementPage] = useState<"view" | "add" >("view")
+    const [currentAnnouncementPage, setCurrentAnnouncementPage] = useState<"view" | "add" >("add")
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<{id: number, title: string, message: string} | null>()
-
+    const [isDeletingAnnouncement, setIsDeletingAnnouncement] = useState(false)
 
     // Counts
     const [shipmentCounts, setShipmentCounts] = useState<ShipmentCount | null>(null)
@@ -46,6 +46,7 @@ const Page: NextPage = () => {
 
     // DELETE Announcement
     const deleteAnnouncement = async (id) => {
+        setIsDeletingAnnouncement(true)
         try{
             const res = await fetch("/api/announcements", {
                 method: "DELETE",
@@ -69,6 +70,9 @@ const Page: NextPage = () => {
         catch(err){
             toast.error("ERR:: Deleting announcement")
             console.error("ERR:: Deleting announcement", err)
+        }
+        finally{
+            setIsDeletingAnnouncement(false)
         }
     }
 
@@ -186,27 +190,44 @@ const Page: NextPage = () => {
                 </div>
                 <div className='border border-dark/20 p-2 h-60 min-h-60 rounded overflow-y-auto space-y-2 relative'>
                     {
-                        currentAnnouncementPage === "view" ?
+                        currentAnnouncementPage === "add" ?
                         <>
                             <span className='text-[10px] opacity-70 mb-3 block'>
                             Click on an announcement to edit or delete. 
                             </span>
                             {announcements.map( x => 
-                                <button
-                                key={x.id} 
-                                className='border border-dark/10 text-xs w-full text-left p-2 rounded active:bg-accent-red flex items-center justify-between'
-                                onClick={() => setSelectedAnnouncement(x)}
+                                <div
+                                key={x.id}
+                                className='flex gap-1'
                                 >
-                                    <span>
-                                        {x.title}
-                                    </span>
+                                    <button
+                                    className='border border-dark/10 text-xs w-full text-left p-2 rounded active:bg-accent-red flex items-center justify-between'
+                                    onClick={() => setSelectedAnnouncement(x)}
+                                    >
+                                        <span>
+                                            {x.title}
+                                        </span>
+                                    </button>
 
+                                    <button
+                                    onClick={(e) => {
+                                        deleteAnnouncement(x.id)
+                                    }}
+                                    disabled={isDeletingAnnouncement}
+                                    >
+                                        {
+                                            isDeletingAnnouncement ?
+                                            <BeatLoader color='red' size={6}/> :
+                                            <MdDelete
+                                            className='cursor-pointer hover:text-red-500'
+                                            />
+                                        }
+
+                                    </button>
                                     
-                                    <MdDelete
-                                    onClick={() => {deleteAnnouncement(x.id)}}
-                                    />
-
-                                </button>
+                                    
+                                </div>
+                                
                             )}
                             
                         </> :
