@@ -26,7 +26,7 @@ const CopyWarehouseDetails = ({text, title, ignoreText} : {text: string, title: 
     }
 
   return (
-    <div className="text-sm flex items-center justify-between flex-wrap gap-3">
+    <div className="text-xs flex items-center justify-between flex-wrap gap-3">
         {
             !ignoreText &&
             <p className="">

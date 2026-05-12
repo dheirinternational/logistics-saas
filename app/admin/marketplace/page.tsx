@@ -102,6 +102,12 @@ const Page: NextPage = ({}) => {
                 {getValue()} kg
             </p>
         }),
+        columnHelper.accessor("created_at", {
+            header: "Added on",
+            cell: ({getValue}) => <p>
+                {new Date(getValue()).toDateString()} 
+            </p>
+        }),
         columnHelper.accessor("is_featured", {
             header: "Featured"
         }),

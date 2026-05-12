@@ -450,6 +450,7 @@ const IncomingPackageEditComponent = () => {
                             value={selectedPackage.weight}
                             onChange={handleSelectedPackageInput}
                             min={0}
+                            step="0.01"
                             required
                             />
                         </label>
@@ -553,6 +554,7 @@ const IncomingPackageEditComponent = () => {
                         </div>
                     </div>
                     
+                    {/* Submit Button */}
                     <div className="mt-16 mb-40">
                         <button 
                         className="bg-accent-red text-white text-[10px] w-full py-2 rounded"
@@ -785,6 +787,7 @@ const AcceptedShipmentsEditComponent = () => {
                             onChange={handleSelectedShipmentInput}
                             required
                             readOnly
+                            step="0.01"
                             /> 
                             <span className="left-1 bottom-2.25 absolute">
                                 ₦
@@ -802,6 +805,7 @@ const AcceptedShipmentsEditComponent = () => {
                             value={selectedShipment.total_weight}
                             onChange={handleSelectedShipmentInput}
                             required
+                            step="0.01"
                             readOnly
                             /> 
                         </label>

@@ -115,6 +115,8 @@ export type IncomingPackage = {
     customer_note: string
 }
 
+
+
 export type Package = {
     id: number // unique
     incoming_package_id: string  // FK -> IncomingPackage(id)

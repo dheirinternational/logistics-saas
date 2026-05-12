@@ -62,14 +62,14 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
 
   return (
     <div className="w-full relative ">
-        <label className="text-xs relative h-fit">
+        <label className="text-xs relative h-fit overflow-hidden w-100 max-w-100">
             {!textarea && <>
                 <p className="font-semibold">{title}</p>
                 <input 
                 ref={inputRef}
                 type={type}
                 name={name}
-                className={`w-full ${title && "mt-2" } outline-0 border border-dark/40 rounded px-3 py-2 focus:border-dark 
+                className={`w-full ${title && "mt-2" } outline-0 border border-dark/40 rounded px-3 py-2 focus:border-dark overflow-hidden w-full max-w-full
                 ${!readonly ? "bg-light/60" : "bg-dark/10 outline-0 focus:outline-0"}    
                 `}
                 value={state[key] ?? ""}
@@ -82,7 +82,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
             </>}
 
             {overshadow && state[key] && 
-                <div className={`whitespace-nowrap w-[70%] h-7.5 left-3 absolute flex items-center pointer-events-none bg-[#e5e5e5] outline-0  ${title ? "top-6.5" : "top-px"}`}>
+                <div className={`whitespace-nowrap w-[90%] h-7.5 left-3 absolute flex items-center pointer-events-none bg-[#e5e5e5] outline-0  ${title ? "top-6.5" : "top-px"}  overflow-hidden`}>
                     {defaultValue?.name ??  overshadowText}
                 </div>
             }
@@ -108,7 +108,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
 
         </label>
         {select && 
-        <div className={`bg-light shadow shadow-dark/20 rounded-b transition-set absolute w-full z-60
+        <div className={`bg-light shadow shadow-dark/20 rounded-b transition-set absolute z-60 
         ${isDropDownActive ? "h-16 max-h-16 overflow-auto" : "max-h-0 h-0 pointer-events-none overflow-hidden"}
         `}>
             {selectValues.length > 0 && selectValues.map( (btn, i) => 

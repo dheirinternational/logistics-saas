@@ -3,16 +3,17 @@
 import InputComponent from '@/components/admin/shipments/InputComponent'
 import StatusStatCard from '@/components/admin/StatusStatCard'
 import RequestMailProduct from '@/components/base/RequestMailProduct'
-import { Package } from '@/types/entityTypeDef'
+import { Package, PackageImage } from '@/types/entityTypeDef'
 import { PackageStatus } from '@/types/statusTypes'
 import { NextPage } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaChevronLeft, FaUser, FaWarehouse } from 'react-icons/fa'
 import { GiShakingHands } from 'react-icons/gi'
 import { MdAssignmentAdd, MdCheckCircle } from 'react-icons/md'
-import { BeatLoader } from 'react-spinners'
+import { BeatLoader, SkewLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
 
 
@@ -24,15 +25,22 @@ type FilterValues = {
 
 const Page: NextPage = () => {
 
-
+    // Arrays
     const [packages, setPackages] = useState<Package[]>([])
+    
+    
+    // Selected Objects
     const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
-    const [isDataLoading, setIsDataLoading] = useState(false)
-
     const [filterValues, setFilterValues] = useState<FilterValues>({
         tracking_id: "",
         status: "",
     })
+
+
+    // loading states
+    const [isDataLoading, setIsDataLoading] = useState(false)
+
+    
 
     const router = useRouter()
     
@@ -147,9 +155,7 @@ const Page: NextPage = () => {
             !isDataLoading ?
             data
                 .map( packag => 
-                    <div key={packag.id}>
-                        <RequestMailProduct prop={packag} handlePackage={setSelectedPackages}/>   
-                    </div>
+                    <PackagesComponent key={packag.id} {...{packag}}/>
                 ) :
                 <div className='w-full h-full center-items'>
                     <BeatLoader color='#f26430' size={15}/>
@@ -159,5 +165,100 @@ const Page: NextPage = () => {
 
   </div>
 }
+
+
+const PackagesComponent = ({packag} : {packag: Package}) => {
+
+    // Array
+    const [packageImages, setPackageImages] = useState<PackageImage[]>([])
+
+
+    // Loading Indicator
+    const [isFetchingImages, setIsFetchingImages] = useState(true)  
+
+
+    // Fetch package images
+    const fetchPackageImages = async () => {
+        setIsFetchingImages(true)
+        try{
+            const res = await fetch(`/api/packages/images/${packag.id}`)
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return 
+            }
+
+            setPackageImages(result.data)
+        }
+        catch(err: any){
+            console.error("Network Error", err)
+            // toast.error(err.message)
+        }
+        finally{
+            setIsFetchingImages(false)
+        }
+    }
+
+    
+
+    // Fetch Package images
+
+    useEffect(() => {
+        fetchPackageImages()
+    }, [])
+
+
+
+    return <div key={packag.id}>
+        <div className={`
+            border border-dark/20 p-4 py-3 space-y-2 rounded transition-set     
+        `}
+        >
+            <div className='flex items-center justify-between'>
+                <p className='border border-dark/8 text-sm p-2 rounded shadow-sm'>
+                    {packag.package_name}awdawd
+                </p>
+                <p className='text-[10px] text-dark/70 whitespace-nowrap '>
+                    Track: {packag.incoming_package_id}
+                </p>
+                <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
+                    <span className='text-[10px] text-accent-blue block'>
+                        {packag.status}
+                    </span>
+                </div>
+            </div>
+
+            <div className='text-xs flex'>
+
+                <div className='flex-1 flex gap-2 p-2 border border-dark/8 rounded shadow-sm bg-gray-100'>
+                    {
+                        isFetchingImages && <div className='p-3'>
+                            <BeatLoader color='orange' size={8} />
+                        </div>
+                    }
+                    {packageImages.map( image => 
+                        <figure key={image.id} className='w-10 h-10 relative overflow-hidden rounded border border-dark/20'>
+                            <Image 
+                            src={image.image_url}
+                            alt={image.alt_text}
+                            fill
+                            className='object-cover'
+                            />
+                        </figure>
+                        )}
+                </div>
+                
+                <p className='flex-1 whitespace-nowrap flex justify-end text-[10px]'>
+                    Added: {new Date(packag.created_at).toDateString()}
+                </p>
+            </div>
+        </div>   
+    </div>
+}
+
+
+
+
 
 export default Page

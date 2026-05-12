@@ -75,6 +75,10 @@ const Page: NextPage = () => {
         columnHelper.accessor("paid_for", {
             header: "Paid For",
         }),
+        columnHelper.accessor("created_at", {
+            header: "Accepted at",
+            cell: ({getValue}) => <span>{new Date(getValue()).toDateString()}</span> 
+        }),
         columnHelper.display({
             id: "Details",
             cell: ({row}) => 

@@ -133,18 +133,18 @@ export default function Page() {
 
             <div className='bg-light p-body mx-2 rounded-lg shadow shadow-dark/10'>
                 <div className='flex justify-between'>
-                    <h2 className='font-bold uppercase text-accent-red'>
+                    <h2 className='font-bold uppercase text-xs text-accent-red'>
                         {currentlySelectedWarehouse?.name}
                     </h2>
 
-                    <CopyWarehouseDetails ignoreText title='Recipient' text={`${currentlySelectedWarehouse?.country === "CN" ? "KRC2530" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code} ${currentlySelectedWarehouse?.name || ""} ${currentlySelectedWarehouse?.phone || ""} ${currentlySelectedWarehouse?.postal_code || ""}`}/>
+                    <CopyWarehouseDetails ignoreText title='Recipient' text={`${currentlySelectedWarehouse?.country === "CN" ? "KRC2530" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code} ${currentlySelectedWarehouse?.name.split("(")[0] || ""} ${currentlySelectedWarehouse?.phone || ""} ${currentlySelectedWarehouse?.postal_code || ""}`}/>
                 
                 </div>
                 <hr className='my-4 border border-dark/10'/>
                 
                 {/* Warehouse information */}
                 <div className='space-y-2'>
-                <CopyWarehouseDetails title='Recipient' text={`${currentlySelectedWarehouse?.name || ""}`}/>
+                <CopyWarehouseDetails title='Recipient' text={`${currentlySelectedWarehouse?.name.split("(")[0] || ""}`}/>
                 <CopyWarehouseDetails title='Contact' text={`${currentlySelectedWarehouse?.phone || ""}`}/>
                 <CopyWarehouseDetails title='Address' text={`${currentlySelectedWarehouse?.country === "CN" ? "KRC2530" : "Nigeria"}, ${currentlySelectedWarehouse?.province || ""}, ${currentlySelectedWarehouse?.city || ""}, ${currentlySelectedWarehouse?.district || ""}, ${currentlySelectedWarehouse?.street || ""}, ${currentlySelectedWarehouse?.building || ""}  ${userDetails?.code}`}  />
                 <CopyWarehouseDetails title='Postal Code' text={`${currentlySelectedWarehouse?.postal_code || ""}`}/>

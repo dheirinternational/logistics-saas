@@ -144,6 +144,10 @@ const Page: NextPage = () => {
             header: "Total Weight",
             cell: ({getValue}) => <p>{getValue()} kg</p>,
         }),
+        columnHelper.accessor("created_at", {
+            header: "Requested at",
+            cell: ({getValue}) => <p>{new Date(getValue()).toDateString()}</p>,
+        }),
         columnHelper.display({
             id: "Details",
             cell: ({row}) => 
@@ -251,10 +255,11 @@ const Page: NextPage = () => {
                                     // remove leading zeros but keep single zero
                                     value = value.replace(/^0+(?=\d)/, "")
 
-                                    setTotalPrice(value)
+                                    setTotalPrice(String(Number(value).toFixed(2)))
                                 }
                                 }
                                 min={0}
+                                step="0.01"
                                 className='border border-dark/10 rounded px-2 py-1 outline-0'
                                 />
                             </label>
@@ -269,9 +274,10 @@ const Page: NextPage = () => {
                                     // remove leading zeros but keep single zero
                                     value = value.replace(/^0+(?=\d)/, "")
 
-                                    setTotalWeight(value)
+                                    setTotalWeight(String(Number(value).toFixed(2)))
                                 }}
                                 min={0}
+                                step="0.01"
                                 className='border border-dark/10 rounded px-2 py-1 outline-0'
                                 />
                             </label>

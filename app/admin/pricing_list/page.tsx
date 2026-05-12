@@ -216,8 +216,9 @@ const EditAirTemplate = ({id}) => {
             <input 
             type="number" 
             value={price || 0}
-            onChange={(e) => setPrice(Number(e.currentTarget.value) === 0 ? null : Number(e.currentTarget.value))}
+            onChange={(e) => setPrice(Number(e.currentTarget.value) === 0.00 ? null : Number(e.currentTarget.value))}
             className="border border-dark/10 rounded py-1 px-2 outline-0"
+            step="0.01"
             />
         </label>
         <label className="flex gap-2 items-center w-50 justify-between">
@@ -227,8 +228,9 @@ const EditAirTemplate = ({id}) => {
             <input 
             type="number" 
             value={clearance || 0}
-            onChange={(e) => setClearance(Number(e.currentTarget.value) === 0 ? null : Number(e.currentTarget.value))}
+            onChange={(e) => setClearance(Number(e.currentTarget.value) === 0.00 ? null : Number(e.currentTarget.value))}
             className="border border-dark/10 rounded py-1 px-2 outline-0"
+            step="0.01"
             />
         </label>
         <button
@@ -401,6 +403,7 @@ const EditSeaTemplate = ({id}) => {
             value={price || 0}
             onChange={(e) => setPrice(Number(e.currentTarget.value) === 0 ? null : Number(e.currentTarget.value))}
             className="border border-dark/10 rounded py-1 px-2 outline-0"
+            step="0.01"
             />
         </label>
         <label className="flex gap-2 items-center w-50 justify-between">
@@ -412,6 +415,7 @@ const EditSeaTemplate = ({id}) => {
             value={clearance || 0}
             onChange={(e) => setClearance(Number(e.currentTarget.value) === 0 ? null : Number(e.currentTarget.value))}
             className="border border-dark/10 rounded py-1 px-2 outline-0"
+            step="0.01"
             />
         </label>
         <button
@@ -589,6 +593,7 @@ const EditExpressTemplate = ({id}) => {
             value={price || 0}
             onChange={(e) => setPrice(Number(e.currentTarget.value) === 0 ? null : Number(e.currentTarget.value))}
             className="border border-dark/10 rounded py-1 px-2 outline-0"
+            step="0.01"
             />
         </label>
         <label className="flex gap-2 items-center w-50 justify-between">
@@ -600,6 +605,7 @@ const EditExpressTemplate = ({id}) => {
             value={clearance || 0}
             onChange={(e) => setClearance(Number(e.currentTarget.value) === 0 ? null : Number(e.currentTarget.value))}
             className="border border-dark/10 rounded py-1 px-2 outline-0"
+            step="0.01"
             />
         </label>
         <button
