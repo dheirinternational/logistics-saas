@@ -4,7 +4,7 @@ declare global{
     var pgPool: Pool | undefined;
 }
 
-const connectionString = process.env.DATABASE_URL
+const connectionString = process.env.NODE_ENV === "production" ? process.env.DATABASE_URL : process.env.TEST_DATABASE_URL
 
 if (!connectionString) {
   throw new Error("Missing DATABASE_URL")

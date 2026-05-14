@@ -6,8 +6,8 @@ import { Resend } from "resend";
 
 
 const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!, 
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_SUPABASE_URL! : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST!, 
+    process.env.NODE_ENV === "production" ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
 )
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -198,11 +198,11 @@ export async function POST(req: NextRequest){
     catch(err){
 
         await client.query("ROLLBACK")
-        console.error("Error Adding Package to database", err)
+        console.error("Internal server error", err)
 
         return NextResponse.json({
             success: false,
-            message: "Error adding Package to database"
+            message: "Internal server error"
         }, {status: 500})
     }
     finally {
@@ -235,10 +235,10 @@ export async function GET(){
 
     }
     catch(err){
-        console.error("Error fetching Packages", err)
+        console.error("Internal server error", err)
         return NextResponse.json({
             success: false,
-            message: "Something went wrong"
+            message: "Internal server error"
         }, {status: 500})
 
     }

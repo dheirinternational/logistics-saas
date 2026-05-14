@@ -58,11 +58,11 @@ const RequestMailProduct = ({prop, handlePackage}: Props) => {
 
         if(isSelected){
             handlePackage(prev => {
-                const prevArray = prev.filter( packag => packag.id != packag.id )
+                const prevArray = prev.filter( packag => packag.id != prop.id )
                 return([...prevArray, {...prop}])
             })
         } else{
-            handlePackage(prev => prev.filter(packag => packag.id != packag.id))
+            handlePackage(prev => prev.filter(packag => packag.id != prop.id))
         }
     }, [isSelected])
 
@@ -81,7 +81,7 @@ const RequestMailProduct = ({prop, handlePackage}: Props) => {
     >
         <div className='flex items-center justify-between'>
             <p className='border border-dark/8 text-sm p-2 rounded shadow-sm'>
-                {prop.package_name}awdawd
+                {prop.package_name}
             </p>
             <p className='text-[10px] text-dark/70 whitespace-nowrap '>
                 Track: {prop.incoming_package_id}
@@ -105,7 +105,7 @@ const RequestMailProduct = ({prop, handlePackage}: Props) => {
                     <figure key={image.id} className='w-10 h-10 relative overflow-hidden rounded border border-dark/20'>
                         <Image 
                         src={image.image_url}
-                        alt={image.alt_text}
+                        alt={image.alt_text || "heyyy"}
                         fill
                         className='object-cover'
                         />

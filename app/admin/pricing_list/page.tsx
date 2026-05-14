@@ -6,7 +6,57 @@ import { BeatLoader } from "react-spinners"
 import { toast } from "react-toastify"
 
 
+type MoneyExchangeRate = {
+    name: string,
+    currency_one: number,
+    currency_two: number
+}
+
+
 export default function Page(){
+
+    // Money Exchange rate
+    const [moneyExchangeRate, setMoneyExhangeRate] = useState<MoneyExchangeRate[]>([])
+
+
+    // selected values
+    const [currency, setCurrency] = useState<"Naira" | "Dollar">("Dollar")
+    const [currentSelectedCurrencyValue, setCurrentSelectedCurrencyValue] = useState(0)
+
+
+    // Loading States
+    const [isFetchingMoneyExchangeRates, setIsFetchingMoneyExchangeRates] = useState(true)
+
+
+    // Fetch Money exchange rates
+    useEffect(() => {
+        const fetchMoneyExchangeRates = async() => {
+            try{
+                const res = await fetch(`/api/money-exchange-rate`)
+                const result = await res.json()
+
+                if(!res.ok){
+                    toast.error(result.message)
+                    return
+                }   
+
+                console.log(result)
+
+                setMoneyExhangeRate(result.data)
+                setCurrentSelectedCurrencyValue(result.data[0].currency_one)
+            }
+            catch(err: any){
+                console.error(err.message, err)
+                toast.error(err.message)
+            }
+            finally{
+                setIsFetchingMoneyExchangeRates(false)
+            }
+        }
+
+        fetchMoneyExchangeRates()
+    }, [])
+
 
 
     return <div className="h-dvh p-body">
@@ -19,6 +69,35 @@ export default function Page(){
             Manage, edit and and manage all Pricing List from one control deck.
         </p>
 
+        <div>
+            <div className="w-fit text-[10px] bg-gray-200 rounded mt-4 p-1">
+                <button className={`
+                    p-2 rounded ${currency === "Dollar" && "bg-white"}
+                `}
+                onClick={() => {
+                    setCurrency("Dollar")
+                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_one)
+                }}
+                >
+                    Dollar
+                </button>
+                <button className={`
+                    p-2 rounded ${currency === "Naira" && "bg-white"}
+                `}
+                onClick={() => {
+                    setCurrency("Naira")
+                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_two)
+                }}
+                >
+                    Naira
+                </button>
+            </div>
+        </div>
+        <p className="text-[10px] mt-2">
+            <span className="text-red-400 font-semibold mr-2">Note:</span>
+            <span className="text-dark/70 italic">
+            While currency can be changed on the ui, all edits made to the prices must be made in dollars as that is the standard currency in the database</span>
+        </p>
 
         <div className="w-full p-2 bg-light rounded mt-6">
             <div className="bg-gray-100 p-2 rounded">
@@ -27,7 +106,7 @@ export default function Page(){
                     <h2 className="font-semibold">
                         Air Shipping Template
                     </h2>
-                    <AirTemplateComponent />
+                    <AirTemplateComponent {...{currencyValue: currentSelectedCurrencyValue}}/>
                 </div>
 
                 <div className="p-4 bg-light rounded">
@@ -41,7 +120,7 @@ export default function Page(){
                     <h2 className="font-semibold">
                         Express Shipping Template
                     </h2>
-                    <ExpressTemplateComponent />
+                    <ExpressTemplateComponent {...{currencyValue: currentSelectedCurrencyValue}} />
                 </div>
 
             </div>
@@ -53,7 +132,7 @@ export default function Page(){
 
 
 
-const AirTemplateComponent = () => {
+const AirTemplateComponent = ({currencyValue} : {currencyValue: number}) => {
     
 
     // Arrays 
@@ -106,14 +185,14 @@ const AirTemplateComponent = () => {
                 <BeatLoader color="orange" size={8}/> 
             </div>:
             airTemplate?.map( (template, i) => 
-                <AirComp key={i} {...{template}}/>
+                <AirComp key={i} {...{template, currencyValue}}/>
             )
         }
     </div>
 }
 
 
-const AirComp = ({template}) => {
+const AirComp = ({template, currencyValue}) => {
 
         const [isEditPageActive, setIsEditPageActive] = useState(false)
 
@@ -141,7 +220,7 @@ const AirComp = ({template}) => {
                 !isEditPageActive ?
                 <>
                     <p>
-                        Price per kg: ₦{template.price}
+                        Price per kg: {currencyValue === 1 ? "$" : "₦"}{(template.price * currencyValue).toFixed(2)}
                     </p>
                     <p>
                         Clearance Fee per kg: ₦{template.clearance}
@@ -441,7 +520,7 @@ const EditSeaTemplate = ({id}) => {
 
 
 
-const ExpressTemplateComponent = () => {
+const ExpressTemplateComponent = ({currencyValue} : {currencyValue : number}) => {
     
     const [expressTemplate, setExpressTemplate] = useState<SeaPricingTemplate[]>()
     const [isFetchingExpressTemplate, setIsFetchingExpressTemplate] = useState(true)
@@ -482,14 +561,14 @@ const ExpressTemplateComponent = () => {
                 <BeatLoader color="orange" size={8}/> 
             </div>:
             expressTemplate?.map( template => 
-                <ExpressContainer key={template.id} {...{template}}/>
+                <ExpressContainer key={template.id} {...{template, currencyValue}}/>
             )
         }
     </div>
 }
 
 
-const ExpressContainer = ({template}) => {
+const ExpressContainer = ({template, currencyValue}) => {
 
     const [isEditPageActive, setIsEditPageActive] = useState(false)
 
@@ -517,7 +596,7 @@ const ExpressContainer = ({template}) => {
                 !isEditPageActive ? 
                 <>
                     <p>
-                        Price: ₦{template.price}
+                        Price: {currencyValue === 1 ? "$" : "₦"}{(template.price * currencyValue).toFixed(2)}
                     </p>
                     <p>
                         Clearance Fee: ₦{template.clearance}

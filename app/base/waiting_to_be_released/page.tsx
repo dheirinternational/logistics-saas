@@ -107,8 +107,8 @@ const Page: NextPage = () => {
             shipmentRequests 
                 .map( request => 
                     <div key={request.id} className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
-                        <div className='flex items-center justify-between'>
-                            <p className='text-lg'>
+                        <div className='flex items-center justify-between mb-2'>
+                            <p className='text-sm p-2 border-dark/8 border rounded shadow-sm'>
                                 Channel: {request.channel}
                             </p>
                             <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
@@ -118,15 +118,18 @@ const Page: NextPage = () => {
                             </div>
                         </div>
 
-                        <div className='text-xs flex'>
+                        <div className='text-xs flex mt-5'>
                             
-                            <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20'>
-                                Packages No: {request.package_ids.length}
+                            <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20 text-[10px] items-center'>
+                                Packages count: 
+                                <p className='ml-3 rounded-full border border-dark/8 w-5 h-5 center-items bg-dark/50 text-light'>
+                                    {request.package_ids.length}
+                                </p>
                             </p>
 
 
-                            <p className='flex-1 whitespace-nowrap flex justify-end'>
-                                {request.created_at.slice(0, 10)}
+                            <p className='flex-1 whitespace-nowrap flex justify-end text-[10px] text-dark/70'>
+                                Requested at: <span className='ml-1 italic'>{new Date(request.created_at).toDateString()}</span>    
                             </p>
                         </div>
                     </div>

@@ -453,7 +453,7 @@ const Search = ({state, handleChange, handleWarehouseChange, handleStatusChange}
                 </div>
 
                 {/* Overlay */}
-                    <div className="bg-light w-fit absolute bottom-2 left-2">
+                    <div className="bg-light w-[84%] absolute bottom-2 left-2 whitespace-nowrap  overflow-hidden">
                         {warehouseName}
                     </div>
             </label>

@@ -146,6 +146,7 @@ export type ShippingRequest = {
     shipping_note: string
     total_weight: number
     customer_note: string
+    packaging: string
 }
 
 

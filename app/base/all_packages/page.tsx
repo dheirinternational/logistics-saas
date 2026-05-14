@@ -217,7 +217,7 @@ const PackagesComponent = ({packag} : {packag: Package}) => {
         >
             <div className='flex items-center justify-between'>
                 <p className='border border-dark/8 text-sm p-2 rounded shadow-sm'>
-                    {packag.package_name}awdawd
+                    {packag.package_name}
                 </p>
                 <p className='text-[10px] text-dark/70 whitespace-nowrap '>
                     Track: {packag.incoming_package_id}
@@ -241,7 +241,7 @@ const PackagesComponent = ({packag} : {packag: Package}) => {
                         <figure key={image.id} className='w-10 h-10 relative overflow-hidden rounded border border-dark/20'>
                             <Image 
                             src={image.image_url}
-                            alt={image.alt_text}
+                            alt={image.alt_text || "Heyy"}
                             fill
                             className='object-cover'
                             />

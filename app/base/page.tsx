@@ -140,11 +140,109 @@ const Page: NextPage = ({}) => {
               Shipping from China shouldn’t feel complicated
             </h2>
 
-            <p className="text-primary-text/60 text-base leading-relaxed">
-              We help you receive, track, and ship your goods from China to Nigeria 
-              without stress. From warehouse handling to final delivery, everything 
-              is designed to be simple, transparent, and reliable.
-            </p>
+            <section className="text-xs leading-5.5 text-dark/70">
+              <header>
+                <h1>
+                  China to Nigeria Shipping Services
+                </h1>
+
+                <p>
+                  We help you receive, track, and ship your goods from China to Nigeria
+                  without stress.
+                </p>
+
+                <p>
+                  From warehouse handling to final delivery, everything is designed
+                  to be simple, transparent, and reliable.
+                </p>
+              </header>
+
+              <section className="warehouse-info">
+                <h2>Warehouse Locations</h2>
+
+                <ul>
+                  <li>
+                    <strong>Guangzhou:</strong>
+                    For consolidation.
+                  </li>
+
+                  <li>
+                    <strong>Foshan:</strong>
+                    No consolidation, immediate loading.
+                  </li>
+
+                  <li>
+                    <strong>Minimum CBM:</strong>
+                    0.1
+                  </li>
+                </ul>
+              </section>
+
+              <section className="interstate-delivery">
+                <h2>Interstate Delivery</h2>
+
+                <ul>
+                  <li>Onitsha</li>
+                  <li>Kano</li>
+                  <li>Other states are delivered via waybill.</li>
+                </ul>
+              </section>
+
+              <section className="service-notice">
+                <h2>Notice</h2>
+
+                <ul>
+                  <li>No missing items.</li>
+
+                  <li>
+                    Inspection of selected packages is available upon request
+                    for shipments from 1CBM and above.
+                  </li>
+
+                  <li>We provide accurate CBM measurements.</li>
+
+                  <li>We repack and consolidate goods together.</li>
+
+                  <li>
+                    We pack goods into freezers and washing machines when required.
+                  </li>
+
+                  <li>
+                    We are no longer shipping lithium batteries such as power banks
+                    and related items.
+                  </li>
+                </ul>
+              </section>
+
+              <section className="important-notice">
+                <h2>Important Notice</h2>
+
+                <p>
+                  Your name and phone number must be clearly written on your packages.
+                </p>
+              </section>
+
+              <section className="support">
+                <h2>Support</h2>
+
+                <p><strong>Shipping Methods:</strong> Air / Sea</p>
+
+                <p>
+                  <strong>Phone:</strong>
+                  <a href="tel:+2347059136729">+234 705 913 6729</a>
+                </p>
+
+                <p>
+                  Or click on the floating WhatsApp icon to chat with our
+                  customer support representative.
+                </p>
+
+                <p>
+                  Kindly reach out if you need help. We are always available to support you.
+                </p>
+              </section>
+
+            </section>
 
             <div className="flex gap-4">
               <Link href={"/base/add_package"} className="px-5 py-2.5 bg-accent-blue text-white rounded-lg text-sm font-medium hover:bg-accent-blue/70 transition">

@@ -140,9 +140,8 @@ const Page: NextPage = () => {
         columnHelper.accessor("status", {
             header: "Status"
         }),
-        columnHelper.accessor("total_weight", {
-            header: "Total Weight",
-            cell: ({getValue}) => <p>{getValue()} kg</p>,
+        columnHelper.accessor("packaging", {
+            header: "Packaging type"
         }),
         columnHelper.accessor("created_at", {
             header: "Requested at",

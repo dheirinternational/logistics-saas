@@ -95,6 +95,10 @@ const Page: NextPage = () => {
             cell: ({getValue}) => getValue(),
             enableColumnFilter: false
         }),
+        columnHelper.accessor("created_at", {
+            header: "Created At",
+            cell: ({getValue}) => <span>{new Date(getValue()).toDateString()}</span>
+        }),
         columnHelper.display({
             header: "Add Product",
             id: "add-product",

@@ -139,10 +139,20 @@ export async function POST(request: Request){
             data: result
         }, {status: 200})
     }
-    catch(err){
-        console.error("SERVER ERROR", err)
+    catch(err: any){
+
+        if(err.code === '23505'){
+            console.error("Shipment Id already exists", err)
+            return NextResponse.json({
+                success: false,
+                message: "Shipment Id already exists",
+            }, { status: 400 })
+        }
+
+        console.error("Internal server error", err)
         return NextResponse.json({
-            error: "Failed to put in package"
+            sucess: false,
+            message: "Internal server error"
         }, {status: 500})
     }
 }
@@ -182,6 +192,6 @@ export async function GET(){
         return NextResponse.json({
             success: false,
             message: "Something went wrong"
-        })
+        }, { status: 500 })
     }
 } 

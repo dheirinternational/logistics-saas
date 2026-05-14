@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         // 📧 Send email AFTER commit
         if (userEmail) {
             resend.emails.send({
-                from: "onboarding@resend.dev", // change after domain verification
+                from: "Logistics <no-reply@dheirinternational.com>", // change after domain verification
                 to: [userEmail],
                 subject: "Shipment Created Successfully 🚚",
                 html: `
