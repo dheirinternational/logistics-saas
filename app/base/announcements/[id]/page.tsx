@@ -82,7 +82,7 @@ const Announcements = () => {
                     <p className="text-xs">
                        {new Date(announcement?.created_at || "").toLocaleDateString()} 
                     </p>
-                    <p className='text-gray-600 text-[10px]'>
+                    <p className='text-gray-600 text-[10px] whitespace-pre-wrap'>
                         {announcement.message}
                     </p>
                 </div>
