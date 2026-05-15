@@ -157,29 +157,8 @@ const Page: NextPage = ({}) => {
                 </p>
               </header>
 
-              <section className="warehouse-info">
-                <h2>Warehouse Locations</h2>
-
-                <ul>
-                  <li>
-                    <strong>Guangzhou:</strong>
-                    For consolidation.
-                  </li>
-
-                  <li>
-                    <strong>Foshan:</strong>
-                    No consolidation, immediate loading.
-                  </li>
-
-                  <li>
-                    <strong>Minimum CBM:</strong>
-                    0.1
-                  </li>
-                </ul>
-              </section>
-
               <section className="interstate-delivery">
-                <h2>Interstate Delivery</h2>
+                <h2 className="font-bold">Interstate Delivery</h2>
 
                 <ul>
                   <li>Onitsha</li>
@@ -189,7 +168,7 @@ const Page: NextPage = ({}) => {
               </section>
 
               <section className="service-notice">
-                <h2>Notice</h2>
+                <h2 className="font-bold">Notice</h2>
 
                 <ul>
                   <li>No missing items.</li>
@@ -215,7 +194,7 @@ const Page: NextPage = ({}) => {
               </section>
 
               <section className="important-notice">
-                <h2>Important Notice</h2>
+                <h2 className="font-bold">Important Notice</h2>
 
                 <p>
                   Your name and phone number must be clearly written on your packages.
@@ -223,7 +202,7 @@ const Page: NextPage = ({}) => {
               </section>
 
               <section className="support">
-                <h2>Support</h2>
+                <h2 className="font-bold">Support</h2>
 
                 <p><strong>Shipping Methods:</strong> Air / Sea</p>
 
