@@ -1,6 +1,5 @@
 "use client"
 
-import SearchComponent from '@/components/admin/orders/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
 import { usePackageStore } from '@/store/incomingPackagesStore'
 import { Package, PackageImage, Warehouse } from '@/types/entityTypeDef'
@@ -8,7 +7,7 @@ import { PackageStatus } from '@/types/statusTypes'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import Image from 'next/image'
-import { ChangeEvent, useEffect, useEffectEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { FaChevronDown } from 'react-icons/fa'
 import { FaX } from 'react-icons/fa6'
 import { BeatLoader } from 'react-spinners'

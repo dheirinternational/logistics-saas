@@ -3,13 +3,14 @@
 import SearchComponent from '@/components/admin/shipments/requests/SearchComponent'
 import ShipmentStatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
-import { ShippingRequest } from '@/types/entityTypeDef'
+import { ShipmentImage, ShippingRequest } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
-import { FaCheckCircle, FaClock } from 'react-icons/fa'
+import { FaCheckCircle, FaClock, FaImage } from 'react-icons/fa'
 import { FaX } from 'react-icons/fa6'
 import { BeatLoader } from 'react-spinners'
 import { toast } from 'react-toastify'
@@ -27,13 +28,21 @@ const Page: NextPage = () => {
 
     const router = useRouter()
 
+    const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
+
+
+
     const [totalPrice, setTotalPrice] = useState("") 
     const [totalWeight, setTotalWeight] = useState("")
-    const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
+    const [images, setImages] = useState<File[]>([])
+    const [previews, setPreviews] = useState<string[]>([])
+
+
 
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [isCreatingShipmentData, setIsCreatingShipmentData] = useState(false)
     const [isModalActive, setIsModalActive] = useState(false)
+    
     
     
     const [filterValues, setFilterValues] = useState<SearchProps>({
@@ -69,37 +78,62 @@ const Page: NextPage = () => {
         }
     }
 
-    const createShipment = async () => {
 
-        if(Number(totalWeight || 0) < 1 || Number(totalWeight || 0) < 1){
+    // handle image selection
+    const hanldeImageChange = (e:ChangeEvent<HTMLInputElement>) => {
+
+        if(!e.target.files) return
+
+        const files = Array.from(e.target.files)
+
+        if(files.length < 1){
+            toast.error("Select Images")
+            return
+        }
+
+        const urls = files.map( file => URL.createObjectURL(file) )
+        setPreviews(urls)
+        setImages(files)
+    }
+
+
+
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setIsCreatingShipmentData(true)
+        const formData = new FormData(e.currentTarget)
+
+        images.forEach((image) => {
+            formData.append("images", image)
+        })
+
+        formData.append("customer_code", modalSelectedRequest?.customer_code || "")
+        formData.append("origin_warehouse_id", "1")
+        formData.append("destination_warehouse_id", "2")
+        formData.append("channel", modalSelectedRequest?.channel || "")
+        formData.append("shipment_request_id", modalSelectedRequest?.id || "")
+        formData.append("shipment_request_id", modalSelectedRequest?.id || "")
+        formData.append("shipment_note", modalSelectedRequest?.customer_note || "")
+        formData.append("user_id", `${modalSelectedRequest?.user_id}` || "")
+        formData.append("payment_time", `${modalSelectedRequest?.payment_time}` || "")
+        formData.append("package_ids", `${modalSelectedRequest?.package_ids}` || "")
+
+        console.log(Object.fromEntries(formData))
+
+        if(Number(formData.get("total_price") || 0) < 1 || Number(formData.get("total_weight") || 0.01) < 0.01){
             toast.error("Input Price and Weight")
+            setIsCreatingShipmentData(false)
             return 
         }
 
-        setIsCreatingShipmentData(true)
-        try{
-            const res = await fetch("/api/shipments", {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type" : "application/json"
-                },
-                body: JSON.stringify({
-                    customer_code: modalSelectedRequest?.customer_code,
-                    origin_warehouse_id: 1,
-                    destination_warehouse_id: 2,
-                    channel: modalSelectedRequest?.channel,
-                    wrapping: modalSelectedRequest?.wrapping,
-                    shipment_request_id: modalSelectedRequest?.id,
-                    shipment_note: modalSelectedRequest?.shipping_note,
-                    user_id: modalSelectedRequest?.user_id,
-                    payment_time: modalSelectedRequest?.payment_time,
-                    package_ids: modalSelectedRequest?.package_ids,
-                    total_weight: Number(totalWeight || 0),
-                    price: Number(totalPrice || 0)
-                })
-            })
 
+
+        try{
+            const res = await fetch(`/api/shipments`, {
+                method: "POST",
+                body: formData
+            })
             const result = await res.json()
 
             if(!res.ok){
@@ -107,18 +141,18 @@ const Page: NextPage = () => {
                 return
             }
 
-            toast.success("Shipment Initialized Succesfully")
+            toast.success("Shipment created")
             fetchShipmentData()
-            router.refresh()
-
         }
-        catch(err){
-            console.error("ERR:: creating shipment", err)
-            toast.error("ERR:: creating shipment")
+        catch(err: any){
+            console.error(err.message, err)
+            toast.error(err.message)
         }
         finally{
             setIsCreatingShipmentData(false)
             setIsModalActive(false)
+            setModalSelectedRequest(null)
+            setImages([])
         }
     }
 
@@ -215,6 +249,9 @@ const Page: NextPage = () => {
                 }
             </div>
         </div>
+
+
+
         {
             isModalActive &&
             <div className={`fixed w-screen h-dvh bg-dark/20 top-0 right-0 z-1000 center-items text-xs`}>
@@ -230,25 +267,27 @@ const Page: NextPage = () => {
                         </button>
                     </div>
                     <hr className='border-dark/20 my-3'/>
-                    <div className='space-y-2'>
+                    <div className='text-[10px] p-4 space-y-3'>
                         <p><span className='font-semibold'>Requested At:</span> {new Date(modalSelectedRequest?.created_at || "").toDateString()}</p>
                         <p className='space-x-2'>
                             <span className='font-semibold'>Product Ids:</span> 
-                            <span className='space-x-2'>
+                            <span className='space-x-2'> 
                                 {modalSelectedRequest?.package_ids.map((x, i)=> <span key={x}>{x}{i !== modalSelectedRequest.package_ids.length - 1 && ","}</span>)}
                             </span>
                         </p>
                         <p><span className='font-semibold'>Channel Requested:</span> {modalSelectedRequest?.channel}</p>
                         <p><span className='font-semibold'>Customer Code:</span> {modalSelectedRequest?.customer_code}</p>
-                        <p><span className='font-semibold'>Payment Time:</span> {modalSelectedRequest?.payment_time} shipping</p>
+                        <p><span className='font-semibold'>Payment Time:</span> {modalSelectedRequest?.payment_time}</p>
+                        <p><span className='font-semibold'>Packaging Type:</span> {modalSelectedRequest?.packaging}</p>
 
-                        <div className='space-y-2'>
+                        <form onSubmit={handleSubmit} className='space-y-2'>
 
                             <label className='text-[10px] flex gap-2 items-center'>
                                 Total Price
                                 <input 
                                 type="number" 
                                 value={totalPrice}
+                                name='total_price'
                                 onChange={(e) => {
                                     let { value } = e.currentTarget
                                     // remove leading zeros but keep single zero
@@ -264,10 +303,11 @@ const Page: NextPage = () => {
                             </label>
 
                             <label className='text-[10px] flex gap-2 items-center'>
-                                Weight (kg)
+                                Weight {`(${modalSelectedRequest?.channel === "sea" ? "cbm" : "kg"})`}
                                 <input 
                                 type="number" 
                                 value={totalWeight}
+                                name='total_weight'
                                 onChange={(e) => {
                                     let { value } = e.currentTarget
                                     // remove leading zeros but keep single zero
@@ -280,35 +320,77 @@ const Page: NextPage = () => {
                                 className='border border-dark/10 rounded px-2 py-1 outline-0'
                                 />
                             </label>
+                            <div className='mt-3 space-y-1'>
+                                <span>Customer Note</span>
+                                <p className='border border-dark/20 h-16 mt-2 p-3 rounded-lg overflow-y-auto'>
+                                    {modalSelectedRequest?.customer_note}
+                                </p>
+                            </div>
 
-                        </div>
 
-                        <div className='mt-3 space-y-1'>
-                            <span>Customer Note</span>
-                            <p className='border border-dark/20 h-16 mt-2 p-3 rounded-lg overflow-y-auto'>
-                                {modalSelectedRequest?.customer_note}
-                            </p>
-                        </div>
+                            <div>
+                                <div className="w-fit h-fit overflow-hidden max-w-fit max-h-fit relative rounded">
+                                    <button 
+                                    className="text-[10px] border border-dark/30 rounded px-4 py-2 flex gap-1 items-center relative z-100"
+                                    type="button"
+                                    >
+                                        Select Images
+                                        <FaImage />
+                                    </button>
+                                    <input 
+                                    type="file" 
+                                    accept="image/*"
+                                    multiple
+                                    name="images"
+                                    onChange={hanldeImageChange}
+                                    className="w-full h-full bg-red-400 absolute z-1000 top-0 left-0 opacity-0 cursor-pointer"
+                                    />
+                                </div>
+                                <div className="border border-dark/40 rounded py-2 mt-4">
+                                    <div className="flex justify-center w-full gap-4 max-w-full overflow-x-auto">
+                                        {previews.map( (x, i) => 
+                                        <figure key={i} className="w-10 h-10 bg-accent-red rounded overflow-hidden relative">
+                                            <Image
+                                                src={x}
+                                                alt=""
+                                                fill
+                                                className="object-fill"
+                                                />
+                                            </figure>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>      
+
+                        
+
+
+                            {/* Submit button */}
+
+                            <div className='flex justify-end mt-14'>
+                                <button 
+                                disabled={isCreatingShipmentData}
+                                className='bg-accent-blue text-white px-3 py-2 rounded flex gap-1 items-center'
+                                // onClick={async() => {
+                                //     await createShipment()
+                                // }}
+                                >
+                                    {
+                                        isCreatingShipmentData ? 
+                                        <BeatLoader color='#FFF' size={10}/> :
+                                        <>
+                                        <BiCheck className='text-lg'/>
+                                        Accept
+                                        </>
+                                    }
+                                </button>
+                            </div>
+                        </form>
+
+                        
                     </div>
 
-                    <div className='flex justify-end mt-2'>
-                        <button 
-                        disabled={isCreatingShipmentData}
-                        className='bg-accent-blue text-white px-3 py-2 rounded flex gap-1 items-center'
-                        onClick={async() => {
-                            await createShipment()
-                        }}
-                        >
-                            {
-                                isCreatingShipmentData ? 
-                                <BeatLoader color='#FFF' size={10}/> :
-                                <>
-                                <BiCheck className='text-lg'/>
-                                Accept
-                                </>
-                            }
-                        </button>
-                    </div>
+                    
                 </div>
             </div>
         }

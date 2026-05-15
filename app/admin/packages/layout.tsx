@@ -4,7 +4,7 @@ import { usePackageStore } from "@/store/incomingPackagesStore";
 import { useEditModalStore } from "@/types/editModalStore";
 import { PackageImage, Warehouse } from "@/types/entityTypeDef";
 import Image from "next/image";
-import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from "react";
+import {  FormEvent, ReactNode, useEffect, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { toast } from "react-toastify";
 

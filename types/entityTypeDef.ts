@@ -152,7 +152,15 @@ export type ShippingRequest = {
 
 export type PackageImage = {
     id: number // unique
-    package_id: number // (FK -> Proudtc)
+    package_id: number // (FK -> Packages)
+    image_url: string // unique
+    alt_text: string
+    created_at: string
+}
+
+export type ShipmentImage = {
+    id: number // unique
+    shipment_id: number // (FK -> Shipments)
     image_url: string // unique
     alt_text: string
     created_at: string

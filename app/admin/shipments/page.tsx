@@ -106,7 +106,7 @@ const Page: NextPage = () => {
                 const item = row.original
 
                 if (!item || typeof item.id === "undefined") {
-                    return "Peyyyy"
+                    return "heyyyy"
                 }
 
                 if (item.status === "stored") return null

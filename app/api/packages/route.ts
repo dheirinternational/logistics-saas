@@ -90,6 +90,8 @@ export async function POST(req: NextRequest){
                 WHERE incoming_tracking_number = $1
         `, [data.incoming_package_id])
 
+
+        
         const { id } = res.rows[0]
         const uploadedImages: string[] = []
 
