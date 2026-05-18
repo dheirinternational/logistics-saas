@@ -249,7 +249,7 @@ const PackageEditComponent = () => {
                             </div>
             
                             {/* Overlay */}
-                                <div className="bg-light w-fit absolute bottom-2 left-2">
+                                <div className="bg-light w-[83%] whitespace-nowrap overflow-hidden absolute bottom-2 left-2">
                                     {selectedWarehouse?.name}
                                 </div>
                         </label>
