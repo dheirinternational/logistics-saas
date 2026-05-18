@@ -1,6 +1,8 @@
 "use client"
 
 import InputComponent from "@/components/admin/shipments/InputComponent"
+import MonnifyPayButton from "@/components/base/MonnifyPaymentBtn"
+import PayButton from "@/components/base/MonnifyPaymentBtn"
 import { Payment, User } from "@/types/entityTypeDef"
 import { PaymentStatus } from "@/types/statusTypes"
 import Link from "next/link"
@@ -214,7 +216,7 @@ const PaymentCard = ({ payment, userEmail }: { payment: Payment, userEmail: stri
                         {payment.created_at.slice(0, 10)}
                     </p>
                 </div>
-                <button 
+                {/* <button 
                 disabled={isPaYmentLoading}
                 className="bg-accent-blue flex gap-1 items-center h-fit px-4 py-2 text-white rounded"
                 onClick={() => initializePayment(payment.shipment_tracking_number, payment.amount)}
@@ -228,7 +230,8 @@ const PaymentCard = ({ payment, userEmail }: { payment: Payment, userEmail: stri
                             Pay
                         </>    
                     }
-                </button>
+                </button> */}
+                <MonnifyPayButton {...{transactionRef: payment.transaction_ref}}/>
             </div>
             
         </div>

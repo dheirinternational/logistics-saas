@@ -1,5 +1,6 @@
 import { handleRedirect } from "@/lib/redirect/handleRedirect"
 import { getSession } from "@/lib/db/session"
+import { redirect } from "next/navigation"
 
 export default async function Home() {
 
@@ -12,7 +13,13 @@ export default async function Home() {
     return null
   }
 
-  handleRedirect(session.role)
-
-  return null
+  if (session.role === "customer"){
+      redirect("/base")
+  }
+  else if (session.role === "admin"){
+      redirect("/admin")
+  }
+  else {
+      redirect("/auth/login")
+  }
 }

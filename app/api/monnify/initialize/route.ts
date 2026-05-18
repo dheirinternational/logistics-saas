@@ -1,28 +1,29 @@
-import { getSession } from "@/lib/db/session"
+import { initializePayment } from "@/lib/monnify/initialize";
 import { NextResponse } from "next/server"
 
 
 export const POST = async (req: Request) => {
-    const origin = new URL(req.url).host
     
     try{
-        const session = await getSession()
-        if(!session){
-            return NextResponse.json({
-                success: false,
-                message: "Unauthorized"
-            }, { status: 401 })
-        }
+        
+        const body = await req.json();
+        console.log(body.transactionRef)
+        const payment = await initializePayment({   
+            amount: body.amount,
+            customerEmail: body.customerEmail,
+            customerName: body.customerName,
+            transactionRef: body.transactionRef
+        })
 
-        const {amount, customerEmail, paymentReference, paymentDescription, currencyCode, redirectUrl, paymentMethods, metaData } = await req.json()
+        console.log(payment)
 
-
+        return NextResponse.json({success: true, message: "Payment Initialized", data: payment})
     }
     catch(err: any){
-        console.log("Internal server error", err)
+        console.log("Payment initialization failed", err)
         return NextResponse.json({
             success: false,
-            message: "Internal server error"
+            message: "Payment initialization failed"
         }, { status: 500 })
     }
 }
