@@ -1,3 +1,4 @@
+import { MoneyExchangeRate } from "@/app/base/estimate/page"
 import { AirPricingTemplate } from "@/types/entityTypeDef"
 import { toast } from "react-toastify"
 
@@ -87,10 +88,22 @@ export const generateExpressShippingQuotation = async (itemCart: ItemCartType[])
         const res = await fetch(`/api/pricing_template/express`)
         const result = await res.json()
 
+        const moneyRatesRes = await fetch(`/api/money-exchange-rate`)
+        const moneyRatesResult = await moneyRatesRes.json()
+
         if(!res.ok){
             toast.error(result.message)
             return
         }
+
+        if (!moneyRatesRes.ok){
+            toast.error(moneyRatesResult.message)
+            return
+        }
+
+        const moneyRatesData: MoneyExchangeRate = moneyRatesResult.data[0]
+        
+
 
         const phone: ItemCartType[] = []
         const laptop: ItemCartType[]  = []
@@ -140,19 +153,7 @@ export const generateExpressShippingQuotation = async (itemCart: ItemCartType[])
         const tablet_above_1kg_clearance_fee = tablet_above_1kg.reduce((acc, item) => acc + (item.numberOfItems * tablet_above_1kg_template.clearance), 0)
         const items_above_20kg_clearance_fee = items_above_20kg.reduce((acc, item) => acc + (item.numberOfItems * items_above_20kg_template.clearance), 0)
         const items_below_20kg_clearance_fee = items_below_20kg.reduce((acc, item) => acc + (item.numberOfItems * items_below_20kg_template.clearance), 0)
-        // console.log(phone_template, laptop_template)
-
-        // const noraml_goods_weight = normal_goods.reduce((acc, item) => acc + (item.weight * item.numberOfItems), 0)
-        // const special_goods_weight = special_goods.reduce((acc, item) => acc + (item.weight * item.numberOfItems), 0)
-
-        // const normal_goods_price = noraml_goods_weight * normal_goods_template.price
-        // const special_goods_price = special_goods_weight * special_goods_template.price
-
-        // const normal_goods_clearance_fee = noraml_goods_weight * normal_goods_template.clearance 
-        // const special_goods_clearance_fee = special_goods_weight * special_goods_template.clearance
-
-        // const normal_goods_quantity = normal_goods.reduce((acc, item) => acc + item.numberOfItems, 0)
-        // const special_goods_quantity = special_goods.reduce((acc, item) => acc + item.numberOfItems, 0)
+        
 
         //  Delivery Window Calculation 
 
@@ -163,8 +164,11 @@ export const generateExpressShippingQuotation = async (itemCart: ItemCartType[])
         const items_above_20kg_delivery_window = items_above_20kg_template.min_duration + " - " + items_above_20kg_template.max_duration + " " + items_above_20kg_template.duration_type
         const items_below_20kg_delivery_window = items_below_20kg_template.min_duration + " - " + items_below_20kg_template.max_duration + " " + items_below_20kg_template.duration_type
 
+        
+        const priceSubtotal = phone_price + laptop_price + tablet_below_1kg_price + tablet_above_1kg_price + items_above_20kg_price + items_below_20kg_price + (phone_clearance_fee / moneyRatesData.currency_two) + (laptop_clearance_fee / moneyRatesData.currency_two) + (tablet_below_1kg_clearance_fee / moneyRatesData.currency_two) + (tablet_above_1kg_clearance_fee) / (moneyRatesData.currency_two) + (items_above_20kg_clearance_fee / moneyRatesData.currency_two) + (items_below_20kg_clearance_fee / moneyRatesData.currency_two)
+
         // Total Price Calculation
-        const total_price = phone_price + laptop_price + tablet_below_1kg_price + tablet_above_1kg_price + items_above_20kg_price + items_below_20kg_price * PAYSTACK_SERVICE_CHARGE_RATE + phone_clearance_fee + laptop_clearance_fee + tablet_below_1kg_clearance_fee + tablet_above_1kg_clearance_fee + items_above_20kg_clearance_fee + items_below_20kg_clearance_fee
+        const total_price = priceSubtotal
 
         // Final Quotation Object Construction
 

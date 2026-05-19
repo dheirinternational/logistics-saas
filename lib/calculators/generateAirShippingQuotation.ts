@@ -1,3 +1,4 @@
+import { MoneyExchangeRate } from "@/app/base/estimate/page"
 import { AirPricingTemplate } from "@/types/entityTypeDef"
 import { toast } from "react-toastify"
 
@@ -30,10 +31,23 @@ export const generateAirShippingQuotation = async (itemCart: ItemCartType[]) => 
         const res = await fetch(`/api/pricing_template/air`)
         const result = await res.json()
 
+        const moneyRatesRes = await fetch(`/api/money-exchange-rate`)
+        const moneyRatesResult = await moneyRatesRes.json()
+
         if(!res.ok){
             toast.error(result.message)
             return
         }
+
+        if (!moneyRatesRes.ok){
+            toast.error(moneyRatesResult.message)
+            return
+        }
+
+        const moneyRatesData: MoneyExchangeRate = moneyRatesResult.data[0]
+
+
+        
 
         const normal_goods: ItemCartType[] = []
         const special_goods: ItemCartType[]  = []
@@ -67,7 +81,7 @@ export const generateAirShippingQuotation = async (itemCart: ItemCartType[]) => 
         const special_delivery_window = special_goods_template.min_duration + " - " + special_goods_template.max_duration + " " + special_goods_template.duration_type
 
 
-        const total_price = normal_goods_price + special_goods_price * PAYSTACK_SERVICE_CHARGE_RATE + normal_goods_clearance_fee + special_goods_clearance_fee
+        const total_price = normal_goods_price + special_goods_price + normal_goods_clearance_fee / moneyRatesData.currency_two + special_goods_clearance_fee / moneyRatesData.currency_two
 
         console.log({
             normal_goods_price,

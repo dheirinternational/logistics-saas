@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 const supabase = createClient(
     process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_SUPABASE_URL! : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST!, 
-    process.env.NODE_ENV === "production" ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.NODE_ENV === "production" ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
 )
 
 export async function POST(req: Request){

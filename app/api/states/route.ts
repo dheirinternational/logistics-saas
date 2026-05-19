@@ -18,6 +18,8 @@ export async function GET(){
             ORDER BY name 
         `)
 
+        console.log(result.rows)
+
         return NextResponse.json({
             success: true,
             message: "Successfully fetched States",

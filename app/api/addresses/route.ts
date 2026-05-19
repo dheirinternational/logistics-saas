@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
 
         const { country, state, city, street, postal_code } = await req.json()
-        if (!country.trim() || !state.trim() || !city.trim() || !street.trim() || !postal_code.trim()){
+        if (!country.trim() || !state.trim() || !city.trim() || !street.trim()){
             return NextResponse.json({
                 success: false,
                 message: "All fields are required"
@@ -37,6 +37,6 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: false,
             message: "Error Adding Address"
-        })  
+        }, { status: 500 })  
     }
 }

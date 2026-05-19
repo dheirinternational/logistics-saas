@@ -252,7 +252,7 @@ export type CartProduct = {
     id: number // unique
     name: string
     price: number
-    discount_price?: number
+    discount_price: number
     quantity: number
     image: string
     amount_to_be_ordered: number
@@ -294,6 +294,11 @@ export type Order = {
 }
 
 
+export type DeliveryZonePrice = {
+    id: number  
+    state_id: number
+    price: number
+}
 
 
 

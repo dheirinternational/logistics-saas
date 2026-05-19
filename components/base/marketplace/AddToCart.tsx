@@ -1,11 +1,11 @@
 "use client"
 
 import { useCartStore } from "@/store/cartStore"
-import { CartProduct } from "@/types/entityTypeDef"
+import { Address, CartProduct } from "@/types/entityTypeDef"
 import { BiCartAdd } from "react-icons/bi"
 import { toast } from "react-toastify"
 
-const AddToCart = (product: CartProduct) => {
+const AddToCart = ({product, address } : {product: CartProduct, address: Address | null}) => {
 
     const {addProduct, cart} = useCartStore()
 
@@ -20,6 +20,10 @@ const AddToCart = (product: CartProduct) => {
         toast.info("Product already in cart")
         return
       } 
+      if (!address){
+        toast.error("Please add your address in your profile before adding to cart")
+        return
+      }
 
       addProduct(product); 
       toast.success("Added to cart")

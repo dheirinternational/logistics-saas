@@ -2,7 +2,8 @@
 
 import AddToCart from "@/components/base/marketplace/AddToCart"
 import MarketSearch from "@/components/base/marketplace/MarketSearch"
-import { CartProduct, Product, ProductImage } from "@/types/entityTypeDef"
+import { calculateDeliveryZonePrice } from "@/lib/calculators/calculateDeliveryZonePrice"
+import { Address, CartProduct, Product, ProductImage } from "@/types/entityTypeDef"
 import Image from "next/image"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -15,11 +16,19 @@ export default function ProductDisplay(){
     const {id} = useParams()
     console.log(id)
 
-    const [product, setProduct] = useState<Product | null>(null)
+
     const [images, setImages] = useState<ProductImage[]>([])
+
+
     const [cartItem, setCartItem] = useState<CartProduct | null>(null)
-    const [isFetchingData, setIsFetchingData] = useState(true)
+    const [product, setProduct] = useState<Product | null>(null)    
     const [selectedImage, setSelectedImage] = useState("")
+    const [userAddress, setUserAddress] = useState<Address | null>(null)
+    const [deliveryZonePrice, setDeliveryZonePrice] = useState(0)
+
+
+    const [isFetchingData, setIsFetchingData] = useState(true)
+    const [isFetchingAddress, setIsFetchingAddress] = useState(true)
 
     // Get Product 
     const fetchProduct = async() => {
@@ -61,8 +70,39 @@ export default function ProductDisplay(){
         }
     }
 
+    // Fetch users address to get shipping cost
+    const fetchUserAddress = async() => {
+        setIsFetchingAddress(true)
+        try{
+            const res = await fetch("/api/addresses/user")
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            console.log(result)
+            const zonePrice = await calculateDeliveryZonePrice(result.data[0].state)
+            setDeliveryZonePrice(zonePrice)
+            setUserAddress(result.data[0])
+            console.log(result.data[0])
+
+        }
+        catch(err: any){
+            console.error("Error Fetching User Address", err)
+            toast.error(err.message || "Error Fetching User Address")
+        }
+        finally{
+            setIsFetchingAddress(false)
+        }
+    }
+
+
+
     useEffect(() => {
         fetchProduct()
+        fetchUserAddress()
     }, [])
 
     useEffect(() => {
@@ -150,9 +190,14 @@ export default function ProductDisplay(){
                             {product?.stock_quantity || 0 > 0 ? `${product?.stock_quantity} items left In stock` : "Not in stock"}
                         </span> 
                     </div>
-                    <p className="text-[11px] mt-2">
-                        + shipping <span className="font-semibold">₦ {(5600).toLocaleString()}</span> to Abuja 
-                    </p>
+                    {
+                        isFetchingAddress ? <div className="flex p-2">
+                            <BeatLoader color="orange" size={6}/>
+                        </div> :
+                        <p className="text-[11px] mt-2">
+                            + shipping <span className="font-semibold">₦ {deliveryZonePrice.toLocaleString()}</span> to {userAddress ? `${userAddress.state}` : "your location"}
+                        </p> 
+                    }
 
                     <div className="bg-light p-body mt-2">
                         <h2 className="tracking-wide text-sm font-semibold">
@@ -168,79 +213,11 @@ export default function ProductDisplay(){
                     <div className="bg-light p-body">
                         {
                             cartItem &&
-                            <AddToCart {...cartItem}/>
+                            <AddToCart {...{product: cartItem, address: userAddress}} />
                         }
                     </div> 
                 </div>
 
-                {/* <div className="p-2 flex gap-2 overflow-auto">
-                {images.map( (img: ProductImage) => 
-                    <figure key={img.id} className="w-66 h-50 min-w-66 overflow-hidden max-h-50 max-w-66 relative rounded">
-                        {
-                            isFetchingData ?
-                            <BeatLoader color="orange" size={10}/> :
-                            <Image 
-                            src={img.image_url}
-                            alt={""}
-                            fill
-                            className="object-cover"
-                            loading="eager"
-                            />
-                        }
-                    </figure>
-                    )}
-                </div>
-
-                {
-                    isFetchingData ? 
-                    <BeatLoader color="orange" size={10}/> :
-                    <>
-                        <div className="p-body bg-light py-8">
-                            <h2 className="">
-                                {product?.name}
-                            </h2>
-                            <p className="text-2xl mt-3 font-semibold">
-                                ₦ {product?.price}
-                            </p>
-
-                            <span className="mt-3 block w-fit text-xs opacity-60">
-                                {product?.stock_quantity || 0 > 0 ? "In stock" : "Not in stock"}
-                            </span> */}
-
-                            {/* Rating */}
-
-                            {/* <div className="flex gap-1 mt-4 text-gray-400">
-                                <FaStar/>
-                                <FaStar/>
-                                <FaStar/>
-                                <FaStar/>
-                                <FaStar/>
-                            </div> */}
-                        {/* </div> */}
-
-                        {/* Product Description */}
-
-                        {/* <div className="bg-light p-body mt-2">
-                            <h2 className="tracking-wide">
-                                Product Details
-                            </h2>
-                            <hr className="border-dark/20 my-3"/>
-                            <p className="text-xs leading-5">
-                                {product?.description}
-                            </p>
-                        </div> */}
-
-
-                        {/* Add to cart */}
-                        {/* <div className="bg-light p-body mb-20">
-                            {
-                                cartItem &&
-                                <AddToCart {...cartItem}/>
-                            }
-                        </div> */}
-
-                    {/* </>
-                } */}
             </div>
             
         </div>

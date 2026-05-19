@@ -2,6 +2,7 @@
 
 import CheckoutCartCard from '@/components/base/marketplace/CheckoutCartCard'
 import Header from '@/components/base/marketplace/Header'
+import { calculateDeliveryZonePrice } from '@/lib/calculators/calculateDeliveryZonePrice'
 import { useCartStore } from '@/store/cartStore'
 import { Address, DeliveryZones, State } from '@/types/entityTypeDef'
 import { NextPage } from 'next'
@@ -23,27 +24,66 @@ const Page: NextPage = () => {
     const [totalPrice, setTotalPrice] = useState(0)
     const [alternateAddress, setIsAlternateAddress] = useState("")
     const [isStateSelectorActive, setIsStateSelectorActive] = useState(false)
+    const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null)
+    const [deliveryZonePrice, setDeliveryZonePrice] = useState(0)
+
+
     
     const [states, setStates] = useState<State[]>([])
-    const [pricingZones, setPricingZones] = useState<DeliveryZones[]>([])
-    const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null)
+
 
     const [isFetchingStates, setIsFetchingStates] = useState(true)
-    const [isFetchingPricingZones, setIsFetchingPricingZones] = useState(true)
+    const [isFetchingAddress, setIsFetchingAddress] = useState(true)
+
 
 
     const router = useRouter()
 
+    const fetchUserAddress = async() => {
+        setIsFetchingAddress(true)
+        try{
+            const res = await fetch("/api/addresses/user")
+            const result = await res.json()
+
+            if(!res.ok){
+                toast.error(result.message)
+                return
+            }
+
+            console.log(result)
+            const zonePrice = await calculateDeliveryZonePrice(result.data[0].state)
+            setDeliveryZonePrice(zonePrice)
+            setAddress(result.data[0])
+
+        }
+        catch(err: any){
+            console.error("Error Fetching User Address", err)
+            toast.error(err.message || "Error Fetching User Address")
+        }
+        finally{
+            setIsFetchingAddress(false)
+        }
+    }
+
+
+
+
     // Calculate total price
     useEffect(() => {
-        let totalPriceCalculated = 0
         setTotalPrice(0)
 
-        cart.forEach( item => {
-            totalPriceCalculated += item.discount_price !== 0 ? item.price * item.amount_to_be_ordered:  item.discount_price * item.amount_to_be_ordered 
-        })
+        const totalPrice = cart.reduce((acc, item) => {
+            const itemPrice = item.discount_price > 0
+                ? item.discount_price
+                : item.price
 
-        setTotalPrice(totalPriceCalculated)
+            return acc + (itemPrice * item.amount_to_be_ordered)
+        }, 0)
+
+        console.log("Calculated Total Price", totalPrice)
+
+        setTotalPrice(totalPrice)
+        console.log(cart)
 
     }, [cart])
 
@@ -52,20 +92,15 @@ const Page: NextPage = () => {
         const fetchUserData = async() => {
             try{
                 const res = await fetch("/api/users/my-data")
-                const addr = await fetch("/api/addresses/user")
                 const result = await res.json() 
                 console.log(result)
-                const addrResult = await addr.json()
+
                 if(!res.ok){
                     toast.error(result.message)
                     return
                 }   
-                if(!addr.ok){
-                    toast.error(addrResult.message)
-                    return
-                }
+
                 setUserEmail(result.data.email)
-                setAddress(addrResult.data[0])
                 setUserCode(result.data.code)
             }
             catch(err){
@@ -96,29 +131,7 @@ const Page: NextPage = () => {
             }
         }
 
-        const fetchZonePricing = async() => {
-            setIsFetchingPricingZones(true)
-            try{
-                const res = await fetch(`/api/delivery-zones`)
-                const result = await res.json()
-
-                if(!res.ok){
-                    toast.error(result.message)
-                    return
-                }
-
-                setPricingZones(result.data)
-            }
-            catch(err){
-                console.error("Network Error", err)
-                toast.error("Network Error")
-            }
-            finally{
-                setIsFetchingPricingZones(false)
-            }
-        }
- 
-        fetchZonePricing()
+        fetchUserAddress()
         fetchStates()
         fetchUserData()
     }, [])
@@ -132,7 +145,7 @@ const Page: NextPage = () => {
     
         setIsPaymentLoading(true)
         try{
-            const res = await fetch("/api/paystack-ecommerce/initialize-payment", {
+            const res = await fetch("/api/monnify/initialize", {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json"
@@ -140,18 +153,7 @@ const Page: NextPage = () => {
                 body: JSON.stringify({
                     email: userEmail,
                     amount: amount,
-                    metadata: {
-                        products: [
-                            ...(cart.map(x => 
-                                ({
-                                    product_id: x.id,
-                                    quantity: x.quantity,
-                                    price: x.discount_price ? x.discount_price : x.price
-                                })
-                            ))
-                        ]
-                    },
-                    destination_address: !alternateAddress ? ` ${address?.street}, ${address?.city}, ${address?.state}, ${address?.postal_code}` : alternateAddress,
+                    destination_address: ` ${address?.street}, ${address?.city}, ${address?.state}, ${address?.postal_code}`,
                     cart_items: cart,
                     customer_code: userCode
                 })
@@ -209,7 +211,7 @@ const Page: NextPage = () => {
                             Subtotal
                         </p>
                         <p>
-                            ₦ {totalPrice}
+                            ₦ {totalPrice.toLocaleString()}
                         </p>
                     </div>
                 </div>
@@ -229,7 +231,7 @@ const Page: NextPage = () => {
 
 
 
-                <div className='bg-light p-body pb-20'>
+                <div className='bg-light p-body pb-20 hidden'>
                     <button 
                     className='bg-accent-red w-full text-white py-3 rounded ' 
                     // onClick={() => initializePayment(totalPrice)} 
@@ -253,7 +255,11 @@ const Page: NextPage = () => {
                         <p className='text-[10px] text-dark/60'>
                             Please review your order details before proceeding to payment.
                         </p>    
-                        <div className='flex flex-col items-center text-xs space-x-2 gap-8'>
+                        {
+                            isFetchingAddress ? <div className="flex p-2">
+                                <BeatLoader color="orange" size={6}/>
+                            </div> :
+                            <div className='flex flex-col items-center text-xs space-x-2 gap-8'>
                             
                             <div className='flex text-[10px] gap-4'>
 
@@ -353,7 +359,8 @@ const Page: NextPage = () => {
                                 </label>
 
                             </div>                                
-                        </div> 
+                            </div> 
+                        }
                         
                         <div className='border-5 border-dark/20 p-3 rounded max-h-40 h-40 overflow-auto px-8'>
                             {cart.map(x => 
@@ -372,7 +379,7 @@ const Page: NextPage = () => {
                                     Delivery Fee:    
                                 </p>
                                 <p className=''>
-                                    ₦ {Number(5600).toLocaleString()}
+                                    ₦ {Number(deliveryZonePrice).toLocaleString()}
                                 </p>
                                 <p>
                                     {/* Shipping Fee: ₦ 5,000 */}
@@ -383,7 +390,7 @@ const Page: NextPage = () => {
                                     Total Amount:    
                                 </p>
                                 <p className=''>
-                                    ₦ {Number(totalPrice + 5600).toLocaleString()}
+                                    ₦ {Number(totalPrice + deliveryZonePrice).toLocaleString()}
                                 </p>
                                 <p>
                                     {/* Shipping Fee: ₦ 5,000 */}
@@ -400,7 +407,7 @@ const Page: NextPage = () => {
                             </button>
                             <button 
                             className='flex-1 py-2 bg-accent-red text-white rounded'
-                            onClick={() => {initializePayment(totalPrice)}}
+                            onClick={() => {initializePayment(totalPrice + deliveryZonePrice)}}
                             >
                                 {isPaymentLoading ? 
                                 <BeatLoader color='#FFF' size={15}/> :

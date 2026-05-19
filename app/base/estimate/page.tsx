@@ -31,6 +31,13 @@ type QuotationState = {
     totalPrice: string
 }
 
+export type MoneyExchangeRate = {
+    name: string,
+    currency_one: number,
+    currency_two: number
+}
+
+
 
 export default function Page(){
 
@@ -39,9 +46,28 @@ export default function Page(){
 
     const [itemCart, setItemCart] = useState<ItemCartType[]>([])
     const [quotation, setQuotation] = useState<QuotationState | null>(null)
+    const [moneyExchangeRate, setMoneyExhangeRate] = useState<MoneyExchangeRate[]>([])
+    
+
+
     const [isFetchingQuotation, setIsFetchingQuotation] = useState(false)
+    const [isFetchingMoneyExchangeRates, setIsFetchingMoneyExchangeRates] = useState(true)
+
 
     const [isExtraInformationMenuOpen, setIsExtraInformationMenuOpen] = useState(false)
+
+    // Money Exchange rate
+
+
+    // selected values
+    const [currency, setCurrency] = useState<"Naira" | "Dollar">("Dollar")
+    const [currentSelectedCurrencyValue, setCurrentSelectedCurrencyValue] = useState(0)
+
+
+    // Loading States
+
+
+    
 
     
     // Edit Item in Cart
@@ -88,17 +114,53 @@ export default function Page(){
             }
             
         }
-
-
-
         // console.log(itemCart)
-
 
         if(itemCart.length > 0){
             fetchQuota()
         }
 
     }, [itemCart.length])
+
+
+
+
+    // Fetch Money exchange rates
+    useEffect(() => {
+        const fetchMoneyExchangeRates = async() => {
+            try{
+                const res = await fetch(`/api/money-exchange-rate`)
+                const result = await res.json()
+
+                if(!res.ok){
+                    toast.error(result.message)
+                    return
+                }   
+
+                console.log(result)
+
+                setMoneyExhangeRate(result.data)
+                setCurrentSelectedCurrencyValue(result.data[0].currency_one)
+            }
+            catch(err: any){
+                console.error(err.message, err)
+                toast.error(err.message)
+            }
+            finally{
+                setIsFetchingMoneyExchangeRates(false)
+            }
+        }
+
+        fetchMoneyExchangeRates()
+    }, [])
+
+
+    useEffect(() => {
+        if(selectedTemplate === "sea"){
+            setCurrency("Naira")
+        }
+    }, [selectedTemplate])
+
 
     let component
 
@@ -115,73 +177,6 @@ export default function Page(){
     }
 
 
-
-
-    // Fetch Sea Pricing Template
-    // const fetchSeaPricingTemplate = async ( ) => {
-    //     setIsDataLoading(true)
-    //     try{
-    //         const res = await fetch(`/api/pricing_template/sea`)
-    //         const result = await res.json()
-
-    //         if(!res.ok){
-    //             toast.error(result.message)
-    //             return
-    //         }
-    //         console.log(result.data)
-    //         setSeaPricingTemplate(result.data)
-    //     }
-    //     catch(err){
-    //         console.error("ERR:: Fetching Sea Pricing Template", err)
-    //         toast.error("ERR:: Fetching Sea Pricing Template")
-    //     }
-    //     finally{
-    //         setIsDataLoading(false)
-    //     }
-    // }
-
-    
-
-    // Fetch Express Pricing Template
-    // const fetchExpressPricingTemplate = async ( ) => {
-    //     setIsDataLoading(true)
-    //     try{
-    //         const res = await fetch(`/api/pricing_template/express`)
-    //         const result = await res.json()
-
-    //         if(!res.ok){
-    //             toast.error(result.message)
-    //             return
-    //         }
-    //         console.log(result.data)
-    //         setExpressPricingTemplate(result.data)
-    //     }
-    //     catch(err){
-    //         console.error("ERR:: Fetching Express Pricing Template", err)
-    //         toast.error("ERR:: Fetching Express Pricing Template")
-    //     }
-    //     finally{
-    //         setIsDataLoading(false)
-    //     }
-    // }
-
-
-    // useEffect(() => {
-
-    //     switch (selectedTemplate){
-    //         case "air" :
-    //             fetchAirPricingTemplate()
-    //             break
-    //         case "sea" :
-    //             fetchSeaPricingTemplate()
-    //             break
-    //         case "express" : 
-    //             fetchExpressPricingTemplate()
-    //             break
-    //         }
-
-        
-    // }, [selectedTemplate])
 
 
     return <div className="h-dvh w-full flex flex-wrap">
@@ -292,9 +287,36 @@ export default function Page(){
                 <p className="text-xs text-dark mt-2 mb-4 font-semibold"> 
                     Our Current Conversion Rates are as follows: 
                 </p>
-                <p>Dollar to Naira: $1 / ₦1500</p>
-                <p>Yen to Naira: ¥1 / ₦1500</p>
+                <p>Dollar to Naira: $1 / ₦{moneyExchangeRate[0]?.currency_two} </p>
+                {/* <p>Yen to Naira: ¥1 / $1500</p> */}
                 <br/>
+                <div>
+            <div className="w-fit text-[10px] bg-gray-200 rounded mt-4 p-1">
+                <button className={`
+                    p-2 rounded ${currency === "Dollar" && "bg-white"}
+                `}
+                onClick={() => {
+                    if(selectedTemplate !== "sea"){
+                        setCurrency("Dollar")
+                        setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_one)
+                    }
+
+                }}
+                >
+                    Dollar
+                </button>
+                <button className={`
+                    p-2 rounded ${currency === "Naira" && "bg-white"}
+                `}
+                onClick={() => {
+                    setCurrency("Naira")
+                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_two)
+                }}
+                >
+                    Naira
+                </button>
+            </div>
+        </div>
             </div>
 
 
@@ -443,7 +465,10 @@ export default function Page(){
                                     </p>
 
                                     {/* PRICE */}
-                                    <p>Price: ₦ {Number(good.price).toLocaleString()}</p>
+                                    <p>Price: {currency === "Dollar" ? "$" : "₦"} {
+                                        currency === "Naira" && selectedTemplate !== "sea" ? 
+                                        (Number(good.price) * moneyExchangeRate[0].currency_two).toLocaleString() : Number(good.price).toLocaleString()
+                                    }</p>
 
                                     {/* CLEARANCE FEE */}
                                     <p>
@@ -464,7 +489,11 @@ export default function Page(){
                 </div>
                 <div className="border-b my-2 border-dashed"/>
                 <div className="h-5 font-semibold text-sm mt-2 flex justify-end">
-                    <p>Total Cost: ₦ {Number(quotation?.totalPrice).toLocaleString()}</p>
+                    <p>Total Cost: {currency === "Dollar" ? "$" : "₦"}{
+                        currency === "Naira" && selectedTemplate !== "sea" ?
+                        (Number(quotation?.totalPrice || 0) * moneyExchangeRate[0].currency_two).toLocaleString() :
+                        Number(quotation?.totalPrice || 0).toLocaleString() 
+                    }</p>
                 </div>
             </div>
         </div>

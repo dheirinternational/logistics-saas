@@ -79,6 +79,7 @@ const AddProduct = () => {
 
             if(!res.ok){
                 toast.error(result.message)
+                return
             }
 
             toast.success("Product Successfully Added to System")
