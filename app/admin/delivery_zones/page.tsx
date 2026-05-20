@@ -65,7 +65,7 @@ export default function Page(){
 
     return <div className="h-full max-h-full p-body">
         <h2 className="text-2xl font-semibold">
-            Pricing List/Templates
+            Delivery Zones Pricing
         </h2>
         
         <p className="text-xs text-dark/50 mt-2">
