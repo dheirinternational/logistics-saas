@@ -9,8 +9,7 @@ export default async function Home() {
   console.log(session)
 
   if (!session) {
-    handleRedirect(null)
-    return null
+    redirect("/auth/login")
   }
 
   if (session.role === "customer"){
