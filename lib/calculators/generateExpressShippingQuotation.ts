@@ -1,4 +1,4 @@
-import { MoneyExchangeRate } from "@/app/base/estimate/page"
+import type { MoneyExchangeRate } from "@/lib/portal/quote/types"
 import { AirPricingTemplate } from "@/types/entityTypeDef"
 import { toast } from "react-toastify"
 

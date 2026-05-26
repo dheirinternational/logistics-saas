@@ -80,7 +80,7 @@ const Page: NextPage = ({}) => {
 
 
 
-    <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto'> 
+    <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='flex items-center text-xs gap-1 '>
             <InputComponent
             name='tracking_id'
@@ -114,7 +114,7 @@ const Page: NextPage = ({}) => {
 
 
 
-    <div className='bg-light p-4 min-h-150 space-y-2 md:max-w-150 md:mx-auto'>
+    <div className='bg-light p-4 min-h-150 space-y-2'>
         
         {
             isDataLoading ? 

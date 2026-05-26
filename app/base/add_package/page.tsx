@@ -1,184 +1,181 @@
 "use client"
 
-import { NextPage } from 'next'
-import { FaChevronLeft, FaUser } from 'react-icons/fa'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import InputComponent from '@/components/admin/shipments/InputComponent'
-import { FormEvent, useEffect, useState } from 'react'
-import { Warehouse } from '@/types/entityTypeDef'
-import { toast } from 'react-toastify'
-import { BeatLoader } from 'react-spinners'
+import {
+  PortalFormField,
+  PortalFormInput,
+  PortalFormSelect,
+  PortalFormTextarea,
+} from "@/components/portal/packages/PortalFormField"
+import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPackagesPageHeader"
+import type { Warehouse } from "@/types/entityTypeDef"
+import { FormEvent, useEffect, useState } from "react"
+import { BeatLoader } from "react-spinners"
+import { toast } from "react-toastify"
 
-const Page: NextPage = () => {
+export default function AddPackagePage() {
+  const [packageInformation, setPackageInformation] = useState({
+    incoming_tracking_number: "",
+    warehouse_id: 1,
+    declared_item_name: "",
+    declared_item_quantity: 1,
+    customer_note: "",
+    status: "expected",
+  })
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const router = useRouter()
-    const [packageInformation, setPackageInformation] = useState({
+  useEffect(() => {
+    fetch("/api/warehouses", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.data?.length) {
+          setWarehouses(data.data)
+          setPackageInformation((prev) => ({
+            ...prev,
+            warehouse_id: data.data[0].id,
+          }))
+        }
+      })
+      .catch(console.error)
+  }, [])
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    try {
+      const res = await fetch("/api/incoming-packages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(packageInformation),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        toast.error(result?.message)
+        return
+      }
+      toast.success(`Registered ${packageInformation.declared_item_name}`)
+      setPackageInformation({
         incoming_tracking_number: "",
-        warehouse_id: 1,
+        warehouse_id: warehouses[0]?.id ?? 1,
         declared_item_name: "",
         declared_item_quantity: 1,
         customer_note: "",
-        status: "expected"
-    })
-    const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-    const [isSubmiting, setIsSubmitting] = useState(false)
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setIsSubmitting(true)
-        try{
-            const res = await fetch("/api/incoming-packages", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json" 
-                },
-                credentials: "include",
-                body: JSON.stringify(packageInformation)
-            });
-
-            const result = await res.json()
-
-            if (!res.ok) {
-                toast.error(result?.message)
-                return;
-            }
-            
-            toast.success(`Successfully Added ${packageInformation.declared_item_name}`)
-            setPackageInformation({
-                incoming_tracking_number: "",
-                warehouse_id: 1,
-                declared_item_name: "",
-                declared_item_quantity: 1,
-                customer_note: "",
-                status: "expected"
-            })
-        }
-        catch(err){
-            console.error(err)
-        }
-        finally{
-            setIsSubmitting(false)
-        }
+        status: "expected",
+      })
+    } catch (err) {
+      console.error(err)
+      toast.error("Could not add package")
+    } finally {
+      setIsSubmitting(false)
     }
+  }
 
-    const fetchWarehousedata = async () => {
-        try{
-            const res = await fetch("/api/warehouses", {
-                method: "GET",
-                credentials: "include"
-            })
+  return (
+    <div className="portal-packages">
+      <PortalPackagesPageHeader
+        title="Add incoming package"
+        description="Tell us what is on the way to our China warehouse so we can match it when it arrives."
+      />
 
-            if(!res.ok){
-                throw new Error("Error fetching warehouse data")
-            }
-
-            const data = await res.json()
-
-            setWarehouses(data.data)
-        }
-        catch(err){
-            console.error(err)
-        }
-    }
-
-    useEffect(() => {
-        fetchWarehousedata()
-    }, [])
-
-  return <div className='h-full w-full space-y-body'>
-    <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
-        <button 
-        className='flex gap-2 flex-1 justify-start'
-        onClick={() => {router.back()}}
-        >
-            <span className='text-xs font-semibold'>
-                Go Back
-            </span>
-        </button>
-        <h1 className='font-semibold'>
-            Add a package
-        </h1>
-        <Link href={"/base/profile"} className='flex-1 flex justify-end'>
-            <FaUser/>
-        </Link>
-    </div>
-    <form onSubmit={handleSubmit} className='md:flex-row'>
-        <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto'>
-            <div className='flex gap-2 md:max-w-150'>
-                <div className='w-1/2'>
-                    <InputComponent 
-                    name='warehouse_id'
-                    type='text'
-                    state={packageInformation}
-                    setState={setPackageInformation}
-                    readonly
-                    select
-                    selectValues={warehouses.map( x => ({name: x.name, value: x.id}))}
-                    required
-                    overshadow
-                    />
-                </div>
-                
-                <div className='w-1/2'>
-                    <InputComponent 
-                    name='declared_item_quantity'
-                    type='number'
-                    state={packageInformation}
-                    setState={setPackageInformation}
-                    placeHolder='Quantity'
-                    required
-                    />        
-                </div>
-            </div>
-
-                <div className='space-y-2'>
-                    <InputComponent 
-                    name='declared_item_name'
-                    type='text'
-                    state={packageInformation}
-                    setState={setPackageInformation}
-                    placeHolder='Input Package Name...'
-                    required
-                    />
-
-                    <InputComponent 
-                    name='incoming_tracking_number'
-                    type='text'
-                    state={packageInformation}
-                    setState={setPackageInformation}
-                    placeHolder='Input Tracking Number...'
-                    required
-                    
-                    />
-                </div>
-                
-                <div className='bg-white p-4 flex flex-col gap-2'>
-                    <InputComponent 
-                    title='Customer Personal Note'
-                    name='customer_note'
-                    type='text'
-                    state={packageInformation}
-                    setState={setPackageInformation}
-                    placeHolder='customer personal note...'
-                    textarea
-                    />
-                </div>
-            </div>
-
-        <div className='p-body mx-auto w-full md:max-w-150 md:mx-auto'>
-            <button 
-            className='bg-accent-red text-white text-xs py-3 w-full rounded disabled:opacity-70 '
-            disabled={isSubmiting}
+      <form onSubmit={handleSubmit} className="portal-packages__form">
+        <div className="portal-packages__form-grid">
+          <PortalFormField label="Warehouse">
+            <PortalFormSelect
+              name="warehouse_id"
+              required
+              value={packageInformation.warehouse_id}
+              onChange={(e) =>
+                setPackageInformation((prev) => ({
+                  ...prev,
+                  warehouse_id: Number(e.target.value),
+                }))
+              }
             >
-                {
-                    isSubmiting ?
-                    <BeatLoader color='#FFF' speedMultiplier={0.5} size={10}/> : "Submit"
-                }
-            </button>
-        </div>
-    </form>
-  </div>
-}
+              {warehouses.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </PortalFormSelect>
+          </PortalFormField>
 
-export default Page
+          <PortalFormField label="Quantity">
+            <PortalFormInput
+              type="number"
+              name="declared_item_quantity"
+              min={1}
+              required
+              value={packageInformation.declared_item_quantity}
+              onChange={(e) =>
+                setPackageInformation((prev) => ({
+                  ...prev,
+                  declared_item_quantity: Number(e.target.value),
+                }))
+              }
+            />
+          </PortalFormField>
+        </div>
+
+        <PortalFormField label="Item name" hint="What did you order?">
+          <PortalFormInput
+            name="declared_item_name"
+            required
+            placeholder="e.g. Nike shoes, phone case"
+            value={packageInformation.declared_item_name}
+            onChange={(e) =>
+              setPackageInformation((prev) => ({
+                ...prev,
+                declared_item_name: e.target.value,
+              }))
+            }
+          />
+        </PortalFormField>
+
+        <PortalFormField
+          label="Tracking number"
+          hint="From your supplier or marketplace"
+        >
+          <PortalFormInput
+            name="incoming_tracking_number"
+            required
+            placeholder="Courier tracking ID"
+            value={packageInformation.incoming_tracking_number}
+            onChange={(e) =>
+              setPackageInformation((prev) => ({
+                ...prev,
+                incoming_tracking_number: e.target.value,
+              }))
+            }
+          />
+        </PortalFormField>
+
+        <PortalFormField label="Note (optional)">
+          <PortalFormTextarea
+            name="customer_note"
+            placeholder="Colour, size, or special instructions"
+            value={packageInformation.customer_note}
+            onChange={(e) =>
+              setPackageInformation((prev) => ({
+                ...prev,
+                customer_note: e.target.value,
+              }))
+            }
+          />
+        </PortalFormField>
+
+        <button
+          type="submit"
+          className="portal-packages__btn-primary portal-packages__btn-primary--block"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <BeatLoader color="#fff" size={8} />
+          ) : (
+            "Register package"
+          )}
+        </button>
+      </form>
+    </div>
+  )
+}

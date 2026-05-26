@@ -52,7 +52,7 @@ const Announcements = () => {
 
 
     return (
-        <div className=' bg-white shadow shadow-dark/10  md:max-w-125 md:mx-auto h-dvh space-y-4'>
+        <div className=' bg-white shadow shadow-dark/10  h-dvh space-y-4'>
             <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
                 <button 
                 className='flex gap-2 flex-1 justify-start'

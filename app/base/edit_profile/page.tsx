@@ -251,11 +251,11 @@ const Page: NextPage = () => {
   return <div className='h-full w-full'>
     {
     isLoading ? 
-    <div className='flex h-full w-full center-items md:max-w-125 md:mx-auto'>
+    <div className='flex h-full w-full center-items'>
         <BeatLoader color='#f26430' size={15} speedMultiplier={0.5}/>
     </div> :
     <>
-        <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between md:max-w-125 md:mx-auto'>
+        <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
             <button 
             className='flex gap-2 flex-1 justify-start'
             onClick={() => {router.back()}}
@@ -272,7 +272,7 @@ f                <span className='text-xs font-semibold'>
             </Link>
         </div>
 
-        <div className='p-body bg-light mt-2 text-sm space-y-4 md:max-w-125 md:mx-auto'>
+        <div className='p-body bg-light mt-2 text-sm space-y-4'>
             <div className='relative w-fit h-fit mx-auto space-y-2'>
                 <figure className='w-31 h-31 bg-red-300 rounded-full mx-auto relative overflow-hidden'>
                     {
@@ -308,7 +308,7 @@ f                <span className='text-xs font-semibold'>
             </div>
 
             {/* Details */}
-            <form className='w-full px-4 mt-4 space-y-2 md:max-w-125 md:mx-auto' onSubmit={handleSubmit}>
+            <form className='w-full px-4 mt-4 space-y-2' onSubmit={handleSubmit}>
                 <div className='flex gap-2'>
                     <InputComponent 
                     name='first_name'
@@ -345,7 +345,7 @@ f                <span className='text-xs font-semibold'>
 
         </div>
 
-        <div className='bg-light p-body mt-2 space-y-3 md:max-w-125 md:mx-auto'>
+        <div className='bg-light p-body mt-2 space-y-3'>
             <div className='flex justify-between items-end'>
                 <div className='w-50'>
                     <InputComponent 
@@ -433,7 +433,7 @@ f                <span className='text-xs font-semibold'>
             </div>
         </div>
 
-        {/* <div className='bg-light p-body mt-2 flex justify-between items-center md:max-w-125 md:mx-auto pb-26'>
+        {/* <div className='bg-light p-body mt-2 flex justify-between items-center pb-26'>
             <p className='text-red-500 text-xs'>
                 Delete my Account
             </p>

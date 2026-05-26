@@ -136,7 +136,7 @@ const Page: NextPage = () => {
 
 
     {/* Search Component */}
-    <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto'> 
+    <div className='bg-white p-4 flex flex-col gap-2'> 
         <div className='w-40 -mt-2'>
 
         </div>
@@ -156,7 +156,7 @@ const Page: NextPage = () => {
 
 
     {/* Input Fields */}
-    <div className='bg-light px-4 py-2 md:max-w-150 md:mx-auto'>
+    <div className='bg-light px-4 py-2'>
         <span className='text-xs'>
             Selected Packages: <span className='text-accent-red font-bold text-sm'>{selectedPackages.length}</span> 
         </span>
@@ -223,7 +223,7 @@ const Page: NextPage = () => {
         </fieldset>
     </div>
 
-    <div className='bg-light p-4 min-h-68 h-68 max-h-68 space-y-2 overflow-y-scroll md:max-w-150 md:mx-auto'>
+    <div className='bg-light p-4 min-h-68 h-68 max-h-68 space-y-2 overflow-y-scroll'>
         {
             data.length < 1 && 
             <p className='text-xs italic'>
@@ -243,7 +243,7 @@ const Page: NextPage = () => {
         }
     </div>
 
-    <div className='p-body pb-20 md:max-w-158 md:mx-auto'>
+    <div className='p-body pb-20'>
         <button 
         className='bg-accent-red text-white w-full text-sm py-3 rounded'
         onClick={() => {

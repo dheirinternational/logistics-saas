@@ -1,146 +1,86 @@
 "use client"
 
-import { ShippingRequest } from '@/types/entityTypeDef'
-import { NextPage } from 'next'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { FaChevronLeft, FaUser } from 'react-icons/fa'
-import { BeatLoader } from 'react-spinners'
-import { toast } from 'react-toastify'
+import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPackagesPageHeader"
+import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
+import type { ShippingRequest } from "@/types/entityTypeDef"
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { BeatLoader } from "react-spinners"
+import { toast } from "react-toastify"
 
-const Page: NextPage = () => {
+export default function ShipmentRequestsPage() {
+  const [requests, setRequests] = useState<ShippingRequest[]>([])
+  const [loading, setLoading] = useState(true)
 
-    const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
-    const [isDataLoading, setIsDataLoading] = useState(false)
-
-    // Fetch Shipment Requests
-    useEffect(() => {
-        const fetchShipmentRequests = async() => {
-
-            setIsDataLoading(true)
-            try{
-                const res = await fetch(`/api/shipment-requests/user`, {
-                    method: "GET",
-                    credentials: "include"
-                })
-
-                const result = await res.json()
-                
-                if(!res.ok){
-                    toast.error(result.message)
-                    return
-                }
-
-                setShipmentRequests(result.data.filter((x: ShippingRequest) => x.status === "pending"))
-
-            }
-            catch(err){
-                toast.error("ERR:: fetching shipments requests")
-                console.error("ERR:: fetching shipments requests", err)
-            }
-            finally{
-                setIsDataLoading(false)
-            }
+  useEffect(() => {
+    fetch("/api/shipment-requests/user", { credentials: "include" })
+      .then(async (res) => {
+        const result = await res.json()
+        if (!res.ok) {
+          toast.error(result.message)
+          return
         }
+        setRequests(
+          (result.data ?? []).filter(
+            (x: ShippingRequest) => x.status === "pending",
+          ),
+        )
+      })
+      .catch(() => toast.error("Could not load shipment requests"))
+      .finally(() => setLoading(false))
+  }, [])
 
-        fetchShipmentRequests()
-    }, [])
-
-    const router = useRouter()
-
-  return <div className='h-full w-full space-y-2'>
-    <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between'>
-        <button 
-        className='flex gap-2 flex-1 justify-start'
-        onClick={() => {router.back()}}
-        >
-            <span className='text-xs font-semibold'>
-                Go Back
-            </span>
-        </button>
-        <h1 className='font-semibold text-xs'>
-            Shipment Requests
-        </h1>
-        <Link href={"/base/profile"} className='flex-1 flex justify-end'>
-            <FaUser/>
-        </Link>
-    </div>
-
-    {/* <div className='bg-white p-4 flex flex-col gap-2'> 
-        <div className='w-40 -mt-2'>
-            <InputComponent
-            name='warehouse_id'
-            type='text'
-            state={filterValues}
-            setState={setFilterValues}
-            readonly
-            select
-            selectValues={dummyWarehouses.map( x => x.name)}
-            />
-        </div>
-        <div className='flex items-center text-xs gap-1 -mt-2'>
-            <InputComponent
-            name='incoming_tracking_id'
-            type='text'
-            state={filterValues}
-            setState={setFilterValues}
-            placeHolder='Product Id/Product Name...'
-            />
-            <button className='h-full px-4 py-2 bg-accent-red text-white mt-2 rounded'>
-                Search
-            </button>
-        </div>
-    </div> */}
-
-    <div className='bg-light p-4 min-h-150 space-y-3 md:max-w-150 md:mx-auto'>
-        {
-            shipmentRequests.length < 1 && !isDataLoading && 
-            <p className='text-xs italic'>
-                ...No shipment requests 
-            </p>
+  return (
+    <div className="portal-packages">
+      <PortalPackagesPageHeader
+        title="Shipment requests"
+        description="Requests waiting for DHEIR to accept and release."
+        action={
+          <Link href="/base/request_mail" className="portal-packages__btn-primary">
+            New request
+          </Link>
         }
-        
+      />
 
-        {
-        !isDataLoading ?
-            shipmentRequests 
-                .map( request => 
-                    <div key={request.id} className='border border-dark/20 p-4 py-3 space-y-2 rounded'>
-                        <div className='flex items-center justify-between mb-2'>
-                            <p className='text-sm p-2 border-dark/8 border rounded shadow-sm'>
-                                Channel: {request.channel}
-                            </p>
-                            <div className='bg-accent-blue/30 px-3 py-1 w-fit rounded-full h-fit'>
-                                <span className='text-[10px] text-accent-blue block'>
-                                    {request.status}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className='text-xs flex mt-5'>
-                            
-                            <p className='flex-1 whitespace-nowrap flex justify-start border-r border-dark/20 text-[10px] items-center'>
-                                Packages count: 
-                                <p className='ml-3 rounded-full border border-dark/8 w-5 h-5 center-items bg-dark/50 text-light'>
-                                    {request.package_ids.length}
-                                </p>
-                            </p>
-
-
-                            <p className='flex-1 whitespace-nowrap flex justify-end text-[10px] text-dark/70'>
-                                Requested at: <span className='ml-1 italic'>{new Date(request.created_at).toDateString()}</span>    
-                            </p>
-                        </div>
-                    </div>
-                ) :
-                <div className='w-full h-full center-items'>
-                    <BeatLoader color='#f26430' size={15}/>
+      <div className="portal-packages__list">
+        {loading ? (
+          <div className="portal-packages__loading">
+            <BeatLoader color="var(--color-dheir-blue)" size={12} />
+          </div>
+        ) : requests.length === 0 ? (
+          <div className="portal-packages__empty">
+            <p>No pending shipment requests.</p>
+            <Link href="/base/request_mail" className="portal-packages__text-link">
+              Ship my packages
+            </Link>
+          </div>
+        ) : (
+          requests.map((req) => (
+            <article key={req.id} className="portal-packages__card">
+              <div className="portal-packages__card-head">
+                <div className="portal-packages__card-title-block">
+                  <h3 className="portal-packages__card-title">
+                    {req.channel.toUpperCase()} shipment
+                  </h3>
+                  <p className="portal-packages__card-meta">
+                    {req.package_ids?.length ?? 0} package(s) · Pay{" "}
+                    {req.payment_time}
+                  </p>
                 </div>
-        }
-        
+                <PortalPackageStatusBadge label="Pending" variant="orange" />
+              </div>
+              <div className="portal-packages__card-foot portal-packages__card-foot--split">
+                <span className="portal-packages__card-meta">
+                  Weight: {req.total_weight} kg
+                </span>
+                <time dateTime={req.created_at}>
+                  {new Date(req.created_at).toLocaleDateString()}
+                </time>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
     </div>
-  </div>
+  )
 }
-
-export default Page

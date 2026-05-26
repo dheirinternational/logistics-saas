@@ -74,7 +74,7 @@ const Page: NextPage = () => {
     </div>
     :
     <>
-        <div className='bg-white p-4 flex flex-col gap-2 md:max-w-150 md:mx-auto'> 
+        <div className='bg-white p-4 flex flex-col gap-2'> 
             <div className='flex items-center text-xs gap-1'>
                 <InputComponent
                 name='tracking_id'
@@ -89,13 +89,13 @@ const Page: NextPage = () => {
             </div>
         </div>
 
-        <div className='bg-light px-4 py-2 md:max-w-150 md:mx-auto'>
+        <div className='bg-light px-4 py-2'>
             <span className='text-xs'>
                 Orders: <span className='text-accent-red font-bold text-sm'>{data.length}</span> 
             </span>
         </div>
 
-        <div className='bg-light p-4 max-h-94 overflow-auto space-y-3 md:max-w-150 md:mx-auto'>
+        <div className='bg-light p-4 max-h-94 overflow-auto space-y-3'>
             {
                 data.length < 1 && 
                 <p className='text-xs italic'>

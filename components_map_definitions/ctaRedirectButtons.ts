@@ -45,7 +45,7 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
     {
         title: "All Packages",
         icon: FaBoxes,
-        path: "/base/all_packages"
+        path: "/base/packages"
     },
     {
         title: "Request Mail",
@@ -80,6 +80,11 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
 ]
 
 export const profileMenuCtaButtonsProps: CTARedirectButton[] = [
+    {
+        title: "Shop",
+        path: "/base/shop",
+        icon: BsCart3
+    },
     {
         title: "Warehouse Address",
         path: "/base/warehouse_address",

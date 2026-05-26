@@ -85,7 +85,7 @@ export default function PendingPayments() {
         </Link>
       </div>
 
-      <div className="bg-white p-4 flex flex-col gap-2 md:max-w-150 mx-auto">
+      <div className="bg-white p-4 flex flex-col gap-2 w-full">
         <div className="flex items-center text-xs gap-1">
           <InputComponent
             name="tracking_id"
@@ -100,7 +100,7 @@ export default function PendingPayments() {
         </div>
       </div>
 
-      <div className="bg-light p-4 min-h-150 space-y-2 md:max-w-150 mx-auto">
+      <div className="bg-light p-4 min-h-150 space-y-2 w-full">
         {isDataLoading ? (
           <div className="flex justify-center py-5">
             <BeatLoader color="#f26430" size={15} />
