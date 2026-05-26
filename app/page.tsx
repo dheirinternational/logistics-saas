@@ -10,6 +10,7 @@ import { MarketingHeader } from "@/components/marketing/MarketingHeader"
 import { SocialProofSection } from "@/components/marketing/SocialProofSection"
 import { getSession } from "@/lib/db/session"
 import { toMarketingHeaderUser } from "@/lib/marketing/headerUser"
+import { getMarketingReviews } from "@/lib/marketing/reviews"
 
 export const metadata: Metadata = {
   title: "DHEIR International",
@@ -18,7 +19,10 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const session = await getSession()
+  const [session, reviews] = await Promise.all([
+    getSession(),
+    getMarketingReviews(),
+  ])
   const headerUser = session ? toMarketingHeaderUser(session) : null
 
   return (
@@ -26,11 +30,11 @@ export default async function Home() {
       <MarketingHeader user={headerUser} />
       <main id="top" className="relative">
         <HeroSection />
-        <SocialProofSection />
+        <SocialProofSection reviews={reviews} />
         <HowItWorksSection />
         <ServicesSection />
         <TrustSection />
-        <ShopTeaserSection />
+        <ShopTeaserSection isAuthenticated={!!session} />
         <FAQSection />
       </main>
       <MarketingFooter />

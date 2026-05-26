@@ -1,21 +1,62 @@
 "use client"
 
 import { BlurReveal } from "@/components/auth/BlurReveal"
+import { DheirLoader } from "@/components/ui/DheirLoader"
 import { NetLift } from "@/components/marketing/NetLift"
 import { ShopCategoryCard } from "@/components/marketing/ShopCategoryCard"
 import { ShopProductCard } from "@/components/marketing/ShopProductCard"
 import {
-  SHOP_CATEGORIES,
-  SHOP_FEATURED_PRODUCTS,
   SHOP_TEASER_COPY,
+  type MarketingShopCategory,
+  type MarketingShopProduct,
 } from "@/lib/marketing/shopCatalog"
 import { useCartStore } from "@/store/cartStore"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
-export function ShopTeaserSection() {
+type ShopTeaserSectionProps = {
+  isAuthenticated?: boolean
+}
+
+export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSectionProps) {
   const cartCount = useCartStore((state) =>
-    state.cart.reduce((total, item) => total + item.amount_to_be_ordered, 0)
+    state.cart.reduce((total, item) => total + item.amount_to_be_ordered, 0),
   )
+
+  const [featured, setFeatured] = useState<MarketingShopProduct[]>([])
+  const [categories, setCategories] = useState<MarketingShopCategory[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const shopHref = isAuthenticated ? "/base/shop" : "/auth/signup"
+  const productDetailHref = (id: number) =>
+    isAuthenticated ? `/base/marketplace/${id}` : "/auth/signup"
+  const categoryHref = (id: number) =>
+    isAuthenticated ? `/base/shop?category=${id}` : "/auth/signup"
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetch("/api/shop/catalog")
+      .then((r) => r.json())
+      .then((result) => {
+        if (cancelled || !result.success) return
+        setFeatured(result.data?.featured ?? [])
+        setCategories(result.data?.categories ?? [])
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setFeatured([])
+          setCategories([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <section
@@ -45,7 +86,7 @@ export function ShopTeaserSection() {
 
           <BlurReveal delay={80} className="shrink-0">
             <Link
-              href="/auth/signup"
+              href={shopHref}
               className="shop-teaser__see-all dheir-btn-primary inline-flex min-h-11 w-auto px-5 text-[14px]"
             >
               {SHOP_TEASER_COPY.seeAll}
@@ -63,11 +104,24 @@ export function ShopTeaserSection() {
           </BlurReveal>
 
           <div className="shop-teaser__grid mt-6 md:mt-8">
-            {SHOP_FEATURED_PRODUCTS.map((product, index) => (
-              <NetLift key={product.id} delay={index * 60}>
-                <ShopProductCard product={product} />
-              </NetLift>
-            ))}
+            {loading ? (
+              <div className="col-span-full flex justify-center py-12">
+                <DheirLoader color="var(--color-dheir-blue)" size={12} />
+              </div>
+            ) : featured.length === 0 ? (
+              <p className="col-span-full py-8 text-center text-sm text-dheir-muted">
+                No featured products right now.
+              </p>
+            ) : (
+              featured.map((product, index) => (
+                <NetLift key={product.id} delay={index * 60}>
+                  <ShopProductCard
+                    product={product}
+                    detailHref={productDetailHref(product.id)}
+                  />
+                </NetLift>
+              ))
+            )}
           </div>
         </div>
 
@@ -79,23 +133,33 @@ export function ShopTeaserSection() {
           </BlurReveal>
 
           <div className="shop-category-grid mt-6 md:mt-8">
-            {SHOP_CATEGORIES.map((category, index) => (
-              <NetLift key={category.id} delay={index * 80}>
-                <ShopCategoryCard category={category} />
-              </NetLift>
-            ))}
+            {loading ? (
+              <div className="col-span-full flex justify-center py-12">
+                <DheirLoader color="var(--color-dheir-blue)" size={12} />
+              </div>
+            ) : categories.length === 0 ? (
+              <p className="col-span-full py-8 text-center text-sm text-dheir-muted">
+                No categories available.
+              </p>
+            ) : (
+              categories.slice(0, 6).map((category, index) => (
+                <NetLift key={category.id} delay={index * 80}>
+                  <ShopCategoryCard category={category} href={categoryHref(category.id)} />
+                </NetLift>
+              ))
+            )}
           </div>
         </div>
 
         <BlurReveal delay={160}>
           <div className="shop-teaser__actions mt-14 flex flex-col items-center gap-4 sm:mt-16 sm:flex-row sm:justify-center">
             <Link
-              href="/auth/signup"
+              href={shopHref}
               className="dheir-btn-primary inline-flex min-h-12 w-full items-center justify-center px-8 sm:w-auto"
             >
               {SHOP_TEASER_COPY.browseCatalog}
             </Link>
-            {cartCount > 0 && (
+            {isAuthenticated && cartCount > 0 ? (
               <Link
                 href="/base/marketplace/cart"
                 className="dheir-btn-secondary inline-flex min-h-12 w-full items-center justify-center gap-2 px-8 sm:w-auto"
@@ -105,7 +169,7 @@ export function ShopTeaserSection() {
                   {cartCount > 99 ? "99+" : cartCount}
                 </span>
               </Link>
-            )}
+            ) : null}
           </div>
         </BlurReveal>
       </div>

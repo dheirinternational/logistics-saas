@@ -52,7 +52,7 @@ export function PortalHomeStatsCards({ counts }: PortalHomeStatsCardsProps) {
         counts.total_shipments > 0
           ? `${counts.delivered_shipments} delivered total`
           : "None yet",
-      href: "/base#tracking",
+      href: "/base/orders_shipped",
       icon: IconTruckDelivery,
     },
     {

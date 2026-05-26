@@ -95,8 +95,8 @@ export const PORTAL_HOME_QUICK_ACTIONS: PortalHomeAction[] = [
     id: "track",
     label: "Track shipment",
     description: "Shipments in progress",
-    href: "/base#tracking",
-    icon: IconTruckDelivery,
+    href: "/base/orders_shipped",
+    icon: IconTruck,
     countKey: "shipment",
   },
   {

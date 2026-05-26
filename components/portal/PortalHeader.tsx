@@ -5,7 +5,7 @@ import { PortalReviewModal } from "@/components/portal/PortalReviewModal"
 import { getPortalSearchHref } from "@/lib/portal/search"
 import { IconBell, IconMenu2, IconSearch, IconStar } from "@tabler/icons-react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { FormEvent, useEffect, useId, useRef, useState } from "react"
 
 type Announcement = {
@@ -23,6 +23,7 @@ type PortalHeaderProps = {
 export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const searchId = useId()
   const notificationsId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -32,6 +33,11 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
   const [reviewOpen, setReviewOpen] = useState(false)
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [announcementsLoaded, setAnnouncementsLoaded] = useState(false)
+
+  useEffect(() => {
+    const next = (searchParams.get("search") ?? "").trim()
+    setQuery(next)
+  }, [searchParams])
 
   useEffect(() => {
     let cancelled = false

@@ -1,8 +1,15 @@
 "use client"
 
 import { BlurReveal } from "@/components/auth/BlurReveal"
-import { DUMMY_REVIEWS, type MarketingReview } from "@/lib/marketing/dummyReviews"
+import {
+  reviewsForMarquee,
+  type MarketingReview,
+} from "@/lib/marketing/marketingReviews"
 import { IconStarFilled } from "@tabler/icons-react"
+
+type SocialProofSectionProps = {
+  reviews: MarketingReview[]
+}
 
 function StarRow({ rating }: { rating: number }) {
   return (
@@ -37,8 +44,8 @@ function ReviewCard({ name, review, rating }: MarketingReview) {
   )
 }
 
-export function SocialProofSection() {
-  const loop = [...DUMMY_REVIEWS, ...DUMMY_REVIEWS]
+export function SocialProofSection({ reviews }: SocialProofSectionProps) {
+  const loop = reviewsForMarquee(reviews)
 
   return (
     <section
@@ -59,23 +66,35 @@ export function SocialProofSection() {
         </BlurReveal>
       </div>
 
-      <div className="reviews-marquee relative mt-12 w-full md:mt-16">
-        <div className="reviews-marquee-fade reviews-marquee-fade--left" aria-hidden />
-        <div className="reviews-marquee-fade reviews-marquee-fade--right" aria-hidden />
-
-        <div className="reviews-marquee-viewport">
+      {loop.length === 0 ? (
+        <p className="marketing-container mt-12 text-center text-sm text-dheir-muted md:mt-16">
+          Customer reviews will appear here as importers share their experience.
+        </p>
+      ) : (
+        <div className="reviews-marquee relative mt-12 w-full md:mt-16">
           <div
-            className="reviews-marquee-track marketing-scroll-x flex w-max gap-5 px-[max(1rem,env(safe-area-inset-left,0px))] md:gap-6 md:px-[max(1.25rem,env(safe-area-inset-left,0px))]"
-            role="list"
-          >
-            {loop.map((item, index) => (
-              <div key={`${item.id}-${index}`} role="listitem">
-                <ReviewCard {...item} />
-              </div>
-            ))}
+            className="reviews-marquee-fade reviews-marquee-fade--left"
+            aria-hidden
+          />
+          <div
+            className="reviews-marquee-fade reviews-marquee-fade--right"
+            aria-hidden
+          />
+
+          <div className="reviews-marquee-viewport">
+            <div
+              className="reviews-marquee-track marketing-scroll-x flex w-max gap-5 px-[max(1rem,env(safe-area-inset-left,0px))] md:gap-6 md:px-[max(1.25rem,env(safe-area-inset-left,0px))]"
+              role="list"
+            >
+              {loop.map((item, index) => (
+                <div key={`${item.id}-${index}`} role="listitem">
+                  <ReviewCard {...item} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

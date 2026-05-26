@@ -57,8 +57,8 @@ export function HeroSection() {
           <div className="marketing-hero-overlay absolute inset-0" aria-hidden />
           <div className="marketing-hero-scrim-bottom absolute inset-0" aria-hidden />
 
-          <div className="relative z-10 flex min-h-[inherit] flex-col justify-end pb-[max(clamp(5.5rem,14vw,8rem),env(safe-area-inset-bottom,0px))] pt-28 md:pb-[max(clamp(6rem,12vw,9rem),env(safe-area-inset-bottom,0px))] md:pt-32">
-            <div className="marketing-container">
+          <div className="relative z-10 flex min-h-[inherit] flex-col justify-center pt-28 pb-[max(clamp(6rem,14vh,10rem),env(safe-area-inset-bottom,0px))] md:pt-32 md:pb-[max(clamp(7rem,16vh,11rem),env(safe-area-inset-bottom,0px))]">
+            <div className="marketing-container translate-y-6 md:translate-y-8">
               <div className="max-w-2xl">
                 <BlurReveal immediate delay={0}>
                   <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-white/75">

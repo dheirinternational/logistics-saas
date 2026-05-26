@@ -83,7 +83,7 @@ export default function Page(){
                 <>
                     <section className="portal-home__panel" aria-label="Currency display">
                         <div className="portal-home__panel-head">
-                            <div>
+        <div>
                                 <h2 className="portal-home__section-title">Currency</h2>
                                 <p className="portal-home__section-sub">Display values in dollars or naira.</p>
                             </div>
@@ -95,25 +95,25 @@ export default function Page(){
                                 className={`portal-home__btn ${
                                     currency === "Dollar" ? "portal-home__btn--primary" : "portal-home__btn--secondary"
                                 }`}
-                                onClick={() => {
-                                    setCurrency("Dollar")
-                                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_one)
-                                }}
-                            >
-                                Dollar
-                            </button>
+                onClick={() => {
+                    setCurrency("Dollar")
+                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_one)
+                }}
+                >
+                    Dollar
+                </button>
                             <button
                                 type="button"
                                 className={`portal-home__btn ${
                                     currency === "Naira" ? "portal-home__btn--primary" : "portal-home__btn--secondary"
                                 }`}
-                                onClick={() => {
-                                    setCurrency("Naira")
-                                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_two)
-                                }}
-                            >
-                                Naira
-                            </button>
+                onClick={() => {
+                    setCurrency("Naira")
+                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_two)
+                }}
+                >
+                    Naira
+                </button>
 
                             <p className="portal-home__section-sub" style={{ margin: 0, maxWidth: 820 }}>
                                 <span style={{ color: "var(--color-dheir-red)", fontWeight: 600, marginRight: 8 }}>
@@ -151,7 +151,7 @@ export default function Page(){
                                 <h2 className="portal-home__section-title">Express shipping template</h2>
                                 <p className="portal-home__section-sub">Edit the express pricing rules.</p>
                             </div>
-                        </div>
+            </div>
                         <ExpressTemplateComponent currencyValue={currentSelectedCurrencyValue} />
                     </section>
                 </>
@@ -329,8 +329,8 @@ function PricingTemplateEditModal({
                                     <option value="months">Months</option>
                                 </DheirSelect>
                             </label>
-                        </div>
-
+                </div>
+                
                         <div className="admin-modal__actions" style={{ marginTop: 10 }}>
                             <button
                                 type="button"
@@ -453,7 +453,7 @@ const AirComp = ({
 }) => {
     return (
         <div style={{ border: "1px solid var(--color-dheir-border)", borderRadius: 14, padding: 14 }}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">    
             <h3 className="portal-home__section-title" style={{ fontSize: 14, margin: 0, textTransform: "capitalize" }}>
                 {`${template.name.split("_").join(" ")}`}
             </h3>
@@ -472,14 +472,14 @@ const AirComp = ({
             </p>
             <p style={{ margin: 0 }}>Clearance fee per kg: ₦{template.clearance}</p>
             <p style={{ margin: 0 }}>
-                Minimum expected delivery: {template.min_duration} {template.duration_type}
-            </p>
+                        Minimum expected delivery: {template.min_duration} {template.duration_type}
+                    </p>
             <p style={{ margin: 0 }}>
-                Maximum expected delivery: {template.max_duration} {template.duration_type}
-            </p>
+                        Maximum expected delivery: {template.max_duration} {template.duration_type}
+                    </p>
         </div>
         
-        </div>
+    </div>
     )
 }
 
@@ -566,7 +566,7 @@ const SeaTemplateComponent = () => {
 const SeaTemp = ({ template, onEdit }: { template: SeaPricingTemplate; onEdit: () => void }) => {
     return (
         <div style={{ border: "1px solid var(--color-dheir-border)", borderRadius: 14, padding: 14 }}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">    
             <h3 className="portal-home__section-title" style={{ fontSize: 14, margin: 0, textTransform: "capitalize" }}>
                 {`${template.name.split("_").join(" ")}`}
             </h3>
@@ -582,14 +582,14 @@ const SeaTemp = ({ template, onEdit }: { template: SeaPricingTemplate; onEdit: (
             <p style={{ margin: 0 }}>Price per cbm: ₦{template.price}</p>
             <p style={{ margin: 0 }}>Clearance fee per cbm: ₦{template.clearance}</p>
             <p style={{ margin: 0 }}>
-                Minimum expected delivery: {template.min_duration} {template.duration_type}
-            </p>
+                        Minimum expected delivery: {template.min_duration} {template.duration_type}
+                    </p>
             <p style={{ margin: 0 }}>
-                Maximum expected delivery: {template.max_duration} {template.duration_type}
+                        Maximum expected delivery: {template.max_duration} {template.duration_type}
             </p>
         </div>
         
-        </div>
+    </div>
     )
 }
 
@@ -693,7 +693,7 @@ const ExpressContainer = ({
 }) => {
     return (
         <div style={{ border: "1px solid var(--color-dheir-border)", borderRadius: 14, padding: 14 }}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">    
             <h3 className="portal-home__section-title" style={{ fontSize: 14, margin: 0, textTransform: "capitalize" }}>
                 {`${template.name.split("_").join(" ")}`}
             </h3>
@@ -712,13 +712,13 @@ const ExpressContainer = ({
             </p>
             <p style={{ margin: 0 }}>Clearance fee: ₦{template.clearance}</p>
             <p style={{ margin: 0 }}>
-                Minimum expected delivery: {template.min_duration} {template.duration_type}
-            </p>
+                        Minimum expected delivery: {template.min_duration} {template.duration_type}
+                    </p>
             <p style={{ margin: 0 }}>
-                Maximum expected delivery: {template.max_duration} {template.duration_type}
-            </p>
+                        Maximum expected delivery: {template.max_duration} {template.duration_type}
+                    </p>
         </div>
         
-        </div>
+    </div>
     )
 }

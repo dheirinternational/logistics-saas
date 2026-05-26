@@ -40,6 +40,8 @@ export default function TrackShipmentsPage() {
       <PortalPackagesPageHeader
         title="Track shipment"
         description="Active shipments on the way to Nigeria."
+        backHref="/base"
+        backLabel="Home"
       />
 
       <PortalPackagesToolbar

@@ -1,13 +1,13 @@
 "use client"
 
-import type { Product } from "@/types/entityTypeDef"
+import { ShopProductCartControls } from "@/components/shop/ShopProductCartControls"
+import { DheirLoader } from "@/components/ui/DheirLoader"
 import { useCartStore } from "@/store/cartStore"
-import { IconShoppingCartPlus } from "@tabler/icons-react"
+import type { Product } from "@/types/entityTypeDef"
 import Image from "next/image"
 import Link from "next/link"
 import type { MouseEvent } from "react"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
 
 type PortalShopProductCardProps = {
@@ -20,7 +20,6 @@ export function PortalShopProductCard({
   categoryLabel = "Shop",
 }: PortalShopProductCardProps) {
   const addProduct = useCartStore((s) => s.addProduct)
-  const cart = useCartStore((s) => s.cart)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [loadingImage, setLoadingImage] = useState(true)
 
@@ -52,11 +51,6 @@ export function PortalShopProductCard({
   const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     e.stopPropagation()
-
-    if (cart.some((item) => item.id === product.id)) {
-      toast.info("Already in your cart")
-      return
-    }
 
     if (!imageUrl) {
       toast.error("Product image still loading")
@@ -106,15 +100,13 @@ export function PortalShopProductCard({
           <p className="shop-product-card__price tabular-nums">
             ₦{displayPrice.toLocaleString()}
           </p>
-          <button
-            type="button"
-            className="shop-product-card__cart-btn"
-            disabled={product.stock_quantity < 1 || loadingImage}
-            aria-label={`Add ${product.name} to cart`}
-            onClick={handleAddToCart}
-          >
-            <IconShoppingCartPlus size={20} stroke={1.5} aria-hidden />
-          </button>
+          <ShopProductCartControls
+            productId={product.id}
+            stockQuantity={product.stock_quantity}
+            disabled={loadingImage || !imageUrl}
+            onAdd={handleAddToCart}
+            addAriaLabel={`Add ${product.name} to cart`}
+          />
         </div>
       </div>
     </article>

@@ -15,7 +15,7 @@ export type MarketingService = {
   title: string
   description: string
   imageSrc: string
-  imageAlt: string
+  imageAlt: string 
 }
 
 export const MARKETING_SERVICES: MarketingService[] = [
@@ -26,8 +26,8 @@ export const MARKETING_SERVICES: MarketingService[] = [
     description:
       "Express air routes for urgent restocks and time-sensitive shipments from China to Nigeria.",
     imageSrc:
-      "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Commercial aircraft at airport",
+      "https://images.unsplash.com/photo-1778385406327-54caa75374e2?auto=format&fit=crop&w=1200&q=80",
+    imageAlt: "Airplane at airport during a vibrant sunset",
   },
   {
     id: "sea",
@@ -36,8 +36,8 @@ export const MARKETING_SERVICES: MarketingService[] = [
     description:
       "Container and consolidated sea options when cost per CBM counts more than days in transit.",
     imageSrc:
-      "https://images.unsplash.com/photo-1605745341112-85968b19335b?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Cargo containers at port",
+      "https://images.unsplash.com/photo-1592963219385-53b52b371dd1?auto=format&fit=crop&w=1200&q=80",
+    imageAlt: "Red, blue, and yellow intermodal containers",
   },
   {
     id: "express",
@@ -46,7 +46,7 @@ export const MARKETING_SERVICES: MarketingService[] = [
     description:
       "Warehouse consolidation and repack so multiple supplier parcels move as one clear shipment.",
     imageSrc:
-      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Warehouse logistics and pallets",
+      "https://images.unsplash.com/photo-1777026321659-64941fb943dd?auto=format&fit=crop&w=1200&q=80",
+    imageAlt: "Warehouse storage aisles with shelves full of boxes",
   },
 ]

@@ -7,13 +7,7 @@ import {
   type MarketingService,
   type ServiceVariant,
 } from "@/lib/marketing/services"
-import {
-  IconArrowRight,
-  IconPackage,
-  IconPlane,
-  IconShip,
-} from "@tabler/icons-react"
-import { MarketingAnchorLink } from "@/components/marketing/MarketingAnchorLink"
+import { IconPackage, IconPlane, IconShip } from "@tabler/icons-react"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
@@ -83,10 +77,6 @@ function ServiceColumn({ service, index }: { service: MarketingService; index: n
         <p className="services-column__label">{service.label}</p>
         <h3 className="services-column__title">{service.title}</h3>
         <p className="services-column__body">{service.description}</p>
-        <MarketingAnchorLink href="#faq" className="services-column__link">
-          Learn more
-          <IconArrowRight size={16} stroke={1.75} aria-hidden />
-        </MarketingAnchorLink>
       </div>
     </article>
   )
