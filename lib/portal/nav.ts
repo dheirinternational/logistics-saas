@@ -30,11 +30,15 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { id: "account", label: "Account", href: "/base/profile", icon: IconUser },
 ]
 
+/** Marketplace catalog, cart, checkout, and shop order history. */
 const SHOP_PREFIXES = [
   "/base/shop",
   "/base/marketplace",
+  "/base/orders",
+  "/base/verify_order_payment",
 ] as const
 
+/** Logistics: packages, shipments, warehouse, and shipment-related payments. */
 const PACKAGES_PREFIXES = [
   "/base/packages",
   "/base/all_packages",
@@ -44,17 +48,16 @@ const PACKAGES_PREFIXES = [
   "/base/request_mail",
   "/base/warehouse_address",
   "/base/orders_shipped",
+  "/base/payment_receipts",
+  "/base/pending_payments",
+  "/base/verify_payment",
 ] as const
 
+/** Profile, address, and account settings. */
 const ACCOUNT_PREFIXES = [
   "/base/profile",
   "/base/edit_profile",
   "/base/my_address",
-  "/base/payment_receipts",
-  "/base/pending_payments",
-  "/base/orders",
-  "/base/verify_payment",
-  "/base/verify_order_payment",
 ] as const
 
 function matchesPrefix(pathname: string, prefix: string): boolean {
@@ -68,7 +71,16 @@ function matchesAnyPrefix(
   return prefixes.some((prefix) => matchesPrefix(pathname, prefix))
 }
 
-/** Highlights the correct tab on nested portal routes. */
+/**
+ * Highlights the correct sidebar tab on nested portal routes.
+ *
+ * Route map (all `/base` pages):
+ * - home: `/base`, `/base/announcements/*`
+ * - quote: `/base/estimate`
+ * - shop: `/base/shop`, `/base/marketplace/*`, `/base/orders/*`, `/base/verify_order_payment`
+ * - packages: packages hub, add/request/track flows, shipment payments
+ * - account: profile, edit profile, delivery address
+ */
 export function resolvePortalNavId(pathname: string): PortalNavId {
   if (pathname === "/base" || pathname.startsWith("/base/announcements")) {
     return "home"
