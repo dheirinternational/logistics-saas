@@ -16,6 +16,30 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DHEIR International",
   description: "Dheir International delivers reliable global shipping, logistics, and warehouse solutions with a focus on speed, security, and customer satisfaction.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.BASE_URL ||
+      "http://localhost:3000",
+  ),
+  openGraph: {
+    type: "website",
+    title: "DHEIR International",
+    description:
+      "Dheir International delivers reliable global shipping, logistics, and warehouse solutions with a focus on speed, security, and customer satisfaction.",
+    images: [
+      {
+        url: "/Dhe-5.png",
+        alt: "DHEIR International",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DHEIR International",
+    description:
+      "Dheir International delivers reliable global shipping, logistics, and warehouse solutions with a focus on speed, security, and customer satisfaction.",
+    images: ["/Dhe-5.png"],
+  },
 };
 
 export default function RootLayout({

@@ -77,11 +77,11 @@ export function MarketingHeader({ user = null }: MarketingHeaderProps) {
         >
           <figure className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg">
             <Image
-              src="/d_heir_logo.png"
+              src="/Dheir-logo.png"
               alt=""
               fill
               sizes="40px"
-              className="object-contain p-0.5"
+              className="object-contain p-0.5 dheir-logo-img"
               priority
             />
           </figure>

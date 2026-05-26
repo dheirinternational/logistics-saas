@@ -25,15 +25,36 @@ export function HeroSection() {
         variants={shellVariants}
       >
         <div className="marketing-hero-frame relative min-h-[min(100svh,920px)] w-full">
-          <Image
-            src={HERO_IMAGE.src}
-            alt={HERO_IMAGE.alt}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
+          <motion.div
+            className="absolute inset-0"
+            animate={
+              reduceMotion
+                ? undefined
+                : {
+                    scale: [1, 1.06, 1],
+                  }
+            }
+            transition={
+              reduceMotion
+                ? undefined
+                : {
+                    duration: 18,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                  }
+            }
+          >
+            <Image
+              src={HERO_IMAGE.src}
+              alt={HERO_IMAGE.alt}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover marketing-hero-bg"
+            />
+          </motion.div>
 
+          <div className="marketing-hero-overlay absolute inset-0" aria-hidden />
           <div className="marketing-hero-scrim-bottom absolute inset-0" aria-hidden />
 
           <div className="relative z-10 flex min-h-[inherit] flex-col justify-end pb-[max(clamp(5.5rem,14vw,8rem),env(safe-area-inset-bottom,0px))] pt-28 md:pb-[max(clamp(6rem,12vw,9rem),env(safe-area-inset-bottom,0px))] md:pt-32">

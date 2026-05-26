@@ -14,10 +14,10 @@ export const Header = () => {
             <Link href={`/`} className="block">
                 <figure className="h-13 w-13 relative">
                     <Image 
-                    src="/d_heir_logo.png" 
+                    src="/Dheir-logo.png"
                     alt="hey" 
                     fill
-                    className="object-cover"
+                    className="object-cover dheir-logo-img dheir-logo-img--invert"
                     />
                 </figure>
             </Link> 

@@ -60,11 +60,11 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
         <div className="portal-sidebar__head">
           <Link href="/base" className="portal-sidebar__brand">
             <Image
-              src="/d_heir_logo.png"
+              src="/Dheir-logo.png"
               alt=""
               width={36}
               height={36}
-              className="h-9 w-9 object-contain"
+              className="h-9 w-9 object-contain dheir-logo-img"
               priority
             />
             <span className="font-display text-lg font-bold tracking-tight text-dheir-ink">

@@ -80,10 +80,10 @@ const MarketSearch = () => {
         {/* Logo */}
         <figure className="h-13 w-13 bg-amber-50 relative rounded-full z-100">
             <Image 
-            src={`/d_heir_logo.png`}
+            src={`/Dheir-logo.png`}
             alt="company logo"
             fill
-            className="object-cover"
+            className="object-cover dheir-logo-img dheir-logo-img--invert"
             />
         </figure>
 

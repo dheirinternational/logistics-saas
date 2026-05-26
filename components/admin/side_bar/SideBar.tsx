@@ -19,7 +19,7 @@ export const SideBar = () => {
         <Link href={`/`} className="pl-3 block mb-8 max-sm:hidden">
             <figure className="h-13 w-13 relative">
                 <Image 
-                src="/d_heir_logo.png" 
+                src="/Dheir-logo.png" 
                 alt="hey" 
                 fill
                 className="object-cover"

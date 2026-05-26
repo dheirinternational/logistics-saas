@@ -1,5 +1,11 @@
 import { PortalShopPage } from "@/components/portal/shop/PortalShopPage"
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Shop | DHEIR International",
+  description: "Browse marketplace products and add them to your cart.",
+}
 
 export default function ShopPage() {
   return (

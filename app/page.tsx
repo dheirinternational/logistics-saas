@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { HeroSection } from "@/components/marketing/HeroSection"
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection"
 import { ServicesSection } from "@/components/marketing/ServicesSection"
@@ -9,6 +10,12 @@ import { MarketingHeader } from "@/components/marketing/MarketingHeader"
 import { SocialProofSection } from "@/components/marketing/SocialProofSection"
 import { getSession } from "@/lib/db/session"
 import { toMarketingHeaderUser } from "@/lib/marketing/headerUser"
+
+export const metadata: Metadata = {
+  title: "DHEIR International",
+  description:
+    "Global shipping, logistics, and warehouse solutions with a focus on speed, security, and customer satisfaction.",
+}
 
 export default async function Home() {
   const session = await getSession()

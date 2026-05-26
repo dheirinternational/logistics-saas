@@ -3,7 +3,6 @@
 import { PortalHeaderCart } from "@/components/portal/PortalHeaderCart"
 import { getPortalSearchHref } from "@/lib/portal/search"
 import { IconBell, IconMenu2, IconSearch } from "@tabler/icons-react"
-import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { FormEvent, useEffect, useId, useRef, useState } from "react"
@@ -93,16 +92,6 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
         <IconMenu2 size={22} stroke={1.5} aria-hidden />
         <span className="sr-only">Open menu</span>
       </button>
-
-      <Link href="/base" className="portal-header__brand" aria-label="Home">
-        <Image
-          src="/d_heir_logo.png"
-          alt=""
-          width={28}
-          height={28}
-          className="h-7 w-7 object-contain lg:hidden"
-        />
-      </Link>
 
       <form className="portal-header__search" onSubmit={handleSearch} role="search">
         <label htmlFor={searchId} className="sr-only">

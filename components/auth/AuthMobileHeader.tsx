@@ -11,7 +11,7 @@ export function AuthMobileHeader({ trailing }: AuthMobileHeaderProps) {
       <Link href="/" className="inline-flex items-center gap-2.5 no-underline">
         <figure className="relative h-10 w-10 overflow-hidden rounded-lg bg-dheir-surface shadow-[var(--shadow-dheir-soft)]">
           <Image
-            src="/d_heir_logo.png"
+            src="/Dheir-logo.png"
             alt=""
             fill
             className="object-contain p-0.5"

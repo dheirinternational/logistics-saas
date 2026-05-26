@@ -38,7 +38,7 @@ export function MarketingFooter() {
             <Link href="/" className="inline-flex items-center gap-2.5 no-underline">
               <figure className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white/10">
                 <Image
-                  src="/d_heir_logo.png"
+                  src="/Dheir-logo.png"
                   alt=""
                   fill
                   sizes="40px"

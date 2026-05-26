@@ -1,6 +1,7 @@
 "use client"
 
 import SearchComponent from '@/components/admin/orders/SearchComponent'
+import { DheirSelect } from '@/components/ui/DheirSelect'
 import { Table } from '@/components/admin/table/Table'
 import { Order } from '@/types/entityTypeDef'
 import { OrderStatus } from '@/types/statusTypes'
@@ -256,8 +257,9 @@ const OrderModal = ({
                         Update Order Status
                     </label>
 
-                    <select
-                        className='w-full border p-2 text-xs rounded'
+                    <DheirSelect
+                        compact
+                        className="text-sm"
                         value={status}
                         onChange={(e) =>
                             setStatus(e.target.value as Order["status"])
@@ -268,7 +270,7 @@ const OrderModal = ({
                         <option value="shipped">Shipped</option>
                         <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
-                    </select>
+                    </DheirSelect>
 
                     <button
                         onClick={updateStatus}

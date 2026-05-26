@@ -1,5 +1,6 @@
 "use client"
 
+import { DheirSelect } from "@/components/ui/DheirSelect"
 import { IconSearch } from "@tabler/icons-react"
 
 type PortalPackagesToolbarProps = {
@@ -31,19 +32,19 @@ export function PortalPackagesToolbar({
           className="portal-packages__search-input"
         />
       </div>
-      <label className="portal-packages__select-wrap">
+      <label className="portal-packages__filter-select">
         <span className="sr-only">Filter by status</span>
-        <select
+        <DheirSelect
+          compact
           value={status}
           onChange={(e) => onStatusChange(e.target.value)}
-          className="portal-packages__select"
         >
           {statusOptions.map((opt) => (
             <option key={opt.value || "all"} value={opt.value}>
               {opt.label}
             </option>
           ))}
-        </select>
+        </DheirSelect>
       </label>
     </div>
   )
