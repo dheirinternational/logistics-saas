@@ -109,7 +109,7 @@ export function PortalOrderDetailPage() {
         </div>
       ) : (
         <div className="portal-orders__layout">
-          <section className="portal-account__card portal-orders__section">
+          <section className="portal-account__card portal-orders__section portal-orders__section--status">
             <div className="portal-orders__section-head">
               <h2 className="portal-account__card-title">Status</h2>
               <PortalPackageStatusBadge
@@ -135,7 +135,7 @@ export function PortalOrderDetailPage() {
             </div>
           </section>
 
-          <section className="portal-account__card portal-orders__section">
+          <section className="portal-account__card portal-orders__section portal-orders__section--items">
             <div className="portal-cart__items-head">
               <h2 className="portal-account__card-title">Items</h2>
               <p className="portal-cart__count">
@@ -154,7 +154,7 @@ export function PortalOrderDetailPage() {
             )}
           </section>
 
-          <aside className="portal-account__card portal-orders__section">
+          <aside className="portal-account__card portal-orders__section portal-orders__section--summary">
             <h2 className="portal-account__card-title">Payment summary</h2>
             <div className="portal-cart__lines">
               <div className="portal-cart__line">
