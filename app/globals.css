@@ -4301,6 +4301,198 @@ a{
     color: var(--color-dheir-ink);
 }
 
+/* ——— Portal product detail ——— */
+
+.portal-pdp__layout {
+    display: grid;
+    gap: 20px;
+}
+
+@media (min-width: 1024px) {
+    .portal-pdp__layout {
+        grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+        align-items: start;
+    }
+}
+
+.portal-pdp__gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.portal-pdp__hero {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    max-height: min(72vh, 560px);
+    border-radius: 14px;
+    border: 1px solid var(--color-dheir-border);
+    background: var(--color-dheir-page);
+    overflow: hidden;
+}
+
+.portal-pdp__no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--color-dheir-muted);
+}
+
+.portal-pdp__thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.portal-pdp__thumb {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 2px solid var(--color-dheir-border);
+    border-radius: 12px;
+    background: var(--color-dheir-page);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 200ms var(--ease-dheir-out);
+}
+
+.portal-pdp__thumb.is-active {
+    border-color: var(--color-dheir-blue);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-dheir-blue) 12%, transparent);
+}
+
+.portal-pdp__buy {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.portal-pdp__category {
+    margin: 0 0 8px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-dheir-blue);
+}
+
+.portal-pdp__price-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.portal-pdp__price {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    color: var(--color-dheir-ink);
+}
+
+.portal-pdp__price-was {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--color-dheir-muted);
+    text-decoration: line-through;
+}
+
+.portal-pdp__stock {
+    margin: 0 0 14px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--color-dheir-muted);
+}
+
+.portal-pdp__shipping {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--color-dheir-blue-muted);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-dheir-ink);
+}
+
+.portal-pdp__shipping--warn {
+    background: var(--color-dheir-page);
+    border: 1px solid var(--color-dheir-border);
+    color: var(--color-dheir-muted);
+}
+
+.portal-pdp__qty {
+    margin-bottom: 18px;
+}
+
+.portal-pdp__qty-label {
+    display: block;
+    margin-bottom: 10px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-dheir-ink);
+}
+
+.portal-pdp__qty-controls {
+    margin-top: 0;
+}
+
+.portal-pdp__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.portal-pdp__actions .portal-packages__btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.portal-pdp__cart-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    text-decoration: none;
+}
+
+.portal-pdp__details {
+    padding-top: 20px;
+    border-top: 1px solid var(--color-dheir-border);
+}
+
+.portal-pdp__description {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--color-dheir-muted);
+    white-space: pre-wrap;
+}
+
+.portal-pdp__empty {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    color: var(--color-dheir-muted);
+}
+
 .announcements-scrollbar {
     animation: animate-announcements 30s linear infinite;
 }
