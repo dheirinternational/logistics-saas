@@ -1,5 +1,5 @@
 import { AirPricingTemplate } from "@/types/entityTypeDef"
-import { toast } from "react-toastify"
+import { toast } from "@/lib/ui/toast"
 
 type ItemCartType = {
     id: number

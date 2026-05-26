@@ -9,8 +9,8 @@ import {
 import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPackagesPageHeader"
 import type { Warehouse } from "@/types/entityTypeDef"
 import { FormEvent, useEffect, useState } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 export default function AddPackagePage() {
   const [packageInformation, setPackageInformation] = useState({
@@ -76,11 +76,13 @@ export default function AddPackagePage() {
       <PortalPackagesPageHeader
         title="Add incoming package"
         description="Tell us what is on the way to our China warehouse so we can match it when it arrives."
+        backHref="/base/packages"
+        backLabel="Packages"
       />
 
       <form onSubmit={handleSubmit} className="portal-packages__form">
-        <div className="portal-packages__form-grid">
-          <PortalFormField label="Warehouse">
+        <div className="portal-packages__form-grid portal-packages__form-grid--split">
+          <PortalFormField label="Warehouse" className="portal-packages__field--grow">
             <PortalFormSelect
               name="warehouse_id"
               required
@@ -100,7 +102,7 @@ export default function AddPackagePage() {
             </PortalFormSelect>
           </PortalFormField>
 
-          <PortalFormField label="Quantity">
+          <PortalFormField label="Quantity" className="portal-packages__field--narrow">
             <PortalFormInput
               type="number"
               name="declared_item_quantity"
@@ -170,7 +172,7 @@ export default function AddPackagePage() {
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <BeatLoader color="#fff" size={8} />
+            <DheirLoader color="#fff" size={8} />
           ) : (
             "Register package"
           )}

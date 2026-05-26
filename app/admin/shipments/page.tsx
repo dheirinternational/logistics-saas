@@ -1,18 +1,15 @@
 "use client"
 
 import SearchComponent from '@/components/admin/shipments/SearchComponent'
-import ShipmentStatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
 import { usePackageStore } from '@/store/incomingPackagesStore'
 import { IncomingPackage } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { BiBox } from 'react-icons/bi'
-import { FaTruckMoving } from 'react-icons/fa'
-import { BeatLoader } from 'react-spinners'
-import { toast } from 'react-toastify'
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
+import { IconBox, IconTruck } from "@tabler/icons-react"
 
 export type SearchProps = {
     search: string,
@@ -142,56 +139,77 @@ const Page: NextPage = () => {
 
     const data = incomingPackages.filter(x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()) && x.warehouse_id.toString().includes(filterValues.warehouse_id))
 
-  return <div className='space-y-body'>
-    {isDataLoading ? <div className='w-full h-full center-items'>
-        <BeatLoader color='#f26430' size={10}/>
-    </div> :
-    <>
-        <div className='flex-col items-center gap-4'>
-            {/* STATUS CARDS */}
-            <div>
-                <div className='flex my-body space-x-2 overflow-x-auto'>
-                    <ShipmentStatusStatCard 
-                    value={incomingPackages.filter(x => x.status === "expected").length}
-                    status='Expected'
-                    icon={FaTruckMoving}
-                    />
-
-                    <ShipmentStatusStatCard 
-                    value={incomingPackages.filter(x => x.status === "stored").length}
-                    status='Stored'
-                    icon={BiBox}
-                    />
-                </div>
-            </div>
-
-            {/* SEARCH COMPONENT  */}
-            <div className='bg-light flex-1 h-full rounded'>
-                <SearchComponent state={filterValues} setState={setFilterValues} />
-            </div>
+  return (
+    <div className="portal-home">
+      {isDataLoading ? (
+        <div className="portal-home__panel portal-home__loader">
+          <DheirLoader color="var(--color-dheir-blue)" size={12} />
         </div>
-
-        {/* Table */}
-        <div className='bg-light p-body rounded-lg'>
-            <h2 className='text-sm font-bold'>
-                Shipment Records
-            </h2>
-            <p className='text-xs mt-2 opacity-70'>
-                A live overview of all shipments in the system.
-            </p>
-            <div className='mt-4'>
-                {
-                    incomingPackages ?
-                    <Table 
-                    importedData={data}
-                    columnDef={incomingPackageColumnDef}
-                    globalFilter={filterValues.search}
-                    /> : null
-                }
+      ) : (
+        <>
+          <div className="portal-home__stats" role="list" aria-label="Incoming packages stats">
+            <div className="portal-home__stat-card" role="listitem">
+              <span className="portal-home__stat-card-icon" aria-hidden>
+                <IconTruck size={22} stroke={1.5} />
+              </span>
+              <span className="portal-home__stat-card-body">
+                <span className="portal-home__stat-card-label">Expected</span>
+                <span className="portal-home__stat-card-value">
+                  {incomingPackages.filter((x) => x.status === "expected").length}
+                </span>
+                <span className="portal-home__stat-card-hint">On the way</span>
+              </span>
             </div>
-        </div>
-    </>}
-  </div>
+
+            <div className="portal-home__stat-card" role="listitem">
+              <span className="portal-home__stat-card-icon" aria-hidden>
+                <IconBox size={22} stroke={1.5} />
+              </span>
+              <span className="portal-home__stat-card-body">
+                <span className="portal-home__stat-card-label">Stored</span>
+                <span className="portal-home__stat-card-value">
+                  {incomingPackages.filter((x) => x.status === "stored").length}
+                </span>
+                <span className="portal-home__stat-card-hint">At warehouse</span>
+              </span>
+            </div>
+          </div>
+
+          <section className="portal-home__panel" aria-label="Shipment filters">
+            <div className="portal-home__panel-head">
+              <div>
+                <h2 className="portal-home__section-title">Filters</h2>
+                <p className="portal-home__section-sub">
+                  Search by tracking number, customer code, status, or warehouse.
+                </p>
+              </div>
+            </div>
+            <SearchComponent state={filterValues} setState={setFilterValues} />
+          </section>
+
+          <section className="portal-home__panel" aria-labelledby="shipment-records-heading">
+            <div className="portal-home__panel-head">
+              <div>
+                <h2 id="shipment-records-heading" className="portal-home__section-title">
+                  Shipment records
+                </h2>
+                <p className="portal-home__section-sub">
+                  A live overview of incoming shipments in the system.
+                </p>
+              </div>
+            </div>
+            {incomingPackages ? (
+              <Table
+                importedData={data}
+                columnDef={incomingPackageColumnDef}
+                globalFilter={filterValues.search}
+              />
+            ) : null}
+          </section>
+        </>
+      )}
+    </div>
+  )
 }
 
 export default Page

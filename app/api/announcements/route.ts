@@ -18,8 +18,8 @@ export async function GET(){
         `)
 
         return NextResponse.json({
-            success: false,
-            message: "Announcements successfully retrived from Database",
+            success: true,
+            message: "Announcements successfully retrieved from database",
             data: res.rows
         })
     }

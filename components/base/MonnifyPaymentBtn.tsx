@@ -1,8 +1,8 @@
 "use client"
 
-import { BeatLoader } from "react-spinners"
+import { DheirLoader } from "@/components/ui/DheirLoader"
 import { useState } from "react"
-import { toast } from "react-toastify"
+import { toast } from "@/lib/ui/toast"
 
 type MonnifyPaymentButtonProps = {
   amount: number
@@ -70,7 +70,7 @@ export default function MonnifyPaymentButton({
       onClick={handlePayment}
     >
       {isLoading ? (
-        <BeatLoader color="white" size={6} />
+        <DheirLoader color="white" size={6} />
       ) : (
         <>Pay ₦{Number(amount).toLocaleString()}</>
       )}

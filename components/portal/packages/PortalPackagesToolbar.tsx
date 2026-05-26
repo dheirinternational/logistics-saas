@@ -6,19 +6,21 @@ import { IconSearch } from "@tabler/icons-react"
 type PortalPackagesToolbarProps = {
   search: string
   onSearchChange: (value: string) => void
-  status: string
-  onStatusChange: (value: string) => void
-  statusOptions: readonly { value: string; label: string }[]
+  status?: string
+  onStatusChange?: (value: string) => void
+  statusOptions?: readonly { value: string; label: string }[]
   searchPlaceholder?: string
+  hideStatusFilter?: boolean
 }
 
 export function PortalPackagesToolbar({
   search,
   onSearchChange,
-  status,
+  status = "",
   onStatusChange,
-  statusOptions,
+  statusOptions = [],
   searchPlaceholder = "Search tracking or package name…",
+  hideStatusFilter = false,
 }: PortalPackagesToolbarProps) {
   return (
     <div className="portal-packages__toolbar">
@@ -32,20 +34,22 @@ export function PortalPackagesToolbar({
           className="portal-packages__search-input"
         />
       </div>
-      <label className="portal-packages__filter-select">
-        <span className="sr-only">Filter by status</span>
-        <DheirSelect
-          compact
-          value={status}
-          onChange={(e) => onStatusChange(e.target.value)}
-        >
-          {statusOptions.map((opt) => (
-            <option key={opt.value || "all"} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </DheirSelect>
-      </label>
+      {!hideStatusFilter && onStatusChange && statusOptions.length > 0 ? (
+        <label className="portal-packages__filter-select">
+          <span className="sr-only">Filter by status</span>
+          <DheirSelect
+            compact
+            value={status}
+            onChange={(e) => onStatusChange(e.target.value)}
+          >
+            {statusOptions.map((opt) => (
+              <option key={opt.value || "all"} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </DheirSelect>
+        </label>
+      ) : null}
     </div>
   )
 }

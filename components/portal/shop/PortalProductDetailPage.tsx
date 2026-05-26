@@ -13,8 +13,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 function getDisplayPrice(product: Product) {
   const discount = Number(product.discount_price ?? 0)
@@ -168,7 +168,7 @@ export function PortalProductDetailPage() {
   if (loadingProduct) {
     return (
       <div className="portal-account portal-account--centered">
-        <BeatLoader color="var(--color-dheir-blue)" size={12} />
+        <DheirLoader color="var(--color-dheir-blue)" size={12} />
       </div>
     )
   }

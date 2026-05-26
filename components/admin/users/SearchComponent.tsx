@@ -1,32 +1,32 @@
 "use client"
 
-import { Dispatch, FormEvent, SetStateAction, useState } from "react"
-import InputComponent from "../shipments/InputComponent"
+import { Dispatch, SetStateAction } from "react"
 
 type FilterParams = {
-    search: string, 
+    search: string
 }
 
 type Props = {
-    filter: FilterParams,
+    filter: FilterParams
     setFilter: Dispatch<SetStateAction<FilterParams>>
 }
 
-
-const SearchComponent = ({filter, setFilter} : Props) => {
-
-    // ! Make the role text inputs checkboxes instead, and select one of the three types of users
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-    }
-
-  return (
-    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col gap-4 w-1/2'>
-        <InputComponent name="search" type="text" state={filter} setState={setFilter} placeHolder="Search Customer code, email"/>
-        
-    </form>
-  )
+const SearchComponent = ({ filter, setFilter }: Props) => {
+    return (
+        <div className="admin-filters">
+            <label className="portal-packages__field">
+                <span className="portal-packages__field-label">Search</span>
+                <input
+                    type="text"
+                    name="search"
+                    className="dheir-input"
+                    value={filter.search}
+                    onChange={(e) => setFilter((prev) => ({ ...prev, search: e.target.value }))}
+                    placeholder="Search customer code or email"
+                />
+            </label>
+        </div>
+    )
 }
 
 export default SearchComponent

@@ -18,8 +18,8 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChangeEvent, FormEvent, useEffect, useState } from "react"
-import { ClipLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 type AuthView = "login" | "forgot-password"
 
@@ -201,7 +201,7 @@ export default function LoginPage() {
                   className="dheir-btn-primary"
                 >
                   {isLoading ? (
-                    <ClipLoader color="#fff" size={20} />
+                    <DheirLoader color="#fff" size={20} />
                   ) : (
                     "Log in"
                   )}
@@ -269,7 +269,7 @@ export default function LoginPage() {
                   onClick={handlePasswordChangeLink}
                 >
                   {isSendingPasswordEmail ? (
-                    <ClipLoader color="#fff" size={20} />
+                    <DheirLoader color="#fff" size={20} />
                   ) : (
                     "Send reset link"
                   )}

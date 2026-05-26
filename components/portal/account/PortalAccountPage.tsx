@@ -1,4 +1,5 @@
 import { PortalAccountLinkRow } from "@/components/portal/account/PortalAccountLinkRow"
+import { CopyableValue } from "@/components/ui/CopyableValue"
 import {
   formatAccountAddress,
   type PortalAccountData,
@@ -42,19 +43,35 @@ export function PortalAccountPage({ data }: PortalAccountPageProps) {
         <div className="portal-account__profile-body">
           <p className="portal-account__name">{fullName}</p>
           {data.email ? (
-            <p className="portal-account__email">{data.email}</p>
+            <CopyableValue
+              layout="inline"
+              value={data.email}
+              successMessage="Email copied"
+              className="portal-account__copy-row portal-account__copy-row--email"
+              valueClassName="portal-account__email"
+            />
           ) : null}
           {data.memberCode ? (
-            <p className="portal-account__member-code">
-              <span className="portal-account__member-code-label">
-                Member code
-              </span>
-              <span className="portal-account__member-code-value">
-                {data.memberCode}
-              </span>
-            </p>
+            <CopyableValue
+              layout="pill"
+              label="Member code"
+              value={data.memberCode}
+              successMessage="Member code copied"
+              className="portal-account__member-code"
+              valueClassName="portal-account__member-code-value"
+            />
           ) : null}
-          <p className="portal-account__address">{addressLine}</p>
+          {data.address ? (
+            <CopyableValue
+              layout="inline"
+              value={addressLine}
+              successMessage="Address copied"
+              className="portal-account__copy-row portal-account__copy-row--address"
+              valueClassName="portal-account__address"
+            />
+          ) : (
+            <p className="portal-account__address">{addressLine}</p>
+          )}
         </div>
       </section>
 

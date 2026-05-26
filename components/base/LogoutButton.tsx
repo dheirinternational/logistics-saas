@@ -1,27 +1,63 @@
 "use client"
 
-import { logoutAction } from '@/lib/db/actions'
-import { FaChevronRight } from 'react-icons/fa'
-import { LuLogOut } from 'react-icons/lu'
+import { DheirConfirmDialog } from "@/components/ui/DheirConfirmDialog"
+import { logoutAction } from "@/lib/db/actions"
+import { toast } from "@/lib/ui/toast"
+import { useState } from "react"
+import { IconChevronRight, IconLogout } from "@tabler/icons-react"
 
 const LogoutButton = () => {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
   const handleLogout = async () => {
-    await logoutAction()
+    setLoading(true)
+    try {
+      await logoutAction()
+    } catch (err) {
+      const digest = err && typeof err === "object" && "digest" in err ? String(err.digest) : ""
+      if (digest.startsWith("NEXT_REDIRECT")) return
+      console.error(err)
+      toast.error("Could not log out. Try again.")
+      setLoading(false)
+    }
   }
 
   return (
-    <button 
-      className='py-4 px-4 flex w-full items-center justify-between'
-      onClick={handleLogout}
-    >
-      <div className='flex gap-4'>
-        <LuLogOut className='text-base'/>
-        <span className='text-xs text-primary-text/80'>
-          Log Out
+    <>
+      <button
+        type="button"
+        className="portal-account__link"
+        onClick={() => setConfirmOpen(true)}
+      >
+        <span className="portal-account__link-icon" aria-hidden style={{ background: "color-mix(in srgb, var(--color-dheir-red) 12%, transparent)", color: "var(--color-dheir-red)" }}>
+          <IconLogout size={22} stroke={1.5} />
         </span>
-      </div>
-      <FaChevronRight className='text-dark/40' />
-    </button>
+        <span className="portal-account__link-body">
+          <span className="portal-account__link-label">Log out</span>
+        </span>
+        <IconChevronRight
+          size={18}
+          stroke={1.5}
+          className="portal-account__link-chevron"
+          aria-hidden
+        />
+      </button>
+
+      <DheirConfirmDialog
+        open={confirmOpen}
+        onClose={() => {
+          if (!loading) setConfirmOpen(false)
+        }}
+        onConfirm={handleLogout}
+        title="Log out?"
+        description="You will need to sign in again to access the admin portal."
+        confirmLabel="Log out"
+        cancelLabel="Stay signed in"
+        variant="danger"
+        loading={loading}
+      />
+    </>
   )
 }
 

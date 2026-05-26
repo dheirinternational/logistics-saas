@@ -4,8 +4,8 @@ import { dheirEase } from "@/lib/motion/dheir"
 import { AnimatePresence, motion } from "framer-motion"
 import { IconX } from "@tabler/icons-react"
 import { useCallback, useEffect, useState } from "react"
-import { ClipLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 type AuthOtpSheetProps = {
   open: boolean
@@ -224,7 +224,7 @@ export function AuthOtpSheet({
               onClick={verifyOtp}
             >
               {isVerifyingEmail ? (
-                <ClipLoader color="#fff" size={20} />
+                <DheirLoader color="#fff" size={20} />
               ) : (
                 "Verify and continue"
               )}

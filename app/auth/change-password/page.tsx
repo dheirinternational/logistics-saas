@@ -8,8 +8,8 @@ import { IconEye, IconEyeOff, IconLock } from "@tabler/icons-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useState } from "react"
-import { ClipLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 export default function ChangePasswordPage() {
   return (
@@ -165,7 +165,7 @@ function ChangePasswordForm() {
             onClick={changePassword}
           >
             {isChangingPassword ? (
-              <ClipLoader color="#fff" size={20} />
+              <DheirLoader color="#fff" size={20} />
             ) : (
               "Update password"
             )}

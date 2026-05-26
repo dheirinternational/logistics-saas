@@ -5,8 +5,8 @@ import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPac
 import type { ShippingRequest } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 export default function ShipmentRequestsPage() {
   const [requests, setRequests] = useState<ShippingRequest[]>([])
@@ -45,7 +45,7 @@ export default function ShipmentRequestsPage() {
       <div className="portal-packages__list">
         {loading ? (
           <div className="portal-packages__loading">
-            <BeatLoader color="var(--color-dheir-blue)" size={12} />
+            <DheirLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : requests.length === 0 ? (
           <div className="portal-packages__empty">

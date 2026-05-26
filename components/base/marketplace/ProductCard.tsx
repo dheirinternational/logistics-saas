@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { FaStar } from "react-icons/fa"
-import { BeatLoader } from "react-spinners"
+import { DheirLoader } from "@/components/ui/DheirLoader"
 
 
 const ProductCard = (props: Product) => {
@@ -48,7 +48,7 @@ const ProductCard = (props: Product) => {
         <figure className="w-23 h-23 bg-red-500 rounded relative overflow-hidden ">
             {
               isImageLoading ? (
-              <BeatLoader color="#FFF"  size={10}/> ) :
+              <DheirLoader color="#FFF"  size={10}/> ) :
               (<Image
               src={images[0]?.image_url }
               alt={"Product Image"}

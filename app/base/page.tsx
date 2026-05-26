@@ -1,4 +1,4 @@
-import { PortalHomePage } from "@/components/portal/home/PortalHomePage"
+import { PortalHomeClient } from "@/components/portal/home/PortalHomeClient"
 import { getPortalDashboardData } from "@/lib/portal/dashboard"
 import { getSession } from "@/lib/db/session"
 import { redirect } from "next/navigation"
@@ -11,5 +11,5 @@ export default async function BaseHomePage() {
 
   const data = await getPortalDashboardData(session.user_id)
 
-  return <PortalHomePage data={data} />
+  return <PortalHomeClient data={data} />
 }

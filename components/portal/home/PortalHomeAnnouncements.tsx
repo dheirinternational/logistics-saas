@@ -20,6 +20,9 @@ export function PortalHomeAnnouncements({
     <section className="portal-home__section">
       <div className="portal-home__section-head">
         <h2 className="portal-home__section-title">Announcements</h2>
+        <Link href="/base/announcements" className="portal-home__text-link">
+          View all
+        </Link>
       </div>
       <ul className="portal-home__announcements">
         {announcements.map((item) => (

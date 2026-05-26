@@ -1,41 +1,32 @@
 "use client"
 
-import { FormEvent, useState } from "react"
-import InputComponent from "../shipments/InputComponent"
+import { Dispatch, SetStateAction } from "react"
 
 type FilterParams = {
-    search: string, 
+    search: string
 }
 
+type Props = {
+    filter: FilterParams
+    setFilter: Dispatch<SetStateAction<FilterParams>>
+}
 
-const SearchComponent = () => {
-
-    const [filterParams, setFilterParams] = useState<FilterParams>({search: ""})
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-    }
-
-  return (
-    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col gap-4'>
-        <InputComponent name="search" title="Search" type="text" state={filterParams} setState={setFilterParams}/>
-        {filterParams.search}
-        
-        {/* Btns */}
-        <div className="space-x-2 mt-5">
-            <button className="text-xs px-5 py-2 bg-accent-blue rounded-lg text-white">
-                Apply
-            </button>
-
-            <button
-            type="button"
-            className="text-xs px-5 py-2 border border-dark/30 rounded-lg"
-            >
-                Reset
-            </button>
+const SearchComponent = ({ filter, setFilter }: Props) => {
+    return (
+        <div className="admin-filters">
+            <label className="portal-packages__field">
+                <span className="portal-packages__field-label">Search</span>
+                <input
+                    type="text"
+                    name="search"
+                    className="dheir-input"
+                    value={filter.search}
+                    onChange={(e) => setFilter((prev) => ({ ...prev, search: e.target.value }))}
+                    placeholder="Search warehouse name, type, or phone"
+                />
+            </label>
         </div>
-    </form>
-  )
+    )
 }
 
 export default SearchComponent

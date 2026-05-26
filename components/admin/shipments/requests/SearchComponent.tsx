@@ -3,7 +3,7 @@
 import { Dispatch, FormEvent, SetStateAction, useEffect, useState} from "react"
 import InputComponent from "../InputComponent"
 import { Warehouse } from "@/types/entityTypeDef"
-import { toast } from "react-toastify"
+import { toast } from "@/lib/ui/toast"
 
 type InputSafe = string | number 
 
@@ -66,7 +66,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
     // }))
 
   return (
-    <form onSubmit={handleSubmit} className='p-body px-8 bg-light rounded-lg flex flex-col md:flex-row gap-4'>
+    <form onSubmit={handleSubmit} className="admin-filters">
 
 
         <InputComponent 
@@ -75,7 +75,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}
         type="text" 
         state={state} 
         setState={setState}
-        placeHolder="Customer Code..."        
+        placeHolder="Customer code…"        
         />
 
         <InputComponent 

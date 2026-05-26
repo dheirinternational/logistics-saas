@@ -5,8 +5,8 @@ import { IoCreate } from "react-icons/io5"
 import { IncomingPackage, Package } from "@/types/entityTypeDef"
 import InputComponent from "../shipments/InputComponent"
 import Image from "next/image"
-import { toast } from "react-toastify"
-import { BeatLoader } from "react-spinners"
+import { toast } from "@/lib/ui/toast"
+import { DheirLoader } from "@/components/ui/DheirLoader"
 import { useRouter } from "next/navigation"
 
 
@@ -183,7 +183,7 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
 //             >
 //                 {
 //                     isSubmitting ? 
-//                     <BeatLoader color="#FFF" size={15}/> :
+//                     <DheirLoader color="#FFF" size={15}/> :
 //                     <>
 //                         <IoCreate/>
 //                         <p className="text-xs font-bold">

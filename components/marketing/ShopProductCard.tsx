@@ -9,7 +9,7 @@ import { IconShoppingCartPlus } from "@tabler/icons-react"
 import Image from "next/image"
 import Link from "next/link"
 import type { MouseEvent } from "react"
-import { toast } from "react-toastify"
+import { toast } from "@/lib/ui/toast"
 
 type ShopProductCardProps = {
   product: ShopShowcaseProduct

@@ -61,9 +61,12 @@ export async function PATCH(req: NextRequest){
         await pool.query(`
           UPDATE express_pricing_templates
             SET price = COALESCE($1, price),
-                clearance = COALESCE($2, clearance)
-            WHERE id = $3
-        `, [body.price, body.clearance, body.id])
+                clearance = COALESCE($2, clearance),
+                min_duration = COALESCE($3, min_duration),
+                max_duration = COALESCE($4, max_duration),
+                duration_type = COALESCE($5, duration_type)
+            WHERE id = $6
+        `, [body.price, body.clearance, body.min_duration, body.max_duration, body.duration_type, body.id])
 
         return NextResponse.json({
             success: true,

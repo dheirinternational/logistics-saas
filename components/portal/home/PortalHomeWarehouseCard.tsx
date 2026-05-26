@@ -3,7 +3,7 @@
 import { IconCopy } from "@tabler/icons-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { toast } from "react-toastify"
+import { toast } from "@/lib/ui/toast"
 
 type PortalHomeWarehouseCardProps = {
   warehouseName: string

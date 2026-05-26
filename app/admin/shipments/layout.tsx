@@ -7,10 +7,12 @@ import { Warehouse } from "@/types/entityTypeDef";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { FaChevronDown, FaGlobe, FaImage, FaPlus } from "react-icons/fa";
-import { BeatLoader } from "react-spinners";
-import { toast } from "react-toastify";
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast";
+import { IconX } from "@tabler/icons-react"
+import { DheirSelect } from "@/components/ui/DheirSelect"
 
 const pages = [
     {
@@ -73,67 +75,39 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
 
     return(
         <div className='max-h-full h-full overflow-hidden relative flex'>
-            <div className="p-body overflow-y-auto max-h-full h-full flex-1">
-                <h2 className="text-2xl font-semibold">
-                    Shipments
-                </h2>
-                <p className="text-xs text-dark/50 mt-2">
-                    Monitor, filter, and manage all outgoing shipments from one control deck.
-                </p>
-                
-                {/* Page Selector */}
-                <div>
-                    <div className="mt-8 mb-6 flex gap-6 justify-start">
-                        <label className='w-full flex flex-col relative max-w-70 text-xs'>
-                            <span className='text-dark/80'>
-                                Page
-                            </span>
-                            <input 
-                            type="text" 
-                            name="current_page" 
-                            className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
-                            value={currentPage}
-                            readOnly
-                            onChange={ (e) => setCurrentPage(e.currentTarget.value as "expected_shipments" | "shipment_requests" | "accepted_requests")}
-                            />
-                            <FaGlobe className='absolute left-1 bottom-2.5 text-dark/60'/>
-                            <div className="absolute right-1 bottom-1.5">
-                                <button
-                                onClick={() => setIsPageSelectorActive(prev => !prev)}
-                                className={`${isPageSelectorActive && "rotate-180"} transition-set`}
+            <div className="portal-home overflow-y-auto max-h-full h-full flex-1">
+                <header className="portal-home__greeting">
+                    <div>
+                        <p className="portal-home__greeting-label">Admin</p>
+                        <h1 className="portal-home__greeting-title">Shipments</h1>
+                        <p className="portal-home__greeting-sub">
+                            Monitor, filter, and manage shipments from one control deck.
+                        </p>
+                    </div>
+                </header>
+
+                <div className="portal-home__toolbar">
+                    <div className="portal-home__tabs" role="tablist" aria-label="Shipments pages">
+                        {pages.map((x) => {
+                            const isActive = pathName === x.link
+                            return (
+                                <Link
+                                    key={x.name}
+                                    href={x.link}
+                                    className={`portal-home__tab${isActive ? " is-active" : ""}`}
+                                    role="tab"
+                                    aria-selected={isActive}
                                 >
-                                    <FaChevronDown/>
-                                </button>
+                                    {`${x.name.charAt(0).toUpperCase() + x.name.slice(1)}`.split("_").join(" ")}
+                                </Link>
+                            )
+                        })}
+                    </div>
 
-
-                                {/* LINKS */}
-                                <div className={`
-                                    absolute right-0 top-[110%] bg-light shadow shadow-dark/20 p-2 z-1000 rounded w-40 transition-set flex flex-col gap-1
-                                    ${!isPageSelectorActive && "opacity-0 translate-y-8 pointer-events-none"}
-                                `}>
-                                    {
-                                        pages.map( (x, i) => 
-                                            <Link 
-                                            key={x.name} 
-                                            href={x.link} 
-                                            className={`z-50 relative border-dark/20 px-3 py-2 text-center
-                                            ${pathName === x.link && "bg-dark text-white rounded"}
-                                            ${i !== 2 && "border-b"}
-                                            `}
-                                            
-                                            onClick={() => setIsPageSelectorActive(false)}
-                                            >
-                                                {`${x.name.charAt(0).toUpperCase() + x.name.slice(1)}`.split("_").join(" ")}
-                                            </Link>
-                                        )
-                                    }
-                                </div>
-                            </div>
-                        </label>
-                        {
-                            currentPage === "expected_shipments" &&
-                            <button 
-                            className={"bg-light px-4 py-2 text-[10px] shadow shadow-dark/8 rounded flex items-center gap-1"}
+                    {currentPage === "expected_shipments" ? (
+                        <button
+                            type="button"
+                            className="portal-home__btn portal-home__btn--primary"
                             onClick={() => {
                                 setReadOnly()
                                 setSelectedPackage({
@@ -151,26 +125,54 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
                                     stored_at: "",
                                     created_at: "",
                                 })
+                                setIsModalActive()
                             }}
-                            >
-                                <FaPlus className=""/>
-                                Add Package 
-                            </button>
-                        }
-                    </div>
+                        >
+                            Add package
+                        </button>
+                    ) : null}
                 </div>
 
                 {children}
 
             </div>
 
-            <div className={` 
-                bg-light w-70
-                max-sm:fixed max-sm:w-screen 
-                ${isModalActive ? "max-sm:right-0" : "max-sm:-right-full"}
-            `}>
-                {EditComponent()}
-            </div>    
+            {isModalActive ? (
+                <div
+                    className="dheir-dialog-backdrop"
+                    role="presentation"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setIsModalActive()
+                    }}
+                >
+                    <div
+                        className="dheir-dialog admin-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Add packages"
+                    >
+                        <div className="dheir-dialog__head">
+                            <div>
+                                <h2 className="dheir-dialog__title">Add packages</h2>
+                                <p className="admin-modal__subtitle">
+                                    Add packages to warehouse with photos and details.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                className="dheir-dialog__close"
+                                onClick={() => setIsModalActive()}
+                                aria-label="Close"
+                            >
+                                <IconX size={20} stroke={1.5} />
+                            </button>
+                        </div>
+                        <div className="admin-modal__body">
+                            {EditComponent()}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     )
 }
@@ -200,6 +202,7 @@ const IncomingPackageEditComponent = () => {
 
     // Set DropDown States
     const [isWarehouseDropDownActive, setIsWarehouseDropDownActice] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement | null>(null)
 
     
 
@@ -305,278 +308,195 @@ const IncomingPackageEditComponent = () => {
 
 
 
-    return <div className="h-full max-h-full bg-light w-70 p-body space-y-4 overflow-y-auto overflow-x-hidden min-h-180 "> 
-        <div>
-            <h2 className='font-semibold'>
-                Add Packages
-            </h2>          
-            <p className='text-[10px] text-dark/60 my-3'>
-                Add Packages to warehouse
-            </p>
-        </div>  
-
-        <form className='mt-8' onSubmit={handleSubmit}>
-
-            {
-                selectedPackage &&
-                <div className='space-y-4'> 
-
-                    {/* Package Name */}
-                    <div>
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Package Name
-                            </span>
-                            <input 
-                            type="text" 
-                            name="package_name" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.package_name}
-                            onChange={handleSelectedPackageInput}
-                            required
-                            readOnly={readonly}
-                            />
-                        </label>
-                    </div>
-
-                    {/* Package Warehouse */}
-                    <div>
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Warehouse
-                            </span>
-                            <input 
-                            type="number" 
-                            name="warehouse_id" 
-                            className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.warehouse_id}
-                            onChange={handleSelectedPackageInput}
-                            min={0}
-                            required
-                            readOnly
-                            />
-
-                            <div className="absolute right-1 bottom-2">
-                                <button
-                                className={`${isWarehouseDropDownActive && "rotate-180"} p-1`}
-                                onClick={() => {setIsWarehouseDropDownActice(!isWarehouseDropDownActive)}}
-                                type="button"
-                                
-                                >
-                                    <FaChevronDown />
-                                </button>
-            
-                                <div className={`
-                                    absolute right-0 top-10 p-3 w-40 rounded bg-light shadow z-1000 transition-set flex flex-col max-h-64 overflow-y-auto
-                                    ${!isWarehouseDropDownActive && "opacity-0 pointer-events-none translate-y-6"}    
-                                `}>
-                                    {
-                                        warehouses.map( (warehouse, i) => 
-                                            {
-                                            return <button
-                                                key={warehouse.id}
-                                                className={`
-                                                    py-3 
-                                                    ${selectedPackage.warehouse_id === warehouse.id && "bg-dark text-white rounded"}
-                                                    ${i !== warehouses.length - 1 && "border-b border-dark/8"}
-                                                `}
-                                                onClick={() => {
-                                                    setPackageWarehouse(warehouse.id)
-                                                    setIsWarehouseDropDownActice(false)
-                                                }}
-                                                type="button"
-                                                >
-                                                    {warehouse.name}
-                                                </button>
-                                            }
-                                        )
-                                    }
-                                </div>
-                            </div>
-            
-                            {/* Overlay */}
-                                <div className="bg-light w-[85%] overflow-hidden absolute bottom-2 left-2 whitespace-nowrap">
-                                    {selectedWarehouse?.name}
-                                </div>
-                        </label>
-                    </div>
-                  
-                    {/* Customer Code */}
-                    <div>
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Customer Code
-                            </span>
-                            <input 
-                            type="text" 
-                            name="customer_code" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.customer_code}
-                            onChange={handleSelectedPackageInput}
-                            required
-                            readOnly={readonly}
-                            />
-                        </label>
-                    </div>
-
-                    {/* Package Identifier */}
-                    <div>
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Package Identifier
-                            </span>
-                            <input 
-                            type="text" 
-                            name="incoming_package_id" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.incoming_package_id}
-                            onChange={handleSelectedPackageInput}
-                            required
-                            readOnly={readonly}
-                            />
-                        </label>
-                    </div>
-                    
-                    {/* Weight */}
-                    <div className="flex gap-2">
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Weight (kg)
-                            </span>
-                            <input 
-                            type="number" 
-                            name="weight" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.weight}
-                            onChange={handleSelectedPackageInput}
-                            min={0}
-                            step="0.01"
-                            required
+    return (
+        <form onSubmit={handleSubmit} className="admin-modal__form">
+            {selectedPackage ? (
+                <>
+                    <div className="admin-modal__fields">
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Package name</span>
+                            <input
+                                type="text"
+                                name="package_name"
+                                className="dheir-input"
+                                value={selectedPackage.package_name}
+                                onChange={handleSelectedPackageInput}
+                                required
+                                readOnly={readonly}
                             />
                         </label>
 
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                No. of items
-                            </span>
-                            <input 
-                            type="number" 
-                            name="amount" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.amount}
-                            onChange={handleSelectedPackageInput}
-                            min={0}
-                            required
-                            />
-                        </label>
-                    </div>
-
-
-                    {/* condition   Received_at   stored_at */}
-                    <div className="flex gap-2">
-                        <label className='w-18.5 flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Status
-                            </span>
-                            <input 
-                            type="text" 
-                            name="condition" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.condition}
-                            onChange={handleSelectedPackageInput}
-                            required
-                            />
-                        </label>
-
-
-                        <label className='w-18.5 flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Received
-                            </span>
-                            <input 
-                            type="date" 
-                            name="received_at" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.received_at}
-                            onChange={handleSelectedPackageInput}
-                            required
-                            />
-                        </label>
-
-
-                        <label className='w-18.5 flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Stored
-                            </span>
-                            <input 
-                            type="date" 
-                            name="stored_at" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedPackage.stored_at}
-                            onChange={handleSelectedPackageInput}
-                            required
-                            />
-                        </label>
-                    </div>
-
-                    {/* Images */}
-                    <div>
-                        <div className="w-fit h-fit overflow-hidden max-w-fit max-h-fit relative rounded">
-                            <button 
-                            className="text-[10px] border border-dark/30 rounded px-4 py-2 flex gap-1 items-center relative z-100"
-                            type="button"
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Warehouse</span>
+                            <DheirSelect
+                                name="warehouse_id"
+                                value={String(selectedPackage.warehouse_id ?? "")}
+                                onChange={(e) => setPackageWarehouse(Number(e.target.value))}
+                                required
                             >
-                                Select Images
-                                <FaImage />
-                            </button>
-                            <input 
-                            type="file" 
-                            accept="image/*"
-                            multiple
-                            name="images"
-                            onChange={hanldeImageChange}
-                            className="w-full h-full bg-red-400 absolute z-1000 top-0 left-0 opacity-0 cursor-pointer"
-                            />
-                        </div>
-                        <div className="border border-dark/40 rounded py-2 mt-4">
-                            <div className="flex justify-center w-full gap-4 max-w-full overflow-x-auto">
-                                {previews.map( (x, i) => 
-                                <figure key={i} className="w-10 h-10 bg-accent-red rounded overflow-hidden relative">
-                                    <Image
-                                        src={x}
-                                        alt=""
-                                        fill
-                                        className="object-fill"
-                                        />
-                                    </figure>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Submit Button */}
-                    <div className="mt-16 mb-40">
-                        <button 
-                        className="bg-accent-red text-white text-[10px] w-full py-2 rounded"
-                        onClick={() => console.log(selectedPackage)}
-                        disabled={isUploadingPackage}
-                        >
-                            {
-                                isUploadingPackage ? 
-                                <BeatLoader color="#FFF" size={8}/> :
-                                <>
-                                    <p>
-                                        Add Package
-                                    </p>
-                                </>
-                            }
-                        </button>
-                    </div>
-                </div>
-            }
+                                <option value="">Select warehouse</option>
+                                {warehouses.map((w) => (
+                                    <option key={w.id} value={w.id}>
+                                        {w.name}
+                                    </option>
+                                ))}
+                            </DheirSelect>
+                        </label>
 
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Customer code</span>
+                            <input
+                                type="text"
+                                name="customer_code"
+                                className="dheir-input"
+                                value={selectedPackage.customer_code}
+                                onChange={handleSelectedPackageInput}
+                                required
+                                readOnly={readonly}
+                            />
+                        </label>
+
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Package identifier</span>
+                            <input
+                                type="text"
+                                name="incoming_package_id"
+                                className="dheir-input"
+                                value={selectedPackage.incoming_package_id}
+                                onChange={handleSelectedPackageInput}
+                                required
+                                readOnly={readonly}
+                            />
+                        </label>
+
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Weight (kg)</span>
+                            <input
+                                type="number"
+                                name="weight"
+                                className="dheir-input"
+                                value={selectedPackage.weight}
+                                onChange={handleSelectedPackageInput}
+                                min={0}
+                                step="0.01"
+                                required
+                            />
+                        </label>
+
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">No. of items</span>
+                            <input
+                                type="number"
+                                name="amount"
+                                className="dheir-input"
+                                value={selectedPackage.amount}
+                                onChange={handleSelectedPackageInput}
+                                min={0}
+                                required
+                            />
+                        </label>
+
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Condition</span>
+                            <input
+                                type="text"
+                                name="condition"
+                                className="dheir-input"
+                                value={selectedPackage.condition}
+                                onChange={handleSelectedPackageInput}
+                                required
+                            />
+                        </label>
+
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Received</span>
+                            <input
+                                type="date"
+                                name="received_at"
+                                className="dheir-input"
+                                value={selectedPackage.received_at}
+                                onChange={handleSelectedPackageInput}
+                                required
+                            />
+                        </label>
+
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Stored</span>
+                            <input
+                                type="date"
+                                name="stored_at"
+                                className="dheir-input"
+                                value={selectedPackage.stored_at}
+                                onChange={handleSelectedPackageInput}
+                                required
+                            />
+                        </label>
+                    </div>
+
+                    <div className="admin-uploader">
+                            <div className="admin-uploader__row">
+                                <div>
+                                    <p className="portal-packages__field-label" style={{ margin: 0 }}>
+                                        Photos
+                                    </p>
+                                    <p className="admin-uploader__help">
+                                        Upload clear images of the package. You can select multiple.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="portal-home__btn portal-home__btn--secondary"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    Choose images
+                                </button>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    name="images"
+                                    onChange={hanldeImageChange}
+                                    style={{ display: "none" }}
+                                />
+                            </div>
+
+                            {previews.length > 0 ? (
+                                <div className="admin-uploader__previews">
+                                    {previews.map((src, i) => (
+                                        <div key={src + i} className="admin-uploader__preview">
+                                            <Image src={src} alt="" fill className="object-cover" />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="admin-uploader__help">No images selected yet.</p>
+                            )}
+                        </div>
+
+                    <div className="admin-modal__actions">
+                            <button
+                                type="submit"
+                                className="portal-home__btn portal-home__btn--primary"
+                                disabled={isUploadingPackage}
+                            >
+                                {isUploadingPackage ? (
+                                    <DheirLoader color="#fff" size={10} />
+                                ) : (
+                                    "Add package"
+                                )}
+                            </button>
+                    </div>
+                </>
+            ) : (
+                <div className="portal-home__panel-empty">
+                    <p className="portal-home__section-sub">
+                        Select an incoming package to add details.
+                    </p>
+                </div>
+            )}
         </form>
-    </div>
+    )
 }
 
 
@@ -889,7 +809,7 @@ const AcceptedShipmentsEditComponent = () => {
                             isUpdatingShipmentStatus && 
                             <div className="text-[8px] text-yellow-600 flex items-center gap-2 mt-3 absolute top-10 z-1000 left-0">
                                 <p>Updating Status</p>
-                                <BeatLoader color="black" size={4}/>
+                                <DheirLoader color="black" size={4}/>
                             </div>
                         } 
                     </div>

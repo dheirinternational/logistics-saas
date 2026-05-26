@@ -69,6 +69,30 @@ export function getIncomingStatusVariant(
   )
 }
 
+const SHIPMENT_STATUS_VARIANTS: Record<string, PackageStatusChipVariant> = {
+  processing: "orange",
+  shipped: "blue",
+  in_transit: "blue",
+  arrived: "blue",
+  out_for_delivery: "orange",
+  delivered: "green",
+}
+
+export function getShipmentStatusVariant(
+  status: string,
+): PackageStatusChipVariant {
+  return SHIPMENT_STATUS_VARIANTS[status] ?? "neutral"
+}
+
+export function getActivityStatusVariant(
+  kind: "shipment" | "package" | "incoming",
+  status: string,
+): PackageStatusChipVariant {
+  if (kind === "shipment") return getShipmentStatusVariant(status)
+  if (kind === "incoming") return getIncomingStatusVariant(status)
+  return getPackageStatusVariant(status)
+}
+
 export const PACKAGE_FILTER_OPTIONS = [
   { value: "", label: "All statuses" },
   { value: "stored", label: "At warehouse" },

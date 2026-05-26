@@ -1,5 +1,5 @@
 import { DeliveryZonePrice, State } from "@/types/entityTypeDef";
-import { toast } from "react-toastify"
+import { toast } from "@/lib/ui/toast"
 
 
 export const calculateDeliveryZonePrice = async (state: string): Promise<number> => {

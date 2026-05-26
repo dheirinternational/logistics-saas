@@ -1,8 +1,9 @@
 "use client"
 
 import { PortalHeaderCart } from "@/components/portal/PortalHeaderCart"
+import { PortalReviewModal } from "@/components/portal/PortalReviewModal"
 import { getPortalSearchHref } from "@/lib/portal/search"
-import { IconBell, IconMenu2, IconSearch } from "@tabler/icons-react"
+import { IconBell, IconMenu2, IconSearch, IconStar } from "@tabler/icons-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { FormEvent, useEffect, useId, useRef, useState } from "react"
@@ -28,6 +29,7 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
 
   const [query, setQuery] = useState("")
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(false)
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [announcementsLoaded, setAnnouncementsLoaded] = useState(false)
 
@@ -81,97 +83,119 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
   const hasAnnouncements = announcements.length > 0
 
   return (
-    <header className="portal-header">
-      <button
-        type="button"
-        className="portal-header__menu"
-        onClick={onOpenMenu}
-        aria-expanded={menuExpanded}
-        aria-controls="portal-sidebar"
-      >
-        <IconMenu2 size={22} stroke={1.5} aria-hidden />
-        <span className="sr-only">Open menu</span>
-      </button>
-
-      <form className="portal-header__search" onSubmit={handleSearch} role="search">
-        <label htmlFor={searchId} className="sr-only">
-          Search packages or products
-        </label>
-        <IconSearch
-          size={18}
-          stroke={1.5}
-          className="portal-header__search-icon"
-          aria-hidden
-        />
-        <input
-          id={searchId}
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search packages, tracking, products…"
-          className="portal-header__search-input"
-          autoComplete="off"
-        />
-      </form>
-
-      <div className="portal-header__end">
-        <PortalHeaderCart />
-
-        <div className="portal-header__actions" ref={panelRef}>
+    <>
+      <header className="portal-header">
         <button
           type="button"
-          className="portal-header__icon-btn"
-          onClick={() => setNotificationsOpen((open) => !open)}
-          aria-expanded={notificationsOpen}
-          aria-controls={notificationsId}
-          aria-label="Notifications"
+          className="portal-header__menu"
+          onClick={onOpenMenu}
+          aria-expanded={menuExpanded}
+          aria-controls="portal-sidebar"
         >
-          <IconBell size={22} stroke={1.5} aria-hidden />
-          {hasAnnouncements ? (
-            <span className="portal-header__badge" aria-hidden />
-          ) : null}
+          <IconMenu2 size={22} stroke={1.5} aria-hidden />
+          <span className="sr-only">Open menu</span>
         </button>
 
-        {notificationsOpen ? (
-          <div
-            id={notificationsId}
-            className="portal-header__notifications"
-            role="dialog"
-            aria-label="Announcements"
+        <form className="portal-header__search" onSubmit={handleSearch} role="search">
+          <label htmlFor={searchId} className="sr-only">
+            Search packages or products
+          </label>
+          <IconSearch
+            size={18}
+            stroke={1.5}
+            className="portal-header__search-icon"
+            aria-hidden
+          />
+          <input
+            id={searchId}
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search packages, tracking, products…"
+            className="portal-header__search-input"
+            autoComplete="off"
+          />
+        </form>
+
+        <div className="portal-header__end">
+          <PortalHeaderCart />
+
+          <button
+            type="button"
+            className="portal-header__review-btn"
+            onClick={() => setReviewOpen(true)}
           >
-            <p className="portal-header__notifications-title">Announcements</p>
-            {!announcementsLoaded ? (
-              <p className="portal-header__notifications-empty">Loading…</p>
-            ) : announcements.length === 0 ? (
-              <p className="portal-header__notifications-empty">
-                No announcements right now.
-              </p>
-            ) : (
-              <ul className="portal-header__notifications-list">
-                {announcements.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={`/base/announcements/${item.id}`}
-                      className="portal-header__notification-link"
-                      onClick={() => setNotificationsOpen(false)}
-                    >
-                      <span className="portal-header__notification-title">
-                        {item.title}
-                      </span>
-                      {item.message ? (
-                        <span className="portal-header__notification-preview">
-                          {item.message}
-                        </span>
-                      ) : null}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <IconStar size={20} stroke={1.5} aria-hidden />
+            <span className="portal-header__review-label">Add review</span>
+          </button>
+
+          <div className="portal-header__actions" ref={panelRef}>
+            <button
+              type="button"
+              className="portal-header__icon-btn"
+              onClick={() => setNotificationsOpen((open) => !open)}
+              aria-expanded={notificationsOpen}
+              aria-controls={notificationsId}
+              aria-label="Announcements"
+            >
+              <IconBell size={22} stroke={1.5} aria-hidden />
+              {hasAnnouncements ? (
+                <span className="portal-header__badge" aria-hidden />
+              ) : null}
+            </button>
+
+            {notificationsOpen ? (
+              <div
+                id={notificationsId}
+                className="portal-header__notifications"
+                role="dialog"
+                aria-label="Announcements"
+              >
+                <p className="portal-header__notifications-title">Announcements</p>
+                {!announcementsLoaded ? (
+                  <p className="portal-header__notifications-empty">Loading…</p>
+                ) : announcements.length === 0 ? (
+                  <p className="portal-header__notifications-empty">
+                    No announcements right now.
+                  </p>
+                ) : (
+                  <ul className="portal-header__notifications-list">
+                    {announcements.slice(0, 5).map((item) => (
+                      <li key={item.id}>
+                        <Link
+                          href={`/base/announcements/${item.id}`}
+                          className="portal-header__notification-link"
+                          onClick={() => setNotificationsOpen(false)}
+                        >
+                          <span className="portal-header__notification-title">
+                            {item.title}
+                          </span>
+                          {item.message ? (
+                            <span className="portal-header__notification-preview">
+                              {item.message}
+                            </span>
+                          ) : null}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="portal-header__notifications-foot">
+                  <Link
+                    href="/base/announcements"
+                    className="portal-header__notifications-view-all"
+                    onClick={() => setNotificationsOpen(false)}
+                  >
+                    View all
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </div>
-        ) : null}
         </div>
-      </div>
-    </header>
+      </header>
+
+      <PortalReviewModal open={reviewOpen} onClose={() => setReviewOpen(false)} />
+    </>
   )
 }

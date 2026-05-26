@@ -9,8 +9,8 @@ import {
 import type { Address } from "@/types/entityTypeDef"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 type AddressState = Omit<Address, "id" | "created_at" | "user_id">
 
@@ -162,7 +162,7 @@ export function PortalMyAddressPage() {
   if (loading) {
     return (
       <div className="portal-account portal-account--centered">
-        <BeatLoader color="var(--color-dheir-blue)" size={12} />
+        <DheirLoader color="var(--color-dheir-blue)" size={12} />
       </div>
     )
   }
@@ -259,7 +259,7 @@ export function PortalMyAddressPage() {
             disabled={isUploadingAddress}
           >
             {isUploadingAddress ? (
-              <BeatLoader color="#fff" size={8} />
+              <DheirLoader color="#fff" size={8} />
             ) : isAddressExisting ? (
               "Update address"
             ) : (

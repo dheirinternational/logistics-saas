@@ -16,8 +16,8 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChangeEvent, FormEvent, useState } from "react"
-import { ClipLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -262,7 +262,7 @@ export default function SignupPage() {
             className="dheir-btn-primary mt-2"
           >
             {isCreatingAccount ? (
-              <ClipLoader color="#fff" size={20} />
+              <DheirLoader color="#fff" size={20} />
             ) : isEmailVerified &&
               verifiedEmail === credentials.email.trim().toLowerCase() ? (
               "Create account"

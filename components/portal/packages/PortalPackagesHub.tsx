@@ -10,8 +10,8 @@ import type { IncomingPackage, Package } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 type TabId = "warehouse" | "incoming"
 
@@ -185,7 +185,7 @@ export function PortalPackagesHub() {
       <div className="portal-packages__list">
         {loading ? (
           <div className="portal-packages__loading">
-            <BeatLoader color="var(--color-dheir-blue)" size={12} />
+            <DheirLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : tab === "warehouse" ? (
           filteredPackages.length === 0 ? (

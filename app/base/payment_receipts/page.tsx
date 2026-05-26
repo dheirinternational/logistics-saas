@@ -8,8 +8,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaChevronLeft, FaUser } from 'react-icons/fa'
-import { BeatLoader } from 'react-spinners'
-import { toast } from 'react-toastify'
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 const Page: NextPage = ({}) => {
 
@@ -119,7 +119,7 @@ const Page: NextPage = ({}) => {
         {
             isDataLoading ? 
             <div className='flex justify-center py-5'>
-                <BeatLoader color='#f26430' size={10}/>
+                <DheirLoader color='#f26430' size={10}/>
             </div>
             :
             <>

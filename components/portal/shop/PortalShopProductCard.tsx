@@ -7,8 +7,8 @@ import Image from "next/image"
 import Link from "next/link"
 import type { MouseEvent } from "react"
 import { useEffect, useState } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 type PortalShopProductCardProps = {
   product: Product
@@ -80,7 +80,7 @@ export function PortalShopProductCard({
       <Link href={detailHref} className="shop-product-card__media block">
         {loadingImage ? (
           <span className="flex h-full w-full items-center justify-center">
-            <BeatLoader size={8} color="var(--color-dheir-blue)" />
+            <DheirLoader size={8} color="var(--color-dheir-blue)" />
           </span>
         ) : imageUrl ? (
           <Image

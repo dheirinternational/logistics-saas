@@ -20,17 +20,12 @@ export default async function AdminLayout({children}: {children: ReactNode}){
         redirect("/auth/login")
     }
     
-    return(
-        <div className="max-h-dvh h-dvh flex">
+    return (
+        <div className="admin-shell">
             <SideBar />
-            <div className="
-                w-[calc(100vw-200px)] h-dvh overflow-y-auto
-                max-sm:w-full    
-            ">
+            <div className="admin-shell__content">
                 <Header />
-                <div className="h-dvh max-h-dvh max-sm:h-[calc(100dvh-56px)] max-sm:max-h-[calc(100dvh-56px)] bg-gray-100">
-                    {children}
-                </div>
+                <main className="admin-shell__main">{children}</main>
             </div>
         </div>
     )

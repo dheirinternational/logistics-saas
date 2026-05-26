@@ -7,8 +7,8 @@ import { useCartStore } from "@/store/cartStore"
 import type { Address } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 type UserCheckout = {
   email: string
@@ -223,7 +223,7 @@ export function PortalCartPage() {
             onClick={initializePayment}
           >
             {isPaying ? (
-              <BeatLoader color="#fff" size={8} />
+              <DheirLoader color="#fff" size={8} />
             ) : (
               "Checkout"
             )}

@@ -3,8 +3,8 @@
 import { useCartStore } from "@/store/cartStore"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 export default function VerifyOrderPayment() {
   const searchParams = useSearchParams()
@@ -58,7 +58,7 @@ export default function VerifyOrderPayment() {
 
   return (
     <div className="p-body flex min-h-[40vh] flex-col items-center justify-center gap-4">
-      <BeatLoader color="#1A5FFF" size={12} />
+      <DheirLoader color="#1A5FFF" size={12} />
       <h1 className="text-sm font-semibold">Verifying payment...</h1>
     </div>
   )

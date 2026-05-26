@@ -1,28 +1,30 @@
-import { IconType } from "react-icons"
-import { BsCart2 } from "react-icons/bs"
-import { FaBoxes,  FaUsers } from "react-icons/fa"
+import type { TablerIcon } from "@tabler/icons-react"
+import {
+  IconShoppingCart,
+  IconTruck,
+  IconUsers,
+} from "@tabler/icons-react"
 
 type props = {
   link: string
-  icon: IconType
+  icon: TablerIcon
   title: string
 }
 
-
 export const buttonsProps: props[] = [
-    {
-        title: "users",
-        icon: FaUsers,
-        link: "/admin/users"
-    },
-    {
-        title: "shipments",
-        icon: FaBoxes,
-        link: "/admin/shipments"
-    },
-    {
-        title: "Orders",
-        icon: BsCart2,
-        link: "/admin/shipments"
-    }
+  {
+    title: "Users",
+    icon: IconUsers,
+    link: "/admin/users",
+  },
+  {
+    title: "Shipments",
+    icon: IconTruck,
+    link: "/admin/shipments",
+  },
+  {
+    title: "Orders",
+    icon: IconShoppingCart,
+    link: "/admin/orders",
+  },
 ]

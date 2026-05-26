@@ -1,3 +1,6 @@
+"use client"
+
+import { CopyableValue } from "@/components/ui/CopyableValue"
 import { getTimeGreeting } from "@/lib/portal/greeting"
 
 type PortalHomeGreetingProps = {
@@ -15,17 +18,23 @@ export function PortalHomeGreeting({
   return (
     <header className="portal-home__greeting">
       <div>
-        <p className="portal-home__greeting-label">{greeting}</p>
-        <h1 className="portal-home__greeting-title">{name}</h1>
+        <h1 className="portal-home__greeting-title">
+          <span className="portal-home__greeting-prefix">{greeting}</span>{" "}
+          {name}
+        </h1>
         <p className="portal-home__greeting-sub">
           Here is what needs your attention today.
         </p>
       </div>
       {memberCode ? (
-        <div className="portal-home__member-code">
-          <span className="portal-home__member-code-label">Member code</span>
-          <span className="portal-home__member-code-value">{memberCode}</span>
-        </div>
+        <CopyableValue
+          layout="stacked"
+          label="Member code"
+          value={memberCode}
+          successMessage="Member code copied"
+          className="portal-home__member-code"
+          valueClassName="portal-home__member-code-value"
+        />
       ) : null}
     </header>
   )

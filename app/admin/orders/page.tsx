@@ -1,17 +1,15 @@
 "use client"
 
-import SearchComponent from '@/components/admin/orders/SearchComponent'
-import { DheirSelect } from '@/components/ui/DheirSelect'
-import { Table } from '@/components/admin/table/Table'
-import { Order } from '@/types/entityTypeDef'
-import { OrderStatus } from '@/types/statusTypes'
-import { createColumnHelper } from '@tanstack/react-table'
-import { NextPage } from 'next'
-import { useEffect, useState } from 'react'
-import { FaX } from 'react-icons/fa6'
-import { BeatLoader } from 'react-spinners'
-import { toast } from 'react-toastify'
-
+import SearchComponent from "@/components/admin/orders/SearchComponent"
+import { Table } from "@/components/admin/table/Table"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DheirSelect } from "@/components/ui/DheirSelect"
+import { toast } from "@/lib/ui/toast"
+import { Order } from "@/types/entityTypeDef"
+import { createColumnHelper } from "@tanstack/react-table"
+import { IconCircleCheck, IconClock, IconPackage, IconTruckDelivery, IconX } from "@tabler/icons-react"
+import { NextPage } from "next"
+import { useEffect, useMemo, useState } from "react"
 
 type FilterValues = {
     search: string
@@ -19,20 +17,17 @@ type FilterValues = {
 }
 
 const Page: NextPage = () => {
-
     const [orders, setOrders] = useState<Order[]>([])
     const [isDataLoading, setIsDataLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-    const [isModalActive, setIsModalActive] = useState(false)
 
     const [filterValues, setFilterValues] = useState<FilterValues>({
         search: "",
-        status: ""
+        status: "",
     })
 
     useEffect(() => {
-
         const fetchOrders = async () => {
             setIsDataLoading(true)
 
@@ -60,119 +55,218 @@ const Page: NextPage = () => {
         }
 
         fetchOrders()
-
     }, [])
 
     const columnHelper = createColumnHelper<Order>()
 
     const columnDef = [
         columnHelper.accessor("order_id", {
-            header: "Order ID"
+            header: "Order ID",
         }),
         columnHelper.accessor("customer_code", {
-            header: "Customer Code"
+            header: "Customer Code",
         }),
         columnHelper.accessor("total_price", {
-            header: "Total Price"
+            header: "Total Price",
+            cell: ({ getValue }) => <span>₦ {getValue()}</span>,
         }),
         columnHelper.accessor("delivery_fee", {
-            header: "Delivery Fee"
+            header: "Delivery Fee",
+            cell: ({ getValue }) => <span>₦ {getValue()}</span>,
         }),
         columnHelper.accessor("status", {
-            header: "Status"
+            header: "Status",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value ? String(value).replace(/_/g, " ") : "—"
+            },
         }),
         columnHelper.accessor("created_at", {
             header: "Created At",
             cell: ({ getValue }) => (
                 <p>{new Date(getValue()).toDateString()}</p>
-            )
+            ),
         }),
         columnHelper.display({
-            id: "action-btns",
+            id: "actions",
+            header: "Actions",
             cell: ({ row }) => (
                 <button
+                    type="button"
+                    className="portal-home__table-link"
                     onClick={() => {
                         setSelectedOrder(row.original)
-                        setIsModalActive(true)
                     }}
                 >
-                    view
+                    View / edit
                 </button>
-            )
-        })
+            ),
+        }),
     ]
 
-    const filteredData = orders
-        .filter(x =>
-            x.order_id.toLowerCase().includes(filterValues.search.toLowerCase())
-        )
-        .filter( x =>  
-            x.status.toLowerCase().includes(filterValues.status.toLowerCase())
-        )
+    const filteredData = useMemo(() => {
+        const q = filterValues.search.trim().toLowerCase()
+        const status = filterValues.status.trim().toLowerCase()
+        return orders
+            .filter((x) => {
+                if (!q) return true
+                const orderId = String(x.order_id ?? "").toLowerCase()
+                const customer = String(x.customer_code ?? "").toLowerCase()
+                return orderId.includes(q) || customer.includes(q)
+            })
+            .filter((x) => {
+                if (!status) return true
+                return String(x.status ?? "").toLowerCase() === status
+            })
+    }, [orders, filterValues.search, filterValues.status])
 
+    const stats = useMemo(() => {
+        const total = orders.length
+        const confirmed = orders.filter((o) => String(o.status).toLowerCase() === "confirmed").length
+        const processing = orders.filter((o) => String(o.status).toLowerCase() === "processing").length
+        const shipped = orders.filter((o) => String(o.status).toLowerCase() === "shipped").length
+        const delivered = orders.filter((o) => String(o.status).toLowerCase() === "delivered").length
+        return { total, confirmed, processing, shipped, delivered }
+    }, [orders])
 
     return (
-        <div className='h-full space-y-4'>
+        <>
+            <div className="portal-home">
+                <header className="portal-home__greeting">
+                    <div>
+                        <p className="portal-home__greeting-label">Admin</p>
+                        <h1 className="portal-home__greeting-title">Orders</h1>
+                        <p className="portal-home__greeting-sub">Manage, edit and view all Orders.</p>
+                    </div>
+                </header>
 
-            <h2 className="text-2xl font-semibold">
-                Orders
-            </h2>
-            <p className="text-xs text-dark/50 mt-2">
-                Manage, edit and view all Orders.
-            </p>
+                {isDataLoading ? (
+                    <div className="portal-home__panel portal-home__loader">
+                        <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                    </div>
+                ) : (
+                    <>
+                        <div className="portal-home__stats" role="list" aria-label="Orders stats">
+                            <div className="portal-home__stat-card" role="listitem">
+                                <span className="portal-home__stat-card-icon" aria-hidden>
+                                    <IconPackage size={22} stroke={1.5} />
+                                </span>
+                                <span className="portal-home__stat-card-body">
+                                    <span className="portal-home__stat-card-label">Total</span>
+                                    <span className="portal-home__stat-card-value">{stats.total}</span>
+                                    <span className="portal-home__stat-card-hint">All orders</span>
+                                </span>
+                            </div>
 
-            {/* SEARCH COMPONENT */}
-            <SearchComponent state={filterValues} setState={setFilterValues} />
+                            <div className="portal-home__stat-card" role="listitem">
+                                <span className="portal-home__stat-card-icon" aria-hidden>
+                                    <IconCircleCheck size={22} stroke={1.5} />
+                                </span>
+                                <span className="portal-home__stat-card-body">
+                                    <span className="portal-home__stat-card-label">Confirmed</span>
+                                    <span className="portal-home__stat-card-value">{stats.confirmed}</span>
+                                    <span className="portal-home__stat-card-hint">Ready to process</span>
+                                </span>
+                            </div>
 
-            {/* TABLE */}
-            <div className='bg-light p-body rounded-lg mt-4'>
-                <h2 className='text-sm font-bold'>
-                    Orders
-                </h2>
+                            <div className="portal-home__stat-card" role="listitem">
+                                <span className="portal-home__stat-card-icon" aria-hidden>
+                                    <IconClock size={22} stroke={1.5} />
+                                </span>
+                                <span className="portal-home__stat-card-body">
+                                    <span className="portal-home__stat-card-label">Processing</span>
+                                    <span className="portal-home__stat-card-value">{stats.processing}</span>
+                                    <span className="portal-home__stat-card-hint">Being prepared</span>
+                                </span>
+                            </div>
 
-                <p className='text-xs mt-2 opacity-70'>
-                    A live record of all customer orders.
-                </p>
+                            <div className="portal-home__stat-card" role="listitem">
+                                <span className="portal-home__stat-card-icon" aria-hidden>
+                                    <IconTruckDelivery size={22} stroke={1.5} />
+                                </span>
+                                <span className="portal-home__stat-card-body">
+                                    <span className="portal-home__stat-card-label">Shipped</span>
+                                    <span className="portal-home__stat-card-value">{stats.shipped}</span>
+                                    <span className="portal-home__stat-card-hint">On the move</span>
+                                </span>
+                            </div>
 
-                <div className='mt-4'>
-                    {isDataLoading ? (
-                        <div className='flex justify-center items-center py-8'>
-                            <BeatLoader color="#3B82F6" size={15} />
-                            <span className='ml-2 text-sm'>Loading orders...</span>
+                            <div className="portal-home__stat-card" role="listitem">
+                                <span className="portal-home__stat-card-icon" aria-hidden>
+                                    <IconPackage size={22} stroke={1.5} />
+                                </span>
+                                <span className="portal-home__stat-card-body">
+                                    <span className="portal-home__stat-card-label">Delivered</span>
+                                    <span className="portal-home__stat-card-value">{stats.delivered}</span>
+                                    <span className="portal-home__stat-card-hint">Completed</span>
+                                </span>
+                            </div>
                         </div>
-                    ) : error ? (
-                        <div className='text-center py-8'>
-                            <p className='text-red-500 text-sm'>{error}</p>
-                        </div>
-                    ) : (
-                        <Table
-                            importedData={filteredData}
-                            columnDef={columnDef}
-                            globalFilter=''
-                        />
-                    )}
-                </div>
+
+                        <section className="portal-home__panel" aria-label="Order filters">
+                            <div className="portal-home__panel-head">
+                                <div>
+                                    <h2 className="portal-home__section-title">Filters</h2>
+                                    <p className="portal-home__section-sub">
+                                        Search by tracking number, customer code, or status.
+                                    </p>
+                                </div>
+                            </div>
+                            <SearchComponent state={filterValues} setState={setFilterValues} />
+                        </section>
+
+                        <section className="portal-home__panel" aria-labelledby="orders-records-heading">
+                            <div className="portal-home__panel-head">
+                                <div>
+                                    <h2 id="orders-records-heading" className="portal-home__section-title">
+                                        Orders
+                                    </h2>
+                                    <p className="portal-home__section-sub">A live record of all customer orders.</p>
+                                </div>
+                            </div>
+
+                            {error ? (
+                                <div className="portal-home__panel-empty">
+                                    <p className="portal-home__section-sub" style={{ color: "var(--color-dheir-red)" }}>
+                                        {error}
+                                    </p>
+                                </div>
+                            ) : filteredData.length < 1 ? (
+                                <div className="portal-home__panel-empty">
+                                    <p className="portal-home__empty">No orders found.</p>
+                                </div>
+                            ) : (
+                                <Table importedData={filteredData} columnDef={columnDef} globalFilter={filterValues.search} />
+                            )}
+                        </section>
+                    </>
+                )}
             </div>
 
-            {/* MODAL */}
-            {isModalActive && selectedOrder && (
+            {selectedOrder ? (
                 <OrderModal
+                    key={selectedOrder.order_id}
                     order={selectedOrder}
-                    setModal={() => setIsModalActive(false)}
+                    onClose={() => setSelectedOrder(null)}
+                    onUpdated={() => {
+                        setSelectedOrder(null)
+                        setFilterValues((prev) => ({ ...prev }))
+                    }}
                 />
-            )}
-        </div>
+            ) : null}
+        </>
     )
 }
 
 const OrderModal = ({
     order,
-    setModal
+    onClose,
+    onUpdated,
 }: {
-    order: Order | null
-    setModal: () => void
+    order: Order
+    onClose: () => void
+    onUpdated: () => void
 }) => {
-
     const [status, setStatus] = useState<Order["status"]>(
         order?.status || "Confirmed"
     )
@@ -180,8 +274,6 @@ const OrderModal = ({
     const [isUpdating, setIsUpdating] = useState(false)
 
     const updateStatus = async () => {
-        if (!order) return
-
         setIsUpdating(true)
 
         try {
@@ -201,6 +293,7 @@ const OrderModal = ({
             }
 
             toast.success("Order status updated")
+            onUpdated()
 
         } catch (err) {
             console.error("Update error:", err)
@@ -211,77 +304,114 @@ const OrderModal = ({
     }
 
     return (
-        <div className='w-screen h-dvh bg-dark/40 fixed top-0 right-0 center-items'>
-
-            <div className='w-96 bg-light rounded p-4 relative'>
-
-                {/* CLOSE BUTTON */}
-                <button
-                    className='absolute right-4 top-4'
-                    onClick={setModal}
-                >
-                    <FaX />
-                </button>
-
-                {/* HEADER */}
-                <h2 className='font-bold text-lg'>
-                    {order?.order_id}
-                </h2>
-
-                {/* ORDER DETAILS */}
-                <div className='text-xs space-y-2 mt-4'>
-
-                    <p><b>Customer:</b> {order?.customer_code}</p>
-                    <p><b>Total:</b> ₦{order?.total_price}</p>
-                    <p><b>Delivery Fee:</b> ₦{order?.delivery_fee}</p>
-                    <p><b>Extra Charges:</b> ₦{order?.extra_charges}</p>
-
-                    <p><b>Status:</b> {order?.status}</p>
-
-                    <p>
-                        <b>Address:</b> {order?.destination_address}
-                    </p>
-
-                    <p>
-                        <b>Created:</b>{" "}
-                        {new Date(order?.created_at || "").toDateString()}
-                    </p>
-                </div>
-
-                <hr className='my-3 border-dark/30' />
-
-                {/* STATUS UPDATE */}
-                <div className='space-y-2'>
-
-                    <label className='text-xs font-semibold'>
-                        Update Order Status
-                    </label>
-
-                    <DheirSelect
-                        compact
-                        className="text-sm"
-                        value={status}
-                        onChange={(e) =>
-                            setStatus(e.target.value as Order["status"])
-                        }
-                    >
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                    </DheirSelect>
-
-                    <button
-                        onClick={updateStatus}
-                        disabled={isUpdating}
-                        className='w-full bg-accent-red text-white py-2 rounded text-xs'
-                    >
-                        {isUpdating ? "Updating..." : "Update Status"}
+        <div
+            className="dheir-dialog-backdrop"
+            role="presentation"
+            onClick={(e) => {
+                if (e.target === e.currentTarget) onClose()
+            }}
+        >
+            <div className="dheir-dialog admin-modal" role="dialog" aria-modal="true" aria-label="Edit order">
+                <div className="dheir-dialog__head">
+                    <div>
+                        <h2 className="dheir-dialog__title">Order {order.order_id}</h2>
+                        <p className="admin-modal__subtitle">Review and update this order.</p>
+                    </div>
+                    <button type="button" className="dheir-dialog__close" onClick={onClose} aria-label="Close">
+                        <IconX size={20} stroke={1.5} />
                     </button>
-
                 </div>
 
+                <div className="admin-modal__body">
+                    <div className="admin-modal__form">
+                        <div className="admin-modal__fields">
+                            <div className="portal-packages__field">
+                                <span className="portal-packages__field-label">Customer code</span>
+                                <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                                    {order.customer_code || "—"}
+                                </p>
+                            </div>
+
+                            <div className="portal-packages__field">
+                                <span className="portal-packages__field-label">Total price</span>
+                                <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                                    ₦ {order.total_price}
+                                </p>
+                            </div>
+
+                            <div className="portal-packages__field">
+                                <span className="portal-packages__field-label">Delivery fee</span>
+                                <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                                    ₦ {order.delivery_fee}
+                                </p>
+                            </div>
+
+                            <div className="portal-packages__field">
+                                <span className="portal-packages__field-label">Extra charges</span>
+                                <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                                    ₦ {order.extra_charges ?? 0}
+                                </p>
+                            </div>
+
+                            <div className="portal-packages__field">
+                                <span className="portal-packages__field-label">Current status</span>
+                                <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                                    {String(order.status || "—").replace(/_/g, " ")}
+                                </p>
+                            </div>
+
+                            <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
+                                <span className="portal-packages__field-label">Destination address</span>
+                                <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                                    {order.destination_address || "—"}
+                                </p>
+                            </div>
+
+                            <div className="portal-packages__field">
+                                <span className="portal-packages__field-label">Created</span>
+                                <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                                    {new Date(order.created_at || "").toDateString()}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="admin-uploader">
+                            <div className="admin-uploader__row">
+                                <div>
+                                    <p className="portal-packages__field-label" style={{ margin: 0 }}>
+                                        Update status
+                                    </p>
+                                    <p className="admin-uploader__help">Changes apply immediately to this order.</p>
+                                </div>
+                            </div>
+
+                            <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Status</span>
+                                <DheirSelect
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value as Order["status"])}
+                                >
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </DheirSelect>
+                            </label>
+
+                            <div className="admin-modal__actions" style={{ marginTop: 12 }}>
+                                <button
+                                    type="button"
+                                    onClick={updateStatus}
+                                    disabled={isUpdating}
+                                    className="portal-home__btn portal-home__btn--primary"
+                                >
+                                    {isUpdating ? <DheirLoader color="#fff" size={10} /> : "Update status"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )

@@ -19,8 +19,8 @@ import {
   useEffect,
   useState,
 } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 type BasicDetails = Omit<
   User,
@@ -222,7 +222,7 @@ export function PortalEditProfilePage() {
   if (isLoading) {
     return (
       <div className="portal-account portal-account--centered">
-        <BeatLoader color="var(--color-dheir-blue)" size={12} />
+        <DheirLoader color="var(--color-dheir-blue)" size={12} />
       </div>
     )
   }
@@ -250,7 +250,7 @@ export function PortalEditProfilePage() {
             )}
             {isImageUploading ? (
               <span className="portal-account__photo-overlay">
-                <BeatLoader color="var(--color-dheir-blue)" size={10} />
+                <DheirLoader color="var(--color-dheir-blue)" size={10} />
               </span>
             ) : null}
           </div>
@@ -319,7 +319,7 @@ export function PortalEditProfilePage() {
             disabled={!isEditButtonActive || isEditLoading}
           >
             {isEditLoading ? (
-              <BeatLoader color="#fff" size={8} />
+              <DheirLoader color="#fff" size={8} />
             ) : (
               "Save changes"
             )}
@@ -351,7 +351,7 @@ export function PortalEditProfilePage() {
               onClick={initializeEmailVerification}
             >
               {isSendingEmailVerification ? (
-                <BeatLoader color="var(--color-dheir-blue)" size={8} />
+                <DheirLoader color="var(--color-dheir-blue)" size={8} />
               ) : (
                 "Verify email"
               )}
@@ -364,7 +364,7 @@ export function PortalEditProfilePage() {
             onClick={initializeEmailChangeConfirmation}
           >
             {isSendingEmailChangeVerification ? (
-              <BeatLoader color="var(--color-dheir-blue)" size={8} />
+              <DheirLoader color="var(--color-dheir-blue)" size={8} />
             ) : (
               "Change email"
             )}
@@ -390,7 +390,7 @@ export function PortalEditProfilePage() {
             onClick={initializePasswordChangeConfirmation}
           >
             {isSendingPasswordChangeVerification ? (
-              <BeatLoader color="var(--color-dheir-blue)" size={8} />
+              <DheirLoader color="var(--color-dheir-blue)" size={8} />
             ) : (
               "Change password"
             )}

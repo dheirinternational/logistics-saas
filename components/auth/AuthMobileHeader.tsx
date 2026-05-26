@@ -14,7 +14,7 @@ export function AuthMobileHeader({ trailing }: AuthMobileHeaderProps) {
             src="/Dheir-logo.png"
             alt=""
             fill
-            className="object-contain p-0.5"
+            className="dheir-logo-img dheir-logo-img--invert object-contain p-0.5"
             priority
           />
         </figure>

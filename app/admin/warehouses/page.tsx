@@ -1,101 +1,198 @@
 "use client"
 
-import { Table } from '@/components/admin/table/Table'
-import SearchComponent from '@/components/admin/warehouse/SearchComponent'
-import { Warehouse } from '@/types/entityTypeDef'
-import { createColumnHelper } from '@tanstack/react-table'
-import { NextPage } from 'next'
-import Link from 'next/link'
-import { FaPlus } from 'react-icons/fa'
-import { useEffect, useState } from 'react'
-import { ClipLoader } from 'react-spinners'
+import { Table } from "@/components/admin/table/Table"
+import SearchComponent from "@/components/admin/warehouse/SearchComponent"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { Warehouse } from "@/types/entityTypeDef"
+import { createColumnHelper } from "@tanstack/react-table"
+import { IconBuildingWarehouse, IconPlane, IconShip, IconWorld } from "@tabler/icons-react"
+import { NextPage } from "next"
+import { useEffect, useMemo, useState } from "react"
+import { toast } from "@/lib/ui/toast"
 
-// ! Search component later
+type FilterParams = {
+    search: string
+}
 
+const columnHelper = createColumnHelper<Warehouse>()
 
-const Page: NextPage = ({}) => {
+const Page: NextPage = () => {
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-    const [loading, setLoading] = useState(true)
+    const [isDataLoading, setIsDataLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-
-    const columnHelper = createColumnHelper<Warehouse>()
-
-    const columnDef = [
-        columnHelper.accessor("name", {
-            header: "name"  
-        }),
-        columnHelper.accessor("type", {
-            header: "Type"
-        }),
-        // columnHelper.accessor("manager_id", {
-        //     header: "Manager",
-        // }),
-        columnHelper.accessor("phone", {
-            header: "Phone"
-        })
-    ]
+    const [filterValues, setFilterValues] = useState<FilterParams>({
+        search: "",
+    })
 
     useEffect(() => {
         const fetchWarehouses = async () => {
+            setIsDataLoading(true)
             try {
-                setLoading(true)
-                const response = await fetch('/api/warehouses', {
-                    credentials: 'include'
-                })
+                const res = await fetch("/api/warehouses", { credentials: "include" })
+                const result = await res.json()
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch warehouses')
+                if (!res.ok) {
+                    toast.error(result.message ?? "Failed to fetch warehouses")
+                    setError(result.message ?? "Failed to fetch warehouses")
+                    return
                 }
 
-                const data = await response.json()
-                setWarehouses(data.data || [])
+                setWarehouses(result.data ?? [])
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Something went wrong')
+                const message = err instanceof Error ? err.message : "Something went wrong"
+                setError(message)
+                toast.error(message)
             } finally {
-                setLoading(false)
+                setIsDataLoading(false)
             }
         }
 
         fetchWarehouses()
     }, [])
 
+    const filteredData = useMemo(() => {
+        const q = filterValues.search.trim().toLowerCase()
+        if (!q) return warehouses
 
-  return <div className='space-y-body'>
-    <h2 className="text-2xl font-semibold">
-        Warehouses
-    </h2>
-    <p className="text-xs text-dark/50 mt-2">
-        Manage, edit and view all warehouse related data.
-    </p>
+        return warehouses.filter(
+            (w) =>
+                w.name?.toLowerCase().includes(q) ||
+                w.type?.toLowerCase().includes(q) ||
+                w.phone?.toLowerCase().includes(q) ||
+                w.city?.toLowerCase().includes(q) ||
+                w.country?.toLowerCase().includes(q)
+        )
+    }, [warehouses, filterValues.search])
 
-    {/* SEARCH COMPONENT */}
-    {/* <SearchComponent /> */}
+    const stats = useMemo(() => {
+        const total = warehouses.length
+        const air = warehouses.filter((w) => w.type === "air").length
+        const sea = warehouses.filter((w) => w.type === "sea").length
+        const local = warehouses.filter((w) => w.type === "local").length
+        return { total, air, sea, local }
+    }, [warehouses])
 
-    {/* Table */}
-    <div className='bg-light p-body rounded-lg'>
-        <p className='text-xs mt-2 opacity-70'>
-            A list of all Warehouses in the system.
-        </p>
-        <div className='max-w-full w-full mt-4'>
-            {loading ? (
-                <div className='flex justify-center items-center py-8'>
-                    <ClipLoader color="#3B82F6" size={30} />
-                    <span className='ml-2 text-sm'>Loading warehouses...</span>
+    const columnDef = [
+        columnHelper.accessor("name", {
+            header: "Name",
+        }),
+        columnHelper.accessor("type", {
+            header: "Type",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : "—"
+            },
+        }),
+        columnHelper.accessor("phone", {
+            header: "Phone",
+            cell: ({ getValue }) => getValue() || "—",
+        }),
+    ]
+
+    return (
+        <div className="portal-home">
+            <header className="portal-home__greeting">
+                <div>
+                    <p className="portal-home__greeting-label">Admin</p>
+                    <h1 className="portal-home__greeting-title">Warehouses</h1>
+                    <p className="portal-home__greeting-sub">
+                        Manage, edit, and view all warehouse related data.
+                    </p>
                 </div>
-            ) : error ? (
-                <div className='text-center py-8'>
-                    <p className='text-sm'>{error}</p>
+            </header>
+
+            {isDataLoading ? (
+                <div className="portal-home__panel portal-home__loader">
+                    <DheirLoader color="var(--color-dheir-blue)" size={12} />
                 </div>
             ) : (
-                <Table 
-                    importedData={warehouses}
-                    columnDef={columnDef}
-                    globalFilter=''
-                />
+                <>
+                    <div className="portal-home__stats" role="list" aria-label="Warehouse stats">
+                        <div className="portal-home__stat-card" role="listitem">
+                            <span className="portal-home__stat-card-icon" aria-hidden>
+                                <IconBuildingWarehouse size={22} stroke={1.5} />
+                            </span>
+                            <span className="portal-home__stat-card-body">
+                                <span className="portal-home__stat-card-label">Total</span>
+                                <span className="portal-home__stat-card-value">{stats.total}</span>
+                                <span className="portal-home__stat-card-hint">All locations</span>
+                            </span>
+                        </div>
+
+                        <div className="portal-home__stat-card" role="listitem">
+                            <span className="portal-home__stat-card-icon" aria-hidden>
+                                <IconPlane size={22} stroke={1.5} />
+                            </span>
+                            <span className="portal-home__stat-card-body">
+                                <span className="portal-home__stat-card-label">Air</span>
+                                <span className="portal-home__stat-card-value">{stats.air}</span>
+                                <span className="portal-home__stat-card-hint">Air cargo</span>
+                            </span>
+                        </div>
+
+                        <div className="portal-home__stat-card" role="listitem">
+                            <span className="portal-home__stat-card-icon" aria-hidden>
+                                <IconShip size={22} stroke={1.5} />
+                            </span>
+                            <span className="portal-home__stat-card-body">
+                                <span className="portal-home__stat-card-label">Sea</span>
+                                <span className="portal-home__stat-card-value">{stats.sea}</span>
+                                <span className="portal-home__stat-card-hint">Sea freight</span>
+                            </span>
+                        </div>
+
+                        <div className="portal-home__stat-card" role="listitem">
+                            <span className="portal-home__stat-card-icon" aria-hidden>
+                                <IconWorld size={22} stroke={1.5} />
+                            </span>
+                            <span className="portal-home__stat-card-body">
+                                <span className="portal-home__stat-card-label">Local</span>
+                                <span className="portal-home__stat-card-value">{stats.local}</span>
+                                <span className="portal-home__stat-card-hint">Local hubs</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <section className="portal-home__panel" aria-label="Warehouse filters">
+                        <div className="portal-home__panel-head">
+                            <div>
+                                <h2 className="portal-home__section-title">Filters</h2>
+                                <p className="portal-home__section-sub">
+                                    Search by warehouse name, type, phone, or location.
+                                </p>
+                            </div>
+                        </div>
+                        <SearchComponent filter={filterValues} setFilter={setFilterValues} />
+                    </section>
+
+                    <section className="portal-home__panel" aria-labelledby="warehouse-records-heading">
+                        <div className="portal-home__panel-head">
+                            <div>
+                                <h2 id="warehouse-records-heading" className="portal-home__section-title">
+                                    Warehouse records
+                                </h2>
+                                <p className="portal-home__section-sub">A list of all warehouses in the system.</p>
+                            </div>
+                        </div>
+
+                        {error ? (
+                            <div className="portal-home__panel-empty">
+                                <p className="portal-home__section-sub" style={{ color: "var(--color-dheir-red)" }}>
+                                    {error}
+                                </p>
+                            </div>
+                        ) : (
+                            <Table
+                                importedData={filteredData}
+                                columnDef={columnDef}
+                                globalFilter={filterValues.search}
+                            />
+                        )}
+                    </section>
+                </>
             )}
         </div>
-    </div>
-  </div>
+    )
 }
 
 export default Page

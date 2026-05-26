@@ -10,11 +10,17 @@ type PortalFormFieldProps = {
   label: string
   children: ReactNode
   hint?: string
+  className?: string
 }
 
-export function PortalFormField({ label, children, hint }: PortalFormFieldProps) {
+export function PortalFormField({
+  label,
+  children,
+  hint,
+  className = "",
+}: PortalFormFieldProps) {
   return (
-    <label className="portal-packages__field">
+    <label className={`portal-packages__field${className ? ` ${className}` : ""}`}>
       <span className="portal-packages__field-label">{label}</span>
       {children}
       {hint ? <span className="portal-packages__field-hint">{hint}</span> : null}

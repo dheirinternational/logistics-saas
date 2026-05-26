@@ -1,7 +1,8 @@
-import { cookies } from "next/headers";
-import { randomUUID } from "crypto";
-import { pool } from "./db";
-import { redirect } from "next/navigation";
+import { cookies } from "next/headers"
+import { randomUUID } from "crypto"
+import { cache } from "react"
+import { pool } from "./db"
+import { redirect } from "next/navigation"
 
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "session"
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 4
@@ -32,7 +33,7 @@ export async function createSession(userId: number, userRole: string = "customer
 
 // GET SESSION
 
-export async function getSession(){
+export const getSession = cache(async () => {
     const cookieStore = await cookies()
     const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
 
@@ -77,28 +78,35 @@ export async function getSession(){
         return null
     }
 
-    return session;
-}
+    return session
+})
 
 
 
-export async function deleteSession(){
-    const cookieStore = await cookies();
+/** Clears the session cookie and removes the row from the database. */
+export async function clearSession() {
+    const cookieStore = await cookies()
     const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
 
-    if(sessionId){
-        await pool.query(`
+    if (sessionId) {
+        await pool.query(
+            `
             DELETE FROM sessions WHERE id = $1
-        `, [sessionId])
+        `,
+            [sessionId],
+        )
     }
 
     cookieStore.set(SESSION_COOKIE_NAME, "", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", 
+        secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         expires: new Date(0),
-        path: '/'
+        path: "/",
     })
+}
 
+export async function deleteSession() {
+    await clearSession()
     redirect("/auth/login")
 }

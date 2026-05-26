@@ -1,7 +1,6 @@
 "use client"
 
 import SearchComponent from '@/components/admin/shipments/requests/SearchComponent'
-import ShipmentStatusStatCard from '@/components/admin/ShipmentStatusStatCard'
 import { Table } from '@/components/admin/table/Table'
 import { ShipmentImage, ShippingRequest } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -10,10 +9,11 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
-import { FaCheckCircle, FaClock, FaImage } from 'react-icons/fa'
+import { FaImage } from 'react-icons/fa'
 import { FaX } from 'react-icons/fa6'
-import { BeatLoader } from 'react-spinners'
-import { toast } from 'react-toastify'
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
+import { IconChecks, IconClock } from "@tabler/icons-react"
 
 export type SearchProps = {
     search: string,
@@ -185,7 +185,7 @@ const Page: NextPage = () => {
             id: "Details",
             cell: ({row}) => 
             <button 
-            className={`${row.original.status === "accepted" && "hidden"}`}
+            className={`portal-home__table-btn${row.original.status === "accepted" ? " hidden" : ""}`}
             onClick={() => {
                 setModalSelectedRequest(row.original)
                 setIsModalActive(true)
@@ -205,50 +205,68 @@ const Page: NextPage = () => {
 
     const data = shipmentRequests.filter( x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()))
 
-  return <div className='space-y-body'>
-    {isDataLoading ? <div className='h-full max-h-full center-items'>
-        <BeatLoader color='#f26430' size={10}/>
-    </div> :
-    
-    <>
-        {/* STATUS CARDS */}
-        <div>
-            <div className='flex my-body space-x-2 overflow-x-auto'>
-                <ShipmentStatusStatCard 
-                value={shipmentRequests.filter(x => x.status === "pending").length}
-                status='Pending'
-                icon={FaClock}
-                />
-                <ShipmentStatusStatCard 
-                value={shipmentRequests.filter(x => x.status === "accepted").length}
-                status='Accepted'
-                icon={FaCheckCircle}
-                />
-            </div>
+  return (
+    <div className="portal-home">
+      {isDataLoading ? (
+        <div className="portal-home__panel portal-home__loader">
+          <DheirLoader color="var(--color-dheir-blue)" size={12} />
         </div>
-
-        {/* SEARCH COMPONENT  */}
-        <SearchComponent state={filterValues} setState={setFilterValues} />
-
-        {/* Table */}
-        <div className='bg-light p-body rounded-lg'>
-            <h2 className='text-sm font-bold'>
-                Shipment Records
-            </h2>
-            <p className='text-xs mt-2 opacity-70'>
-                A live overview of all shipments in the system.
-            </p>
-            <div className='mt-4'>
-                {
-                    shipmentRequests ?
-                    <Table 
-                    importedData={data}
-                    columnDef={shipmentRequestColumnDef}
-                    globalFilter={`${filterValues.search}`}
-                    /> : null
-                }
+      ) : (
+        <>
+          <div className="portal-home__stats" role="list" aria-label="Shipment requests status">
+            <div className="portal-home__stat-card" role="listitem">
+              <span className="portal-home__stat-card-icon" aria-hidden>
+                <IconClock size={22} stroke={1.5} />
+              </span>
+              <span className="portal-home__stat-card-body">
+                <span className="portal-home__stat-card-label">Pending</span>
+                <span className="portal-home__stat-card-value">
+                  {shipmentRequests.filter((x) => x.status === "pending").length}
+                </span>
+              </span>
             </div>
-        </div>
+            <div className="portal-home__stat-card" role="listitem">
+              <span className="portal-home__stat-card-icon" aria-hidden>
+                <IconChecks size={22} stroke={1.5} />
+              </span>
+              <span className="portal-home__stat-card-body">
+                <span className="portal-home__stat-card-label">Accepted</span>
+                <span className="portal-home__stat-card-value">
+                  {shipmentRequests.filter((x) => x.status === "accepted").length}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <section className="portal-home__panel" aria-label="Filters">
+            <div className="portal-home__panel-head">
+              <div>
+                <h2 className="portal-home__section-title">Filters</h2>
+              </div>
+            </div>
+            <SearchComponent state={filterValues} setState={setFilterValues} />
+          </section>
+
+          <section className="portal-home__panel" aria-labelledby="shipment-requests-heading">
+            <div className="portal-home__panel-head">
+              <div>
+                <h2 id="shipment-requests-heading" className="portal-home__section-title">
+                  Shipment records
+                </h2>
+                <p className="portal-home__section-sub">
+                  A live overview of all shipment requests in the system.
+                </p>
+              </div>
+            </div>
+            {shipmentRequests ? (
+              <Table
+                importedData={data}
+                columnDef={shipmentRequestColumnDef}
+                globalFilter={`${filterValues.search}`}
+                pageSize={15}
+              />
+            ) : null}
+          </section>
 
 
 
@@ -377,7 +395,7 @@ const Page: NextPage = () => {
                                 >
                                     {
                                         isCreatingShipmentData ? 
-                                        <BeatLoader color='#FFF' size={10}/> :
+                                        <DheirLoader color='#FFF' size={10}/> :
                                         <>
                                         <BiCheck className='text-lg'/>
                                         Accept
@@ -394,9 +412,10 @@ const Page: NextPage = () => {
                 </div>
             </div>
         }
-
-    </>}
+    </>
+  )}
   </div>
+  )
 }
 
 export default Page

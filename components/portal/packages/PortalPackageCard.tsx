@@ -8,7 +8,7 @@ import {
 import type { Package, PackageImage } from "@/types/entityTypeDef"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { BeatLoader } from "react-spinners"
+import { DheirLoader } from "@/components/ui/DheirLoader"
 
 type PortalPackageCardProps = {
   packag: Package
@@ -58,7 +58,7 @@ export function PortalPackageCard({ packag }: PortalPackageCardProps) {
       <div className="portal-packages__card-foot">
         <div className="portal-packages__card-images">
           {loadingImages ? (
-            <BeatLoader size={6} color="var(--color-dheir-blue)" />
+            <DheirLoader size={6} color="var(--color-dheir-blue)" />
           ) : images.length === 0 ? (
             <span className="portal-packages__card-no-img">No photos yet</span>
           ) : (

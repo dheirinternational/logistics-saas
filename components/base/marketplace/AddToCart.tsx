@@ -3,7 +3,7 @@
 import { useCartStore } from "@/store/cartStore"
 import { Address, CartProduct } from "@/types/entityTypeDef"
 import { BiCartAdd } from "react-icons/bi"
-import { toast } from "react-toastify"
+import { toast } from "@/lib/ui/toast"
 
 const AddToCart = ({product, address } : {product: CartProduct, address: Address | null}) => {
 

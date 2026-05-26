@@ -7,9 +7,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { FaCamera, FaCheckCircle, FaChevronLeft, FaUser } from 'react-icons/fa'
-import { BeatLoader, ClipLoader } from 'react-spinners'
-import { toast } from 'react-toastify'
+import { FaCheckCircle, FaUser } from 'react-icons/fa'
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
+import { IconCamera, IconMail, IconShieldLock, IconUserCircle } from "@tabler/icons-react"
 
 
 type BasicDetails = Omit<User, "id" | "password" | "role" | "created_at" | "email" | "profile_img">
@@ -242,13 +243,22 @@ const Page: NextPage = () => {
     }
 
 
-  return <div className='h-full max-h-full w-full p-body'>
-    {
-    isLoading ? 
-    <div className='flex h-full w-full center-items md:max-w-125 md:mx-auto'>
-        <BeatLoader color='#f26430' size={15} speedMultiplier={0.5}/>
-    </div> :
-    <>
+  return (
+    <div className="portal-home">
+      <header className="portal-home__greeting">
+        <div>
+          <p className="portal-home__greeting-label">Admin</p>
+          <h1 className="portal-home__greeting-title">Edit profile</h1>
+          <p className="portal-home__greeting-sub">Make edits to your user information.</p>
+        </div>
+      </header>
+
+      {isLoading ? (
+        <div className="portal-home__panel portal-home__loader">
+          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+        </div>
+      ) : (
+        <>
         {/* <div className='p-body h-14 bg-accent-blue flex text-white items-center justify-between md:max-w-125 md:mx-auto'>
             <button 
             className='flex gap-2 flex-1 justify-start'
@@ -266,173 +276,213 @@ const Page: NextPage = () => {
                 <FaUser />
             </Link>
         </div> */}
-        <h2 className="text-2xl font-semibold">
-            Edit Profile
-        </h2>
-        <p className="text-xs text-dark/50 mt-2">
-            Make edits to your user information
-        </p>
-
-        <div className='p-body bg-light mt-2 text-sm space-y-4 flex h-60 items-center rounded'>
-            <div className='relative w-fit h-fit mx-auto space-y-2'>
-                <figure className='w-31 h-31 bg-red-300 rounded-full mx-auto relative overflow-hidden'>
-                    {
-                        (image || user?.profile_img) ?
-                        <Image
-                        src={image ?? user?.profile_img ?? ""}
-                        alt='User Profile'
-                        fill
-                        className='object-cover'
-                        loading='eager'
-                        /> :
-                        <div className='bg-white/50 absolute top-0 left-0 w-full h-full border rounded-full center-items border-dark/20'>
-                            <FaUser className='text-4xl'/>
-                        </div>
-                    }
-                    {
-                        isImageUploading && 
-                        <div className='bg-white/50 absolute top-0 left-0 w-full h-full border rounded-full center-items border-dark/20'>
-                            <ClipLoader speedMultiplier={0.5}/>
-                        </div>
-                    }
-                </figure>
-                <div className='h-10 w-10 absolute bg-dark/60 rounded-full bottom-0 right-0 flex center-items' > 
-                    <FaCamera className='text-secondary-text'/>
-                    <input 
-                    type="file"
-                    accept='image/*'
-                    className='absolute w-full h-full bg-white rounded-full opacity-0' 
-                    onChange={ e => {profileImageUpload(e)}}
-                    disabled={isImageUploading}
-                    />
-                </div>
+          <section className="portal-home__panel" aria-label="Profile photo">
+            <div className="portal-home__panel-head">
+              <div>
+                <h2 className="portal-home__section-title">Profile photo</h2>
+                <p className="portal-home__section-sub">Update your avatar for the admin portal.</p>
+              </div>
             </div>
 
-            {/* Details */}
-            <form className='w-full px-4 mt-4 space-y-2 md:max-w-125 md:mx-auto' onSubmit={handleSubmit}>
-                <div className='flex gap-2'>
-                    <InputComponent 
-                    name='first_name'
-                    state={userDetails}
-                    setState={setUserDetails}
-                    title='First Name'
-                    type='text'
+            <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ position: "relative", width: 92, height: 92 }}>
+                <div
+                  style={{
+                    width: 92,
+                    height: 92,
+                    borderRadius: 999,
+                    border: "1px solid var(--color-dheir-border)",
+                    background: "var(--color-dheir-page)",
+                    position: "relative",
+                    overflow: "hidden",
+                    display: "grid",
+                    placeItems: "center",
+                  }}
+                >
+                  {(image || user?.profile_img) ? (
+                    <Image
+                      src={image ?? user?.profile_img ?? ""}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="92px"
+                      priority
                     />
+                  ) : (
+                    <IconUserCircle size={44} stroke={1.25} aria-hidden />
+                  )}
 
-                    <InputComponent 
-                    name='last_name'
-                    state={userDetails}
-                    setState={setUserDetails}
-                    title='Last Name'
-                    type='text'
-                    />
-                </div>
-                <div className='flex gap-2 items-end'>
-                    <InputComponent 
-                    name='phone'
-                    state={userDetails}
-                    setState={setUserDetails}
-                    title='Phone'
-                    type='text'
-                    />
-
-                    <button className='w-full bg-accent-red text-white py-2 h-10 rounded disabled:opacity-10'
-                    disabled={!isEditButtonActive || isEditLoading}
+                  {isImageUploading ? (
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "grid",
+                        placeItems: "center",
+                        background: "color-mix(in srgb, #fff 65%, transparent)",
+                      }}
                     >
-                        {isEditLoading ? <BeatLoader color='#fff' size={15}/> : "Edit Profile"}
-                    </button>
+                      <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                    </div>
+                  ) : null}
                 </div>
+
+                <label
+                  style={{
+                    position: "absolute",
+                    right: -6,
+                    bottom: -6,
+                    width: 36,
+                    height: 36,
+                    borderRadius: 999,
+                    border: "1px solid var(--color-dheir-border)",
+                    background: "var(--color-dheir-surface)",
+                    display: "grid",
+                    placeItems: "center",
+                    cursor: isImageUploading ? "not-allowed" : "pointer",
+                  }}
+                  aria-label="Upload new profile photo"
+                >
+                  <IconCamera size={18} stroke={1.5} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={profileImageUpload}
+                    disabled={isImageUploading}
+                    style={{ display: "none" }}
+                  />
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section className="portal-home__panel" aria-label="Basic details">
+            <div className="portal-home__panel-head">
+              <div>
+                <h2 className="portal-home__section-title">Basic details</h2>
+                <p className="portal-home__section-sub">Update your name and phone number.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="admin-modal__form" style={{ gridTemplateColumns: "1fr" }}>
+              <div className="admin-modal__fields" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                <InputComponent
+                  name="first_name"
+                  state={userDetails}
+                  setState={setUserDetails}
+                  title="First name"
+                  type="text"
+                />
+                <InputComponent
+                  name="last_name"
+                  state={userDetails}
+                  setState={setUserDetails}
+                  title="Last name"
+                  type="text"
+                />
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <InputComponent
+                    name="phone"
+                    state={userDetails}
+                    setState={setUserDetails}
+                    title="Phone"
+                    type="text"
+                  />
+                </div>
+              </div>
+
+              <div className="admin-modal__actions">
+                <button
+                  className="portal-home__btn portal-home__btn--primary"
+                  disabled={!isEditButtonActive || isEditLoading}
+                  type="submit"
+                >
+                  {isEditLoading ? <DheirLoader color="#fff" size={10} /> : "Save changes"}
+                </button>
+              </div>
             </form>
+          </section>
 
-        </div>
+          <section className="portal-home__panel" aria-label="Security">
+            <div className="portal-home__panel-head">
+              <div>
+                <h2 className="portal-home__section-title">Security</h2>
+                <p className="portal-home__section-sub">Manage email verification and password resets.</p>
+              </div>
+            </div>
 
-        <div className='bg-light p-body mt-2 space-y-3 rounded'>
-            <div className='flex justify-between items-end'>
-                <div className='w-50'>
-                    <InputComponent 
-                    name='email'
+            <div className="admin-modal__form" style={{ gridTemplateColumns: "1fr" }}>
+              <div className="admin-modal__fields" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <InputComponent
+                    name="email"
                     state={email}
                     setState={setEmail}
-                    title='Email'
-                    type='email'
+                    title="Email"
+                    type="email"
                     readonly
-                    />
+                  />
                 </div>
 
-                <div className='space-x-2'>
-
-                 
-
-                    <button 
-                    className='text-[9px] px-3 py-2 bg-dark/20 rounded h-fit'
-                    disabled={isSendingEmailChangeVerification}
-                    onClick={() => {
-                      initializeEmailChangeConfirmation()
-                    }}
-                    >
-                        {
-                            isSendingEmailChangeVerification ?
-                            <BeatLoader color='orange' size={10}/> :
-                            "Change Email"
-                        }
-                    </button>
-
-                </div>
-            </div>
-
-
-
-            {/* Verify Email Button */}
-
-            {
-                !user?.email_verified ?
                 <button
-                disabled={isSendingEmailVerification} 
-                className={`
-                    text-[10px] px-4 py-2 rounded h-fit border border-dark/20
-                    
-                `}
-                onClick={() => {
-                    initializeEmailVerification()
-                }}
+                  type="button"
+                  className="portal-home__btn portal-home__btn--secondary"
+                  disabled={isSendingEmailChangeVerification}
+                  onClick={initializeEmailChangeConfirmation}
+                  style={{ justifySelf: "start" }}
                 >
-                    {
-                        isSendingEmailVerification ?
-                        <BeatLoader color='orange' size={10}/> :
-                        "Verify Email"
-                    }
-                </button> :
-                <p className='text-[10px] flex gap-1 items-center'>
-                    Email Verified
-                    <FaCheckCircle className='text-green-300 text-[10px]'/>
-                </p>
-            }
+                  {isSendingEmailChangeVerification ? <DheirLoader color="var(--color-dheir-blue)" size={10} /> : (
+                    <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                      <IconMail size={16} stroke={1.5} />
+                      Change email
+                    </span>
+                  )}
+                </button>
 
-            <div className='flex justify-between items-end'>
-                <div className='w-50'>
-                    <InputComponent 
-                    name='password'
+                {!user?.email_verified ? (
+                  <button
+                    type="button"
+                    className="portal-home__btn portal-home__btn--secondary"
+                    disabled={isSendingEmailVerification}
+                    onClick={initializeEmailVerification}
+                    style={{ justifySelf: "start" }}
+                  >
+                    {isSendingEmailVerification ? <DheirLoader color="var(--color-dheir-blue)" size={10} /> : "Verify email"}
+                  </button>
+                ) : (
+                  <p className="portal-home__section-sub" style={{ margin: 0, display: "flex", gap: 8, alignItems: "center" }}>
+                    Email verified <FaCheckCircle className="text-green-300 text-[12px]" />
+                  </p>
+                )}
+
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <InputComponent
+                    name="password"
                     state={password}
                     setState={setPassword}
-                    title='Password'
-                    type='password'
+                    title="Password"
+                    type="password"
                     readonly
-                    />
+                  />
                 </div>
 
-                <button 
-                className='text-[10px] px-4 py-2 bg-dark/20 rounded h-fit'
-                disabled={isSendingPasswordChangeVerification}
-                onClick={initializePasswordChangeConfirmation}
+                <button
+                  type="button"
+                  className="portal-home__btn portal-home__btn--secondary"
+                  disabled={isSendingPasswordChangeVerification}
+                  onClick={initializePasswordChangeConfirmation}
+                  style={{ justifySelf: "start" }}
                 >
-                    {
-                        isSendingPasswordChangeVerification ? 
-                        <BeatLoader color='orange' size={10}/> :
-                        "Change Password"
-                    }
+                  {isSendingPasswordChangeVerification ? <DheirLoader color="var(--color-dheir-blue)" size={10} /> : (
+                    <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                      <IconShieldLock size={16} stroke={1.5} />
+                      Change password
+                    </span>
+                  )}
                 </button>
+              </div>
             </div>
-        </div>
+          </section>
 
         {/* <div className='bg-light p-body mt-2 flex justify-between items-center md:max-w-125 md:mx-auto pb-26'>
             <p className='text-red-500 text-xs'>
@@ -442,8 +492,10 @@ const Page: NextPage = () => {
                 Delete Account
             </button>
         </div> */}
-    </>}
-  </div>
+        </>
+      )}
+    </div>
+  )
 }
 
 export default Page

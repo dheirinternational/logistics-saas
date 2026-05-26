@@ -6,9 +6,9 @@ import Link from "next/link"
 import { FaCartShopping } from "react-icons/fa6"
 import { useCartStore } from "@/store/cartStore"
 import Image from "next/image"
-import { toast } from "react-toastify"
+import { toast } from "@/lib/ui/toast"
 import { Product } from "@/types/entityTypeDef"
-import { BeatLoader } from "react-spinners"
+import { DheirLoader } from "@/components/ui/DheirLoader"
 
 const MarketSearch = () => {
 
@@ -112,7 +112,7 @@ const MarketSearch = () => {
                 {
                     isFetchingSearchResult ? 
                         <div className="center-items py-5">
-                            <BeatLoader color="orange" size={8}/>
+                            <DheirLoader color="orange" size={8}/>
                         </div>
                     : (!searchQuery.trim() ? ( 
                         <p className="text-dark/50 mt-4 italic">Search products...</p> 

@@ -5,8 +5,8 @@ import { useParams } from "next/navigation"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react"
 import { BiChevronLeft } from "react-icons/bi";
-import { BeatLoader } from "react-spinners";
-import { toast } from "react-toastify";
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast";
 
 export type OrderItem = {
   id: number;
@@ -83,7 +83,7 @@ export default function Page(){
             </div>
             {
             isDataLoading ? 
-            <BeatLoader color="orange" size={10} />
+            <DheirLoader color="orange" size={10} />
             :
             <>
                 <div className="mt-8">

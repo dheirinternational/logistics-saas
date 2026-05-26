@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ToastContainer } from "react-toastify";
+import { DheirToastProvider } from "@/components/ui/DheirToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,13 +54,7 @@ export default function RootLayout({
     >
       <body className="max-h-dvh h-dvh bg-primary text-primary-text ">
         {children}
-        <ToastContainer 
-        // position="top-right"
-        // toastClassName={() =>
-        //   "w-20"
-        // }
-        // progressClassName={() => "bg-green-400"}
-        />
+        <DheirToastProvider />
       </body>
     </html>
   );

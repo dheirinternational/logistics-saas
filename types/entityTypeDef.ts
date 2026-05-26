@@ -356,9 +356,10 @@ export type DeliveryZones = {
 
 
 export type Reviews = {
-    id: number,
+    id: number
     review: string
     name: string
     user_id: number // fk -> users(id)
-    created_at: Date 
+    rating: number
+    created_at: Date
 }

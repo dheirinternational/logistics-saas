@@ -9,8 +9,8 @@ import { IconSearch } from "@tabler/icons-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 export function PortalShopPage() {
   const searchParams = useSearchParams()
@@ -129,7 +129,7 @@ export function PortalShopPage() {
           <div className="shop-teaser__grid mt-6 md:mt-8">
             {loading ? (
               <div className="col-span-full flex justify-center py-12">
-                <BeatLoader color="var(--color-dheir-blue)" size={12} />
+                <DheirLoader color="var(--color-dheir-blue)" size={12} />
               </div>
             ) : featured.length === 0 ? (
               <p className="col-span-full text-center text-sm text-dheir-muted py-8">
@@ -200,7 +200,7 @@ export function PortalShopPage() {
           <div className="shop-teaser__grid mt-6 md:mt-8">
             {loading ? (
               <div className="col-span-full flex justify-center py-12">
-                <BeatLoader color="var(--color-dheir-blue)" size={12} />
+                <DheirLoader color="var(--color-dheir-blue)" size={12} />
               </div>
             ) : filtered.length === 0 ? (
               <p className="col-span-full text-center text-sm text-dheir-muted py-8">

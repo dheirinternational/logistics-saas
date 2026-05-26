@@ -8,8 +8,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { FaChevronLeft, FaUser } from "react-icons/fa"
-import { BeatLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 export default function PendingPayments() {
   const [payments, setPayments] = useState<Payment[]>([])
@@ -103,7 +103,7 @@ export default function PendingPayments() {
       <div className="bg-light p-4 min-h-150 space-y-2 w-full">
         {isDataLoading ? (
           <div className="flex justify-center py-5">
-            <BeatLoader color="#f26430" size={15} />
+            <DheirLoader color="#f26430" size={15} />
           </div>
         ) : (
           <>

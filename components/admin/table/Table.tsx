@@ -1,65 +1,113 @@
 "use client"
 
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from "@tanstack/react-table"
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
 import { useMemo, useState } from "react"
 
 type TableProps<T> = {
     importedData: T[],
     columnDef: ColumnDef<T, any>[],  // eslint-disable-line @typescript-eslint/no-explicit-any
     globalFilter: string
+    pageSize?: number
 }   
 
-export function Table <T,>({importedData, columnDef, globalFilter }: TableProps<T>){
+export function Table <T,>({
+  importedData,
+  columnDef,
+  globalFilter,
+  pageSize = 15,
+}: TableProps<T>){
     const data = useMemo(() => importedData, [importedData]) 
     const columns = useMemo(() => {
         return ([...columnDef])
     }, [columnDef])
 
+    const [pagination, setPagination] = useState({
+      pageIndex: 0,
+      pageSize,
+    })
 
     const table = useReactTable({
         data,
         columns,
         state: {
             globalFilter,
+            pagination,
         },
+        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
         globalFilterFn: "includesString"
     })
 
     
 
     return(
-        <div className="w-full max-w-full h-full max-h-full">
-            <div className="w-full max-w-full overflow-auto max-h-80 h-200 ">
-                <table className="table-auto min-w-80 w-full text-[10px] whitespace-nowrap">
-                    <thead>
-                        {table.getHeaderGroups().map( headerGroup => 
-                            <tr 
-                            key={headerGroup.id}
-                            className="bg-gray-100"
-                            >
-                                {headerGroup.headers.map( header => 
-                                    <th key={header.id} className="p-2 text-left">
-                                        {flexRender(header.column.columnDef.header, header.getContext())}
-                                    </th>
-                                )}
-                            </tr>
-                        )}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map(row => 
-                            <tr key={row.id} className="border-b border-dark/10">
-                                {row.getVisibleCells().map(cell => 
-                                    <td key={cell.id} className="p-2 py-4">
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </td>
-                                )}
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+        <div>
+          <div className="portal-home__table-wrap">
+            <table className="portal-home__table">
+                <thead>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => (
+                                <th key={header.id} scope="col">
+                                    {flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext(),
+                                    )}
+                                </th>
+                            ))}
+                        </tr>
+                    ))}
+                </thead>
+                <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                        <tr key={row.id}>
+                            {row.getVisibleCells().map((cell) => (
+                                <td key={cell.id}>
+                                    {flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext(),
+                                    )}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+          </div>
+
+          <div className="portal-home__table-pagination" aria-label="Pagination">
+            <span className="portal-home__table-pagination-text">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+            <div className="portal-home__table-pagination-actions">
+              <button
+                type="button"
+                className="portal-home__btn portal-home__btn--secondary"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                className="portal-home__btn portal-home__btn--secondary"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </button>
             </div>
+          </div>
         </div>
     )
 }

@@ -7,8 +7,8 @@ import { IconMail } from "@tabler/icons-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { FormEvent, useState } from "react"
-import { ClipLoader } from "react-spinners"
-import { toast } from "react-toastify"
+import { DheirLoader } from "@/components/ui/DheirLoader"
+import { toast } from "@/lib/ui/toast"
 
 export default function ChangeEmail() {
   const params = useSearchParams()
@@ -91,7 +91,7 @@ export default function ChangeEmail() {
             className="dheir-btn-primary"
           >
             {isChangingEmail ? (
-              <ClipLoader color="#fff" size={20} />
+              <DheirLoader color="#fff" size={20} />
             ) : (
               "Save email"
             )}

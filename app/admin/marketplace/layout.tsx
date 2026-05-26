@@ -1,11 +1,5 @@
+import { ReactNode } from "react"
 
-
-import { ReactNode } from "react";
-
-export default function MarktePlaceLayout({children}: {children: ReactNode}) {
-    return(
-        <div className="h-full max-h-full w-full">
-                {children}
-        </div>       
-    )
+export default function MarktePlaceLayout({ children }: { children: ReactNode }) {
+    return <div className="h-full max-h-full w-full overflow-y-auto">{children}</div>
 }
