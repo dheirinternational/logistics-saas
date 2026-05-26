@@ -1,7 +1,6 @@
 "use client"
 
 import { BlurReveal } from "@/components/auth/BlurReveal"
-import { MarketingAnchorLink } from "@/components/marketing/MarketingAnchorLink"
 import { NetLift } from "@/components/marketing/NetLift"
 import { TRUST_DIAL_TICKS } from "@/lib/marketing/trustDialTicks"
 import { TRUST_HEADLINE, TRUST_ITEMS } from "@/lib/marketing/trustItems"
@@ -10,7 +9,6 @@ import {
   trustPanelTransition,
   trustPanelTransitionReduced,
 } from "@/lib/motion/dheir"
-import { IconChevronDown } from "@tabler/icons-react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
@@ -183,10 +181,6 @@ export function TrustSection() {
                       </span>
                     </div>
                     <p className="trust-card__body">{active.description}</p>
-                    <MarketingAnchorLink href="#services" className="trust-card__cta">
-                      Explore services
-                      <IconChevronDown size={16} stroke={2} aria-hidden />
-                    </MarketingAnchorLink>
                   </motion.div>
                 </AnimatePresence>
               </BlurReveal>

@@ -8,8 +8,8 @@ type CategoryVisual = {
 const CATEGORY_IMAGES: Record<string, CategoryVisual> = {
   automotive: {
     imageSrc:
-      "https://images.unsplash.com/photo-1767265581229-8ad720f7f814?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Shelves filled with colorful craft supplies and accessories",
+      "https://images.unsplash.com/photo-1759419281480-bacc913c9606?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Collection of car exhaust catalytic converters and parts",
   },
   beauty: {
     imageSrc:
@@ -39,8 +39,8 @@ const CATEGORY_IMAGES: Record<string, CategoryVisual> = {
   },
   fitness: {
     imageSrc:
-      "https://images.unsplash.com/photo-1517836357043-4b0e4110dcca?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Fitness and gym equipment",
+      "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Black spin exercise bike in a gym",
   },
   groceries: {
     imageSrc:
@@ -59,8 +59,8 @@ const CATEGORY_IMAGES: Record<string, CategoryVisual> = {
   },
   pets: {
     imageSrc:
-      "https://images.unsplash.com/photo-1450770069471-970686473a3e?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Pet food and accessories",
+      "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Brown peanuts in a blue plastic bowl",
   },
   services: {
     imageSrc:
@@ -69,8 +69,8 @@ const CATEGORY_IMAGES: Record<string, CategoryVisual> = {
   },
   tools: {
     imageSrc:
-      "https://images.unsplash.com/photo-1504148455328-59b4a43ebe8e?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Tools and hardware",
+      "https://images.unsplash.com/photo-1426927308491-6380b6a9936f?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Assorted handheld tools in a tool rack",
   },
 }
 
