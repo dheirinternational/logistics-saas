@@ -1,49 +1,55 @@
-import { getMonnifyToken } from "./auth";
+import { getMonnifyToken, getMonnifyBaseUrl } from "./auth"
+import type { InitializeMonnifyPaymentParams, MonnifyInitResponse } from "./types"
 
-type InitializePaymentParams = {
-    amount: number
-    customerName: string
-    customerEmail: string
-    metadata?: {
-        type: "shipment" | "order"
-    }
-    transactionRef: string
-}
+export async function initializeMonnifyPayment({
+  amount,
+  customerName,
+  customerEmail,
+  paymentReference,
+  paymentDescription,
+  redirectUrl,
+  metaData,
+}: InitializeMonnifyPaymentParams): Promise<MonnifyInitResponse> {
+  const contractCode = process.env.MONNIFY_CONTRACT_CODE
+  if (!contractCode) {
+    throw new Error("MONNIFY_CONTRACT_CODE is not configured")
+  }
 
-export async function initializePayment({amount, customerName, customerEmail, transactionRef}: InitializePaymentParams){
-    const token = await getMonnifyToken()
-    console.log(transactionRef)
+  const token = await getMonnifyToken()
+  const baseUrl = getMonnifyBaseUrl()
 
+  const res = await fetch(`${baseUrl}/api/v1/merchant/transactions/init-transaction`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      amount: Number(amount),
+      customerName,
+      customerEmail,
+      paymentReference,
+      paymentDescription,
+      currencyCode: "NGN",
+      contractCode,
+      redirectUrl,
+      paymentMethods: ["CARD", "ACCOUNT_TRANSFER"],
+      metaData: metaData ?? {},
+    }),
+  })
 
-    const res = await fetch(`${process.env.MONNIFY_BASE_URL}/api/v1/merchant/transactions/init-transaction`, {
-        method: "POST",
-        headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": `application/json` 
-        },
-        body: JSON.stringify({
-            amount,
-            customerName,
-            customerEmail,
-            paymentReference: transactionRef,
-            paymentDescription: "Order",
-            currencyCode: "NGN",
-            contractCode: process.env.MONNIFY_CONTRACT_CODE,
-            redirectUrl: "https://0fd6-102-89-68-207.ngrok-free.app/base/payment/success",
-            paymentMethods: ["CARD", "ACCOUNT_TRANSFER"],
-            onComplete(response) {
-                console.log(response, "REDIRECTTTTTTTTTTTTTTTTTTTT")
-            }
-        })
-    })
+  const data = await res.json()
 
-    if (!res.ok) {
-        console.log(await res.json())
-        throw new Error("Failed to initialize payment")
-    }
+  if (!res.ok || !data.requestSuccessful) {
+    console.error("Monnify init failed:", data)
+    throw new Error(data.responseMessage || "Failed to initialize payment")
+  }
 
-    const data = await res.json()
-    console.log(data.responseBody)
+  const body = data.responseBody
 
-    return data.responseBody;
+  return {
+    transactionReference: body.transactionReference,
+    paymentReference: body.paymentReference ?? paymentReference,
+    checkoutUrl: body.checkoutUrl,
+  }
 }

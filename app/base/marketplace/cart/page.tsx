@@ -140,46 +140,54 @@ const Page: NextPage = () => {
         console.log(userCode)
     }, [userCode])
 
-    // Initialize Payment with Paystack
     const initializePayment = async (amount: number) => {
-    
+        if (!userEmail || !userCode) {
+            toast.error("Account details are still loading")
+            return
+        }
+
+        if (!address) {
+            toast.error("Delivery address is required")
+            return
+        }
+
         setIsPaymentLoading(true)
-        try{
-            const res = await fetch("/api/monnify/initialize", {
+        try {
+            const res = await fetch("/api/monnify/initialize/order", {
                 method: "POST",
-                headers: { 
-                    "Content-Type": "application/json"
+                headers: {
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     email: userEmail,
-                    amount: amount,
-                    destination_address: ` ${address?.street}, ${address?.city}, ${address?.state}, ${address?.postal_code}`,
+                    amount,
+                    delivery_fee: deliveryZonePrice,
+                    extra_charges: 0,
+                    destination_address: `${address.street}, ${address.city}, ${address.state}, ${address.postal_code}`,
                     cart_items: cart,
-                    customer_code: userCode
-                })
+                    customer_code: userCode,
+                }),
             })
-    
+
             const result = await res.json()
-    
-            if(!res.ok){
-                toast.error(result.message)
+
+            if (!res.ok) {
+                toast.error(result.message || "Could not start payment")
                 return
             }
-    
-            console.log("Payment Initialization Result", result)
-            
-            if(result.data.status){
-                router.push(result.data.data.authorization_url)   
+
+            if (result.data?.checkoutUrl) {
+                window.location.href = result.data.checkoutUrl
+                return
             }
-        }
-        catch(err){
-            toast.error("ERR:: Initializing Payment")
-            console.error("ERR:: Initializing Payment", err)
-        }
-        finally{
+
+            toast.error("Payment checkout URL missing")
+        } catch (err) {
+            toast.error("Could not start payment")
+            console.error("Order payment initialization failed", err)
+        } finally {
             setIsPaymentLoading(false)
         }
-
     }
 
     // Handle Input Change - address

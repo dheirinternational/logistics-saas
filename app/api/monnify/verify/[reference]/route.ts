@@ -1,22 +1,25 @@
-import { VerifyTransaction } from "@/lib/monnify/verify";
-import { NextResponse, NextRequest } from "next/server";
+import { resolvePaymentType } from "@/lib/monnify/resolvePaymentType"
+import { NextRequest, NextResponse } from "next/server"
 
-export const GET = async (req: NextRequest, {params} : {params: Promise<{reference: string}>}) => {
-    try{
-        const {reference} = await params
-        const payment = await VerifyTransaction(reference)
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ reference: string }> }
+) {
+  const { reference } = await params
+  const paymentType = await resolvePaymentType(reference)
+  const base = new URL(req.url).origin
 
-        return NextResponse.json({
-            success: true,
-            message: "Payment verified",
-            data: payment
-        }, { status: 200 })
-    }
-    catch(err){
-        console.error("Verfication failed", err)
-        return NextResponse.json({
-            success: false,
-            message: "Verfication failed"
-        }, { status: 500 })
-    }
+  if (paymentType === "shipment") {
+    return NextResponse.redirect(
+      new URL(`/api/monnify/verify/shipment/${encodeURIComponent(reference)}`, base)
+    )
+  }
+
+  if (paymentType === "order") {
+    return NextResponse.redirect(
+      new URL(`/api/monnify/verify/order/${encodeURIComponent(reference)}`, base)
+    )
+  }
+
+  return NextResponse.json({ message: "Payment reference not found" }, { status: 404 })
 }

@@ -1,56 +1,65 @@
 "use client"
 
+import { useCartStore } from "@/store/cartStore"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
+import { BeatLoader } from "react-spinners"
 import { toast } from "react-toastify"
 
+export default function VerifyOrderPayment() {
+  const searchParams = useSearchParams()
+  const reference =
+    searchParams.get("paymentReference") ||
+    searchParams.get("reference") ||
+    searchParams.get("transactionReference") ||
+    ""
 
-export default function VerifyPayment(){
+  const router = useRouter()
+  const { clearCart } = useCartStore()
+  const verified = useRef(false)
 
-    const reference = useSearchParams().get("reference") || ""   
+  useEffect(() => {
+    if (verified.current) return
 
-    const router = useRouter()
+    const verifyPayment = async () => {
+      if (!reference) {
+        toast.error("No payment reference found")
+        router.push("/base/marketplace")
+        return
+      }
 
-    useEffect(() => {
-        const verifyPayment = async () => {
-            try{
-                const res = await fetch(`/api/paystack-ecommerce/verify-payment/${reference}`)   
-                
-                if(!res.ok){
-                    const errorData = await res.json()
-                    console.error("Error Verifying Payment", errorData)  
-                    toast.error("Error Verifying Payment")  
-                    return
-                }
+      verified.current = true
 
-                
+      try {
+        const res = await fetch(
+          `/api/monnify/verify/order/${encodeURIComponent(reference)}`
+        )
 
-                const result = await res.json()
-                toast.success(result.message)  
-                console.log("Verification Result", result.redirect_to)
-                router.push(result.redirect_to)
-            }
-            catch(err){
-                console.error("Error Verifying Payment", err)
-                toast.error("Error Verifying Payment")  
-            }  
+        const result = await res.json()
+
+        if (!res.ok) {
+          toast.error(result.message || "Payment verification failed")
+          router.push(result.redirect_to || "/base/marketplace")
+          return
         }
-        if(reference){
-            verifyPayment()
-        }   
-        else{
-            toast.error("No Payment Reference Found")
-        }    
-    })
 
-    return(
-        <div className="p-body">
-            <h1 className="text-sm font-semibold">
-                <>
+        clearCart()
+        toast.success(result.message || "Payment successful")
+        router.push(result.redirect_to || "/base/marketplace")
+      } catch (err) {
+        console.error("Error verifying payment", err)
+        toast.error("Payment verification failed")
+        router.push("/base/marketplace")
+      }
+    }
 
-                    Verifying Payment...
-                </>
-            </h1>
-        </div>
-    )
+    verifyPayment()
+  }, [reference, router, clearCart])
+
+  return (
+    <div className="p-body flex min-h-[40vh] flex-col items-center justify-center gap-4">
+      <BeatLoader color="#1A5FFF" size={12} />
+      <h1 className="text-sm font-semibold">Verifying payment...</h1>
+    </div>
+  )
 }

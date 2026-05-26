@@ -1,460 +1,297 @@
 "use client"
 
-import { useRouter } from 'next/navigation'
-import { NextPage } from 'next'
-import Link from 'next/link'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { FaCheck, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaPhone, FaUser } from 'react-icons/fa'
-import { BeatLoader, ClipLoader } from 'react-spinners'
-import Image from 'next/image'
-import { toast } from 'react-toastify'
+import { AuthField } from "@/components/auth/AuthField"
+import { AuthOtpSheet } from "@/components/auth/AuthOtpSheet"
+import { AuthPageShell } from "@/components/auth/AuthPageShell"
+import { BlurReveal } from "@/components/auth/BlurReveal"
+import {
+  IconCheck,
+  IconEye,
+  IconEyeOff,
+  IconLock,
+  IconMail,
+  IconPhone,
+  IconUser,
+} from "@tabler/icons-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { ChangeEvent, FormEvent, useState } from "react"
+import { ClipLoader } from "react-spinners"
+import { toast } from "react-toastify"
 
-const Page: NextPage = () => {
-    const router = useRouter()
+export default function SignupPage() {
+  const router = useRouter()
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false)
+  const [isEmailVerified, setIsEmailVerified] = useState(false)
+  const [isOtpOpen, setIsOtpOpen] = useState(false)
+  const [verifiedEmail, setVerifiedEmail] = useState("")
 
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: "",
+    first_name: "",
+    last_name: "",
+    phone: "",
+  })
 
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-    const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
-    const [isCreatingAccount, setIsCreatingAccount] = useState(false)
-    const [isEmailVerified, setIsEmailVerified] = useState(false)
-    const [isSendingOtp, setIsSendingOtp] = useState(false)
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.currentTarget
+    setCredentials((prev) => ({ ...prev, [name]: value }))
+    if (name === "email") {
+      const normalized = value.trim().toLowerCase()
+      if (normalized !== verifiedEmail) {
+        setIsEmailVerified(false)
+      }
+    }
+  }
 
-    const [isOTPActive, setIsOtpActive] = useState(false)
+  const validateSignupForm = (): boolean => {
+    if (!credentials.first_name.trim() || !credentials.last_name.trim()) {
+      toast.error("Enter your first and last name")
+      return false
+    }
+    if (!credentials.email.trim() || !credentials.email.includes("@")) {
+      toast.error("Enter a valid email address")
+      return false
+    }
+    if (!credentials.phone.trim()) {
+      toast.error("Enter your phone number")
+      return false
+    }
+    if (credentials.password.length < 7) {
+      toast.error("Password must be at least 7 characters")
+      return false
+    }
+    return true
+  }
 
-    const [credentials, setCredentials] = useState({
-        email: "",
-        password: "",
-        confirm_password: "",
-        first_name: "",
-        last_name: "",
-        phone: "",
-    })
-
-    // Function to handle Submit
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-
-        // Check for password length
-        if(credentials.password.length < 7){
-            toast.error("Password must be minimum 7 characters in length");
-            return
+  const completeRegistration = async () => {
+    setIsCreatingAccount(true)
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: credentials.email.trim().toLowerCase(),
+          password: credentials.password,
+          first_name: credentials.first_name.trim(),
+          last_name: credentials.last_name.trim(),
+          phone: credentials.phone.trim(),
+        }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        toast.error(result.message ?? "Could not create account")
+        if (res.status === 403) {
+          setIsEmailVerified(false)
+          setVerifiedEmail("")
         }
+        return
+      }
+      toast.success(result.message ?? "Account created")
+      router.push("/base")
+    } catch {
+      toast.error("Could not create account. Try again.")
+    } finally {
+      setIsCreatingAccount(false)
+    }
+  }
 
-        // Check if confirmPassword = password
-        if (credentials.password !== credentials.confirm_password){ 
-            toast.error("Passwords don't match, Check Passwords")
-            return
-        }
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
 
-        // Initiate Async process
-        setIsCreatingAccount(true)
-        
-        const formData = new FormData(e.currentTarget)
-        formData.append("role", "customer")
-        formData.append("email_verified", String(isEmailVerified))
-        const data = Object.fromEntries(formData)
+    if (!validateSignupForm()) return
 
-        try{
-            const res = await fetch(`/api/auth/register`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
+    const email = credentials.email.trim().toLowerCase()
 
-            const result = await res.json()
-
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            toast.success(result.message)
-            router.push("/")
-        }
-        catch(err){
-            console.error("ERR:: Unable to create user account", err)
-            toast.error("ERR:: Unable to create user account")
-        }
-        finally{
-            setIsCreatingAccount(false)
-        }
+    if (!isEmailVerified || verifiedEmail !== email) {
+      setIsOtpOpen(true)
+      return
     }
 
-    // Function to handle Input Change
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    await completeRegistration()
+  }
 
-        const { name, value } = e.currentTarget
-        setCredentials(prev => ({...prev, [name]: value}))
-    }
+  const handleVerified = async () => {
+    const email = credentials.email.trim().toLowerCase()
+    setIsEmailVerified(true)
+    setVerifiedEmail(email)
+    setIsOtpOpen(false)
+    await completeRegistration()
+  }
 
+  return (
+    <AuthPageShell
+      maxWidthClass="max-w-[440px]"
+      mobileTrailing={
+        <Link
+          href="/auth/login"
+          className="text-sm font-medium text-dheir-muted no-underline hover:text-dheir-ink"
+        >
+          Log in
+        </Link>
+      }
+    >
+      <BlurReveal immediate>
+        <h2 className="font-display text-[1.75rem] font-bold tracking-tight text-dheir-ink">
+          Create account
+        </h2>
+        <p className="mt-2 text-[15px] text-dheir-muted">
+          A few details to get you started. We will email you a verification code
+          when you continue.
+        </p>
+      </BlurReveal>
 
-    // Function to handle sending otp
-    const handleSendingOtp = async () => {
-        setIsSendingOtp(true)
-        try{
-            const res = await fetch("/api/auth/send-otp", {
-                method: "POST",
-                headers: {
-                    "Content-Type" : "application/json", 
-                },
-                body: JSON.stringify({
-                    email: credentials.email
-                })
-            })
-            const result = await res.json()
-
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            setIsOtpActive(true)
-        }
-        catch(err){
-            console.error("ERR:: Could not send OTP To email", err)
-            toast.error("ERR:: Could not send OTP To email")
-        }
-        finally{
-            setIsSendingOtp(false)
-        }
-    }
-
-
-  return <div className='w-screen h-dvh max-h-screen center-items flex center-items max-sm:overflow-hidden'>
-    <div className='flex-1 bg-white h-full center-items flex-col relative'>
-        <form onSubmit={handleSubmit} className='max-sm:px-10 max-sm:w-screen'>
-            <div>
-                <figure className='w-15 h-15 rounded-full relative mt-8'>
-                    <Image 
-                    src={`/d_heir_logo.png`}
-                    alt='company logo'
-                    fill
-                    />
-                </figure>
-                <p className='text-xs font-semibold text-dark/60'>
-                    DHEIRINTERNATIONAL
-                </p>
-            </div>
-            <h1 className='my-2 font-bold text-2xl mt-6'>
-                Sign up
-            </h1>
-            <div className='mt-8 space-y-4 w-fit text-xs max-sm:w-screen '>
-          
-
-                <div className='flex gap-5 max-sm:flex-col max-sm:w-70'>
-                    <label className='w-full flex flex-col relative'>
-                        <span className='text-dark/60'>
-                            First Name
-                        </span>
-                        <input 
-                        type="text" 
-                        name="first_name" 
-                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set'
-                        value={credentials.first_name}
-                        onChange={handleInputChange}
-                        />
-                        <FaUser className='absolute left-1 bottom-2.5 text-dark/60'/>
-                    </label>
-                    <label className='w-full flex flex-col relative'>
-                        <span className='text-dark/60'>
-                            Last Name
-                        </span>
-                        <input 
-                        type="text" 
-                        name="last_name" 
-                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set'
-                        value={credentials.last_name}
-                        onChange={handleInputChange}
-                        />
-                        <FaUser className='absolute left-1 bottom-2.5 text-dark/60'/>
-                    </label>
-                </div>
-
-                <div className='flex gap-5 max-sm:flex-col max-sm:w-70'>
-                    <label className='w-full flex flex-col relative'>
-                        <span className='text-dark/60'>
-                            Email Address
-                        </span>
-                        <input 
-                        type="email" 
-                        name="email" 
-                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
-                        value={credentials.email}
-                        onChange={handleInputChange}
-                        />
-                        <FaEnvelope className='absolute left-1 bottom-2.5 text-dark/60'/>
-                        {
-                            credentials.email.length > 0 && credentials.email.includes("@gmail.com") &&
-                            <button 
-                            className='absolute right-0 bottom-1.5 text-yellow-500'
-                            type='button'
-                            disabled={isSendingOtp || isEmailVerified}
-                            onClick={handleSendingOtp}
-                            >
-                                {
-                                    isEmailVerified ? 
-                                    <FaCheck className='text-green-400'/> :
-                                    isSendingOtp ?
-                                    <ClipLoader color='orange' size={10}/> :
-                                    "Verify"
-                                }
-                            </button>
-                        }
-                    </label>
-                    <label className='w-full flex flex-col relative'>
-                        <span className='text-dark/60'>
-                            Phone Number
-                        </span>
-                        <input 
-                        type="text" 
-                        name="phone" 
-                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set'
-                        value={credentials.phone}
-                        onChange={handleInputChange}
-                        />
-                        <FaPhone className='absolute left-1 bottom-2.5 text-dark/60'/>
-                    </label>
-                </div>
-
-                <div className='flex gap-5 max-sm:flex-col max-sm:w-70'>
-                    <label className='w-full flex flex-col relative'>
-                        <span className='text-dark/60'>
-                            Password
-                        </span>
-                        <input 
-                        type={isPasswordVisible ? "text" : "password"} 
-                        name="password" 
-                        className='border-b border-dark/10 p-2 pl-7 pr-6 outline-0 focus:border-dark transition-set'
-                        value={credentials.password}
-                        onChange={handleInputChange}
-                        />
-                        <FaLock className='absolute left-1 bottom-2.5 text-dark/60'/>
-                        <button 
-                            className='right-1 absolute bottom-2 rounded-full p-2'
-                            type="button"
-                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                        >
-                            {
-                                isPasswordVisible ?
-                                <FaEyeSlash/> : 
-                                <FaEye />
-                            }
-                        </button>
-                    </label>
-                    <label className='w-full flex flex-col relative'>
-                        <span className='text-dark/60'>
-                            Confirm Password
-                        </span>
-                        <input 
-                        type={isConfirmPasswordVisible ? "text" : "password"} 
-                        name="confirm_password" 
-                        className='border-b border-dark/10 p-2 pl-7 pr-6 outline-0 focus:border-dark transition-set'
-                        value={credentials.confirm_password}
-                        onChange={handleInputChange}
-                        />
-                        <FaLock className='absolute left-1 bottom-2.5 text-dark/60'/>
-                        <button 
-                            className='right-1 absolute bottom-2 rounded-full p-2'
-                            type="button"
-                            onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                        >
-                            {
-                                isConfirmPasswordVisible ?
-                                <FaEyeSlash/> : 
-                                <FaEye />
-                            }
-                        </button>
-                    </label>
-                </div> 
-                
-            </div>
-            <div className='w-full'>
-                <button className='w-full bg-accent-blue text-white text-xs mt-6 py-3 rounded'>
-                    {
-                        isCreatingAccount ?
-                        <BeatLoader color='#fff' size={8}/> :
-                        <>
-                            Create Account
-                        </>
-                    }
-                </button>
-            </div>
-        </form>
-        <div className='flex gap-1 text-xs mt-3 pb-10'>
-            <p className='opacity-40'>
-                Have an account?
-            </p>
-            <Link href={"/auth/login"}>
-                Log in
-            </Link>
-        </div> 
-
-
-        {/* OTP Component*/}
-
-        {
-            isOTPActive && <OTPComponent {...{credentials, setIsOtpActive, setIsEmailVerified}}/>
-            
-        }
-
-    </div>
-
-    
-    <div className='flex-1 h-full max-sm:hidden'>
-        
-    </div>
-
-  </div>
-}
-
-
-const OTPComponent = ({credentials, setIsOtpActive, setIsEmailVerified}) => {
-
-    const [countDown, setCountDown] = useState(59)
-    const [isSendingOtp, setIsSendingOtp] = useState(false)
-    const [isVerifyingEmail, setIsVerifyingEmail] = useState(false)
-    const [otp, setOtp] = useState("")
-
-    // Handle countdown till resend otp available
-    useEffect(() => {
-        
-        const intervalID = setInterval(() => {
-            if(countDown > 0){
-                setCountDown(prev => prev - 1)
-            }
-        }, 1000)
-
-        return () => clearInterval(intervalID)
-        
-    }, [countDown])
-
-
-    // Function to handle sending otp
-    const handleSendingOtp = async () => {
-        setIsSendingOtp(true)
-        try{
-            const res = await fetch("/api/auth/send-otp", {
-                method: "POST",
-                headers: {
-                    "Content-Type" : "application/json", 
-                },
-                body: JSON.stringify({
-                    email: credentials.email
-                })
-            })
-            const result = await res.json()
-
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            toast.success("OTP Sent")
-            setCountDown(59)
-        }
-        catch(err){
-            console.error("ERR:: Could not send OTP To email", err)
-            toast.error("ERR:: Could not send OTP To email")
-        }
-        finally{
-            setIsSendingOtp(false)
-        }
-    }
-
-    const handleSubmit = async () => {
-        setIsVerifyingEmail(true)
-        try{
-            const res = await fetch("/api/auth/verify-otp", {
-                method: "POST",
-                headers: {
-                    "Content-Type" : "application/json" 
-                },
-                body: JSON.stringify({
-                    otp: Number(otp),
-                    email: credentials.email
-                })
-            })
-            const result = await res.json()
-
-            if (!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            // todo: Put verified message here
-            toast.success("Succesfully verified email")
-            setIsOtpActive(false)
-            setIsEmailVerified(true)
-        }
-        catch(err){
-            toast.error("ERR:: Could not verify Email")
-            console.error("ERR:: Could not verify Email", err)
-        }
-        finally{
-            setIsVerifyingEmail(false)
-        }
-    }
-
-
-
-    return <div className='absolute w-full h-full bg-black/40'>
-        <div className='absolute bottom-0 left-1/2 -translate-x-1/2 p-8 rounded-t-2xl bg-light h-70 w-100 center-items flex-col'>
-            <div className='w-70'>
-                <h2 className='font-bold'>
-                    Verify OTP
-                </h2>
-                <p className='text-[10px] text-dark/50 my-2'> 
-                    We sent an OTP to {credentials.email} <br />
-                    Enter it below to continue
-                </p>
-                <input 
-                type="text" 
-                className='border border-dark/20 rounded w-[90%] text-xs outline-0 p-2'
-                value={otp}
-                onChange={(e) => {setOtp(e.currentTarget.value)}}
-                />
-                <div className='mt-3 text-[10px] flex gap-1'>
-                    <span>Resend Available 
-                        {   
-                            countDown > 0 &&
-                            <><span>in</span> <span className='text-accent-red'>{countDown}</span> <span>seconds</span></>
-                        }
-                    :</span>
-                    <button 
-                    className='text-accent-red font-semibold'
-                    onClick={() => {
-                        if(countDown > 0){
-                            toast.info("Please wait before requesting another OTP")
-                        }
-                        else
-                        handleSendingOtp()
-                    }}
-                    >
-                        {
-                            isSendingOtp ? <ClipLoader color='orange' size={5}/> :
-                            "Resend OTP"
-                        }
-                    </button>
-                </div>
-                <button 
-                className='text-xs bg-accent-blue w-full py-2 rounded text-white mt-2'
-                disabled={isVerifyingEmail}
-                onClick={handleSubmit}
-                >
-                    {
-                        isVerifyingEmail ?
-                        <ClipLoader size={12} color='white'/> :
-                        "Verify"
-                    }
-                </button>
-            </div>
+      <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <BlurReveal immediate delay={80}>
+            <AuthField
+              label="First name"
+              name="first_name"
+              required
+              value={credentials.first_name}
+              onChange={handleInputChange}
+              placeholder="Ada"
+              icon={<IconUser size={18} stroke={1.5} />}
+            />
+          </BlurReveal>
+          <BlurReveal immediate delay={120}>
+            <AuthField
+              label="Last name"
+              name="last_name"
+              required
+              value={credentials.last_name}
+              onChange={handleInputChange}
+              placeholder="Okafor"
+              icon={<IconUser size={18} stroke={1.5} />}
+            />
+          </BlurReveal>
         </div>
-    </div>
+
+        <BlurReveal immediate delay={160}>
+          <label className="block">
+            <span className="mb-2 block text-[13px] font-medium text-dheir-ink">
+              Email
+            </span>
+            <span className="relative block">
+              <IconMail
+                className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-dheir-muted"
+                size={18}
+                stroke={1.5}
+              />
+              <input
+                type="email"
+                name="email"
+                required
+                autoComplete="email"
+                value={credentials.email}
+                onChange={handleInputChange}
+                placeholder="you@email.com"
+                className={`dheir-input pl-11 ${
+                  isEmailVerified &&
+                  verifiedEmail === credentials.email.trim().toLowerCase()
+                    ? "pr-11"
+                    : "pr-4"
+                }`}
+              />
+              {isEmailVerified &&
+              verifiedEmail === credentials.email.trim().toLowerCase() ? (
+                <span
+                  className="pointer-events-none absolute right-3 top-1/2 z-10 -translate-y-1/2 text-emerald-600"
+                  aria-label="Email verified"
+                >
+                  <IconCheck size={20} stroke={2} />
+                </span>
+              ) : null}
+            </span>
+            <p className="mt-2 text-[13px] leading-relaxed text-dheir-muted">
+              {isEmailVerified &&
+              verifiedEmail === credentials.email.trim().toLowerCase()
+                ? "Email verified. You can create your account."
+                : "We will send a 6-digit code to this address when you tap Create account."}
+            </p>
+          </label>
+        </BlurReveal>
+
+        <BlurReveal immediate delay={200}>
+          <AuthField
+            label="Phone"
+            name="phone"
+            type="tel"
+            required
+            value={credentials.phone}
+            onChange={handleInputChange}
+            placeholder="+234..."
+            icon={<IconPhone size={18} stroke={1.5} />}
+          />
+        </BlurReveal>
+
+        <BlurReveal immediate delay={240}>
+          <AuthField
+            label="Create password"
+            name="password"
+            type={isPasswordVisible ? "text" : "password"}
+            required
+            autoComplete="new-password"
+            value={credentials.password}
+            onChange={handleInputChange}
+            placeholder="At least 7 characters"
+            icon={<IconLock size={18} stroke={1.5} />}
+            trailing={
+              <button
+                type="button"
+                className="dheir-input-action"
+                aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                onClick={() => setIsPasswordVisible((v) => !v)}
+              >
+                {isPasswordVisible ? (
+                  <IconEyeOff size={18} stroke={1.5} />
+                ) : (
+                  <IconEye size={18} stroke={1.5} />
+                )}
+              </button>
+            }
+          />
+        </BlurReveal>
+
+        <BlurReveal immediate delay={280}>
+          <button
+            type="submit"
+            disabled={isCreatingAccount}
+            className="dheir-btn-primary mt-2"
+          >
+            {isCreatingAccount ? (
+              <ClipLoader color="#fff" size={20} />
+            ) : isEmailVerified &&
+              verifiedEmail === credentials.email.trim().toLowerCase() ? (
+              "Create account"
+            ) : (
+              "Continue"
+            )}
+          </button>
+        </BlurReveal>
+      </form>
+
+      <BlurReveal immediate delay={340}>
+        <p className="mt-8 text-center text-sm text-dheir-muted">
+          Already have an account?{" "}
+          <Link
+            href="/auth/login"
+            className="font-semibold text-dheir-blue underline-offset-2 hover:underline"
+          >
+            Log in
+          </Link>
+        </p>
+      </BlurReveal>
+
+      <AuthOtpSheet
+        open={isOtpOpen}
+        email={credentials.email.trim().toLowerCase()}
+        autoSend
+        onClose={() => setIsOtpOpen(false)}
+        onVerified={handleVerified}
+      />
+    </AuthPageShell>
+  )
 }
-
-
-
-
-export default Page

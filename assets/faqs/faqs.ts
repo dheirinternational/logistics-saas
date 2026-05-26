@@ -54,12 +54,12 @@ export const faqs: FAQ[] = [
   {
     question: "If I place an order now, when will I receive my goods?",
     answer:
-      "Goods typically arrive in Nigeria within 2–3 weeks, depending on how quickly your supplier delivers to our warehouse in China.",
+      "Goods typically arrive in Nigeria within 2 to 3 weeks, depending on how quickly your supplier delivers to our warehouse in China.",
   },
   {
     question: "How long does shipping take?",
     answer:
-      "Shipping time depends on the method chosen: Normal Air Shipping (5–7 days), Express Shipping (3–5 days), Sea Shipping (2–3 months).",
+      "Shipping time depends on the method chosen: Normal Air Shipping (5 to 7 days), Express Shipping (3 to 5 days), Sea Shipping (2 to 3 months).",
   },
   {
     question: "How does importation work, and how can I be sure of product quality?",

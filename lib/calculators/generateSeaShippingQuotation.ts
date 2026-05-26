@@ -21,7 +21,7 @@ type QuotationState = {
     totalPrice: string
 }
 
-const PAYSTACK_SERVICE_CHARGE_RATE = 1.5
+const PAYMENT_GATEWAY_FEE_RATE = 1.5
 
 
 export const generateSeaShippingQuotation = async (itemCart: ItemCartType[]) => {
@@ -69,7 +69,7 @@ export const generateSeaShippingQuotation = async (itemCart: ItemCartType[]) => 
         const special_delivery_window = special_goods_template.min_duration + " - " + special_goods_template.max_duration + " " + special_goods_template.duration_type
 
 
-        const total_price = normal_goods_price + special_goods_price * PAYSTACK_SERVICE_CHARGE_RATE + normal_goods_clearance_fee + special_goods_clearance_fee
+        const total_price = normal_goods_price + special_goods_price * PAYMENT_GATEWAY_FEE_RATE + normal_goods_clearance_fee + special_goods_clearance_fee
 
         console.log({
             normal_goods_price,

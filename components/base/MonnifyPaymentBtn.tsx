@@ -1,38 +1,79 @@
 "use client"
 
+import { BeatLoader } from "react-spinners"
+import { useState } from "react"
+import { toast } from "react-toastify"
 
-export default function MonnifyPayButton({transactionRef} : {transactionRef: string}){
-    
-    const handlePayment = async() => {
-        console.log("Heyy")
-        console.log(transactionRef)
-        const res = await fetch("/api/monnify/initialize", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                amount: 5000,
-                customerName: "John Doe",
-                customerEmail: "john@example.com",
-                transactionRef
-            })
-        })
-        console.log(res)
+type MonnifyPaymentButtonProps = {
+  amount: number
+  customerEmail: string
+  customerName: string
+  paymentReference: string
+  className?: string
+  disabled?: boolean
+}
 
-        const result = await res.json()
-        console.log(result)
+export default function MonnifyPaymentButton({
+  amount,
+  customerEmail,
+  customerName,
+  paymentReference,
+  className = "bg-accent-blue flex gap-1 items-center h-fit px-4 py-2 text-white rounded text-xs",
+  disabled = false,
+}: MonnifyPaymentButtonProps) {
+  const [isLoading, setIsLoading] = useState(false)
 
-        if (!res.ok) {
-            console.log("PAYMENT ERROR:", result.message);
-            return;
-        }
-
-        window.location.href = result.data.checkoutUrl
+  const handlePayment = async () => {
+    if (!customerEmail) {
+      toast.error("Account email is required to pay")
+      return
     }
 
-    return <button onClick={handlePayment} className="bg-accent-blue text-white text-[10px] opacity-80 px-3 py-2 rounded">
-        Pay Now
-    </button>
+    setIsLoading(true)
+    try {
+      const res = await fetch("/api/monnify/initialize/shipment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transaction_ref: paymentReference,
+        }),
+      })
 
+      const result = await res.json()
+
+      if (!res.ok) {
+        toast.error(result.message || "Could not start payment")
+        return
+      }
+
+      if (!result.data?.checkoutUrl) {
+        toast.error("Payment checkout URL missing")
+        return
+      }
+
+      window.location.href = result.data.checkoutUrl
+    } catch (err) {
+      console.error("Monnify payment error:", err)
+      toast.error("Could not start payment")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={disabled || isLoading || !paymentReference}
+      className={className}
+      onClick={handlePayment}
+    >
+      {isLoading ? (
+        <BeatLoader color="white" size={6} />
+      ) : (
+        <>Pay ₦{Number(amount).toLocaleString()}</>
+      )}
+    </button>
+  )
 }

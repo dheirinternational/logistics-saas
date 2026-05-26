@@ -9,6 +9,7 @@ type CartStore = {
     editTotal: (value: number, previousValue: number) => void
     // initializeNumber: (value: number) => void
     resetTotal: (value: number) => void
+    clearCart: () => void
     increaseAmount: (productId: number) => void
     decreaseAmount: (productId: number) => void
     editIndividualItem: (amountToBeOrdered: number, id:number) => void
@@ -58,6 +59,7 @@ export const useCartStore = create<CartStore>((set) => ({
     editTotal: (number, previous) => set((state) => ({
         totalPrice: previous === 0 ? state.totalPrice + number : (state.totalPrice - previous) + number 
     })),
-    resetTotal: (value) => set({totalPrice: value})
+    resetTotal: (value) => set({totalPrice: value}),
+    clearCart: () => set({ cart: [], totalPrice: 0 }),
 
 }))

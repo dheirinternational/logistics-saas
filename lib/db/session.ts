@@ -38,7 +38,16 @@ export async function getSession(){
 
     if (!sessionId) return null
     const result = await pool.query(`
-        SELECT sessions.id, sessions.user_id, sessions.expires_at, users.email, users.role FROM sessions
+        SELECT
+            sessions.id,
+            sessions.user_id,
+            sessions.expires_at,
+            users.email,
+            users.role,
+            users.first_name,
+            users.last_name,
+            users.profile_img
+        FROM sessions
         JOIN users ON users.id = sessions.user_id
         WHERE sessions.id = $1
         LIMIT 1

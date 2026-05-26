@@ -1,18 +1,54 @@
-import { getMonnifyToken } from "./auth";
+import { getMonnifyToken, getMonnifyBaseUrl } from "./auth"
+import type { MonnifyTransactionDetails } from "./types"
 
-export async function VerifyTransaction(reference: string){
-    const token = await getMonnifyToken()
+export function isMonnifyPaymentPaid(paymentStatus: string | undefined) {
+  return paymentStatus === "PAID" || paymentStatus === "OVERPAID"
+}
 
-    const res = await fetch(`${process.env.MONNIFY_BASE_URL}/api/v2/transaction/${reference}`, {
+export async function verifyMonnifyTransaction(
+  reference: string
+): Promise<MonnifyTransactionDetails> {
+  const token = await getMonnifyToken()
+  const baseUrl = getMonnifyBaseUrl()
+  const encoded = encodeURIComponent(reference)
+
+  const endpoints = [
+    `${baseUrl}/api/v2/transactions/${encoded}`,
+    `${baseUrl}/api/v2/transactions/${encoded}?transactionReference=${encoded}`,
+  ]
+
+  let lastError: unknown
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
         headers: {
-            Authorization: `Bearer ${token}`
-        }
-    })
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
-    if (!res.ok) {
-        throw new Error("Verification failed")
+      const data = await res.json()
+
+      if (!res.ok || !data.requestSuccessful) {
+        lastError = data
+        continue
+      }
+
+      const body = data.responseBody
+      return {
+        paymentReference: body.paymentReference ?? reference,
+        transactionReference: body.transactionReference ?? reference,
+        paymentStatus: body.paymentStatus,
+        amountPaid: body.amountPaid,
+        paymentMethod: body.paymentMethod,
+        paidOn: body.paidOn,
+        metaData: body.metaData,
+      }
+    } catch (err) {
+      lastError = err
     }
-    
-    const data = await res.json()
-    return data.responseBody
+  }
+
+  console.error("Monnify verification failed for reference:", reference, lastError)
+  throw new Error("Verification failed")
 }

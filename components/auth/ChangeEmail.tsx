@@ -1,86 +1,103 @@
 "use client"
 
+import { AuthField } from "@/components/auth/AuthField"
+import { AuthPageShell } from "@/components/auth/AuthPageShell"
+import { BlurReveal } from "@/components/auth/BlurReveal"
+import { IconMail } from "@tabler/icons-react"
+import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { FormEvent, useState } from "react"
-import { BeatLoader } from "react-spinners"
+import { ClipLoader } from "react-spinners"
 import { toast } from "react-toastify"
 
-export default function ChangeEmail(){
+export default function ChangeEmail() {
+  const params = useSearchParams()
+  const router = useRouter()
+  const [isChangingEmail, setIsChangingEmail] = useState(false)
 
-    const params = useSearchParams()
-    const router = useRouter() 
-
-    const [isChangingEmail, setIsChangingEmail] = useState(false)
-
-
-    const changeEmail = async (newEmail: string) => {
-        setIsChangingEmail(true)
-        const token = params.get("token")
-        try {
-            const res = await fetch(`/api/auth/change-email?token=${token}`, {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type" : "application/json" 
-                },
-                body: JSON.stringify({newEmail})
-            })
-
-            const result = await res.json()
-
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            toast.success(result.message)
-            toast.info("Redirecting...")
-            router.push("/")
-            
-        } catch(err){
-            toast.error("ERR:: Changing User Email")
-            console.error("ERR:: Changing User Email", err)
-        }
-        finally{
-            setIsChangingEmail(false)
-        }
+  const changeEmail = async (newEmail: string) => {
+    const token = params.get("token")
+    if (!token) {
+      toast.error("Invalid or expired link")
+      return
     }
 
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        const data = Object.fromEntries(formData)
-
-        changeEmail(data.email as string)
+    setIsChangingEmail(true)
+    try {
+      const res = await fetch(`/api/auth/change-email?token=${token}`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newEmail }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        toast.error(result.message)
+        return
+      }
+      toast.success(result.message)
+      router.push("/auth/login")
+    } catch {
+      toast.error("Could not update email. Try again.")
+    } finally {
+      setIsChangingEmail(false)
     }
+  }
 
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData)
+    changeEmail(data.email as string)
+  }
 
-    return(
-        <div className="w-screen h-dvh center-items">
-            <form 
-            onSubmit={handleSubmit}
-            className="bg-light p-body rounded shadow flex flex-col gap-3">
-                
-                <input 
-                type="email" 
-                className="text-xs border border-dark/20 outline-0 rounded w-50 px-2 py-2"
-                required
-                name="email"
-                placeholder="Input New Email..."
-                />
-                
-                <button 
-                disabled={isChangingEmail}
-                className="bg-accent-red text-white text-xs py-2 rounded">
-                    {
-                        isChangingEmail ?
-                        <BeatLoader color="white" size={10}/> :
-                        "Change Email"
-                    }
-                </button>
+  return (
+    <AuthPageShell
+      mobileTrailing={
+        <Link
+          href="/auth/login"
+          className="text-sm font-medium text-dheir-muted no-underline hover:text-dheir-ink"
+        >
+          Log in
+        </Link>
+      }
+    >
+      <BlurReveal immediate>
+        <h2 className="font-display text-[1.75rem] font-bold tracking-tight text-dheir-ink">
+          New email
+        </h2>
+        <p className="mt-2 text-[15px] text-dheir-muted">
+          Enter the address you want on your account.
+        </p>
+      </BlurReveal>
 
-            </form>
-        </div>
-    )
+      <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
+        <BlurReveal immediate delay={100}>
+          <AuthField
+            label="Email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="you@email.com"
+            icon={<IconMail size={18} stroke={1.5} />}
+          />
+        </BlurReveal>
+
+        <BlurReveal immediate delay={180}>
+          <button
+            type="submit"
+            disabled={isChangingEmail}
+            className="dheir-btn-primary"
+          >
+            {isChangingEmail ? (
+              <ClipLoader color="#fff" size={20} />
+            ) : (
+              "Save email"
+            )}
+          </button>
+        </BlurReveal>
+      </form>
+    </AuthPageShell>
+  )
 }

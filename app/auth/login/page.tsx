@@ -1,340 +1,288 @@
 "use client"
 
-import { useRouter } from 'next/navigation'
-import { NextPage } from 'next'
-import Link from 'next/link'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
-import { BeatLoader, ClipLoader } from 'react-spinners'
-import Image from 'next/image'
-import { FaEnvelope, FaEye, FaEyeSlash, FaLock } from 'react-icons/fa'
+import { AuthField } from "@/components/auth/AuthField"
+import { AuthPageShell } from "@/components/auth/AuthPageShell"
+import {
+  BlurReveal,
+  authViewTransition,
+  authViewTransitionReduced,
+} from "@/components/auth/BlurReveal"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import {
+  IconArrowLeft,
+  IconEye,
+  IconEyeOff,
+  IconLock,
+  IconMail,
+} from "@tabler/icons-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { ChangeEvent, FormEvent, useEffect, useState } from "react"
+import { ClipLoader } from "react-spinners"
+import { toast } from "react-toastify"
 
-const Page: NextPage = () => {
-    const router = useRouter()
+type AuthView = "login" | "forgot-password"
 
-    const [credentials, setCredentials] = useState({
-        email: "",
-        password: ""
-    })
-    const [isLoading, setIsLoading] = useState(false)
-    // const [isSendingPasswordChangeVerification, setIsSendingPasswordChangeVerification] = useState(false)
-    const [page, setPage] = useState<"login" | "forgot-password">("login")
-    const [changePasswordEmail, setChangePasswordEmail] = useState("")
-    const [isSendingPasswordEmail, setIsSendingPasswordEmail] = useState(false)
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+export default function LoginPage() {
+  const router = useRouter()
+  const reduceMotion = useReducedMotion()
+  const viewMotion = reduceMotion ? authViewTransitionReduced : authViewTransition
+  const [view, setView] = useState<AuthView>("login")
+  const [credentials, setCredentials] = useState({ email: "", password: "" })
+  const [changePasswordEmail, setChangePasswordEmail] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSendingPasswordEmail, setIsSendingPasswordEmail] = useState(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
+  useEffect(() => {
+    handleSession()
+  }, [])
 
-    useEffect(()=>{
-        handleSession()
-    }, [])
-
-    const handleSession = async() => {
-        try{
-            const res = await fetch("/api/auth/me", {
-                method: "GET",
-                credentials: "include"
-            })
-            const data = await res.json()            
-            if(data.user?.role){
-                if (data.user.role === "customer"){
-                    router.push("/base")
-                } else if (data.user.role === "admin"){
-                    router.push("/admin")
-                }
-            }
-
-        }
-        catch(err){
-            console.log(err)
-        }
+  const handleSession = async () => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        method: "GET",
+        credentials: "include",
+      })
+      const data = await res.json()
+      if (data.user?.role === "customer") router.push("/base")
+      else if (data.user?.role === "admin") router.push("/admin")
+    } catch (err) {
+      console.error(err)
     }
+  }
 
-    // const initializePasswordChangeConfirmation = async () => {
-    //     setIsSendingPasswordChangeVerification(true)
-    //     try{
-    //         const res = await fetch(`/api/auth/forgot-password/initialize`, {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type" : "application/json"
-    //             },
-    //             credentials: "include",
-    //             body: JSON.stringify({email: changePasswordEmail})
-    //         })
-
-    //         const result = await res.json()
-
-    //         if(!res.ok){
-    //             toast.error(result.message)
-    //             return
-    //         }
-
-    //         setPage("login")
-    //         toast.success(result.message)
-    //     }
-    //     catch(err){ 
-    //         toast.error("ERR:: Sending Password Change Confirmation, try again")
-    //         console.error("ERR:: Sending Password Change Confirmation", err)
-    //     }
-    //     finally{
-    //         setIsSendingPasswordChangeVerification(false)
-    //     }
-    // }
-
-
-    // Function to send Password Change page link
-    const handlePasswordChangeLink = async () => {
-        setIsSendingPasswordEmail(true)
-        try{
-            const res = await fetch(`/api/auth/send-change-password-link`, {
-                method: "POST",
-                headers: {
-                    "Content-Type" : "application/json"
-                },
-                body: JSON.stringify({
-                    email: changePasswordEmail
-                })
-            })
-            const result = await res.json()
-
-            if(!res.ok){
-                toast.success(result.message)
-                return
-            }
-
-            toast.success(result.message)
-            
-
-        }
-        catch(err){
-            console.error("ERR:: Network Error", err)
-            toast.error("ERR:: Network Error")
-        }
-        finally{
-            setIsSendingPasswordEmail(false)
-        }
+  const handlePasswordChangeLink = async () => {
+    if (!changePasswordEmail.trim()) {
+      toast.error("Enter your email address")
+      return
     }
-
-
-    // Function to handle Log In
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setIsLoading(true)
-        const formData = new FormData(e.currentTarget)
-        const data = Object.fromEntries(formData)
-
-        try{
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
-
-            const result = await res.json()
-
-            if(!res.ok){
-                toast.error(result.error)
-                return
-            }
-
-            toast.success("Succesfully logged In")
-
-            await handleSession()
-        }
-        catch(err){
-            toast.error("An error occurred. Please try again.")
-            console.error(err)
-        }
-        finally{
-            setIsLoading(false)
-        }
-    } 
-
-
-
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-
-        const { name, value } = e.currentTarget
-        setCredentials(prev => ({...prev, [name]: value}))
+    setIsSendingPasswordEmail(true)
+    try {
+      const res = await fetch("/api/auth/send-change-password-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: changePasswordEmail }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        toast.error(result.message ?? "Could not send reset link")
+        return
+      }
+      toast.success(result.message)
+      setView("login")
+    } catch {
+      toast.error("Network error. Try again.")
+    } finally {
+      setIsSendingPasswordEmail(false)
     }
+  }
 
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsLoading(true)
+    const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData)
 
-  return <div className='w-screen h-dvh max-h-screen center-items flex max-sm:flex-col'>
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        toast.error(result.error ?? "Login failed")
+        return
+      }
+      toast.success("Welcome back")
+      await handleSession()
+    } catch {
+      toast.error("Something went wrong. Try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-        <div className='flex-1 bg-light h-full max-sm:w-screen max-sm:h-dvh'>
-            <div className='center-items flex-col h-full'>
-                <div className={`
-                    h-110 w-70 max-w-70 overflow-x-hidden
-                `}>
-                    {/* Scroll Bar */}
-                    <div className={`
-                        w-fit flex transition-set
-                        ${page === "login" ? "translate-x-0" : "-translate-x-1/2"}
-                    `}>
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.currentTarget
+    setCredentials((prev) => ({ ...prev, [name]: value }))
+  }
 
-                        {/* LOGIN FORM */}
-                        <div>
-                            <div className=''>
-                                <figure className='relative h-20 w-20 '>
-                                    <Image 
-                                    src={"/d_heir_logo.png"}
-                                    alt='company logo'
-                                    fill
-                                    />
-                                </figure>
+  return (
+    <AuthPageShell
+      mobileTrailing={
+        <Link
+          href="/"
+          className="text-sm font-medium text-dheir-muted no-underline hover:text-dheir-ink"
+        >
+          Home
+        </Link>
+      }
+    >
+      <AnimatePresence mode="wait">
+        {view === "login" ? (
+          <motion.div
+            key="login"
+            initial={viewMotion.initial}
+            animate={viewMotion.animate}
+            exit={viewMotion.exit}
+          >
+            <BlurReveal immediate>
+              <h2 className="font-display text-[1.75rem] font-bold tracking-tight text-dheir-ink">
+                Welcome back
+              </h2>
+              <p className="mt-2 text-[15px] text-dheir-muted">
+                Log in to manage your packages.
+              </p>
+            </BlurReveal>
 
-                                <p className='text-xs text-dark/50 font-semibold'>
-                                    DHEIRINTERNATIONAL
-                                </p>
-                            </div>
-                            <h1 className='my-2 font-bold text-2xl mt-8'>
-                                Log in
-                            </h1>
-                            <form 
-                            className='mt-8 space-y-4'
-                            onSubmit={handleSubmit}
-                            >
-                                <div className='text-[10px] space-y-4 w-70'>
-                                    <label className='w-full flex flex-col relative'>
-                                        <span className='text-dark/60'>
-                                            Email Address
-                                        </span>
-                                        <input 
-                                        type="email" 
-                                        name="email" 
-                                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
-                                        value={credentials.email}
-                                        onChange={handleInputChange}
-                                        />
-                                        <FaEnvelope className='absolute left-1 bottom-2.5 text-dark/60'/>
-                                    </label>
-                                    <label className='w-full flex flex-col relative'>
-                                        <span className='text-dark/60'>
-                                            Password
-                                        </span>
-                                        <input 
-                                        type={isPasswordVisible ? "text" : "password"} 
-                                        name="password" 
-                                        className='border-b border-dark/10 p-2 pl-7 pr-6 outline-0 focus:border-dark transition-set'
-                                        value={credentials.password}
-                                        onChange={handleInputChange}
-                                        />
-                                        <FaLock className='absolute left-1 bottom-2.5 text-dark/60'/>
-                                        <button 
-                                            className='right-1 absolute bottom-0.5 rounded-full p-2'
-                                            type="button"
-                                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                                        >
-                                            {
-                                                isPasswordVisible ?
-                                                <FaEyeSlash/> : 
-                                                <FaEye />
-                                            }
-                                        </button>
-                                    </label>
-                                </div>
+            <form className="mt-10 space-y-5" onSubmit={handleSubmit}>
+              <BlurReveal immediate delay={100}>
+                <AuthField
+                  label="Email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={credentials.email}
+                  onChange={handleInputChange}
+                  placeholder="you@email.com"
+                  icon={<IconMail size={18} stroke={1.5} />}
+                />
+              </BlurReveal>
 
+              <BlurReveal immediate delay={160}>
+                <AuthField
+                  label="Password"
+                  name="password"
+                  type={isPasswordVisible ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  value={credentials.password}
+                  onChange={handleInputChange}
+                  placeholder="Your password"
+                  icon={<IconLock size={18} stroke={1.5} />}
+                  trailing={
+                    <button
+                      type="button"
+                      className="dheir-input-action"
+                      aria-label={
+                        isPasswordVisible ? "Hide password" : "Show password"
+                      }
+                      onClick={() => setIsPasswordVisible((v) => !v)}
+                    >
+                      {isPasswordVisible ? (
+                        <IconEyeOff size={18} stroke={1.5} />
+                      ) : (
+                        <IconEye size={18} stroke={1.5} />
+                      )}
+                    </button>
+                  }
+                />
+              </BlurReveal>
 
+              <BlurReveal immediate delay={220}>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-dheir-blue transition-colors hover:text-dheir-blue-hover"
+                    onClick={() => setView("forgot-password")}
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              </BlurReveal>
 
+              <BlurReveal immediate delay={280}>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="dheir-btn-primary"
+                >
+                  {isLoading ? (
+                    <ClipLoader color="#fff" size={20} />
+                  ) : (
+                    "Log in"
+                  )}
+                </button>
+              </BlurReveal>
+            </form>
 
-                                <div>
-                                    <button className='w-full bg-accent-blue text-white mt-6 py-2 rounded text-xs'>
-                                        {isLoading ? <ClipLoader color='#FFF' size={8} /> : "Log in"}
-                                    </button>
-                                </div>
-                            </form>
-                            <div className='flex gap-1 text-[10px] mt-8 mb-1'>
-                                <p className='opacity-40'>
-                                    {"Don't"} Have an account?
-                                </p>
-                                <Link href={"/auth/signup"}>
-                                    Sign Up
-                                </Link>
-                            </div> 
-                            <button 
-                            className={`
-                                text-[10px] flex gap-2 items-center underline text-red-500
-                            `}
-                            onClick={() => {setPage("forgot-password")}}
-                            >
-                                Forgot password
-                            </button>
-                        </div>
+            <BlurReveal immediate delay={340}>
+              <p className="mt-8 text-center text-sm text-dheir-muted">
+                No account?{" "}
+                <Link
+                  href="/auth/signup"
+                  className="font-semibold text-dheir-blue underline-offset-2 hover:underline"
+                >
+                  Create one
+                </Link>
+              </p>
+            </BlurReveal>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="forgot"
+            initial={viewMotion.initial}
+            animate={viewMotion.animate}
+            exit={viewMotion.exit}
+          >
+            <button
+              type="button"
+              className="mb-8 flex items-center gap-1.5 text-sm font-medium text-dheir-muted transition-colors hover:text-dheir-ink"
+              onClick={() => setView("login")}
+            >
+              <IconArrowLeft size={16} stroke={1.5} />
+              Back
+            </button>
 
+            <BlurReveal immediate>
+              <h2 className="font-display text-[1.75rem] font-bold tracking-tight text-dheir-ink">
+                Reset password
+              </h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-dheir-muted">
+                We will email you a link to choose a new password.
+              </p>
+            </BlurReveal>
 
+            <div className="mt-10">
+              <BlurReveal immediate delay={100}>
+                <AuthField
+                  label="Email"
+                  name="reset_email"
+                  type="email"
+                  value={changePasswordEmail}
+                  onChange={(e) =>
+                    setChangePasswordEmail(e.currentTarget.value)
+                  }
+                  placeholder="you@email.com"
+                  icon={<IconMail size={18} stroke={1.5} />}
+                />
+              </BlurReveal>
 
+              <BlurReveal immediate delay={180}>
+                <button
+                  type="button"
+                  disabled={isSendingPasswordEmail}
+                  className="dheir-btn-primary mt-6"
+                  onClick={handlePasswordChangeLink}
+                >
+                  {isSendingPasswordEmail ? (
+                    <ClipLoader color="#fff" size={20} />
+                  ) : (
+                    "Send reset link"
+                  )}
+                </button>
+              </BlurReveal>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-
-
-                        {/* FORGOT PASSWORD */}
-                            
-                        <div className='w-70 h-110 center-items'>
-                            <div>
-                                <h2 className='font-semibold text-xl'>
-                                    Forgot Password
-                                </h2>
-                                <p className='text-[10px] mt-4 text-dark/60'>
-                                    Forgotten your password? Input your account email below. A redirection link to change your email will be sent to your email
-                                </p>
-
-                                <div className='mt-8'>
-                                    <label className='w-full flex flex-col relative text-[10px]'>
-                                        <span className='text-dark/60'>
-                                            Email Address
-                                        </span>
-                                        <input 
-                                        type="text" 
-                                        name="change_password" 
-                                        className='border-b border-dark/10 p-2 pl-7 outline-0 focus:border-dark transition-set pr-14'
-                                        value={changePasswordEmail}
-                                        onChange={(e) => {setChangePasswordEmail(e.currentTarget.value)}}
-                                        />
-                                        <FaEnvelope className='absolute left-1 bottom-2.5 text-dark/60'/>
-                                    </label>
-                                </div>
-
-                                {/* Submit Button */}
-                                <div>
-                                    <button 
-                                    className='bg-accent-blue w-full text-[10px] text-white py-2 rounded mt-4'
-                                    disabled={isSendingPasswordEmail}
-                                    onClick={handlePasswordChangeLink}
-                                    >
-                                        {
-                                            isSendingPasswordEmail ? 
-                                            <ClipLoader size={12} color='white'/> :
-                                            "Send Link"
-                                        }
-                                    </button>
-                                </div>
-
-                                <div>
-                                    <button 
-                                    className='text-[10px] underline mt-6'
-                                    onClick={() => {setPage("login")}}
-                                    >
-                                        Go back
-                                    </button>
-                                </div>
-
-                            </div>
-                        </div>
-                            
-                    </div>
-                    
-                </div>    
-            </div> 
-        </div>
-
-
-        
-        <div className='flex-1 max-sm:hidden'>
-
-        </div>
-
-    
-  </div>
+      <p className="mt-10 text-center text-xs leading-relaxed text-dheir-muted">
+        By continuing you agree to DHEIR service terms.
+      </p>
+    </AuthPageShell>
+  )
 }
-
-export default Page

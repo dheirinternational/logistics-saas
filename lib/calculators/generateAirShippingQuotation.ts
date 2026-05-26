@@ -22,7 +22,7 @@ type QuotationState = {
     totalPrice: string
 }
 
-const PAYSTACK_SERVICE_CHARGE_RATE = 1.5
+const PAYMENT_GATEWAY_FEE_RATE = 1.5
 
 
 export const generateAirShippingQuotation = async (itemCart: ItemCartType[]) => {
