@@ -21,7 +21,7 @@ export function MarketingCartButton({
 
   return (
     <Link
-      href="/base/marketplace/cart"
+      href="/customer/marketplace/cart"
       className={`marketing-header-cart ${className}`}
       aria-label={
         cartCount > 0

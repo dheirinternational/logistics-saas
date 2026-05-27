@@ -15,14 +15,14 @@ export const PORTAL_ACCOUNT_LINKS: PortalAccountLink[] = [
     id: "edit-profile",
     label: "Edit profile",
     description: "Name, phone, email, password, and photo",
-    href: "/base/edit_profile",
+    href: "/customer/edit_profile",
     icon: IconUserEdit,
   },
   {
     id: "my-address",
     label: "My address",
     description: "Delivery address for shipments and checkout",
-    href: "/base/my_address",
+    href: "/customer/my_address",
     icon: IconMapPin,
   },
 ]

@@ -39,7 +39,7 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
 
   const onTabChange = useCallback((next: PortalHomeTab) => {
     setTab(next)
-    const path = next === "tracking" ? "/base#tracking" : "/base"
+    const path = next === "tracking" ? "/customer#tracking" : "/customer"
     window.history.replaceState(null, "", path)
   }, [])
 

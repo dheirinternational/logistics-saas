@@ -15,6 +15,7 @@ import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
+import { extractTrailingNumericId } from "@/lib/portal/slug"
 
 function getDisplayPrice(product: Product) {
   const discount = Number(product.discount_price ?? 0)
@@ -25,7 +26,7 @@ function getDisplayPrice(product: Product) {
 
 export function PortalProductDetailPage() {
   const params = useParams()
-  const productId = String(params.id ?? "")
+  const productId = extractTrailingNumericId(String(params.id ?? ""))
 
   const addProduct = useCartStore((s) => s.addProduct)
   const cart = useCartStore((s) => s.cart)
@@ -179,11 +180,11 @@ export function PortalProductDetailPage() {
         <PortalAccountPageHeader
           title="Product"
           description="This product could not be found."
-          backHref="/base/shop"
+          backHref="/customer/shop"
           backLabel="Shop"
         />
         <p className="portal-pdp__empty">
-          <Link className="portal-cart__link" href="/base/shop">
+          <Link className="portal-cart__link" href="/customer/shop">
             Return to shop
           </Link>
         </p>
@@ -196,7 +197,7 @@ export function PortalProductDetailPage() {
       <PortalAccountPageHeader
         title={product.name}
         description={categoryLabel}
-        backHref="/base/shop"
+        backHref="/customer/shop"
         backLabel="Shop"
       />
 
@@ -277,7 +278,7 @@ export function PortalProductDetailPage() {
           ) : (
             <p className="portal-pdp__shipping portal-pdp__shipping--warn">
               Add a{" "}
-              <Link className="portal-cart__link" href="/base/my_address">
+              <Link className="portal-cart__link" href="/customer/my_address">
                 delivery address
               </Link>{" "}
               to see shipping and checkout.
@@ -335,7 +336,7 @@ export function PortalProductDetailPage() {
             </button>
 
             <Link
-              href="/base/marketplace/cart"
+              href="/customer/marketplace/cart"
               className="portal-account__btn-secondary portal-pdp__cart-link"
             >
               View cart

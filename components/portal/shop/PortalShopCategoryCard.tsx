@@ -1,5 +1,6 @@
 import { getCategoryDisplayImage } from "@/lib/portal/shopCategoryImages"
 import { SHOP_TEASER_COPY } from "@/lib/marketing/shopCatalog"
+import { slugify } from "@/lib/portal/slug"
 import { IconArrowRight } from "@tabler/icons-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -27,7 +28,7 @@ export function PortalShopCategoryCard({
           {display.description}
         </p>
         <Link
-          href={`/base/shop?category=${id}`}
+          href={`/customer/shop?category=${slugify(name)}`}
           className="shop-category-card__link mt-5 inline-flex items-center gap-1 text-[14px] font-semibold text-dheir-blue no-underline transition-[gap] hover:gap-2"
         >
           {SHOP_TEASER_COPY.exploreCategory}

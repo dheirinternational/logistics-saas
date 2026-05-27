@@ -95,7 +95,7 @@ export function PortalOrderDetailPage() {
             ? `Placed ${formatPaymentDate(order.created_at)}`
             : "Order details"
         }
-        backHref="/base/orders"
+        backHref="/customer/orders"
         backLabel="Orders"
       />
 

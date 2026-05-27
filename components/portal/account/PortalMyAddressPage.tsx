@@ -54,7 +54,7 @@ export function PortalMyAddressPage() {
 
       if (data.success) {
         toast.success(data.message)
-        router.push("/base/profile")
+        router.push("/customer/profile")
       } else {
         toast.error(data.message)
       }
@@ -83,7 +83,7 @@ export function PortalMyAddressPage() {
       }
 
       toast.success(data.message)
-      router.push("/base/profile")
+      router.push("/customer/profile")
     } catch (err) {
       console.error(err)
       toast.error("Could not update address")

@@ -11,17 +11,17 @@ export const ctaButtonsProps: CTARedirectButton[] = [
     {
         title: "Request Mail",
         icon: FaShippingFast,
-        path: "/base/request_mail"
+        path: "/customer/request_mail"
     },
     {
         title: "Warehouse Address",
         icon: FaMapLocationDot,
-        path: "/base/warehouse_address"
+        path: "/customer/warehouse_address"
     },
     {
         title: "Pending Payments",
         icon: MdPendingActions,
-        path: "/base/pending_payments"
+        path: "/customer/pending_payments"
     },
 
     // {
@@ -35,69 +35,69 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
     {
         title: "Add Package",
         icon: LuPackagePlus,
-        path: "/base/add_package"
+        path: "/customer/add_package"
     },
     {
         title: "Waiting To Be Received",
         icon: BsBoxArrowInDown,
-        path: "/base/waiting_to_be_stored"
+        path: "/customer/waiting_to_be_stored"
     },
     {
         title: "All Packages",
         icon: FaBoxes,
-        path: "/base/packages"
+        path: "/customer/packages"
     },
     {
         title: "Request Mail",
         icon: FaShippingFast,
-        path: "/base/request_mail"
+        path: "/customer/request_mail"
     },
     {
         title: "Shipment Requests",
         icon: BsBoxArrowUp,
-        path: "/base/waiting_to_be_released"
+        path: "/customer/waiting_to_be_released"
     },
     {
         title: "Shipment",
         icon: MdLocalShipping,
-        path: "/base/orders_shipped"
+        path: "/customer/orders_shipped"
     },
     {
         title: "Payment Receipts",
         icon: MdPayment,
-        path: "/base/payment_receipts"
+        path: "/customer/payment_receipts"
     },
     {
         title: "Pending Payments",
         icon: MdPendingActions, 
-        path: "/base/pending_payments"
+        path: "/customer/pending_payments"
     },
     {
         title: "Orders",
         icon: BsCart3, 
-        path: "/base/orders"
+        path: "/customer/orders"
     }
 ]
 
 export const profileMenuCtaButtonsProps: CTARedirectButton[] = [
     {
         title: "Shop",
-        path: "/base/shop",
+        path: "/customer/shop",
         icon: BsCart3
     },
     {
         title: "Warehouse Address",
-        path: "/base/warehouse_address",
+        path: "/customer/warehouse_address",
         icon: FaMapLocationDot
     },
     {
         title: "My Address",
-        path: "/base/my_address",
+        path: "/customer/my_address",
         icon: FaMapLocationDot
     },
     {
         title: "Edit profile",
-        path: "/base/edit_profile",
+        path: "/customer/edit_profile",
         icon: FaUserEdit
     }
 ]

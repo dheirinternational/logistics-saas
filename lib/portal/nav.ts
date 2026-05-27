@@ -18,46 +18,46 @@ export type PortalNavItem = {
 
 /** Primary sidebar navigation — see plan.md §9 */
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
-  { id: "home", label: "Home", href: "/base", icon: IconHome },
+  { id: "home", label: "Home", href: "/customer", icon: IconHome },
   {
     id: "packages",
     label: "Packages",
-    href: "/base/packages",
+    href: "/customer/packages",
     icon: IconPackage,
   },
-  { id: "quote", label: "Quote", href: "/base/estimate", icon: IconCalculator },
-  { id: "shop", label: "Shop", href: "/base/shop", icon: IconShoppingBag },
-  { id: "account", label: "Account", href: "/base/profile", icon: IconUser },
+  { id: "quote", label: "Quote", href: "/customer/estimate", icon: IconCalculator },
+  { id: "shop", label: "Shop", href: "/customer/shop", icon: IconShoppingBag },
+  { id: "account", label: "Account", href: "/customer/profile", icon: IconUser },
 ]
 
 /** Marketplace catalog, cart, checkout, and shop order history. */
 const SHOP_PREFIXES = [
-  "/base/shop",
-  "/base/marketplace",
-  "/base/orders",
-  "/base/verify_order_payment",
+  "/customer/shop",
+  "/customer/marketplace",
+  "/customer/orders",
+  "/customer/verify_order_payment",
 ] as const
 
 /** Logistics: packages, shipments, warehouse, and shipment-related payments. */
 const PACKAGES_PREFIXES = [
-  "/base/packages",
-  "/base/all_packages",
-  "/base/add_package",
-  "/base/waiting_to_be_stored",
-  "/base/waiting_to_be_released",
-  "/base/request_mail",
-  "/base/warehouse_address",
-  "/base/orders_shipped",
-  "/base/payment_receipts",
-  "/base/pending_payments",
-  "/base/verify_payment",
+  "/customer/packages",
+  "/customer/all_packages",
+  "/customer/add_package",
+  "/customer/waiting_to_be_stored",
+  "/customer/waiting_to_be_released",
+  "/customer/request_mail",
+  "/customer/warehouse_address",
+  "/customer/orders_shipped",
+  "/customer/payment_receipts",
+  "/customer/pending_payments",
+  "/customer/verify_payment",
 ] as const
 
 /** Profile, address, and account settings. */
 const ACCOUNT_PREFIXES = [
-  "/base/profile",
-  "/base/edit_profile",
-  "/base/my_address",
+  "/customer/profile",
+  "/customer/edit_profile",
+  "/customer/my_address",
 ] as const
 
 function matchesPrefix(pathname: string, prefix: string): boolean {
@@ -74,19 +74,19 @@ function matchesAnyPrefix(
 /**
  * Highlights the correct sidebar tab on nested portal routes.
  *
- * Route map (all `/base` pages):
- * - home: `/base`, `/base/announcements/*`
- * - quote: `/base/estimate`
- * - shop: `/base/shop`, `/base/marketplace/*`, `/base/orders/*`, `/base/verify_order_payment`
+ * Route map (all `/customer` pages):
+ * - home: `/customer`, `/customer/announcements/*`
+ * - quote: `/customer/estimate`
+ * - shop: `/customer/shop`, `/customer/marketplace/*`, `/customer/orders/*`, `/customer/verify_order_payment`
  * - packages: packages hub, add/request/track flows, shipment payments
  * - account: profile, edit profile, delivery address
  */
 export function resolvePortalNavId(pathname: string): PortalNavId {
-  if (pathname === "/base" || pathname.startsWith("/base/announcements")) {
+  if (pathname === "/customer" || pathname.startsWith("/customer/announcements")) {
     return "home"
   }
 
-  if (pathname.startsWith("/base/estimate")) {
+  if (pathname.startsWith("/customer/estimate")) {
     return "quote"
   }
 

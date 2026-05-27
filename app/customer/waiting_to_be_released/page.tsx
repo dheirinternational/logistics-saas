@@ -2,6 +2,7 @@
 
 import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPackagesPageHeader"
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
+import { formatShippingQuantity } from "@/lib/shipping/channelUnits"
 import type { ShippingRequest } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -36,7 +37,7 @@ export default function ShipmentRequestsPage() {
         title="Shipment requests"
         description="Requests waiting for DHEIR to accept and release."
         action={
-          <Link href="/base/request_mail" className="portal-packages__btn-primary">
+          <Link href="/customer/request_mail" className="portal-packages__btn-primary">
             New request
           </Link>
         }
@@ -50,7 +51,7 @@ export default function ShipmentRequestsPage() {
         ) : requests.length === 0 ? (
           <div className="portal-packages__empty">
             <p>No pending shipment requests.</p>
-            <Link href="/base/request_mail" className="portal-packages__text-link">
+            <Link href="/customer/request_mail" className="portal-packages__text-link">
               Ship my packages
             </Link>
           </div>
@@ -71,7 +72,7 @@ export default function ShipmentRequestsPage() {
               </div>
               <div className="portal-packages__card-foot portal-packages__card-foot--split">
                 <span className="portal-packages__card-meta">
-                  Weight: {req.total_weight} kg
+                  {formatShippingQuantity(req.total_weight, req.channel)}
                 </span>
                 <time dateTime={req.created_at}>
                   {new Date(req.created_at).toLocaleDateString()}

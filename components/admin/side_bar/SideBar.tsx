@@ -96,7 +96,7 @@ export const SideBar = () => {
         <div className="admin-sidebar__head">
           <Link href="/admin" className="admin-sidebar__brand">
             <Image
-              src="/Dheir-logo.png"
+              src="/Dheir colored.png"
               alt=""
               width={36}
               height={36}

@@ -45,7 +45,7 @@ export default function LoginPage() {
         credentials: "include",
       })
       const data = await res.json()
-      if (data.user?.role === "customer") router.push("/base")
+      if (data.user?.role === "customer") router.push("/customer")
       else if (data.user?.role === "admin") router.push("/admin")
     } catch (err) {
       console.error(err)

@@ -1,7 +1,6 @@
 "use client"
 
 import { IconCopy } from "@tabler/icons-react"
-import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "@/lib/ui/toast"
 
@@ -52,9 +51,6 @@ export function PortalHomeWarehouseCard({
         </button>
       </div>
       <p className="portal-home__warehouse-preview">{copyText}</p>
-      <Link href="/base/warehouse_address" className="portal-home__text-link">
-        View full warehouse details
-      </Link>
     </section>
   )
 }

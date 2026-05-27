@@ -69,6 +69,15 @@ export function getIncomingStatusVariant(
   )
 }
 
+const SHIPMENT_STATUS_LABELS: Record<string, string> = {
+  processing: "Processing",
+  shipped: "Shipped",
+  in_transit: "In transit",
+  arrived: "Arrived",
+  out_for_delivery: "Out for delivery",
+  delivered: "Delivered",
+}
+
 const SHIPMENT_STATUS_VARIANTS: Record<string, PackageStatusChipVariant> = {
   processing: "orange",
   shipped: "blue",
@@ -76,6 +85,12 @@ const SHIPMENT_STATUS_VARIANTS: Record<string, PackageStatusChipVariant> = {
   arrived: "blue",
   out_for_delivery: "orange",
   delivered: "green",
+}
+
+export function getShipmentStatusLabel(status: string): string {
+  return (
+    SHIPMENT_STATUS_LABELS[status] ?? status.replaceAll("_", " ")
+  )
 }
 
 export function getShipmentStatusVariant(

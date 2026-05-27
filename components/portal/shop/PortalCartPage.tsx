@@ -138,7 +138,7 @@ export function PortalCartPage() {
       <PortalAccountPageHeader
         title="Cart"
         description="Review items, confirm delivery, and checkout."
-        backHref="/base/shop"
+        backHref="/customer/shop"
         backLabel="Shop"
       />
 
@@ -152,7 +152,7 @@ export function PortalCartPage() {
           {cart.length === 0 ? (
             <p className="portal-cart__empty">
               Your cart is empty.{" "}
-              <Link className="portal-cart__link" href="/base/shop">
+              <Link className="portal-cart__link" href="/customer/shop">
                 Browse the shop
               </Link>
               .
@@ -202,7 +202,7 @@ export function PortalCartPage() {
             ) : (
               <p className="portal-cart__muted">
                 No address on file.{" "}
-                <Link className="portal-cart__link" href="/base/my_address">
+                <Link className="portal-cart__link" href="/customer/my_address">
                   Add address
                 </Link>
                 .

@@ -33,6 +33,6 @@ export function toMarketingHeaderUser(session: SessionRow): MarketingHeaderUser 
     lastName,
     profileImg: session.profile_img?.trim() || null,
     displayName,
-    dashboardHref: session.role === "admin" ? "/admin" : "/base/profile",
+    dashboardHref: session.role === "admin" ? "/admin" : "/customer/profile",
   }
 }

@@ -1,5 +1,6 @@
 import { CartProduct } from "@/types/entityTypeDef"
-import {create} from "zustand"
+import { create } from "zustand"
+import { persist } from "zustand/middleware"
 
 type CartStore = {
     cart: CartProduct[]
@@ -15,51 +16,60 @@ type CartStore = {
     editIndividualItem: (amountToBeOrdered: number, id:number) => void
 }
 
-export const useCartStore = create<CartStore>((set) => ({
-    cart: [],
-    totalPrice: 0,
-    increaseAmount: (productId) => {
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set) => ({
+      cart: [],
+      totalPrice: 0,
+      increaseAmount: (productId) => {
         set((state) => ({
-            cart: state.cart.map( x => 
-                 x.id === productId
-                    ? { ...x, amount_to_be_ordered: x.amount_to_be_ordered + 1 }
-                    : x
-            )
+          cart: state.cart.map((x) =>
+            x.id === productId
+              ? { ...x, amount_to_be_ordered: x.amount_to_be_ordered + 1 }
+              : x,
+          ),
         }))
-    },
-    decreaseAmount: (productId) => {
+      },
+      decreaseAmount: (productId) => {
         set((state) => ({
-            cart: state.cart.map( x =>
-                x.id === productId && x.amount_to_be_ordered > 1
-                    ? { ...x, amount_to_be_ordered: x.amount_to_be_ordered - 1 }
-                    : x
-            )
+          cart: state.cart.map((x) =>
+            x.id === productId && x.amount_to_be_ordered > 1
+              ? { ...x, amount_to_be_ordered: x.amount_to_be_ordered - 1 }
+              : x,
+          ),
         }))
-    },
-    addProduct: (product) => {
-        set( state => {
-            const filtered = state.cart.filter( x => x.id !== product.id)
-            return { cart: [...filtered, product] }
+      },
+      addProduct: (product) => {
+        set((state) => {
+          const filtered = state.cart.filter((x) => x.id !== product.id)
+          return { cart: [...filtered, product] }
         })
+      },
+      editIndividualItem: (amount, id) => {
+        set((state) => ({
+          cart: state.cart.map((product) =>
+            product.id === id
+              ? { ...product, amount_to_be_ordered: Math.max(1, amount) }
+              : product,
+          ),
+        }))
+      },
+      removeProduct: (id) => {
+        set((state) => ({ cart: state.cart.filter((x) => x.id !== id) }))
+      },
+      editTotal: (number, previous) =>
+        set((state) => ({
+          totalPrice:
+            previous === 0
+              ? state.totalPrice + number
+              : state.totalPrice - previous + number,
+        })),
+      resetTotal: (value) => set({ totalPrice: value }),
+      clearCart: () => set({ cart: [], totalPrice: 0 }),
+    }),
+    {
+      name: "dheir-cart",
+      partialize: (state) => ({ cart: state.cart, totalPrice: state.totalPrice }),
     },
-    editIndividualItem: (amount, id) => {
-    set((state) => {
-        return {
-            cart: state.cart.map((product) =>
-                product.id === id
-                    ? { ...product, amount_to_be_ordered: Math.max(1, amount)}
-                    : product
-            )
-        }
-    })
-},
-    removeProduct: (id) => {
-        set((state) => ({cart: state.cart.filter(x => x.id !== id)}))
-    },
-    editTotal: (number, previous) => set((state) => ({
-        totalPrice: previous === 0 ? state.totalPrice + number : (state.totalPrice - previous) + number 
-    })),
-    resetTotal: (value) => set({totalPrice: value}),
-    clearCart: () => set({ cart: [], totalPrice: 0 }),
-
-}))
+  ),
+)

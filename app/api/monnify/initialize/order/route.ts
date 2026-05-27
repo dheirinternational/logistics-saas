@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       customerEmail: email,
       paymentReference: order_id,
       paymentDescription: "DHEIR marketplace order",
-      redirectUrl: `${origin}/base/verify_order_payment?paymentReference=${encodeURIComponent(order_id)}`,
+      redirectUrl: `${origin}/customer/verify_order_payment?paymentReference=${encodeURIComponent(order_id)}`,
       metaData: {
         type: "order",
         order_id,

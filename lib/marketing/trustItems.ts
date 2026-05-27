@@ -1,4 +1,4 @@
-/** Trust / policy topics — copy from legacy /base notice, shortened for landing. */
+/** Trust / policy topics — copy from legacy /customer notice, shortened for landing. */
 
 export type TrustItem = {
   id: string

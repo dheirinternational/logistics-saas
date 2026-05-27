@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       customerEmail: payment.email,
       paymentReference: payment.transaction_ref,
       paymentDescription: "DHEIR shipment payment",
-      redirectUrl: `${origin}/base/verify_payment?paymentReference=${encodeURIComponent(payment.transaction_ref)}`,
+      redirectUrl: `${origin}/customer/verify_payment?paymentReference=${encodeURIComponent(payment.transaction_ref)}`,
       metaData: {
         type: "shipment",
         shipment_tracking_number: payment.shipment_tracking_number,

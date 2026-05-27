@@ -57,7 +57,7 @@ export function PortalOrdersPage() {
       <PortalPackagesPageHeader
         title="Shop orders"
         description="Marketplace purchases and delivery status."
-        backHref="/base"
+        backHref="/customer"
         backLabel="Home"
       />
 
@@ -84,7 +84,7 @@ export function PortalOrdersPage() {
         ) : filtered.length === 0 ? (
           <div className="portal-packages__empty">
             <p>No orders found.</p>
-            <Link href="/base/shop" className="portal-packages__text-link">
+            <Link href="/customer/shop" className="portal-packages__text-link">
               Browse the shop
             </Link>
           </div>
@@ -92,7 +92,7 @@ export function PortalOrdersPage() {
           filtered.map((order) => (
             <Link
               key={order.id}
-              href={`/base/orders/${order.order_id}`}
+              href={`/customer/orders/${order.order_id}`}
               className="portal-packages__card portal-packages__card--link"
             >
               <div className="portal-packages__card-head">

@@ -28,6 +28,7 @@ export type PortalDashboardActivityRow = {
   kind: "shipment" | "package" | "incoming"
   title: string
   status: string
+  channel: string | null
   routeLabel: string
   weight: number | null
   fee: number | null
@@ -202,6 +203,7 @@ export async function getPortalDashboardData(
         kind: row.kind as PortalDashboardActivityRow["kind"],
         title: row.title ?? row.id,
         status: row.status,
+        channel: row.channel ?? null,
         routeLabel,
         weight: row.total_weight != null ? Number(row.total_weight) : null,
         fee: row.total_cost != null ? Number(row.total_cost) : null,

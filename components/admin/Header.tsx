@@ -12,7 +12,7 @@ export const Header = () => {
     <header className="admin-header">
       <Link href="/admin" className="admin-header__brand">
         <Image
-          src="/Dheir-logo.png"
+          src="/Dheir colored.png"
           alt=""
           width={32}
           height={32}

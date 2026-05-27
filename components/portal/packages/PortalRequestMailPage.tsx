@@ -10,6 +10,10 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
+import {
+  formatShippingQuantity,
+  getShippingQuantityFieldLabel,
+} from "@/lib/shipping/channelUnits"
 
 const SHIPPING_CHANNELS = [
   { id: "air" as const, label: "Air", icon: IconPlane },
@@ -131,7 +135,7 @@ export function PortalRequestMailPage() {
       <PortalPackagesPageHeader
         title="Ship my packages"
         description="Select stored packages in our warehouse, choose how you want them shipped, and submit a release request."
-        backHref="/base/packages"
+        backHref="/customer/packages"
         backLabel="Packages"
       />
 
@@ -149,8 +153,12 @@ export function PortalRequestMailPage() {
             <strong>{selectedPackages.length}</strong>
           </p>
           <p className="portal-request-mail__summary-stat">
-            <span>Total weight</span>
-            <strong>{totalWeight.toFixed(2)} kg</strong>
+            <span>{getShippingQuantityFieldLabel(shippingMethod)}</span>
+            <strong>
+              {formatShippingQuantity(totalWeight, shippingMethod, {
+                decimals: 2,
+              })}
+            </strong>
           </p>
         </div>
 
@@ -200,7 +208,7 @@ export function PortalRequestMailPage() {
             <p>No stored packages ready to ship.</p>
             <p className="portal-request-mail__empty-hint">
               Packages must be in warehouse storage before you can request shipment.{" "}
-              <Link href="/base/packages" className="portal-cart__link">
+              <Link href="/customer/packages" className="portal-cart__link">
                 View packages
               </Link>
             </p>

@@ -2,6 +2,10 @@
 
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
 import { getShipmentStatusVariant } from "@/lib/portal/packageStatus"
+import {
+  formatShippingQuantity,
+  getShippingQuantityShortLabel,
+} from "@/lib/shipping/channelUnits"
 import type { PortalDashboardShipment } from "@/lib/portal/dashboard"
 import { IconMapPin, IconTruck } from "@tabler/icons-react"
 import Link from "next/link"
@@ -51,7 +55,7 @@ export function PortalHomeOngoingSection({
             Shipments currently on the way to you
           </p>
         </div>
-        <Link href="/base/orders_shipped" className="portal-home__text-link">
+        <Link href="/customer/orders_shipped" className="portal-home__text-link">
           View all
         </Link>
       </div>
@@ -59,7 +63,7 @@ export function PortalHomeOngoingSection({
       {shipments.length === 0 ? (
         <div className="portal-packages__empty portal-home__panel-empty">
           <p>No active shipments right now.</p>
-          <Link href="/base/request_mail" className="portal-cart__link">
+          <Link href="/customer/request_mail" className="portal-cart__link">
             Request shipment
           </Link>
         </div>
@@ -120,8 +124,10 @@ export function PortalHomeOngoingSection({
                   <dd>{active.channel?.toUpperCase() || "—"}</dd>
                 </div>
                 <div>
-                  <dt>Weight</dt>
-                  <dd>{active.totalWeight ? `${active.totalWeight} kg` : "—"}</dd>
+                  <dt>{getShippingQuantityShortLabel(active.channel)}</dt>
+                  <dd>
+                    {formatShippingQuantity(active.totalWeight, active.channel)}
+                  </dd>
                 </div>
                 <div>
                   <dt>Fee</dt>

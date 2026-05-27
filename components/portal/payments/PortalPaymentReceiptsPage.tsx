@@ -60,7 +60,7 @@ export function PortalPaymentReceiptsPage() {
   return (
     <div className="portal-account portal-payments">
       <header className="portal-account__header">
-        <PortalPageBack href="/base" label="Home" />
+        <PortalPageBack href="/customer" label="Home" />
         <h1 className="portal-account__title">Payment receipts</h1>
         <p className="portal-account__subtitle">
           Shipment payments you have made or started — filter by tracking number

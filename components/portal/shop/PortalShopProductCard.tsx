@@ -4,6 +4,7 @@ import { ShopProductCartControls } from "@/components/shop/ShopProductCartContro
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { useCartStore } from "@/store/cartStore"
 import type { Product } from "@/types/entityTypeDef"
+import { slugify } from "@/lib/portal/slug"
 import Image from "next/image"
 import Link from "next/link"
 import type { MouseEvent } from "react"
@@ -30,7 +31,7 @@ export function PortalShopProductCard({
       ? Number(product.discount_price)
       : Number(product.price)
 
-  const detailHref = `/base/marketplace/${product.id}`
+  const detailHref = `/customer/marketplace/${slugify(product.name)}-${product.id}`
 
   useEffect(() => {
     let cancelled = false

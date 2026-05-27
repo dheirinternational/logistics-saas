@@ -7,13 +7,14 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
 import { FaImage } from 'react-icons/fa'
-import { FaX } from 'react-icons/fa6'
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
 import { IconChecks, IconClock } from "@tabler/icons-react"
+import { getShippingQuantityFieldLabel } from "@/lib/shipping/channelUnits"
+import { IconX } from "@tabler/icons-react"
 
 export type SearchProps = {
     search: string,
@@ -27,6 +28,7 @@ const columnHelper = createColumnHelper<ShippingRequest>()
 const Page: NextPage = () => {
 
     const router = useRouter()
+    const fileInputRef = useRef<HTMLInputElement | null>(null)
 
     const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
 
@@ -270,148 +272,199 @@ const Page: NextPage = () => {
 
 
 
-        {
-            isModalActive &&
-            <div className={`fixed w-screen h-dvh bg-dark/20 top-0 right-0 z-1000 center-items text-xs`}>
-                <div className='bg-white p-4 rounded max-w-100 w-[90%] h-fit shadow shadow-dark/20'>
-                    <div className='flex justify-between items-center'>
-                        <h2 className='text-sm font-semibold'>
-                            Request Details
-                        </h2>
-                        <button 
-                        disabled={isCreatingShipmentData}
-                        onClick={() => setIsModalActive(false)}>
-                            <FaX/>
-                        </button>
-                    </div>
-                    <hr className='border-dark/20 my-3'/>
-                    <div className='text-[10px] p-4 space-y-3'>
-                        <p><span className='font-semibold'>Requested At:</span> {new Date(modalSelectedRequest?.created_at || "").toDateString()}</p>
-                        <p className='space-x-2'>
-                            <span className='font-semibold'>Product Ids:</span> 
-                            <span className='space-x-2'> 
-                                {modalSelectedRequest?.package_ids.map((x, i)=> <span key={x}>{x}{i !== modalSelectedRequest.package_ids.length - 1 && ","}</span>)}
-                            </span>
-                        </p>
-                        <p><span className='font-semibold'>Channel Requested:</span> {modalSelectedRequest?.channel}</p>
-                        <p><span className='font-semibold'>Customer Code:</span> {modalSelectedRequest?.customer_code}</p>
-                        <p><span className='font-semibold'>Payment Time:</span> {modalSelectedRequest?.payment_time}</p>
-                        <p><span className='font-semibold'>Packaging Type:</span> {modalSelectedRequest?.packaging}</p>
-
-                        <form onSubmit={handleSubmit} className='space-y-2'>
-
-                            <label className='text-[10px] flex gap-2 items-center'>
-                                Total Price
-                                <input 
-                                type="number" 
-                                value={totalPrice}
-                                name='total_price'
-                                onChange={(e) => {
-                                    let { value } = e.currentTarget
-                                    // remove leading zeros but keep single zero
-                                    value = value.replace(/^0+(?=\d)/, "")
-
-                                    setTotalPrice(String(Number(value).toFixed(2)))
-                                }
-                                }
-                                min={0}
-                                step="0.01"
-                                className='border border-dark/10 rounded px-2 py-1 outline-0'
-                                />
-                            </label>
-
-                            <label className='text-[10px] flex gap-2 items-center'>
-                                Weight {`(${modalSelectedRequest?.channel === "sea" ? "cbm" : "kg"})`}
-                                <input 
-                                type="number" 
-                                value={totalWeight}
-                                name='total_weight'
-                                onChange={(e) => {
-                                    let { value } = e.currentTarget
-                                    // remove leading zeros but keep single zero
-                                    value = value.replace(/^0+(?=\d)/, "")
-
-                                    setTotalWeight(String(Number(value).toFixed(2)))
-                                }}
-                                min={0}
-                                step="0.01"
-                                className='border border-dark/10 rounded px-2 py-1 outline-0'
-                                />
-                            </label>
-                            <div className='mt-3 space-y-1'>
-                                <span>Customer Note</span>
-                                <p className='border border-dark/20 h-16 mt-2 p-3 rounded-lg overflow-y-auto'>
-                                    {modalSelectedRequest?.customer_note}
-                                </p>
-                            </div>
-
-
-                            <div>
-                                <div className="w-fit h-fit overflow-hidden max-w-fit max-h-fit relative rounded">
-                                    <button 
-                                    className="text-[10px] border border-dark/30 rounded px-4 py-2 flex gap-1 items-center relative z-100"
-                                    type="button"
-                                    >
-                                        Select Images
-                                        <FaImage />
-                                    </button>
-                                    <input 
-                                    type="file" 
-                                    accept="image/*"
-                                    multiple
-                                    name="images"
-                                    onChange={hanldeImageChange}
-                                    className="w-full h-full bg-red-400 absolute z-1000 top-0 left-0 opacity-0 cursor-pointer"
-                                    />
-                                </div>
-                                <div className="border border-dark/40 rounded py-2 mt-4">
-                                    <div className="flex justify-center w-full gap-4 max-w-full overflow-x-auto">
-                                        {previews.map( (x, i) => 
-                                        <figure key={i} className="w-10 h-10 bg-accent-red rounded overflow-hidden relative">
-                                            <Image
-                                                src={x}
-                                                alt=""
-                                                fill
-                                                className="object-fill"
-                                                />
-                                            </figure>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>      
-
-                        
-
-
-                            {/* Submit button */}
-
-                            <div className='flex justify-end mt-14'>
-                                <button 
-                                disabled={isCreatingShipmentData}
-                                className='bg-accent-blue text-white px-3 py-2 rounded flex gap-1 items-center'
-                                // onClick={async() => {
-                                //     await createShipment()
-                                // }}
-                                >
-                                    {
-                                        isCreatingShipmentData ? 
-                                        <DheirLoader color='#FFF' size={10}/> :
-                                        <>
-                                        <BiCheck className='text-lg'/>
-                                        Accept
-                                        </>
-                                    }
-                                </button>
-                            </div>
-                        </form>
-
-                        
-                    </div>
-
-                    
+        {isModalActive ? (
+          <div
+            className="dheir-dialog-backdrop"
+            role="presentation"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsModalActive(false)
+            }}
+          >
+            <div className="dheir-dialog admin-modal" role="dialog" aria-modal="true" aria-label="Request details">
+              <div className="dheir-dialog__head">
+                <div>
+                  <h2 className="dheir-dialog__title">Request details</h2>
+                  <p className="admin-modal__subtitle">
+                    Review the request, set price + {getShippingQuantityFieldLabel(modalSelectedRequest?.channel).toLowerCase()}, then accept.
+                  </p>
                 </div>
+                <button
+                  type="button"
+                  className="dheir-dialog__close"
+                  onClick={() => setIsModalActive(false)}
+                  aria-label="Close"
+                  disabled={isCreatingShipmentData}
+                >
+                  <IconX size={20} stroke={1.5} aria-hidden />
+                </button>
+              </div>
+
+              <div className="admin-modal__body">
+                <form onSubmit={handleSubmit} className="admin-modal__form">
+                  <div className="admin-modal__fields">
+                    <div className="portal-packages__field">
+                      <span className="portal-packages__field-label">Requested at</span>
+                      <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                        {modalSelectedRequest?.created_at
+                          ? new Date(modalSelectedRequest.created_at).toDateString()
+                          : "—"}
+                      </p>
+                    </div>
+
+                    <div className="portal-packages__field">
+                      <span className="portal-packages__field-label">Customer code</span>
+                      <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                        {modalSelectedRequest?.customer_code || "—"}
+                      </p>
+                    </div>
+
+                    <div className="portal-packages__field">
+                      <span className="portal-packages__field-label">Channel requested</span>
+                      <p className="portal-home__empty capitalize" style={{ color: "var(--color-dheir-ink)" }}>
+                        {modalSelectedRequest?.channel || "—"}
+                      </p>
+                    </div>
+
+                    <div className="portal-packages__field">
+                      <span className="portal-packages__field-label">Payment time</span>
+                      <p className="portal-home__empty capitalize" style={{ color: "var(--color-dheir-ink)" }}>
+                        {modalSelectedRequest?.payment_time?.replaceAll("_", " ") || "—"}
+                      </p>
+                    </div>
+
+                    <div className="portal-packages__field">
+                      <span className="portal-packages__field-label">Packaging type</span>
+                      <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
+                        {modalSelectedRequest?.packaging || "—"}
+                      </p>
+                    </div>
+
+                    <div className="portal-packages__field">
+                      <span className="portal-packages__field-label">Package IDs</span>
+                      <p className="portal-home__empty tabular-nums" style={{ color: "var(--color-dheir-ink)" }}>
+                        {(modalSelectedRequest?.package_ids ?? []).join(", ") || "—"}
+                      </p>
+                    </div>
+
+                    <label className="portal-packages__field">
+                      <span className="portal-packages__field-label">Total price (₦)</span>
+                      <input
+                        type="number"
+                        name="total_price"
+                        className="dheir-input"
+                        value={totalPrice}
+                        onChange={(e) => {
+                          let { value } = e.currentTarget
+                          value = value.replace(/^0+(?=\\d)/, "")
+                          setTotalPrice(String(Number(value).toFixed(2)))
+                        }}
+                        min={0}
+                        step="0.01"
+                        required
+                      />
+                    </label>
+
+                    <label className="portal-packages__field">
+                      <span className="portal-packages__field-label">
+                        {getShippingQuantityFieldLabel(modalSelectedRequest?.channel)}
+                      </span>
+                      <input
+                        type="number"
+                        name="total_weight"
+                        className="dheir-input"
+                        value={totalWeight}
+                        onChange={(e) => {
+                          let { value } = e.currentTarget
+                          value = value.replace(/^0+(?=\\d)/, "")
+                          setTotalWeight(String(Number(value).toFixed(2)))
+                        }}
+                        min={0}
+                        step="0.01"
+                        required
+                      />
+                    </label>
+
+                    <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
+                      <span className="portal-packages__field-label">Customer note</span>
+                      <p className="admin-shipment-view__note" style={{ marginTop: 8 }}>
+                        {modalSelectedRequest?.customer_note || "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="admin-uploader">
+                    <div className="admin-uploader__row">
+                      <div>
+                        <p className="portal-packages__field-label" style={{ margin: 0 }}>
+                          Images
+                        </p>
+                        <p className="admin-uploader__help">
+                          Upload shipment request images (optional).
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="portal-home__btn portal-home__btn--secondary"
+                        disabled={isCreatingShipmentData}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          Select images <FaImage />
+                        </span>
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        name="images"
+                        onChange={hanldeImageChange}
+                        style={{ display: "none" }}
+                      />
+                    </div>
+
+                    {previews.length > 0 ? (
+                      <div className="admin-uploader__previews">
+                        {previews.map((src, idx) => (
+                          <div key={`${src}-${idx}`} className="admin-uploader__preview">
+                            <Image src={src} alt="" fill className="object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="admin-uploader__help">No images selected yet.</p>
+                    )}
+                  </div>
+
+                  <div className="admin-modal__actions">
+                    <button
+                      type="button"
+                      className="portal-home__btn portal-home__btn--secondary"
+                      onClick={() => setIsModalActive(false)}
+                      disabled={isCreatingShipmentData}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="portal-home__btn portal-home__btn--primary"
+                      disabled={isCreatingShipmentData}
+                    >
+                      {isCreatingShipmentData ? (
+                        <DheirLoader color="#fff" size={10} />
+                      ) : (
+                        <span className="inline-flex items-center gap-2">
+                          <BiCheck className="text-lg" />
+                          Accept
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-        }
+          </div>
+        ) : null}
     </>
   )}
   </div>

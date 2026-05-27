@@ -35,7 +35,7 @@ export function PortalHomeToolbar({
           Tracking
         </button>
       </div>
-      <Link href="/base/add_package" className="portal-home__cta">
+      <Link href="/customer/add_package" className="portal-home__cta">
         <IconPlus size={18} stroke={2} aria-hidden />
         Add package
       </Link>

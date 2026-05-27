@@ -24,7 +24,7 @@ export default function VerifyOrderPayment() {
     const verifyPayment = async () => {
       if (!reference) {
         toast.error("No payment reference found")
-        router.push("/base/marketplace")
+        router.push("/customer/marketplace")
         return
       }
 
@@ -39,17 +39,17 @@ export default function VerifyOrderPayment() {
 
         if (!res.ok) {
           toast.error(result.message || "Payment verification failed")
-          router.push(result.redirect_to || "/base/marketplace")
+          router.push(result.redirect_to || "/customer/marketplace")
           return
         }
 
         clearCart()
         toast.success(result.message || "Payment successful")
-        router.push(result.redirect_to || "/base/marketplace")
+        router.push(result.redirect_to || "/customer/marketplace")
       } catch (err) {
         console.error("Error verifying payment", err)
         toast.error("Payment verification failed")
-        router.push("/base/marketplace")
+        router.push("/customer/marketplace")
       }
     }
 

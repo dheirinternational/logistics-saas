@@ -2,20 +2,20 @@
 export function getPortalSearchHref(query: string, pathname: string): string {
   const trimmed = query.trim()
   if (!trimmed) {
-    return pathname.startsWith("/base/shop") ||
-      pathname.startsWith("/base/marketplace")
-      ? "/base/shop"
-      : "/base/packages"
+    return pathname.startsWith("/customer/shop") ||
+      pathname.startsWith("/customer/marketplace")
+      ? "/customer/shop"
+      : "/customer/packages"
   }
 
   const encoded = encodeURIComponent(trimmed)
 
   if (
-    pathname.startsWith("/base/shop") ||
-    pathname.startsWith("/base/marketplace")
+    pathname.startsWith("/customer/shop") ||
+    pathname.startsWith("/customer/marketplace")
   ) {
-    return `/base/shop?search=${encoded}`
+    return `/customer/shop?search=${encoded}`
   }
 
-  return `/base/packages?search=${encoded}`
+  return `/customer/packages?search=${encoded}`
 }

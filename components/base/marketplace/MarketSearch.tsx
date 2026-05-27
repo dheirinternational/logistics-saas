@@ -123,7 +123,7 @@ const MarketSearch = () => {
                     ) : searchResults.map( (result, i) => 
                         <Link
                         key={result.id}
-                        href={`/base/marketplace/${result.id}`}
+                        href={`/customer/marketplace/${result.id}`}
                         className={`
                             block p-2 px-4 hover:bg-dark/5
                             ${i !== searchResults.length - 1 && "border-b border-dark/10" }
@@ -139,7 +139,7 @@ const MarketSearch = () => {
 
         {/* Cart */}
 
-        <Link href={"/base/marketplace/cart"} className="relative">
+        <Link href={"/customer/marketplace/cart"} className="relative">
           <FaCartShopping className="text-xl"/>
           {cartItemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-accent-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">

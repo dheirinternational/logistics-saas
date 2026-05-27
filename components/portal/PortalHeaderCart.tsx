@@ -11,7 +11,7 @@ export function PortalHeaderCart() {
 
   return (
     <Link
-      href="/base/marketplace/cart"
+      href="/customer/marketplace/cart"
       className="portal-header__icon-btn portal-header__cart"
       aria-label={
         cartCount > 0

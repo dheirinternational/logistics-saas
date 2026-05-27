@@ -3,6 +3,10 @@
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { getShipmentStatusVariant } from "@/lib/portal/packageStatus"
+import {
+  formatShippingQuantity,
+  getShippingQuantityShortLabel,
+} from "@/lib/shipping/channelUnits"
 import type {
   PortalTrackingData,
   PortalTrackingFilter,
@@ -181,7 +185,7 @@ export function PortalHomeTrackingView() {
             </p>
           </div>
           {filter === "active" && summary.active > 0 ? (
-            <Link href="/base/pending_payments" className="portal-home__text-link">
+            <Link href="/customer/pending_payments" className="portal-home__text-link">
               Pending payments
             </Link>
           ) : null}
@@ -201,7 +205,7 @@ export function PortalHomeTrackingView() {
                   : "No shipments in this view."}
             </p>
             {filter === "active" ? (
-              <Link href="/base/request_mail" className="portal-cart__link">
+              <Link href="/customer/request_mail" className="portal-cart__link">
                 Request shipment
               </Link>
             ) : null}
@@ -295,9 +299,9 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
           <dd>{shipment.channel?.toUpperCase() || "—"}</dd>
         </div>
         <div>
-          <dt>Weight</dt>
+          <dt>{getShippingQuantityShortLabel(shipment.channel)}</dt>
           <dd>
-            {shipment.totalWeight ? `${shipment.totalWeight} kg` : "—"}
+            {formatShippingQuantity(shipment.totalWeight, shipment.channel)}
           </dd>
         </div>
         <div>
@@ -323,7 +327,7 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
       </dl>
       {needsPayment ? (
         <Link
-          href="/base/pending_payments"
+          href="/customer/pending_payments"
           className="portal-home__tracking-pay-link"
         >
           Complete payment

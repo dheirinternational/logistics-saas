@@ -10,7 +10,7 @@ type PortalAccountPageHeaderProps = {
 export function PortalAccountPageHeader({
   title,
   description,
-  backHref = "/base/profile",
+  backHref = "/customer/profile",
   backLabel = "Account",
 }: PortalAccountPageHeaderProps) {
   return (

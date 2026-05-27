@@ -58,9 +58,9 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
         aria-label="Primary navigation"
       >
         <div className="portal-sidebar__head">
-          <Link href="/base" className="portal-sidebar__brand">
+          <Link href="/customer" className="portal-sidebar__brand">
             <Image
-              src="/Dheir-logo.png"
+              src="/Dheir colored.png"
               alt=""
               width={36}
               height={36}

@@ -35,14 +35,14 @@ export function PortalHomeStatsCards({ counts }: PortalHomeStatsCardsProps) {
       label: "On the way",
       value: counts.waiting_to_be_stored,
       hint: "Not in warehouse yet",
-      href: "/base/waiting_to_be_stored",
+      href: "/customer/waiting_to_be_stored",
       icon: IconPackage,
     },
     {
       label: "In warehouse",
       value: counts.total_packages,
       hint: "Ready to ship",
-      href: "/base/packages",
+      href: "/customer/packages",
       icon: IconBox,
     },
     {
@@ -52,7 +52,7 @@ export function PortalHomeStatsCards({ counts }: PortalHomeStatsCardsProps) {
         counts.total_shipments > 0
           ? `${counts.delivered_shipments} delivered total`
           : "None yet",
-      href: "/base/orders_shipped",
+      href: "/customer/orders_shipped",
       icon: IconTruckDelivery,
     },
     {
@@ -62,7 +62,7 @@ export function PortalHomeStatsCards({ counts }: PortalHomeStatsCardsProps) {
         counts.pending_payments_total > 0
           ? formatNaira(counts.pending_payments_total)
           : "All clear",
-      href: "/base/pending_payments",
+      href: "/customer/pending_payments",
       icon: IconCreditCard,
       alert: counts.pending_payments > 0,
     },

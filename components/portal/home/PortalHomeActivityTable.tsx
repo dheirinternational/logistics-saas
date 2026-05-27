@@ -1,5 +1,6 @@
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
 import { getActivityStatusVariant } from "@/lib/portal/packageStatus"
+import { formatShippingQuantity } from "@/lib/shipping/channelUnits"
 import type { PortalDashboardActivityRow } from "@/lib/portal/dashboard"
 import Link from "next/link"
 
@@ -31,9 +32,9 @@ function formatNaira(amount: number | null) {
 }
 
 function rowHref(row: PortalDashboardActivityRow) {
-  if (row.kind === "shipment") return "/base/orders_shipped"
-  if (row.kind === "incoming") return "/base/waiting_to_be_stored"
-  return "/base/packages"
+  if (row.kind === "shipment") return "/customer/orders_shipped"
+  if (row.kind === "incoming") return "/customer/waiting_to_be_stored"
+  return "/customer/packages"
 }
 
 export function PortalHomeActivityTable({ rows }: PortalHomeActivityTableProps) {
@@ -80,7 +81,13 @@ export function PortalHomeActivityTable({ rows }: PortalHomeActivityTableProps) 
                   <td>
                     <time dateTime={row.createdAt}>{formatDate(row.createdAt)}</time>
                   </td>
-                  <td>{row.weight != null ? `${row.weight} kg` : "—"}</td>
+                  <td>
+                    {row.weight != null
+                      ? row.kind === "shipment"
+                        ? formatShippingQuantity(row.weight, row.channel)
+                        : `${row.weight} kg`
+                      : "—"}
+                  </td>
                   <td className="portal-home__table-route">{row.routeLabel}</td>
                   <td>{formatNaira(row.fee)}</td>
                   <td>

@@ -80,7 +80,7 @@ export function PortalPendingPaymentsPage() {
   return (
     <div className="portal-account portal-payments portal-payments--pending">
       <header className="portal-account__header">
-        <PortalPageBack href="/base" label="Home" />
+        <PortalPageBack href="/customer" label="Home" />
         <h1 className="portal-account__title">Pending payments</h1>
         <p className="portal-account__subtitle">
           Pay shipment balances to release your packages for delivery.

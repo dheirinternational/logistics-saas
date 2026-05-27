@@ -59,7 +59,7 @@ export const Announcements = () => {
                         announcements.map((announcement) => 
                             <Link 
                             key={announcement.id}
-                            href={`/base/announcements/${announcement.id}`} 
+                            href={`/customer/announcements/${announcement.id}`} 
                             className='text-xs bg-white px-1 rounded w-fit whitespace-nowrap '>
                                 {announcement.title}
                             </Link>

@@ -58,10 +58,10 @@
 |-------|---------------|------|
 | **Public marketing** | `/` (landing), optional `/estimate` later | None |
 | **Auth** | `/auth/login`, `/auth/signup`, password/email flows | Public |
-| **Customer app** | `/app/*` or refactored `/base/*` | Required (`role: customer`) |
+| **Customer app** | `/app/*` or refactored `/customer/*` | Required (`role: customer`) |
 | **Admin** | `/admin/*` | Required (`role: admin`) — **visual system phase 2** |
 
-**Critical product rule:** Marketing homepage content must **not** sit behind login. Today’s gated `/base` marketing copy moves to public `/`.
+**Critical product rule:** Marketing homepage content must **not** sit behind login. Today’s gated `/customer` marketing copy moves to public `/`.
 
 ---
 

@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation"
 
-export default async function AllPackagesRedirect({
+export default async function MarketplaceRedirect({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; tab?: string }>
+  searchParams: Promise<{ search?: string; category?: string }>
 }) {
   const params = await searchParams
   const query = new URLSearchParams()
   if (params.search) query.set("search", params.search)
-  if (params.tab) query.set("tab", params.tab)
+  if (params.category) query.set("category", params.category)
   const qs = query.toString()
-  redirect(`/base/packages${qs ? `?${qs}` : ""}`)
+  redirect(`/customer/shop${qs ? `?${qs}` : ""}`)
 }

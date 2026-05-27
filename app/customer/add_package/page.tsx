@@ -76,7 +76,7 @@ export default function AddPackagePage() {
       <PortalPackagesPageHeader
         title="Add incoming package"
         description="Tell us what is on the way to our China warehouse so we can match it when it arrives."
-        backHref="/base/packages"
+        backHref="/customer/packages"
         backLabel="Packages"
       />
 

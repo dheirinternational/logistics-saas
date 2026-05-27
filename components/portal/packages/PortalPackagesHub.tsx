@@ -101,7 +101,7 @@ export function PortalPackagesHub() {
         title="Packages"
         description="Track goods from China to your door. Add tracking, see warehouse status, and request shipment."
         action={
-          <Link href="/base/add_package" className="portal-packages__btn-primary">
+          <Link href="/customer/add_package" className="portal-packages__btn-primary">
             Add package
           </Link>
         }
@@ -191,7 +191,7 @@ export function PortalPackagesHub() {
           filteredPackages.length === 0 ? (
             <div className="portal-packages__empty">
               <p>No packages match your filters.</p>
-              <Link href="/base/add_package" className="portal-packages__text-link">
+              <Link href="/customer/add_package" className="portal-packages__text-link">
                 Add your first incoming package
               </Link>
             </div>
@@ -201,7 +201,7 @@ export function PortalPackagesHub() {
         ) : filteredIncoming.length === 0 ? (
           <div className="portal-packages__empty">
             <p>No packages on the way right now.</p>
-            <Link href="/base/add_package" className="portal-packages__text-link">
+            <Link href="/customer/add_package" className="portal-packages__text-link">
               Register expected tracking
             </Link>
           </div>

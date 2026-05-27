@@ -37,7 +37,7 @@ const ProductCard = (props: Product) => {
   console.log(price, discount_price)
 
   return (
-    <Link href={`/base/marketplace/${id}`} className="relative">
+    <Link href={`/customer/marketplace/${id}`} className="relative">
         {
           props.is_featured && 
           <div className="absolute top-1 left-1 z-100 rounded-full p-1 bg-white/50"> 

@@ -12,7 +12,7 @@ export default async function VerifyPayment({
     (typeof params.transactionReference === "string" && params.transactionReference)
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.BASE_URL || ""
-  const fallback = `${appUrl}/base/pending_payments`
+  const fallback = `${appUrl}/customer/pending_payments`
 
   if (!reference) {
     redirect(fallback)

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "session"
 
 /** App areas that require a session cookie (full validation stays in layouts). */
-const PROTECTED_PREFIXES = ["/base", "/admin"] as const
+const PROTECTED_PREFIXES = ["/customer", "/admin"] as const
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -25,5 +25,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/base/:path*", "/admin/:path*"],
+  matcher: ["/customer/:path*", "/admin/:path*"],
 }

@@ -37,3 +37,41 @@ export function formatWarehouseCopyText(
     .filter(Boolean)
     .join(" · ")
 }
+
+export type WarehouseAddressDetail = {
+  label: string
+  value: string
+}
+
+/** Structured fields for the warehouse address page (below the copy block). */
+export function getWarehouseAddressDetails(
+  warehouse: WarehouseRow,
+  memberCode: string,
+): WarehouseAddressDetail[] {
+  const recipient = warehouse.name.split("(")[0]?.trim() || warehouse.name
+  const addressLine = [
+    warehouse.country === "CN" ? "KRC2530" : null,
+    warehouse.province,
+    warehouse.city,
+    warehouse.district,
+    warehouse.street,
+    warehouse.building,
+    memberCode,
+  ]
+    .filter(Boolean)
+    .join(", ")
+
+  return [
+    { label: "Recipient", value: recipient },
+    { label: "Member code", value: memberCode || "—" },
+    { label: "Phone", value: warehouse.phone || "—" },
+    { label: "Country", value: warehouse.country || "—" },
+    { label: "Province", value: warehouse.province || "—" },
+    { label: "City", value: warehouse.city || "—" },
+    { label: "District", value: warehouse.district || "—" },
+    { label: "Street", value: warehouse.street || "—" },
+    { label: "Building / unit", value: warehouse.building || "—" },
+    { label: "Full address line", value: addressLine || "—" },
+    { label: "Postal code", value: warehouse.postal_code || "—" },
+  ]
+}

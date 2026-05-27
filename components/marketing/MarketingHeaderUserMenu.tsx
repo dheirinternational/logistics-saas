@@ -28,10 +28,12 @@ export function MarketingHeaderUserMenu({
   showLabel = true,
 }: MarketingHeaderUserMenuProps) {
   const initials = getInitials(user)
+  // Marketing header should always link to the customer dashboard entry.
+  const dashboardHref = "/customer/profile"
 
   return (
     <Link
-      href={user.dashboardHref}
+      href={dashboardHref}
       onClick={onNavigate}
       className={`marketing-header-user inline-flex max-w-[min(100%,220px)] items-center gap-2.5 rounded-full py-1 pl-1 pr-3 no-underline sm:pr-4 ${
         onHero ? "marketing-header-glass" : "border border-[var(--color-dheir-border)] bg-dheir-surface shadow-[var(--shadow-dheir-soft)]"

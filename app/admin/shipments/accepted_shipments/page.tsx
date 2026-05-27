@@ -5,6 +5,7 @@ import InputComponent from '@/components/admin/shipments/InputComponent'
 import { Table } from '@/components/admin/table/Table'
 import { generateTrackingNumber } from '@/lib/generators/generateTrackingNumber'
 import { useShipmentStore } from '@/store/shipmentsStore'
+import { useEditModalStore } from '@/types/editModalStore'
 import { Shipment } from '@/types/entityTypeDef'
 import { ShipmentStatus } from '@/types/statusTypes'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -30,7 +31,8 @@ const columnHelper = createColumnHelper<Shipment>()
 
 const Page: NextPage = () => {
 
-    const {setSelectedShipment, shipmentTrigger} = useShipmentStore()
+    const { setSelectedShipment, shipmentTrigger } = useShipmentStore()
+    const openModal = useEditModalStore((s) => s.openModal)
 
     const [shipments, setShipments] = useState<Shipment[]>([])
     const [filterValues, setFilterValues] = useState<SearchProps>({
@@ -79,12 +81,12 @@ const Page: NextPage = () => {
         columnHelper.display({
             id: "Details",
             cell: ({row}) => 
-            <button 
+            <button
+            type="button"
             className="portal-home__table-btn"
             onClick={() => {
-                // setModalSelectedShipmodalSelectedShipment(row.original)
-                // setIsModalActive(true)
                 setSelectedShipment(row.original)
+                openModal()
             }}>
                 View Shipment
             </button>

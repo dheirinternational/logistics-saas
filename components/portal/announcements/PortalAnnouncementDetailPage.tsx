@@ -23,7 +23,7 @@ export function PortalAnnouncementDetailPage({
   return (
     <div className="portal-account portal-announcements">
       <header className="portal-account__header">
-        <PortalPageBack href="/base/announcements" label="Announcements" />
+        <PortalPageBack href="/customer/announcements" label="Announcements" />
         <h1 className="portal-account__title">{announcement.title}</h1>
         <p className="portal-account__subtitle">
           <time dateTime={announcement.createdAt}>{published}</time>
@@ -47,7 +47,7 @@ export function PortalAnnouncementDetailPage({
       </article>
 
       <p className="portal-announcements__footer-link">
-        <Link href="/base/announcements" className="portal-cart__link">
+        <Link href="/customer/announcements" className="portal-cart__link">
           View all announcements
         </Link>
       </p>

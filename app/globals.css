@@ -1836,12 +1836,12 @@ a{
 
 .portal-sidebar__brand .dheir-logo-img,
 .portal-header__brand .dheir-logo-img {
-    filter: invert(1);
+    filter: none;
 }
 
 .admin-sidebar__brand .dheir-logo-img,
 .admin-header__brand .dheir-logo-img {
-    filter: invert(1);
+    filter: none;
 }
 
 /* Landing header (transparent on hero, light on scroll) */
@@ -2797,6 +2797,87 @@ a{
 
 .admin-modal__actions .portal-home__btn {
     width: 220px;
+}
+
+.admin-shipment-view.admin-modal__form {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-shipment-view__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    grid-column: 1 / -1;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--color-dheir-border);
+}
+
+.admin-shipment-view__eyebrow {
+    margin: 0 0 4px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-dheir-muted);
+}
+
+.admin-shipment-view__tracking {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-dheir-ink);
+    word-break: break-word;
+}
+
+.admin-shipment-view__grid {
+    grid-column: 1 / -1;
+}
+
+.admin-shipment-view__value {
+    margin: 6px 0 0;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-dheir-ink);
+}
+
+.admin-shipment-view__payment {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-shipment-view__payment .portal-packages__detail-row {
+    margin: 0;
+}
+
+.admin-shipment-view__note {
+    margin: 6px 0 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--color-dheir-page);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-dheir-ink);
+}
+
+@media (max-width: 639px) {
+    .admin-modal__actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .admin-modal__actions .portal-home__btn {
+        width: 100%;
+    }
 }
 
 .admin-uploader {
@@ -4554,6 +4635,14 @@ a.portal-packages__card--link:focus-visible {
     border: 1px solid var(--color-dheir-border);
     border-radius: 12px;
     background: var(--color-dheir-surface);
+}
+
+.portal-packages__detail-heading {
+    margin: 0 0 4px;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-dheir-ink);
 }
 
 .portal-packages__detail-row {

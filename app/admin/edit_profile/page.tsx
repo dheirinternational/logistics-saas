@@ -272,7 +272,7 @@ const Page: NextPage = () => {
             <h1 className='font-semibold text-xs'>
                 Edit profile
             </h1>
-            <Link href={"/base/profile"} className='flex-1 flex justify-end'>
+            <Link href={"/customer/profile"} className='flex-1 flex justify-end'>
                 <FaUser />
             </Link>
         </div> */}

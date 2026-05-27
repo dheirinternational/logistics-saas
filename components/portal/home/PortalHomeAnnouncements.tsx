@@ -20,7 +20,7 @@ export function PortalHomeAnnouncements({
     <section className="portal-home__section">
       <div className="portal-home__section-head">
         <h2 className="portal-home__section-title">Announcements</h2>
-        <Link href="/base/announcements" className="portal-home__text-link">
+        <Link href="/customer/announcements" className="portal-home__text-link">
           View all
         </Link>
       </div>
@@ -28,7 +28,7 @@ export function PortalHomeAnnouncements({
         {announcements.map((item) => (
           <li key={item.id}>
             <Link
-              href={`/base/announcements/${item.id}`}
+              href={`/customer/announcements/${item.id}`}
               className="portal-home__announcement-item"
             >
               <IconSpeakerphone

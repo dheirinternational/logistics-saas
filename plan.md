@@ -1,7 +1,7 @@
 # DHEIR International — Customer Experience Plan
 
 **Version:** 1.0  
-**Status:** Build blueprint for landing, ecommerce surfaces, and customer portal (`/base/*`). Admin excluded.  
+**Status:** Build blueprint for landing, ecommerce surfaces, and customer portal (`/customer/*`). Admin excluded.  
 **Authority:** Extends [`VISUAL_IDENTITY.md`](./VISUAL_IDENTITY.md). Where this doc conflicts, `VISUAL_IDENTITY.md` wins on tokens and anti-patterns; this doc wins on information architecture and template synthesis.
 
 **References:**
@@ -39,7 +39,7 @@
 
 **Customer outcome (app):** After login they always know **what to do next** — copy warehouse address, register a package, pay a balance, track status — without WhatsApp unless they choose it.
 
-**Design outcome:** One visual language from `/` through `/auth/*` through `/base/*`. Cabinet for moments; Satoshi for work; Tabler for icons; DHEIR blue for action; no legacy red nav blob, no full-page `#e6f3ff`, no mixed icon libraries.
+**Design outcome:** One visual language from `/` through `/auth/*` through `/customer/*`. Cabinet for moments; Satoshi for work; Tabler for icons; DHEIR blue for action; no legacy red nav blob, no full-page `#e6f3ff`, no mixed icon libraries.
 
 ---
 
@@ -77,7 +77,7 @@ Sign up → copy China address → packages arrive → we quote → you pay → 
                               │
                               ▼ signup / login
 ┌─────────────────────────────────────────────────────────────┐
-│  CUSTOMER APP (/base/*) — requires session, role: customer   │
+│  CUSTOMER APP (/customer/*) — requires session, role: customer   │
 │  Shell: top bar + scroll main + bottom nav                    │
 │  Home · Packages hub · Quote · Account (+ marketplace paths)  │
 └─────────────────────────────────────────────────────────────┘
@@ -85,7 +85,7 @@ Sign up → copy China address → packages arrive → we quote → you pay → 
 
 **Root `/` behavior (replace current redirect-to-login):**
 - No session → render landing  
-- Session customer → `/base`  
+- Session customer → `/customer`  
 - Session admin → `/admin`
 
 ---
@@ -110,9 +110,9 @@ Templates are **wireframe and composition references**, not color or font source
 | Reference (board) | Use on | Steal | Do not steal |
 |-------------------|--------|-------|----------------|
 | Commerce X | Landing § Shop teaser | 2×2 category tiles, clean product row, dual hero CTAs | Grey-only palette; generic “tech gadgets” copy |
-| CRESCENDO | Landing teaser + `/base/marketplace` | Featured 3-up cards, “Shop by category” horizontal cards | Blue gradient hero unlike DHEIR wash |
-| lapakbaju | `/base/marketplace` | Filter chips, product grid density, purple→map to `dheir-blue` | Purple brand; sidebar filters v1 can be chips only |
-| BR.F / Nextgen | `/base/marketplace/[id]` | PDP: gallery left, size/color, sticky add-to-cart, shipping accordion | Fashion-only IA; black/white fashion branding |
+| CRESCENDO | Landing teaser + `/customer/marketplace` | Featured 3-up cards, “Shop by category” horizontal cards | Blue gradient hero unlike DHEIR wash |
+| lapakbaju | `/customer/marketplace` | Filter chips, product grid density, purple→map to `dheir-blue` | Purple brand; sidebar filters v1 can be chips only |
+| BR.F / Nextgen | `/customer/marketplace/[id]` | PDP: gallery left, size/color, sticky add-to-cart, shipping accordion | Fashion-only IA; black/white fashion branding |
 | wearism | Promo strips | Soft promo pill: delivery estimate / offer code | Playful mascots; pink palette |
 
 ### Harmonization rule
@@ -316,7 +316,7 @@ Each column: full-bleed photo, variant scrim, Cabinet title + Satoshi body (whit
 
 **Layout:** White section. Left: vertical list with thumb + label (active = bold + pointer line from dial). Center: large tick-mark **dial** SVG, headline with **China to Nigeria** in `dheir-blue`, soft **detail card** (thumb, title, body, “Explore services” pill). Bottom: thin **progress bar** by topic index.
 
-**Topics (6):** Accurate CBM · Onitsha · Kano · Waybill states · Lithium policy · 1CBM+ inspection — copy shortened from `/base` notice.
+**Topics (6):** Accurate CBM · Onitsha · Kano · Waybill states · Lithium policy · 1CBM+ inspection — copy shortened from `/customer` notice.
 
 **Not** full Terms/Privacy (separate legal pages).
 
@@ -338,7 +338,7 @@ Each column: full-bleed photo, variant scrim, Cabinet title + Satoshi body (whit
 
 ### 7.8 FAQ
 
-**Shipped:** `FAQSection`, `FAQAccordionItem`, content from `assets/faqs/faqs` (same as `/base` home).
+**Shipped:** `FAQSection`, `FAQAccordionItem`, content from `assets/faqs/faqs` (same as `/customer` home).
 
 Accordion on `dheir-surface` band: Cabinet questions (16 to 17px), Satoshi answers (15 to 16px, line-height 1.65 to 1.7), `max-width` 3xl list / 65ch answer. Tabler `IconChevronDown`, 250ms grid height transition. First item open by default. No em/en dashes in copy.
 
@@ -354,7 +354,7 @@ Full-width `--dheir-bg-hero-wash`, blur-reveal headline: “Get your China wareh
 | Column | Content |
 |--------|---------|
 | Brand | Logo, tagline |
-| Contact | Email, phone (from `/base` support: +234 705 913 6729) |
+| Contact | Email, phone (from `/customer` support: +234 705 913 6729) |
 | Explore | Anchors: How it works, Services, Shop, FAQ |
 | Legal | Terms, Privacy, Shipping & service conditions, Refund & payment rules |
 | Social | Facebook, Instagram, TikTok (URLs in `siteContact.ts`) |
@@ -393,7 +393,7 @@ Legal routes use `LegalPlaceholder` until counsel supplies full text.
 
 ## 9. Customer portal shell
 
-Replace `app/base/layout.tsx` gray shell + legacy `NavBar`.
+Replace `app/customer/layout.tsx` gray shell + legacy `NavBar`.
 
 ### 9.1 Shell structure
 ```
@@ -410,10 +410,10 @@ Replace `app/base/layout.tsx` gray shell + legacy `NavBar`.
 ### 9.2 Bottom navigation (identity target)
 | Tab | Path | Icon | Notes |
 |-----|------|------|-------|
-| Home | `/base` | `IconHome` | Dashboard |
-| Packages | `/base/all_packages` or hub | `IconPackage` | Hub sub-routes via tiles |
-| Quote | `/base/estimate` | `IconCalculator` | |
-| Account | `/base/profile` | `IconUser` | Marketplace link inside |
+| Home | `/customer` | `IconHome` | Dashboard |
+| Packages | `/customer/all_packages` or hub | `IconPackage` | Hub sub-routes via tiles |
+| Quote | `/customer/estimate` | `IconCalculator` | |
+| Account | `/customer/profile` | `IconUser` | Marketplace link inside |
 
 **Remove:** red sliding blob (`bg-accent-red` circle). **Use:** 2px blue underline or soft pill, `dheir-spring-tab` 200ms.
 
@@ -434,7 +434,7 @@ Repeated across inner pages:
 
 ## 10. Portal routes — screen-by-screen
 
-### 10.1 Home `/base` (dashboard — identity §10)
+### 10.1 Home `/customer` (dashboard — identity §10)
 **Replace** marketing carousel home with **operations dashboard**.
 
 | Priority | Block | Pattern |
@@ -451,36 +451,36 @@ Repeated across inner pages:
 ### 10.2 Packages cluster
 | Route | Revamp focus |
 |-------|----------------|
-| `/base/add_package` | `AuthField`-style inputs, clear steps |
-| `/base/all_packages` | List cards + status chips semantic colors |
-| `/base/waiting_to_be_stored` | Same list pattern |
-| `/base/waiting_to_be_released` | Same |
-| `/base/warehouse_address` | Copy-first hero card |
-| `/base/my_address` | Nigeria delivery address form |
-| `/base/request_mail` | Keep flow; Tabler icons; section progress |
+| `/customer/add_package` | `AuthField`-style inputs, clear steps |
+| `/customer/all_packages` | List cards + status chips semantic colors |
+| `/customer/waiting_to_be_stored` | Same list pattern |
+| `/customer/waiting_to_be_released` | Same |
+| `/customer/warehouse_address` | Copy-first hero card |
+| `/customer/my_address` | Nigeria delivery address form |
+| `/customer/request_mail` | Keep flow; Tabler icons; section progress |
 
 ### 10.3 Shipments & orders
 | Route | Revamp focus |
 |-------|----------------|
-| `/base/orders` | Shipment list cards |
-| `/base/orders/[id]` | Timeline status |
-| `/base/orders_shipped` | Filter + cards |
+| `/customer/orders` | Shipment list cards |
+| `/customer/orders/[id]` | Timeline status |
+| `/customer/orders_shipped` | Filter + cards |
 
 ### 10.4 Payments
 | Route | Revamp focus |
 |-------|----------------|
-| `/base/pending_payments` | Amount + ref + pay CTA (Monnify or manual per ops plan) |
-| `/base/payment_receipts` | History with status chips |
-| `/base/verify_payment` | Minimal verifying state (already server redirect) |
+| `/customer/pending_payments` | Amount + ref + pay CTA (Monnify or manual per ops plan) |
+| `/customer/payment_receipts` | History with status chips |
+| `/customer/verify_payment` | Minimal verifying state (already server redirect) |
 
 **Manual payment interim:** Bank details card + upload receipt + “Under review” chip (when built).
 
 ### 10.5 Marketplace (ecommerce — lapakbaju + Commerce X + PDP templates)
 | Route | Layout |
 |-------|--------|
-| `/base/marketplace` | Header search · category chips · product grid 2/3 col · `ProductCard` component |
-| `/base/marketplace/[id]` | PDP: gallery, price ₦, stock, add to cart, **shipping note** accordion (Nextgen-style: “Delivery via DHEIR forwarding”) |
-| `/base/marketplace/cart` | Checkout summary · address block · order CTA |
+| `/customer/marketplace` | Header search · category chips · product grid 2/3 col · `ProductCard` component |
+| `/customer/marketplace/[id]` | PDP: gallery, price ₦, stock, add to cart, **shipping note** accordion (Nextgen-style: “Delivery via DHEIR forwarding”) |
+| `/customer/marketplace/cart` | Checkout summary · address block · order CTA |
 
 **Product card spec:**
 - Image `aspect-square` `radius-lg`  
@@ -492,14 +492,14 @@ Repeated across inner pages:
 ### 10.6 Account & profile
 | Route | Revamp focus |
 |-------|----------------|
-| `/base/profile` | Avatar, stats, CTA grid (migrate `profileCtaButtonsProps` to Tabler tiles) |
-| `/base/edit_profile` | Auth form patterns |
+| `/customer/profile` | Avatar, stats, CTA grid (migrate `profileCtaButtonsProps` to Tabler tiles) |
+| `/customer/edit_profile` | Auth form patterns |
 
 ### 10.7 Tools
 | Route | Revamp focus |
 |-------|----------------|
-| `/base/estimate` | Wizard steps, calm results cards, ₦ tabular |
-| `/base/announcements/[id]` | Article layout |
+| `/customer/estimate` | Wizard steps, calm results cards, ₦ tabular |
+| `/customer/announcements/[id]` | Article layout |
 
 ---
 
@@ -527,7 +527,7 @@ Build under `components/customer/` (or extend `components/auth/` + `components/m
 ### Portal
 | Component | Used on |
 |-----------|---------|
-| `PortalShell` | `app/base/layout` |
+| `PortalShell` | `app/customer/layout` |
 | `PortalTopBar` | |
 | `PortalBottomNav` | |
 | `PortalPageHeader` | inner pages |
@@ -549,7 +549,7 @@ Build under `components/customer/` (or extend `components/auth/` + `components/m
 
 | Source today | Destination |
 |--------------|-------------|
-| `/base` carousel, about, FAQ, reviews | `/` landing sections |
+| `/customer` carousel, about, FAQ, reviews | `/` landing sections |
 | `assets/faqs/faqs` | Landing FAQ |
 | `/api/reviews` | Landing social proof |
 | `ctaButtonsProps` | Dashboard quick actions (icons → Tabler) |
@@ -646,7 +646,7 @@ Confirm with Ronke:
 4. Manual bank transfer UI vs Monnify-only messaging on pending payments  
 
 ### Risk
-Revamping every `/base` route at once will thrash QA. Follow phase order; keep auth as the reference implementation and diff new screens against `AuthPageShell` spacing and token usage.
+Revamping every `/customer` route at once will thrash QA. Follow phase order; keep auth as the reference implementation and diff new screens against `AuthPageShell` spacing and token usage.
 
 ---
 

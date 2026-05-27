@@ -27,7 +27,7 @@ export function PortalAnnouncementsPage({
   return (
     <div className="portal-account portal-announcements">
       <header className="portal-account__header">
-        <PortalPageBack href="/base" label="Home" />
+        <PortalPageBack href="/customer" label="Home" />
         <h1 className="portal-account__title">Announcements</h1>
         <p className="portal-account__subtitle">
           Updates from DHEIR about shipping, payments, and your account.
@@ -47,7 +47,7 @@ export function PortalAnnouncementsPage({
           {announcements.map((item) => (
             <li key={item.id}>
               <Link
-                href={`/base/announcements/${item.id}`}
+                href={`/customer/announcements/${item.id}`}
                 className="portal-announcements__card"
               >
                 <span className="portal-announcements__card-icon" aria-hidden>

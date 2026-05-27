@@ -9,23 +9,23 @@ const STATUS_ITEMS = [
   {
     label: "On the way",
     countKey: "waiting_to_be_stored" as const,
-    href: "/base/waiting_to_be_stored",
+    href: "/customer/waiting_to_be_stored",
   },
   {
     label: "In warehouse",
     countKey: "total_packages" as const,
-    href: "/base/packages",
+    href: "/customer/packages",
   },
   {
     label: "Pay due",
     countKey: "pending_payments" as const,
-    href: "/base/pending_payments",
+    href: "/customer/pending_payments",
     highlight: true,
   },
   {
     label: "In transit",
     countKey: "shipment" as const,
-    href: "/base/orders_shipped",
+    href: "/customer/orders_shipped",
   },
 ]
 

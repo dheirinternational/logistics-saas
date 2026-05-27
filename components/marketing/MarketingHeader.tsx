@@ -244,7 +244,7 @@ export function MarketingHeader({ user = null }: MarketingHeaderProps) {
               }`}
             >
               <Link
-                href="/base/marketplace/cart"
+                href="/customer/marketplace/cart"
                 className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-semibold no-underline ${
                   onHero
                     ? "text-white hover:bg-white/10"

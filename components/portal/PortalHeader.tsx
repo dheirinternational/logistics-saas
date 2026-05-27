@@ -169,7 +169,7 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
                     {announcements.slice(0, 5).map((item) => (
                       <li key={item.id}>
                         <Link
-                          href={`/base/announcements/${item.id}`}
+                          href={`/customer/announcements/${item.id}`}
                           className="portal-header__notification-link"
                           onClick={() => setNotificationsOpen(false)}
                         >
@@ -188,7 +188,7 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
                 )}
                 <div className="portal-header__notifications-foot">
                   <Link
-                    href="/base/announcements"
+                    href="/customer/announcements"
                     className="portal-header__notifications-view-all"
                     onClick={() => setNotificationsOpen(false)}
                   >

@@ -10,6 +10,7 @@ import {
   type MarketingShopCategory,
   type MarketingShopProduct,
 } from "@/lib/marketing/shopCatalog"
+import { slugify } from "@/lib/portal/slug"
 import { useCartStore } from "@/store/cartStore"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -27,11 +28,15 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
   const [categories, setCategories] = useState<MarketingShopCategory[]>([])
   const [loading, setLoading] = useState(true)
 
-  const shopHref = isAuthenticated ? "/base/shop" : "/auth/signup"
-  const productDetailHref = (id: number) =>
-    isAuthenticated ? `/base/marketplace/${id}` : "/auth/signup"
-  const categoryHref = (id: number) =>
-    isAuthenticated ? `/base/shop?category=${id}` : "/auth/signup"
+  const shopHref = isAuthenticated ? "/customer/shop" : "/auth/signup"
+  const productDetailHref = (product: MarketingShopProduct) =>
+    isAuthenticated
+      ? `/customer/marketplace/${slugify(product.name)}-${product.id}`
+      : "/auth/signup"
+  const categoryHref = (category: MarketingShopCategory) =>
+    isAuthenticated
+      ? `/customer/shop?category=${slugify(category.name)}`
+      : "/auth/signup"
 
   useEffect(() => {
     let cancelled = false
@@ -117,7 +122,7 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
                 <NetLift key={product.id} delay={index * 60}>
                   <ShopProductCard
                     product={product}
-                    detailHref={productDetailHref(product.id)}
+                    detailHref={productDetailHref(product)}
                   />
                 </NetLift>
               ))
@@ -144,7 +149,10 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
             ) : (
               categories.slice(0, 6).map((category, index) => (
                 <NetLift key={category.id} delay={index * 80}>
-                  <ShopCategoryCard category={category} href={categoryHref(category.id)} />
+                  <ShopCategoryCard
+                    category={category}
+                    href={categoryHref(category)}
+                  />
                 </NetLift>
               ))
             )}
@@ -161,7 +169,7 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
             </Link>
             {isAuthenticated && cartCount > 0 ? (
               <Link
-                href="/base/marketplace/cart"
+                href="/customer/marketplace/cart"
                 className="dheir-btn-secondary inline-flex min-h-12 w-full items-center justify-center gap-2 px-8 sm:w-auto"
               >
                 {SHOP_TEASER_COPY.viewCart}

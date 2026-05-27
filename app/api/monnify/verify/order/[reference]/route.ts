@@ -24,7 +24,7 @@ export async function GET(
 
       return NextResponse.json({
         message: "Payment not successful",
-        redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/base/marketplace`,
+        redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/customer/marketplace`,
       })
     }
 
@@ -38,7 +38,7 @@ export async function GET(
 
     return NextResponse.json({
       message: "Payment verified",
-      redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/base/marketplace`,
+      redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/customer/marketplace`,
     })
   } catch (err) {
     await client.query("ROLLBACK")
@@ -46,7 +46,7 @@ export async function GET(
     return NextResponse.json(
       {
         message: "Verification failed",
-        redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/base/marketplace`,
+        redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/customer/marketplace`,
       },
       { status: 500 }
     )

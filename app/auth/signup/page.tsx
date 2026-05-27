@@ -90,7 +90,7 @@ export default function SignupPage() {
         return
       }
       toast.success(result.message ?? "Account created")
-      router.push("/base")
+      router.push("/customer")
     } catch {
       toast.error("Could not create account. Try again.")
     } finally {

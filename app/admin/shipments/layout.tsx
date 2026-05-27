@@ -8,11 +8,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useRef, useState } from "react";
-import { FaChevronDown, FaGlobe, FaImage, FaPlus } from "react-icons/fa";
+import { FaGlobe, FaImage, FaPlus } from "react-icons/fa";
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast";
 import { IconX } from "@tabler/icons-react"
 import { DheirSelect } from "@/components/ui/DheirSelect"
+import { AdminShipmentViewModal } from "@/components/admin/shipments/AdminShipmentViewModal"
 
 const pages = [
     {
@@ -32,8 +33,9 @@ const pages = [
 export default function ShipmentsLayouts({children}: {children:ReactNode}){
 
     const pathName = usePathname()
-    const {isModalActive, setIsModalActive} = useEditModalStore()
-    const {setSelectedPackage, setReadOnly} = usePackageStore()
+    const { isModalActive, setIsModalActive, closeModal } = useEditModalStore()
+    const { setSelectedPackage, setReadOnly } = usePackageStore()
+    const { resetSelectedShipment } = useShipmentStore()
 
 
     const [currentPage, setCurrentPage] = useState<"expected_shipments" | "shipment_requests" | "accepted_requests" | "">("")
@@ -67,11 +69,25 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
             case "expected_shipments" :
                 return <IncomingPackageEditComponent/>
             case "accepted_requests" :
-                return <AcceptedShipmentsEditComponent />
+                return <AdminShipmentViewModal />
             default :
                 return <div></div>
         }
-    } 
+    }
+
+    const closeShipmentsModal = () => {
+        closeModal()
+        if (currentPage === "accepted_requests") {
+            resetSelectedShipment()
+        }
+    }
+
+    const modalTitle =
+        currentPage === "accepted_requests" ? "View shipment" : "Add packages"
+    const modalSubtitle =
+        currentPage === "accepted_requests"
+            ? "View shipment details and update status."
+            : "Add packages to warehouse with photos and details."
 
     return(
         <div className='max-h-full h-full overflow-hidden relative flex'>
@@ -142,26 +158,26 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
                     className="dheir-dialog-backdrop"
                     role="presentation"
                     onClick={(e) => {
-                        if (e.target === e.currentTarget) setIsModalActive()
+                        if (e.target === e.currentTarget) closeShipmentsModal()
                     }}
                 >
                     <div
                         className="dheir-dialog admin-modal"
                         role="dialog"
                         aria-modal="true"
-                        aria-label="Add packages"
+                        aria-label={modalTitle}
                     >
                         <div className="dheir-dialog__head">
                             <div>
-                                <h2 className="dheir-dialog__title">Add packages</h2>
+                                <h2 className="dheir-dialog__title">{modalTitle}</h2>
                                 <p className="admin-modal__subtitle">
-                                    Add packages to warehouse with photos and details.
+                                    {modalSubtitle}
                                 </p>
                             </div>
                             <button
                                 type="button"
                                 className="dheir-dialog__close"
-                                onClick={() => setIsModalActive()}
+                                onClick={closeShipmentsModal}
                                 aria-label="Close"
                             >
                                 <IconX size={20} stroke={1.5} />
@@ -501,323 +517,4 @@ const IncomingPackageEditComponent = () => {
 
 
 
-
-const AcceptedShipmentsEditComponent = () => {
-
-    const {selectedShipment, handleSelectedShipmentInput, setShipmentStatus,resetSelectedShipment, setShipmentrigger} = useShipmentStore()
-
-    // Arrays
-    const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-
-    // Selected Objects
-        
-
-    // Fetching Data indicators 
-    const [isFetchingWarehouse, setIsFetchingWarehouse] = useState(true)
-    const [isUpdatingShipmentStatus, setIsUpdatingShipmentStatus] = useState(false)
-
-    // Set DropDown States
-    const [isStatusDropDownActive, setIsStatusDropDownActive] = useState(false)
-
-    // Fetch Warehouses
-    const fetchWarehouses = async () => {
-        setIsFetchingWarehouse(true)
-        try{
-            const res = await fetch(`/api/warehouses`)
-            const result = await res.json()
-
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            setWarehouses(result.data)
-
-        }
-        catch(err){
-            console.error("Network Error", err)
-            toast.error("Network Error")
-        }
-        finally{
-            setIsFetchingWarehouse(false)
-        }
-    }
-
-    // handle image selection
-
-    // handle uploading packages
-    const handleUpdateStatus = async (id, status: string) => {
-        setIsUpdatingShipmentStatus(true)
-        try{
-            const res = await fetch(`/api/shipments/update-status`, {
-                method: "PUT",
-                headers: {"Content-Type" : "application/json"},
-                body: JSON.stringify({
-                    id,
-                    status
-                })
-            })
-            const result = await res.json()
-
-            if(!res.ok){
-                toast.error(result.message)
-                return
-            }
-
-            toast.success(result.message)
-            setShipmentrigger()
-            resetSelectedShipment()
-
-        }
-        catch(err){
-            console.error("Network Error", err)
-            toast.error("Network Error")
-        }
-        finally{
-            setIsUpdatingShipmentStatus(false)
-        }
-    }
-
-    
-    // Fetch Data upon initial load 
-    useEffect(() => {
-        fetchWarehouses()
-    }, [])
-
-    // Set Selected Warehouse
-
-
-    // Static Data
-    const status = ["processing" , "shipped" , "in_transit" , "arrived" , "out_for_delivery" , "delivered"]
-
-    return <div className="h-full max-h-full bg-light w-70 p-body space-y-4 overflow-y-auto overflow-x-hidden min-h-180 "> 
-        <div>
-            <h2 className='font-semibold'>
-                View Shipment
-            </h2>          
-            <p className='text-[10px] text-dark/60 my-3'>
-                View shipment details and edit shipment status
-            </p>
-        </div>  
-
-
-        <div className='mt-8'>
-            {
-                selectedShipment &&
-                <div className='space-y-4'> 
-
-                    {/* Tracking Id */}
-                    <div>
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Tracking Id
-                            </span>
-                            <input 
-                            type="text" 
-                            name="tracking_number" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedShipment.tracking_number}
-                            // onChange={handleInputChange}
-                            required
-                            readOnly
-                            />
-                        </label>
-                    </div>
-
-                    {/* Customer Code */}
-                    <div>
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Customer Code
-                            </span>
-                            <input 
-                            type="text" 
-                            name="customer_code" 
-                            className='border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedShipment.customer_code}
-                            // onChange={handleInputChange}
-                            required
-                            readOnly
-                            />
-                        </label>
-                    </div>
-
-                    {/* Origin Warehouse */}
-                    <div>
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Origin Warehouse
-                            </span>
-                            <input 
-                            type="number" 
-                            name="origin_warehouse_id" 
-                            className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedShipment.origin_warehouse_id}
-                            onChange={handleSelectedShipmentInput}
-                            required
-                            readOnly
-                            /> 
-                        </label>
-                    </div>
-
-                    {/* Destination Warehouse */}
-                    <div>
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Destination Warehouse
-                            </span>
-                            <input 
-                            type="number" 
-                            name="destination_warehouse_id" 
-                            className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedShipment.destination_warehouse_id}
-                            onChange={handleSelectedShipmentInput}
-                            required
-                            readOnly
-                            /> 
-                        </label>
-                    </div>
-
-                    {/* Channel, price, weight */}
-                    <div className="flex gap-3">
-                        <label className='flex flex-1 flex-col relative text-[10px] w-18'>
-                            <span className='text-dark/60'>
-                                Channel
-                            </span>
-                            <input 
-                            type="text" 
-                            name="channel" 
-                            className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2 capitalize'
-                            value={selectedShipment.channel}
-                            onChange={handleSelectedShipmentInput}
-                            required
-                            readOnly
-                            /> 
-                        </label>
-
-                        <label className='flex flex-1 flex-col relative text-[10px] w-18'>
-                            <span className='text-dark/60'>
-                                T. Cost
-                            </span>
-                            <input 
-                            type="number" 
-                            name="total_cost" 
-                            className='select-none cursor-default border-b border-dark/10 p-2 pl-6 outline-0 focus:border-dark transition-set pr-2 capitalize'
-                            value={selectedShipment.total_cost}
-                            onChange={handleSelectedShipmentInput}
-                            required
-                            readOnly
-                            step="0.01"
-                            /> 
-                            <span className="left-1 bottom-2.25 absolute">
-                                ₦
-                            </span>
-                        </label>
-
-                        <label className='flex flex-1 flex-col relative text-[10px] w-18'>
-                            <span className='text-dark/60'>
-                                T. Weight (kg)
-                            </span>
-                            <input 
-                            type="number" 
-                            name="weight" 
-                            className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2 capitalize'
-                            value={selectedShipment.total_weight}
-                            onChange={handleSelectedShipmentInput}
-                            required
-                            step="0.01"
-                            readOnly
-                            /> 
-                        </label>
-                    </div>
-
-                    {/* Shipment */}
-                    <div className="border border-dark/20 text-[10px] p-3 rounded border-dashed space-y-1 capitalize text-dark/60">
-                        <p>Payment Period: {" "} 
-                            <span className="text-dark">
-                                {selectedShipment.payment_time.split("_").join(" ")}
-                            </span>
-                        </p>
-                        <p>Payment Status: 
-                            <span className="text-dark">
-                                {selectedShipment.paid_for ? "Paid" : "Pending"}
-                            </span>
-                        </p>
-                    </div>
-
-                    {/* Status */}
-
-
-                    <div className="pb-80 relative">
-                        <label className='w-full flex flex-col relative text-[10px]'>
-                            <span className='text-dark/60'>
-                                Shipment Status
-                            </span>
-                            <input 
-                            type="text" 
-                            name="warehouse_id" 
-                            className='select-none cursor-default border-b border-dark/10 p-2 pl-2 outline-0 focus:border-dark transition-set pr-2'
-                            value={selectedShipment.status}
-                            onChange={handleSelectedShipmentInput}
-                            min={0}
-                            required
-                            readOnly
-                            />
-
-                            <div className="absolute right-1 bottom-2">
-                                <button
-                                className={`${isStatusDropDownActive
-                                     && "rotate-180"} p-1`}
-                                onClick={() => {setIsStatusDropDownActive(!isStatusDropDownActive)}}
-                                type="button"
-                                disabled={isUpdatingShipmentStatus}
-                                >
-                                    <FaChevronDown />
-                                </button>
-            
-                                <div className={`
-                                    absolute right-0 top-10 p-3 w-40 rounded bg-light shadow z-1000 transition-set flex flex-col max-h-40 overflow-y-auto
-                                    ${!isStatusDropDownActive && "opacity-0 pointer-events-none translate-y-6"}    
-                                `}>
-                                    {
-                                        status.map( (stat, i) => 
-                                            {
-                                            return <button
-                                                key={stat}
-                                                className={`
-                                                    py-3 capitalize
-                                                    ${selectedShipment.status === stat && "bg-dark text-white rounded"}
-                                                    ${i !== stat.length - 1 && "border-b border-dark/8"}
-                                                `}
-                                                onClick={() => {
-                                                    // setPackageWarehouse(warehouse.id)
-                                                    setIsStatusDropDownActive(false)
-                                                    handleUpdateStatus(selectedShipment.id, stat)
-                                                }}
-                                                disabled={isUpdatingShipmentStatus}
-                                                type="button"
-                                                >
-                                                    {stat.split("_").join(" ")}
-                                                </button>
-                                            }
-                                        )
-                                    }
-                                </div>
-                            </div>
-                        </label>
-                        {
-                            isUpdatingShipmentStatus && 
-                            <div className="text-[8px] text-yellow-600 flex items-center gap-2 mt-3 absolute top-10 z-1000 left-0">
-                                <p>Updating Status</p>
-                                <DheirLoader color="black" size={4}/>
-                            </div>
-                        } 
-                    </div>
-
-                </div>
-            }
-
-        </div>
-    </div>
-}
 

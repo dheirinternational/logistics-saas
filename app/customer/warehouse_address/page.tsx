@@ -6,7 +6,10 @@ import {
   PortalFormField,
   PortalFormSelect,
 } from "@/components/portal/packages/PortalFormField"
-import { formatWarehouseCopyText } from "@/lib/portal/warehouseAddress"
+import {
+  formatWarehouseCopyText,
+  getWarehouseAddressDetails,
+} from "@/lib/portal/warehouseAddress"
 import type { Warehouse } from "@/types/entityTypeDef"
 import { useEffect, useMemo, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
@@ -61,6 +64,8 @@ export default function WarehouseAddressPage() {
       <PortalPackagesPageHeader
         title="Warehouse address"
         description="Give your supplier this address. Include your member code so we can match your goods."
+        backHref="/customer"
+        backLabel="Home"
       />
 
       {warehouses.length > 1 ? (
@@ -91,21 +96,18 @@ export default function WarehouseAddressPage() {
         </div>
       )}
 
-      {selected ? (
-        <div className="portal-packages__detail-grid">
-          <div className="portal-packages__detail-row">
-            <span className="portal-packages__detail-label">Recipient</span>
-            <span>{selected.name.split("(")[0]?.trim() || selected.name}</span>
-          </div>
-          <div className="portal-packages__detail-row">
-            <span className="portal-packages__detail-label">Phone</span>
-            <span>{selected.phone || "—"}</span>
-          </div>
-          <div className="portal-packages__detail-row">
-            <span className="portal-packages__detail-label">Postal code</span>
-            <span>{selected.postal_code || "—"}</span>
-          </div>
-        </div>
+      {selected && memberCode ? (
+        <section className="portal-packages__detail-grid" aria-labelledby="warehouse-breakdown-heading">
+          <h2 id="warehouse-breakdown-heading" className="portal-packages__detail-heading">
+            Address breakdown
+          </h2>
+          {getWarehouseAddressDetails(selected, memberCode).map((row) => (
+            <div key={row.label} className="portal-packages__detail-row">
+              <span className="portal-packages__detail-label">{row.label}</span>
+              <span>{row.value}</span>
+            </div>
+          ))}
+        </section>
       ) : null}
     </div>
   )
