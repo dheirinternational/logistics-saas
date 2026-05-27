@@ -56,6 +56,15 @@ export function PortalOrdersPage() {
     })
   }, [orders, search, status])
 
+  const showTransferSubmittedBanner = useMemo(() => {
+    if (!transferSubmitted || !transferReference) return false
+    const order = orders.find((o) => o.order_id === transferReference)
+    if (!order) return false
+    if (order.latest_manual_payment_status === "awaiting_confirmation") return true
+    if (order.payment_status === "awaiting_confirmation") return true
+    return false
+  }, [orders, transferReference, transferSubmitted])
+
   return (
     <div className="portal-packages portal-orders">
       <PortalPackagesPageHeader
@@ -63,7 +72,7 @@ export function PortalOrdersPage() {
         description="Marketplace purchases and delivery status."
       />
 
-      {transferSubmitted ? (
+      {showTransferSubmittedBanner ? (
         <section className="portal-home__panel portal-bank-transfer__notice portal-bank-transfer__notice--left">
           <span className="portal-payments__status portal-payments__status--awaiting_confirmation">
             Awaiting confirmation

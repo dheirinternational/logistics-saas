@@ -4,6 +4,7 @@ import SearchComponent from "@/components/admin/orders/SearchComponent"
 import { Table } from "@/components/admin/table/Table"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
+import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
 import { toast } from "@/lib/ui/toast"
 import { Order } from "@/types/entityTypeDef"
 import { createColumnHelper } from "@tanstack/react-table"
@@ -272,6 +273,34 @@ const OrderModal = ({
     )
 
     const [isUpdating, setIsUpdating] = useState(false)
+    const [items, setItems] = useState<any[]>([])
+    const [loadingItems, setLoadingItems] = useState(true)
+
+    useEffect(() => {
+        let active = true
+        setLoadingItems(true)
+        fetch(`/api/orders/items/${encodeURIComponent(order.order_id)}`, {
+            credentials: "include",
+        })
+            .then(async (res) => {
+                const result = await res.json()
+                if (!res.ok) {
+                    throw new Error(result.message || "Could not load order items")
+                }
+                if (active) setItems(result.data ?? [])
+            })
+            .catch((err) => {
+                console.error("Items fetch error:", err)
+                if (active) setItems([])
+            })
+            .finally(() => {
+                if (active) setLoadingItems(false)
+            })
+
+        return () => {
+            active = false
+        }
+    }, [order.order_id])
 
     const updateStatus = async () => {
         setIsUpdating(true)
@@ -335,21 +364,21 @@ const OrderModal = ({
                             <div className="portal-packages__field">
                                 <span className="portal-packages__field-label">Total price</span>
                                 <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
-                                    ₦ {order.total_price}
+                                    {formatPaymentAmount(Number(order.total_price))}
                                 </p>
                             </div>
 
                             <div className="portal-packages__field">
                                 <span className="portal-packages__field-label">Delivery fee</span>
                                 <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
-                                    ₦ {order.delivery_fee}
+                                    {formatPaymentAmount(Number(order.delivery_fee))}
                                 </p>
                             </div>
 
                             <div className="portal-packages__field">
                                 <span className="portal-packages__field-label">Extra charges</span>
                                 <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
-                                    ₦ {order.extra_charges ?? 0}
+                                    {formatPaymentAmount(Number(order.extra_charges ?? 0))}
                                 </p>
                             </div>
 
@@ -372,6 +401,97 @@ const OrderModal = ({
                                 <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
                                     {new Date(order.created_at || "").toDateString()}
                                 </p>
+                            </div>
+
+                            <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
+                                <span className="portal-packages__field-label">Items</span>
+                                {loadingItems ? (
+                                    <p className="portal-home__empty" style={{ color: "var(--color-dheir-muted)" }}>
+                                        Loading items…
+                                    </p>
+                                ) : items.length === 0 ? (
+                                    <p className="portal-home__empty" style={{ color: "var(--color-dheir-muted)" }}>
+                                        No items found for this order.
+                                    </p>
+                                ) : (
+                                    <div style={{ maxHeight: 280, overflowY: "auto", paddingRight: 6 }}>
+                                        <div style={{ display: "grid", gap: 10 }}>
+                                            {items.map((item) => (
+                                                <div
+                                                    key={item.id}
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "space-between",
+                                                        gap: 12,
+                                                        padding: "10px 12px",
+                                                        border: "1px solid var(--color-dheir-border)",
+                                                        borderRadius: 12,
+                                                        background: "var(--color-dheir-surface)",
+                                                    }}
+                                                >
+                                                    <div style={{ display: "flex", gap: 10, minWidth: 0 }}>
+                                                        <div
+                                                            style={{
+                                                                width: 44,
+                                                                height: 44,
+                                                                borderRadius: 10,
+                                                                border: "1px solid var(--color-dheir-border)",
+                                                                overflow: "hidden",
+                                                                background: "var(--color-dheir-surface)",
+                                                                flexShrink: 0,
+                                                            }}
+                                                        >
+                                                            {item.image ? (
+                                                                <img
+                                                                    src={item.image}
+                                                                    alt={item.product_name ?? "Product image"}
+                                                                    style={{
+                                                                        width: "100%",
+                                                                        height: "100%",
+                                                                        objectFit: "cover",
+                                                                        display: "block",
+                                                                    }}
+                                                                    loading="lazy"
+                                                                />
+                                                            ) : (
+                                                                <div className="portal-order-item__placeholder">
+                                                                    No image
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <div style={{ minWidth: 0 }}>
+                                                            <p
+                                                                className="portal-home__empty"
+                                                                style={{ color: "var(--color-dheir-ink)", margin: 0 }}
+                                                            >
+                                                                {item.product_name}
+                                                            </p>
+                                                            <p
+                                                                className="portal-home__empty"
+                                                                style={{ color: "var(--color-dheir-muted)", margin: "2px 0 0" }}
+                                                            >
+                                                                Qty {item.quantity} · {formatPaymentAmount(Number(item.unit_price))}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <p
+                                                        className="portal-home__empty tabular-nums"
+                                                        style={{ color: "var(--color-dheir-ink)", margin: 0, whiteSpace: "nowrap" }}
+                                                    >
+                                                        {formatPaymentAmount(
+                                                            Number(
+                                                                item.subtotal ??
+                                                                Number(item.unit_price) * Number(item.quantity)
+                                                            )
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
