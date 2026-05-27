@@ -108,7 +108,7 @@ export function PortalQuotePage() {
   const convertToNaira = currency === "Naira" && channel !== "sea"
 
   const totalDisplay = useMemo(() => {
-    if (!quotation) return "—"
+    if (!quotation) return "-"
     return formatMoney(
       quotation.totalPrice,
       currency,

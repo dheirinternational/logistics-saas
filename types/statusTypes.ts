@@ -13,6 +13,7 @@ export type PaymentStatus =
     | "paid"
     | "failed"
     | "abandoned"
+    | "awaiting_confirmation"
 
 export type ShipmentStatus = 
     | "processing" 

@@ -16,7 +16,7 @@ export type PortalNavItem = {
   icon: TablerIcon
 }
 
-/** Primary sidebar navigation — see plan.md §9 */
+/** Primary sidebar navigation - see plan.md §9 */
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { id: "home", label: "Home", href: "/customer", icon: IconHome },
   {
@@ -36,6 +36,7 @@ const SHOP_PREFIXES = [
   "/customer/marketplace",
   "/customer/orders",
   "/customer/verify_order_payment",
+  "/customer/payments/transfer",
 ] as const
 
 /** Logistics: packages, shipments, warehouse, and shipment-related payments. */
@@ -51,6 +52,7 @@ const PACKAGES_PREFIXES = [
   "/customer/payment_receipts",
   "/customer/pending_payments",
   "/customer/verify_payment",
+  "/customer/payments/transfer",
 ] as const
 
 /** Profile, address, and account settings. */

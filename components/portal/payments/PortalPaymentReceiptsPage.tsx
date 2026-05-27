@@ -63,7 +63,7 @@ export function PortalPaymentReceiptsPage() {
         <PortalPageBack href="/customer" label="Home" />
         <h1 className="portal-account__title">Payment receipts</h1>
         <p className="portal-account__subtitle">
-          Shipment payments you have made or started — filter by tracking number
+          Shipment payments you have made or started - filter by tracking number
           or status.
         </p>
       </header>
@@ -96,6 +96,7 @@ export function PortalPaymentReceiptsPage() {
           >
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
+            <option value="awaiting_confirmation">Awaiting confirmation</option>
             <option value="paid">Paid</option>
             <option value="failed">Failed</option>
           </select>
@@ -146,7 +147,7 @@ export function PortalPaymentReceiptsPage() {
                   </div>
                   <div>
                     <dt>Method</dt>
-                    <dd>{payment.channel || "—"}</dd>
+                    <dd>{payment.channel || "-"}</dd>
                   </div>
                   <div>
                     <dt>Date</dt>

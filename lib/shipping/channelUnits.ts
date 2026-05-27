@@ -45,7 +45,7 @@ export function getShippingQuantityShortLabel(
 
 export function formatShippingChannel(channel: string | null | undefined): string {
   const normalized = normalizeShippingChannel(channel)
-  if (!normalized) return channel?.trim() || "—"
+  if (!normalized) return channel?.trim() || "-"
   return normalized.charAt(0).toUpperCase() + normalized.slice(1)
 }
 
@@ -54,7 +54,7 @@ export function formatShippingQuantity(
   channel: string | null | undefined,
   options?: { decimals?: number; fallback?: string },
 ): string {
-  const fallback = options?.fallback ?? "—"
+  const fallback = options?.fallback ?? "-"
   if (value == null || value === "") return fallback
   const num = Number(value)
   if (!Number.isFinite(num)) return fallback

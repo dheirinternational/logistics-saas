@@ -115,7 +115,7 @@ export function AdminShipmentViewModal() {
         <div className="portal-packages__field">
           <span className="portal-packages__field-label">Customer code</span>
           <p className="admin-shipment-view__value">
-            {selectedShipment.customer_code || "—"}
+            {selectedShipment.customer_code || "-"}
           </p>
         </div>
         <div className="portal-packages__field">
@@ -127,7 +127,7 @@ export function AdminShipmentViewModal() {
         <div className="portal-packages__field">
           <span className="portal-packages__field-label">Origin warehouse</span>
           <p className="admin-shipment-view__value">
-            {selectedShipment.origin_warehouse_id ?? "—"}
+            {selectedShipment.origin_warehouse_id ?? "-"}
           </p>
         </div>
         <div className="portal-packages__field">
@@ -135,7 +135,7 @@ export function AdminShipmentViewModal() {
             Destination warehouse
           </span>
           <p className="admin-shipment-view__value">
-            {selectedShipment.destination_warehouse_id ?? "—"}
+            {selectedShipment.destination_warehouse_id ?? "-"}
           </p>
         </div>
         <div className="portal-packages__field">

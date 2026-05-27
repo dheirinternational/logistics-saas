@@ -15,5 +15,6 @@ export function formatPaymentAmount(amount: number) {
 export function paymentStatusLabel(status: Payment["status"]) {
   if (status === "paid") return "Paid"
   if (status === "pending") return "Pending"
+  if (status === "awaiting_confirmation") return "Awaiting confirmation"
   return "Failed"
 }

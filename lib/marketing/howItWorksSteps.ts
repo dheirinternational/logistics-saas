@@ -1,4 +1,4 @@
-/** How it works step illustrations — `public/custom/step*.png` */
+/** How it works step illustrations - `public/custom/step*.png` */
 
 export type HowItWorksStep = {
   step: number

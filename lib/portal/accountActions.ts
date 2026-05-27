@@ -9,7 +9,7 @@ export type PortalAccountLink = {
   icon: TablerIcon
 }
 
-/** Account-only settings — ops links live on Home, Packages, Quote, and Shop. */
+/** Account-only settings - ops links live on Home, Packages, Quote, and Shop. */
 export const PORTAL_ACCOUNT_LINKS: PortalAccountLink[] = [
   {
     id: "edit-profile",

@@ -177,7 +177,7 @@ export async function POST(req: NextRequest){
                                 </p>
 
                                 <p style="font-weight:bold;">
-                                    — Your Logistics Team 🚚
+                                    - Your Logistics Team 🚚
                                 </p>
 
                             </div>

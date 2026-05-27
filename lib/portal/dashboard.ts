@@ -77,9 +77,9 @@ export async function getPortalDashboardData(
         (SELECT COUNT(*)::int FROM shipments
           WHERE status != 'delivered' AND user_id = $1) AS shipment,
         (SELECT COUNT(*)::int FROM payments
-          WHERE status = 'pending' AND user_id = $1) AS pending_payments,
+          WHERE status IN ('pending', 'awaiting_confirmation') AND user_id = $1) AS pending_payments,
         (SELECT COALESCE(SUM(amount), 0)::float FROM payments
-          WHERE status = 'pending' AND user_id = $1) AS pending_payments_total,
+          WHERE status IN ('pending', 'awaiting_confirmation') AND user_id = $1) AS pending_payments_total,
         (SELECT COUNT(*)::int FROM shipments
           WHERE status = 'delivered' AND user_id = $1) AS delivered_shipments,
         (SELECT COUNT(*)::int FROM shipments

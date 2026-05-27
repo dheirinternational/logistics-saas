@@ -1,7 +1,7 @@
 import { pool } from "@/lib/db/db"
 import { NextResponse } from "next/server"
 
-/** Public shop catalog for landing page — featured products + categories. */
+/** Public shop catalog for landing page - featured products + categories. */
 export async function GET() {
   try {
     const [featuredRes, categoriesRes] = await Promise.all([

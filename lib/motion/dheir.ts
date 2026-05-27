@@ -1,4 +1,4 @@
-/** DHEIR motion tokens — see VISUAL_IDENTITY.md §8 */
+/** DHEIR motion tokens - see VISUAL_IDENTITY.md §8 */
 
 export const dheirEase = [0.22, 1, 0.36, 1] as const
 

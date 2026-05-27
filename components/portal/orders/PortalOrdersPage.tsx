@@ -8,18 +8,22 @@ import {
   getOrderStatusVariant,
   ORDER_FILTER_OPTIONS,
 } from "@/lib/portal/orderStatus"
-import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
+import { formatPaymentAmount, paymentStatusLabel } from "@/lib/portal/paymentDisplay"
 import type { Order } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
+import { useSearchParams } from "next/navigation"
 
 export function PortalOrdersPage() {
+  const searchParams = useSearchParams()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("")
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const transferSubmitted = searchParams.get("transfer") === "submitted"
+  const transferReference = searchParams.get("reference")
 
   useEffect(() => {
     fetch("/api/orders/user", { credentials: "include" })
@@ -57,9 +61,18 @@ export function PortalOrdersPage() {
       <PortalPackagesPageHeader
         title="Shop orders"
         description="Marketplace purchases and delivery status."
-        backHref="/customer"
-        backLabel="Home"
       />
+
+      {transferSubmitted ? (
+        <section className="portal-home__panel portal-bank-transfer__notice portal-bank-transfer__notice--left">
+          <span className="portal-payments__status portal-payments__status--awaiting_confirmation">
+            Awaiting confirmation
+          </span>
+          <p className="portal-bank-transfer__notice-text">
+            Your bank transfer proof has been submitted{transferReference ? ` for ${transferReference}` : ""}. An admin will confirm receipt and your order will move forward.
+          </p>
+        </section>
+      ) : null}
 
       <PortalPackagesToolbar
         search={search}
@@ -104,11 +117,24 @@ export function PortalOrdersPage() {
                     {order.destination_address}
                   </p>
                 </div>
-                <PortalPackageStatusBadge
-                  label={getOrderStatusLabel(order.status)}
-                  variant={getOrderStatusVariant(order.status)}
-                />
+                {order.latest_manual_payment_status === "rejected" ? (
+                  <span className="portal-payments__status portal-payments__status--failed">
+                    Rejected
+                  </span>
+                ) : order.payment_status === "paid" ? (
+                  <PortalPackageStatusBadge
+                    label={getOrderStatusLabel(order.status)}
+                    variant={getOrderStatusVariant(order.status)}
+                  />
+                ) : (
+                  <span
+                    className={`portal-payments__status portal-payments__status--${order.payment_status ?? "pending"}`}
+                  >
+                    {paymentStatusLabel((order.payment_status as any) ?? "pending")}
+                  </span>
+                )}
               </div>
+              {/* Payment chip already shown in header to avoid double-status confusion. */}
               <div className="portal-packages__card-foot portal-packages__card-foot--split">
                 <time dateTime={order.created_at}>
                   {new Date(order.created_at).toLocaleDateString(undefined, {

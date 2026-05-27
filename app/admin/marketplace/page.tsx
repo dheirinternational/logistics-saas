@@ -104,7 +104,7 @@ const Page: NextPage = () => {
             header: "Status",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? String(value).replace(/_/g, " ") : "—"
+                return value ? String(value).replace(/_/g, " ") : "-"
             },
         }),
         columnHelper.accessor("weight", {

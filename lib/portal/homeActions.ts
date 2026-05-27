@@ -29,7 +29,7 @@ export type PortalHomeAction = {
   emphasis?: "primary" | "default"
 }
 
-/** Top priority — what most users need first. */
+/** Top priority - what most users need first. */
 export const PORTAL_HOME_PRIORITY_ACTIONS: PortalHomeAction[] = [
   {
     id: "add-package",
@@ -58,7 +58,7 @@ export const PORTAL_HOME_PRIORITY_ACTIONS: PortalHomeAction[] = [
   },
 ]
 
-/** Full operations grid — moved from Account. */
+/** Full operations grid - moved from Account. */
 export const PORTAL_HOME_QUICK_ACTIONS: PortalHomeAction[] = [
   {
     id: "waiting",

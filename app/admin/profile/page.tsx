@@ -46,7 +46,7 @@ const Page: NextPage = async() => {
                     </div>
                     <div className="portal-account__profile-body">
                         <p className="portal-account__name">{fullName}</p>
-                        <p className="portal-account__email">{userData?.email || "—"}</p>
+                        <p className="portal-account__email">{userData?.email || "-"}</p>
                         <p className="portal-account__email" style={{ display: "flex", gap: 8, alignItems: "center" }}>
                             <IconShield size={16} stroke={1.5} aria-hidden />
                             {userData?.role || "admin"}

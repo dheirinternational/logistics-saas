@@ -307,42 +307,42 @@ const Page: NextPage = () => {
                       <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
                         {modalSelectedRequest?.created_at
                           ? new Date(modalSelectedRequest.created_at).toDateString()
-                          : "—"}
+                          : "-"}
                       </p>
                     </div>
 
                     <div className="portal-packages__field">
                       <span className="portal-packages__field-label">Customer code</span>
                       <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
-                        {modalSelectedRequest?.customer_code || "—"}
+                        {modalSelectedRequest?.customer_code || "-"}
                       </p>
                     </div>
 
                     <div className="portal-packages__field">
                       <span className="portal-packages__field-label">Channel requested</span>
                       <p className="portal-home__empty capitalize" style={{ color: "var(--color-dheir-ink)" }}>
-                        {modalSelectedRequest?.channel || "—"}
+                        {modalSelectedRequest?.channel || "-"}
                       </p>
                     </div>
 
                     <div className="portal-packages__field">
                       <span className="portal-packages__field-label">Payment time</span>
                       <p className="portal-home__empty capitalize" style={{ color: "var(--color-dheir-ink)" }}>
-                        {modalSelectedRequest?.payment_time?.replaceAll("_", " ") || "—"}
+                        {modalSelectedRequest?.payment_time?.replaceAll("_", " ") || "-"}
                       </p>
                     </div>
 
                     <div className="portal-packages__field">
                       <span className="portal-packages__field-label">Packaging type</span>
                       <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
-                        {modalSelectedRequest?.packaging || "—"}
+                        {modalSelectedRequest?.packaging || "-"}
                       </p>
                     </div>
 
                     <div className="portal-packages__field">
                       <span className="portal-packages__field-label">Package IDs</span>
                       <p className="portal-home__empty tabular-nums" style={{ color: "var(--color-dheir-ink)" }}>
-                        {(modalSelectedRequest?.package_ids ?? []).join(", ") || "—"}
+                        {(modalSelectedRequest?.package_ids ?? []).join(", ") || "-"}
                       </p>
                     </div>
 
@@ -387,7 +387,7 @@ const Page: NextPage = () => {
                     <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
                       <span className="portal-packages__field-label">Customer note</span>
                       <p className="admin-shipment-view__note" style={{ marginTop: 8 }}>
-                        {modalSelectedRequest?.customer_note || "—"}
+                        {modalSelectedRequest?.customer_note || "-"}
                       </p>
                     </div>
                   </div>

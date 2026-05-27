@@ -1,4 +1,4 @@
-/** Service column imagery — replace with client assets when available. */
+/** Service column imagery - replace with client assets when available. */
 
 export const SERVICES_SECTION_COPY = {
   eyebrow: "Services",

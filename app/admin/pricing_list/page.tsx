@@ -542,7 +542,7 @@ const SeaTemplateComponent = () => {
 
             {selectedTemplate ? (
                 <PricingTemplateEditModal
-                    title={`Edit sea template — ${selectedTemplate.name.split("_").join(" ")}`}
+                    title={`Edit sea template - ${selectedTemplate.name.split("_").join(" ")}`}
                     endpoint="/api/pricing_template/sea"
                     priceLabel="Price (NGN)"
                     clearanceLabel="Clearance (NGN)"
@@ -660,7 +660,7 @@ const ExpressTemplateComponent = ({currencyValue} : {currencyValue : number}) =>
 
             {selectedTemplate ? (
                 <PricingTemplateEditModal
-                    title={`Edit express template — ${selectedTemplate.name.split("_").join(" ")}`}
+                    title={`Edit express template - ${selectedTemplate.name.split("_").join(" ")}`}
                     endpoint="/api/pricing_template/express"
                     priceLabel="Price (USD)"
                     clearanceLabel="Clearance (NGN)"

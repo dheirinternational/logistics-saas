@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer()
     const blob = new Blob([arrayBuffer], { type: file.type })
 
-    // Fixed path per user — upsert overwrites the existing file
+    // Fixed path per user - upsert overwrites the existing file
     const filePath = `avatars/${session.user_id}`
 
     const { error: uploadError } = await supabaseAdmin.storage

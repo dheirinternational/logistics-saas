@@ -43,7 +43,7 @@ function formatDate(iso: string) {
 }
 
 function formatNaira(amount: number) {
-  if (!amount) return "—"
+  if (!amount) return "-"
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
@@ -296,7 +296,7 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
       <dl className="portal-home__ongoing-meta">
         <div>
           <dt>Channel</dt>
-          <dd>{shipment.channel?.toUpperCase() || "—"}</dd>
+          <dd>{shipment.channel?.toUpperCase() || "-"}</dd>
         </div>
         <div>
           <dt>{getShippingQuantityShortLabel(shipment.channel)}</dt>
@@ -313,7 +313,7 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
           <dd>
             {shipment.paidFor
               ? "Paid"
-              : `${shipment.paymentTime.replaceAll("_", " ") || "—"} (unpaid)`}
+              : `${shipment.paymentTime.replaceAll("_", " ") || "-"} (unpaid)`}
           </dd>
         </div>
         <div>

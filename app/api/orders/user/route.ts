@@ -15,8 +15,20 @@ export async function GET(){
         }
 
         const result = await pool.query(`
-            SELECT * FROM orders
-            WHERE user_id = $1 
+            SELECT
+              o.*,
+              ms.status AS latest_manual_payment_status,
+              ms.admin_note AS latest_manual_payment_admin_note
+            FROM orders o
+            LEFT JOIN LATERAL (
+              SELECT status, admin_note
+              FROM manual_payment_submissions
+              WHERE payment_type = 'order'
+                AND reference = o.order_id
+              ORDER BY created_at DESC
+              LIMIT 1
+            ) ms ON true
+            WHERE o.user_id = $1
         `, [session.user_id])
 
         return NextResponse.json({

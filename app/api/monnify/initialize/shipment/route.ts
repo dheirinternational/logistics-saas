@@ -2,10 +2,18 @@ import { pool } from "@/lib/db/db"
 import { getHost } from "@/lib/db/getHost"
 import { getSession } from "@/lib/db/session"
 import { initializeMonnifyPayment } from "@/lib/monnify/initialize"
+import { isMonnifyCheckoutEnabled } from "@/lib/bankTransfer/config"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isMonnifyCheckoutEnabled()) {
+      return NextResponse.json(
+        { message: "Card payment is temporarily unavailable" },
+        { status: 503 }
+      )
+    }
+
     const session = await getSession()
     if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })

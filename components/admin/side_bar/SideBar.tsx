@@ -24,9 +24,10 @@ export const SideBar = () => {
 
     const fetchBadges = async () => {
       try {
-        const [ordersRes, shipmentsRes] = await Promise.all([
+        const [ordersRes, shipmentsRes, manualPaymentsRes] = await Promise.all([
           fetch("/api/orders/count", { credentials: "include" }),
           fetch("/api/shipments/count", { credentials: "include" }),
+          fetch("/api/manual-payments/admin/count", { credentials: "include" }),
         ])
 
         const nextBadges: Record<string, number> = {}
@@ -41,6 +42,12 @@ export const SideBar = () => {
           const shipmentsJson = await shipmentsRes.json()
           const active = Number(shipmentsJson?.data?.total_active_count ?? 0)
           nextBadges["/admin/shipments"] = active
+        }
+
+        if (manualPaymentsRes.ok) {
+          const manualJson = await manualPaymentsRes.json()
+          const awaiting = Number(manualJson?.data?.count ?? 0)
+          nextBadges["/admin/payments/confirmations"] = awaiting
         }
 
         if (isMounted) setBadges(nextBadges)

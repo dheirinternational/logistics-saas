@@ -24,6 +24,10 @@ export function PortalCartPage() {
   const [loadingAddress, setLoadingAddress] = useState(true)
   const [loadingUser, setLoadingUser] = useState(true)
   const [isPaying, setIsPaying] = useState(false)
+  const [isBankPaying, setIsBankPaying] = useState(false)
+  const [bankTransferEnabled, setBankTransferEnabled] = useState(false)
+
+  const MONNIFY_ENABLED = process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED !== "false"
 
   const subtotal = useMemo(() => {
     return cart.reduce((acc, item) => {
@@ -36,6 +40,12 @@ export function PortalCartPage() {
   }, [cart])
 
   const total = subtotal + deliveryFee
+
+  useEffect(() => {
+    fetch("/api/bank-transfer/config", { credentials: "include" })
+      .then((r) => setBankTransferEnabled(r.ok))
+      .catch(() => setBankTransferEnabled(false))
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -133,6 +143,29 @@ export function PortalCartPage() {
     }
   }
 
+  const initializeBankTransfer = async () => {
+    if (cart.length === 0) return
+    if (!user.email || !user.code) {
+      toast.error("Account details are still loading")
+      return
+    }
+    if (!address) {
+      toast.error("Add your delivery address first")
+      return
+    }
+
+    setIsBankPaying(true)
+    try {
+      // Do not create an order record until proof is submitted.
+      window.location.href = "/customer/payments/transfer/order/new"
+    } catch (err) {
+      console.error(err)
+      toast.error("Could not start bank transfer checkout")
+    } finally {
+      setIsBankPaying(false)
+    }
+  }
+
   return (
     <div className="portal-account portal-cart">
       <PortalAccountPageHeader
@@ -210,24 +243,60 @@ export function PortalCartPage() {
             )}
           </div>
 
-          <button
-            type="button"
-            className="portal-packages__btn-primary portal-packages__btn-primary--block"
-            disabled={
-              cart.length === 0 ||
-              isPaying ||
-              loadingAddress ||
-              loadingUser ||
-              !address
-            }
-            onClick={initializePayment}
-          >
-            {isPaying ? (
-              <DheirLoader color="#fff" size={8} />
-            ) : (
-              "Checkout"
-            )}
-          </button>
+          {cart.length > 0 ? (
+            <div className="portal-cart__checkout-actions">
+              {bankTransferEnabled ? (
+                <button
+                  type="button"
+                  className="portal-packages__btn-primary portal-packages__btn-primary--block portal-cart__checkout-btn"
+                  disabled={
+                    isBankPaying ||
+                    isPaying ||
+                    loadingAddress ||
+                    loadingUser ||
+                    !address
+                  }
+                  onClick={initializeBankTransfer}
+                >
+                  {isBankPaying ? (
+                    <DheirLoader color="#fff" size={8} />
+                  ) : (
+                    "Pay by bank transfer"
+                  )}
+                </button>
+              ) : null}
+
+              <div
+                className={
+                  MONNIFY_ENABLED
+                    ? "portal-cart__monnify-wrap"
+                    : "portal-cart__monnify-wrap portal-cart__monnify-wrap--paused"
+                }
+              >
+                <button
+                  type="button"
+                  className="portal-packages__btn-primary portal-packages__btn-primary--block portal-cart__checkout-btn portal-cart__checkout-btn--secondary"
+                  disabled={
+                    isPaying ||
+                    isBankPaying ||
+                    loadingAddress ||
+                    loadingUser ||
+                    !address ||
+                    !MONNIFY_ENABLED
+                  }
+                  onClick={initializePayment}
+                >
+                  {isPaying ? (
+                    <DheirLoader color="#fff" size={8} />
+                  ) : MONNIFY_ENABLED ? (
+                    "Pay with card (Monnify)"
+                  ) : (
+                    "Card payment unavailable"
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : null}
         </aside>
       </div>
     </div>

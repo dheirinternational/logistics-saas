@@ -3,7 +3,7 @@ export const runtime = "nodejs"
 import { pool } from "@/lib/db/db"
 import { NextResponse } from "next/server"
 
-/** Public read — featured products for landing shop teaser (max 4). */
+/** Public read - featured products for landing shop teaser (max 4). */
 export async function GET() {
   try {
     const { rows } = await pool.query(

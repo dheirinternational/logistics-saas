@@ -7,7 +7,7 @@ export type DheirLoaderProps = {
   size?: number | DheirLoaderSize
   /** Preset color when `color` is not set. */
   variant?: "brand" | "white" | "accent" | "muted"
-  /** Legacy prop from react-spinners — still supported for gradual migration. */
+  /** Legacy prop from react-spinners - still supported for gradual migration. */
   color?: string
   label?: string
   /** Center in a min-height block with optional label (page-level loading). */

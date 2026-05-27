@@ -32,7 +32,15 @@ export async function GET(req: Request, {params}:{params: Promise<{id: string}>}
         }
 
         const result = await pool.query(`
-            SELECT * FROM order_items
+            SELECT 
+              id,
+              product_id,
+              product_name,
+              quantity,
+              unit_price,
+              subtotal,
+              product_image AS image
+            FROM order_items
             WHERE order_id = $1 
         `, [id])
 

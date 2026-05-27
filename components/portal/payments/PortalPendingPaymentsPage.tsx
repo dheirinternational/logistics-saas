@@ -6,24 +6,30 @@ import { DheirLoader } from "@/components/ui/DheirLoader"
 import {
   formatPaymentAmount,
   formatPaymentDate,
+  paymentStatusLabel,
 } from "@/lib/portal/paymentDisplay"
 import type { Payment, User } from "@/types/entityTypeDef"
-import { IconCreditCard } from "@tabler/icons-react"
+import { IconBuildingBank, IconCreditCard } from "@tabler/icons-react"
+import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "@/lib/ui/toast"
+
+const MONNIFY_ENABLED = process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED !== "false"
 
 export function PortalPendingPaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [bankTransferEnabled, setBankTransferEnabled] = useState(false)
 
   const fetchPayments = useCallback(async () => {
     setLoading(true)
     try {
-      const [userRes, paymentsRes] = await Promise.all([
+      const [userRes, paymentsRes, bankRes] = await Promise.all([
         fetch("/api/users/my-data", { credentials: "include" }),
         fetch("/api/payments/user", { credentials: "include" }),
+        fetch("/api/bank-transfer/config", { credentials: "include" }),
       ])
 
       const userData = await userRes.json()
@@ -41,9 +47,13 @@ export function PortalPendingPaymentsPage() {
         return
       }
 
+      setBankTransferEnabled(bankRes.ok)
+
       setPayments(
         (paymentsData.data ?? []).filter(
-          (payment: Payment) => payment.status === "pending",
+          (payment: Payment) =>
+            payment.status === "pending" ||
+            payment.status === "awaiting_confirmation",
         ),
       )
     } catch {
@@ -136,7 +146,7 @@ export function PortalPendingPaymentsPage() {
           <p>No pending payments.</p>
           <p className="portal-payments__empty-hint">
             {payments.length === 0
-              ? "You're all caught up — nothing is waiting for payment."
+              ? "You're all caught up - nothing is waiting for payment."
               : "Try a different search term."}
           </p>
         </div>
@@ -149,8 +159,10 @@ export function PortalPendingPaymentsPage() {
                   <p className="portal-payments__tracking portal-payments__tracking--title">
                     {payment.shipment_tracking_number}
                   </p>
-                  <span className="portal-payments__status portal-payments__status--pending">
-                    Pending
+                  <span
+                    className={`portal-payments__status portal-payments__status--${payment.status === "awaiting_confirmation" ? "awaiting" : "pending"}`}
+                  >
+                    {paymentStatusLabel(payment.status)}
                   </span>
                 </div>
 
@@ -182,17 +194,50 @@ export function PortalPendingPaymentsPage() {
                 </dl>
 
                 <div className="portal-payments__card-actions">
-                  <p className="portal-payments__pay-hint">
-                    Pay now to release this shipment.
-                  </p>
-                  <MonnifyPaymentButton
-                    amount={payment.amount}
-                    customerEmail={user?.email ?? ""}
-                    customerName={customerName || user?.email || ""}
-                    paymentReference={payment.transaction_ref}
-                    className="portal-payments__pay-btn dheir-btn-primary"
-                    disabled={!user?.email}
-                  />
+                  {payment.status === "awaiting_confirmation" ? (
+                    <p className="portal-payments__pay-hint">
+                      Your transfer proof is being verified. We will release this
+                      shipment once confirmed.
+                    </p>
+                  ) : (
+                    <>
+                      <p className="portal-payments__pay-hint">
+                        Pay now to release this shipment.
+                      </p>
+                      <div className="portal-payments__pay-options">
+                        {bankTransferEnabled ? (
+                          <Link
+                            href={`/customer/payments/transfer/shipment/${encodeURIComponent(payment.transaction_ref)}`}
+                            className="portal-payments__pay-btn portal-payments__pay-btn--bank dheir-btn-primary"
+                          >
+                            <IconBuildingBank size={18} stroke={1.5} aria-hidden />
+                            Pay by transfer
+                          </Link>
+                        ) : null}
+                        <div
+                          className={
+                            MONNIFY_ENABLED
+                              ? "portal-payments__monnify-wrap"
+                              : "portal-payments__monnify-wrap portal-payments__monnify-wrap--paused"
+                          }
+                          title={
+                            MONNIFY_ENABLED
+                              ? undefined
+                              : "Card payments are temporarily unavailable"
+                          }
+                        >
+                          <MonnifyPaymentButton
+                            amount={payment.amount}
+                            customerEmail={user?.email ?? ""}
+                            customerName={customerName || user?.email || ""}
+                            paymentReference={payment.transaction_ref}
+                            className="portal-payments__pay-btn dheir-btn-primary"
+                            disabled={!user?.email || !MONNIFY_ENABLED}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </article>
             </li>

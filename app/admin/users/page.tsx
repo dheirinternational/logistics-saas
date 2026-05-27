@@ -89,7 +89,7 @@ const Page: NextPage = () => {
         }),
         columnHelper.accessor("phone", {
             header: "Phone",
-            cell: ({ getValue }) => getValue() || "—",
+            cell: ({ getValue }) => getValue() || "-",
         }),
         columnHelper.accessor("created_at", {
             header: "Joined at",

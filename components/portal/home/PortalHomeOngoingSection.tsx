@@ -28,7 +28,7 @@ function formatDate(iso: string) {
 }
 
 function formatNaira(amount: number) {
-  if (!amount) return "—"
+  if (!amount) return "-"
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
@@ -121,7 +121,7 @@ export function PortalHomeOngoingSection({
               <dl className="portal-home__ongoing-meta">
                 <div>
                   <dt>Channel</dt>
-                  <dd>{active.channel?.toUpperCase() || "—"}</dd>
+                  <dd>{active.channel?.toUpperCase() || "-"}</dd>
                 </div>
                 <div>
                   <dt>{getShippingQuantityShortLabel(active.channel)}</dt>
@@ -135,7 +135,7 @@ export function PortalHomeOngoingSection({
                 </div>
                 <div>
                   <dt>Payment</dt>
-                  <dd>{active.paymentTime.replaceAll("_", " ") || "—"}</dd>
+                  <dd>{active.paymentTime.replaceAll("_", " ") || "-"}</dd>
                 </div>
                 <div>
                   <dt>Started</dt>

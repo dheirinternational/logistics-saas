@@ -2,6 +2,7 @@ import type { TablerIcon } from "@tabler/icons-react"
 import {
   IconBuildingStore,
   IconBuildingWarehouse,
+  IconCash,
   IconCurrencyNaira,
   IconLayoutDashboard,
   IconMapPin,
@@ -53,6 +54,11 @@ export const navLinks: NavLink[] = [
     name: "Orders",
     path: "/admin/orders",
     icon: IconShoppingCart,
+  },
+  {
+    name: "Payment confirmations",
+    path: "/admin/payments/confirmations",
+    icon: IconCash,
   },
   {
     name: "Delivery Zones",

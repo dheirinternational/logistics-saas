@@ -119,7 +119,7 @@ export async function POST(request: Request){
                                 </p>
 
                                 <p style="font-weight:bold;">
-                                    — Your Logistics Team 🚚
+                                    - Your Logistics Team 🚚
                                 </p>
 
                             </div>

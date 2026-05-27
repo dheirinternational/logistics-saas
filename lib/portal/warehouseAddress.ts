@@ -10,7 +10,7 @@ type WarehouseRow = {
   postal_code?: string | null
 }
 
-/** Full line for supplier copy — matches warehouse_address page. */
+/** Full line for supplier copy - matches warehouse_address page. */
 export function formatWarehouseCopyText(
   warehouse: WarehouseRow,
   memberCode: string,
@@ -63,15 +63,15 @@ export function getWarehouseAddressDetails(
 
   return [
     { label: "Recipient", value: recipient },
-    { label: "Member code", value: memberCode || "—" },
-    { label: "Phone", value: warehouse.phone || "—" },
-    { label: "Country", value: warehouse.country || "—" },
-    { label: "Province", value: warehouse.province || "—" },
-    { label: "City", value: warehouse.city || "—" },
-    { label: "District", value: warehouse.district || "—" },
-    { label: "Street", value: warehouse.street || "—" },
-    { label: "Building / unit", value: warehouse.building || "—" },
-    { label: "Full address line", value: addressLine || "—" },
-    { label: "Postal code", value: warehouse.postal_code || "—" },
+    { label: "Member code", value: memberCode || "-" },
+    { label: "Phone", value: warehouse.phone || "-" },
+    { label: "Country", value: warehouse.country || "-" },
+    { label: "Province", value: warehouse.province || "-" },
+    { label: "City", value: warehouse.city || "-" },
+    { label: "District", value: warehouse.district || "-" },
+    { label: "Street", value: warehouse.street || "-" },
+    { label: "Building / unit", value: warehouse.building || "-" },
+    { label: "Full address line", value: addressLine || "-" },
+    { label: "Postal code", value: warehouse.postal_code || "-" },
   ]
 }

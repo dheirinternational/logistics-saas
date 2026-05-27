@@ -78,7 +78,7 @@ const Page: NextPage = () => {
             header: "Status",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? String(value).replace(/_/g, " ") : "—"
+                return value ? String(value).replace(/_/g, " ") : "-"
             },
         }),
         columnHelper.accessor("created_at", {
@@ -328,7 +328,7 @@ const OrderModal = ({
                             <div className="portal-packages__field">
                                 <span className="portal-packages__field-label">Customer code</span>
                                 <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
-                                    {order.customer_code || "—"}
+                                    {order.customer_code || "-"}
                                 </p>
                             </div>
 
@@ -356,14 +356,14 @@ const OrderModal = ({
                             <div className="portal-packages__field">
                                 <span className="portal-packages__field-label">Current status</span>
                                 <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
-                                    {String(order.status || "—").replace(/_/g, " ")}
+                                    {String(order.status || "-").replace(/_/g, " ")}
                                 </p>
                             </div>
 
                             <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
                                 <span className="portal-packages__field-label">Destination address</span>
                                 <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)" }}>
-                                    {order.destination_address || "—"}
+                                    {order.destination_address || "-"}
                                 </p>
                             </div>
 

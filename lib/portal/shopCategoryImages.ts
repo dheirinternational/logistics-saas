@@ -1,4 +1,4 @@
-/** Category card imagery — one distinct image per category (not product inventory photos). */
+/** Category card imagery - one distinct image per category (not product inventory photos). */
 
 type CategoryVisual = {
   imageSrc: string

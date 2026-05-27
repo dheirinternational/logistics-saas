@@ -1,4 +1,4 @@
-/** Precomputed dial ticks — avoids SSR/client float hydration mismatches. */
+/** Precomputed dial ticks - avoids SSR/client float hydration mismatches. */
 
 const fmt = (n: number) => Number(n.toFixed(2))
 

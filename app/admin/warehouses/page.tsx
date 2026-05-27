@@ -80,12 +80,12 @@ const Page: NextPage = () => {
             header: "Type",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : "—"
+                return value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : "-"
             },
         }),
         columnHelper.accessor("phone", {
             header: "Phone",
-            cell: ({ getValue }) => getValue() || "—",
+            cell: ({ getValue }) => getValue() || "-",
         }),
     ]
 

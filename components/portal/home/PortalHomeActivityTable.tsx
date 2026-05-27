@@ -23,7 +23,7 @@ function formatDate(iso: string) {
 }
 
 function formatNaira(amount: number | null) {
-  if (amount == null || amount === 0) return "—"
+  if (amount == null || amount === 0) return "-"
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
@@ -86,7 +86,7 @@ export function PortalHomeActivityTable({ rows }: PortalHomeActivityTableProps) 
                       ? row.kind === "shipment"
                         ? formatShippingQuantity(row.weight, row.channel)
                         : `${row.weight} kg`
-                      : "—"}
+                      : "-"}
                   </td>
                   <td className="portal-home__table-route">{row.routeLabel}</td>
                   <td>{formatNaira(row.fee)}</td>

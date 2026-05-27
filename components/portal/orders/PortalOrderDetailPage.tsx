@@ -11,8 +11,10 @@ import {
 import {
   formatPaymentAmount,
   formatPaymentDate,
+  paymentStatusLabel,
 } from "@/lib/portal/paymentDisplay"
 import type { Order } from "@/types/entityTypeDef"
+import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
@@ -25,6 +27,10 @@ export function PortalOrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [orderItems, setOrderItems] = useState<PortalOrderLineItemData[]>([])
   const [loading, setLoading] = useState(true)
+  const [latestSubmission, setLatestSubmission] = useState<{
+    status: string
+    admin_note: string | null
+  } | null>(null)
 
   useEffect(() => {
     if (!orderId) return
@@ -34,17 +40,21 @@ export function PortalOrderDetailPage() {
     const load = async () => {
       setLoading(true)
       try {
-        const [orderRes, itemsRes] = await Promise.all([
+        const [orderRes, itemsRes, manualRes] = await Promise.all([
           fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
             credentials: "include",
           }),
           fetch(`/api/orders/items/${encodeURIComponent(orderId)}`, {
             credentials: "include",
           }),
+          fetch(`/api/manual-payments/order/${encodeURIComponent(orderId)}`, {
+            credentials: "include",
+          }),
         ])
 
         const orderResult = await orderRes.json()
         const itemsResult = await itemsRes.json()
+        const manualResult = await manualRes.json()
 
         if (cancelled) return
 
@@ -60,6 +70,12 @@ export function PortalOrderDetailPage() {
           setOrderItems([])
         } else {
           setOrderItems(itemsResult.data ?? [])
+        }
+
+        if (manualRes.ok) {
+          setLatestSubmission(manualResult.data?.latestSubmission ?? null)
+        } else {
+          setLatestSubmission(null)
         }
       } catch {
         if (!cancelled) toast.error("Could not load order details")
@@ -85,6 +101,7 @@ export function PortalOrderDetailPage() {
       ? itemsSubtotal
       : Math.max(0, Number(order?.total_price ?? 0) - deliveryFee)
   const totalPaid = Number(order?.total_price ?? subtotal + deliveryFee)
+  const paymentStatus = order?.payment_status ?? "pending"
 
   return (
     <div className="portal-packages portal-orders portal-orders--detail">
@@ -109,13 +126,43 @@ export function PortalOrderDetailPage() {
         </div>
       ) : (
         <div className="portal-orders__layout">
+          {latestSubmission?.status === "rejected" ? (
+            <section className="portal-home__panel portal-bank-transfer__notice portal-bank-transfer__notice--reject portal-orders__notice">
+              <span className="portal-payments__status portal-payments__status--failed">
+                Rejected
+              </span>
+              <p className="portal-bank-transfer__notice-text">
+                {latestSubmission.admin_note
+                  ? latestSubmission.admin_note
+                  : "Your transfer proof was rejected. Please submit a new receipt."}
+              </p>
+              <Link
+                href={`/customer/payments/transfer/order/${encodeURIComponent(orderId)}`}
+                className="portal-home__table-link"
+              >
+                Submit a new transfer proof
+              </Link>
+            </section>
+          ) : null}
           <section className="portal-account__card portal-orders__section portal-orders__section--status">
             <div className="portal-orders__section-head">
               <h2 className="portal-account__card-title">Status</h2>
-              <PortalPackageStatusBadge
-                label={getOrderStatusLabel(order.status)}
-                variant={getOrderStatusVariant(order.status)}
-              />
+              {latestSubmission?.status === "rejected" ? (
+                <span className="portal-payments__status portal-payments__status--failed">
+                  Rejected
+                </span>
+              ) : paymentStatus === "paid" ? (
+                <PortalPackageStatusBadge
+                  label={getOrderStatusLabel(order.status)}
+                  variant={getOrderStatusVariant(order.status)}
+                />
+              ) : (
+                <span
+                  className={`portal-payments__status portal-payments__status--${paymentStatus}`}
+                >
+                  {paymentStatusLabel(paymentStatus as any)}
+                </span>
+              )}
             </div>
             <div className="portal-packages__detail-grid portal-orders__meta">
               <div className="portal-packages__detail-row">
@@ -170,7 +217,9 @@ export function PortalOrderDetailPage() {
                 </strong>
               </div>
               <div className="portal-cart__line portal-cart__line--total">
-                <span>Total paid</span>
+                <span>
+                  {paymentStatus === "paid" ? "Total paid" : "Total due"}
+                </span>
                 <strong className="tabular-nums">
                   {formatPaymentAmount(totalPaid)}
                 </strong>

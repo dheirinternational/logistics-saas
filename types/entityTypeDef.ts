@@ -85,7 +85,7 @@ export type Payment = {
     customer_code: string  // (Fk -> Customers(id))
     amount: number
     channel: string
-    status: "pending" | "failed" | "paid"
+    status: "pending" | "failed" | "paid" | "awaiting_confirmation"
     transaction_ref: string
     fees: number    
     paid_at: string
@@ -286,6 +286,9 @@ export type Order = {
     delivery_fee: number
     destination_address: string
     payment_type: "transfer"
+    payment_status?: "pending" | "paid" | "failed" | "awaiting_confirmation" | "abandoned"
+    latest_manual_payment_status?: "awaiting_confirmation" | "confirmed" | "rejected" | "superseded" | null
+    latest_manual_payment_admin_note?: string | null
     status: "Confirmed" | "preparing" | "shipped" | "delivered"
     product_ids: string[]
     created_at: string
