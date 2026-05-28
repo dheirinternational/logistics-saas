@@ -51,7 +51,7 @@ export async function PUT(req: NextRequest){
             }, {status: 403})
         }
 
-        const {id, price} = await req.json()
+        const {id, price, rate_unit} = await req.json()
 
         if (!id || typeof price !== "number" || price < 0) {
             return NextResponse.json({
@@ -59,13 +59,22 @@ export async function PUT(req: NextRequest){
                 message: "Invalid input"
             }, { status: 400 })
         }
+
+        if (rate_unit && !["kg", "cbm"].includes(String(rate_unit))) {
+            return NextResponse.json(
+                { success: false, message: "Invalid rate unit" },
+                { status: 400 }
+            )
+        }
         
         const result = await pool.query(`
             UPDATE item_pricing_methods
                 SET 
-                    price_per_kg = $1
-                WHERE id = $2     
-        `, [price, id])
+                    price_per_unit = $1,
+                    price_per_kg = COALESCE(price_per_kg, $1),
+                    rate_unit = COALESCE($2, rate_unit)
+                WHERE id = $3
+        `, [price, rate_unit ?? null, id])
 
         if(result.rowCount === 0){
             return NextResponse.json({

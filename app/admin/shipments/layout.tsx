@@ -200,7 +200,7 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
 const IncomingPackageEditComponent = () => {
 
     const {setIsModalActive} = useEditModalStore()
-    const {selectedPackage, handleSelectedPackageInput, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly} = usePackageStore()
+    const {selectedPackage, handleSelectedPackageInput, handleSelectedPackageSelect, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly} = usePackageStore()
 
     // Arrays
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
@@ -386,7 +386,9 @@ const IncomingPackageEditComponent = () => {
                         </label>
 
                         <label className="portal-packages__field">
-                            <span className="portal-packages__field-label">Weight (kg)</span>
+                            <span className="portal-packages__field-label">
+                                {selectedPackage.weight_unit === "cbm" ? "Volume (CBM)" : "Weight (kg)"}
+                            </span>
                             <input
                                 type="number"
                                 name="weight"
@@ -397,6 +399,19 @@ const IncomingPackageEditComponent = () => {
                                 step="0.01"
                                 required
                             />
+                        </label>
+
+                        <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Unit</span>
+                            <DheirSelect
+                                name="weight_unit"
+                                value={selectedPackage.weight_unit ?? "kg"}
+                                onChange={handleSelectedPackageSelect}
+                                required
+                            >
+                                <option value="kg">KG</option>
+                                <option value="cbm">CBM</option>
+                            </DheirSelect>
                         </label>
 
                         <label className="portal-packages__field">

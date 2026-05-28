@@ -3,6 +3,7 @@
 import SearchComponent from '@/components/admin/shipments/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
 import { usePackageStore } from '@/store/incomingPackagesStore'
+import { useEditModalStore } from "@/types/editModalStore"
 import { IncomingPackage } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
@@ -22,6 +23,7 @@ const columnHelper = createColumnHelper<IncomingPackage>()
 const Page: NextPage = () => {
 
     const {setSelectedPackage, trigger, resetReadOnly} = usePackageStore()
+    const { setIsModalActive } = useEditModalStore()
     
     const [incomingPackages, setIncomingPackages] = useState<IncomingPackage[]>([])
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -121,6 +123,7 @@ const Page: NextPage = () => {
                             customer_code: item.customer_code,
                             warehouse_id: Number(item.warehouse_id),
                             weight: Number(item.declared_item_weight) || 0,
+                            weight_unit: (item as any).declared_item_weight_unit ?? "kg",
                             condition: "good",
                             status: "stored",
                             received_at: "",
@@ -128,6 +131,7 @@ const Page: NextPage = () => {
                             created_at: "",
                             amount: item.declared_item_quantity
                         })
+                        setIsModalActive()
                     }}
                     >
                         Add

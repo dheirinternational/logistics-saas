@@ -46,12 +46,20 @@ export async function POST(req: NextRequest){
             customer_code: formData.get("customer_code"),
             warehouse_id: Number(formData.get("warehouse_id")),
             weight: Number(formData.get("weight")),
+            weight_unit: String(formData.get("weight_unit") ?? "kg"),
             condition: formData.get("condition"),
             status: "stored",
             received_at: formData.get("received_at"),
             stored_at: formData.get("stored_at"),
             inp_status: formData.get("inp_status"),
             amount: Number(formData.get("amount"))
+        }
+
+        if (!["kg", "cbm"].includes(data.weight_unit)) {
+            return NextResponse.json(
+                { success: false, message: "Invalid weight unit" },
+                { status: 400 }
+            )
         }
 
         if(fileImages.length < 1 ){
@@ -78,11 +86,11 @@ export async function POST(req: NextRequest){
 
         const res = await client.query(`
             INSERT INTO packages(
-                incoming_package_id, package_name, user_id, customer_code, warehouse_id, weight, condition, status, received_at, stored_at, created_at, amount
+                incoming_package_id, package_name, user_id, customer_code, warehouse_id, weight, weight_unit, condition, status, received_at, stored_at, created_at, amount
             )     
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), $12)
             RETURNING id
-        `, [data.incoming_package_id, data.package_name, userId.rows[0].user_id, data.customer_code, data.warehouse_id, data.weight, data.condition, data.status, data.received_at, data.stored_at, data.amount])
+        `, [data.incoming_package_id, data.package_name, userId.rows[0].user_id, data.customer_code, data.warehouse_id, data.weight, data.weight_unit, data.condition, data.status, data.received_at, data.stored_at, data.amount])
 
         await client.query(`
             UPDATE incoming_packages

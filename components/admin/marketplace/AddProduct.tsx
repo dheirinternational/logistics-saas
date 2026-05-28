@@ -41,8 +41,8 @@ const AddProduct = () => {
         e.preventDefault()
         setIsAddingProduct(true)
 
-        if (images.length !== 4) {
-            toast.error("Select 4 images")
+        if (images.length < 1) {
+            toast.error("Select at least 1 media file")
             setIsAddingProduct(false)
             return
         }
@@ -100,11 +100,7 @@ const AddProduct = () => {
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files || files.length < 1) {
-            toast.error("No images selected")
-            return
-        }
-        if (files.length !== 4) {
-            toast.error("Select 4 images")
+            toast.error("No media selected")
             return
         }
 
@@ -113,7 +109,7 @@ const AddProduct = () => {
             preview: URL.createObjectURL(file),
             file,
         }))
-        setImages(previewUrls)
+        setImages(previewUrls.slice(0, 8))
     }
 
     useEffect(() => {
@@ -287,21 +283,21 @@ const AddProduct = () => {
                 <div className="admin-uploader__row">
                     <div>
                         <p className="portal-packages__field-label" style={{ margin: 0 }}>
-                            Photos
+                            Media
                         </p>
-                        <p className="admin-uploader__help">Upload exactly 4 product images for the marketplace.</p>
+                        <p className="admin-uploader__help">Upload at least 1 product media (images or videos).</p>
                     </div>
                     <button
                         type="button"
                         className="portal-home__btn portal-home__btn--secondary"
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        Choose images
+                        Choose media
                     </button>
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept="image/*,video/*"
                         multiple
                         name="images"
                         onChange={handleImageChange}
@@ -313,12 +309,28 @@ const AddProduct = () => {
                     <div className="admin-uploader__previews">
                         {images.map((img, index) => (
                             <div key={img.preview + index} className="admin-uploader__preview">
-                                <Image src={img.preview} alt="" fill className="object-cover" />
+                                {img.file.type.startsWith("video/") ? (
+                                    <video
+                                        src={img.preview}
+                                        muted
+                                        playsInline
+                                        preload="metadata"
+                                        className="object-cover"
+                                        style={{
+                                            position: "absolute",
+                                            inset: 0,
+                                            width: "100%",
+                                            height: "100%",
+                                        }}
+                                    />
+                                ) : (
+                                    <Image src={img.preview} alt="" fill className="object-cover" />
+                                )}
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <p className="admin-uploader__help">No images selected yet.</p>
+                    <p className="admin-uploader__help">No media selected yet.</p>
                 )}
             </div>
 

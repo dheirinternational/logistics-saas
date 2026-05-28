@@ -4,9 +4,9 @@ import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
 import { toast } from "@/lib/ui/toast"
 import { Product, ProductCategory, ProductImage } from "@/types/entityTypeDef"
-import { IconX } from "@tabler/icons-react"
+import { IconHelp, IconStar, IconStarFilled, IconTrash, IconX } from "@tabler/icons-react"
 import Image from "next/image"
-import { ChangeEvent, useEffect, useState } from "react"
+import { ChangeEvent, useEffect, useRef, useState } from "react"
 
 type Props = {
     product: Product
@@ -20,6 +20,8 @@ export default function AdminProductEditModal({ product, categories, onClose, on
     const [images, setImages] = useState<ProductImage[]>([])
     const [isFetchingImages, setIsFetchingImages] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [uploadingMedia, setUploadingMedia] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement | null>(null)
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -43,6 +45,93 @@ export default function AdminProductEditModal({ product, categories, onClose, on
 
         fetchImages()
     }, [product.id])
+
+    const refreshMedia = async () => {
+        setIsFetchingImages(true)
+        try {
+            const res = await fetch(`/api/products/images/${product.id}`, { credentials: "include" })
+            const result = await res.json()
+            if (!res.ok) {
+                toast.error(result.message ?? "Error fetching product media")
+                return
+            }
+            setImages(result.data ?? [])
+        } catch {
+            toast.error("Could not load product media")
+        } finally {
+            setIsFetchingImages(false)
+        }
+    }
+
+    const uploadMedia = async (files: FileList | null) => {
+        if (!files || files.length < 1) return
+        const formData = new FormData()
+        Array.from(files)
+            .slice(0, 8)
+            .forEach((file) => formData.append("media", file))
+
+        setUploadingMedia(true)
+        try {
+            const res = await fetch(`/api/products/images/${product.id}`, {
+                method: "POST",
+                credentials: "include",
+                body: formData,
+            })
+            const result = await res.json()
+            if (!res.ok) {
+                toast.error(result.message ?? "Could not upload media")
+                return
+            }
+            toast.success("Media uploaded")
+            if (fileInputRef.current) fileInputRef.current.value = ""
+            await refreshMedia()
+        } catch (err) {
+            console.error(err)
+            toast.error("Could not upload media")
+        } finally {
+            setUploadingMedia(false)
+        }
+    }
+
+    const removeMedia = async (imageId: number) => {
+        try {
+            const res = await fetch(
+                `/api/products/images/${product.id}?image_id=${encodeURIComponent(String(imageId))}`,
+                { method: "DELETE", credentials: "include" }
+            )
+            const result = await res.json()
+            if (!res.ok) {
+                toast.error(result.message ?? "Could not remove media")
+                return
+            }
+            toast.success("Media removed")
+            await refreshMedia()
+        } catch (err) {
+            console.error(err)
+            toast.error("Could not remove media")
+        }
+    }
+
+    const setCover = async (imageId: number) => {
+        try {
+            const res = await fetch(`/api/products/images/${product.id}`, {
+                method: "PATCH",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image_id: imageId }),
+            })
+            const result = await res.json()
+            if (!res.ok) {
+                toast.error(result.message ?? "Could not set cover")
+                return
+            }
+            toast.success("Cover updated")
+            await refreshMedia()
+        } catch (err) {
+            console.error(err)
+            toast.error("Could not set cover")
+        }
+    }
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, type } = e.currentTarget
@@ -268,24 +357,100 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                         <div className="admin-uploader">
                             <div className="admin-uploader__row">
                                 <div>
-                                    <p className="portal-packages__field-label" style={{ margin: 0 }}>
-                                        Photos
+                                    <p className="portal-packages__field-label" style={{ margin: 0, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                                        Media
+                                        <span className="dheir-tooltip">
+                                            <button
+                                                type="button"
+                                                className="dheir-tooltip__trigger"
+                                                aria-label="Media help"
+                                            >
+                                                <IconHelp size={16} stroke={1.5} aria-hidden />
+                                            </button>
+                                            <span className="dheir-tooltip__content">
+                                                Star = set cover. Bin = remove media.
+                                            </span>
+                                        </span>
                                     </p>
-                                    <p className="admin-uploader__help">Product images shown in the marketplace.</p>
+                                    <p className="admin-uploader__help">
+                                        Images and videos shown in the marketplace. Upload at least 1.
+                                    </p>
                                 </div>
-                                {isFetchingImages ? <DheirLoader color="var(--color-dheir-blue)" size={10} /> : null}
+                                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    {(isFetchingImages || uploadingMedia) ? (
+                                        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                                    ) : null}
+                                    <button
+                                        type="button"
+                                        className="portal-home__btn portal-home__btn--secondary"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={uploadingMedia}
+                                    >
+                                        Add media
+                                    </button>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*,video/*"
+                                        multiple
+                                        onChange={(e) => uploadMedia(e.currentTarget.files)}
+                                        style={{ display: "none" }}
+                                    />
+                                </div>
                             </div>
 
                             {images.length > 0 ? (
                                 <div className="admin-uploader__previews">
                                     {images.map((img) => (
                                         <div key={img.id} className="admin-uploader__preview">
-                                            <Image src={img.image_url} alt={img.alt_text || ""} fill className="object-cover" />
+                                            {img.media_type === "video" ? (
+                                                <video
+                                                    src={img.image_url}
+                                                    muted
+                                                    playsInline
+                                                    preload="metadata"
+                                                    className="object-cover"
+                                                    style={{
+                                                        position: "absolute",
+                                                        inset: 0,
+                                                        width: "100%",
+                                                        height: "100%",
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Image src={img.image_url} alt={img.alt_text || ""} fill className="object-cover" />
+                                            )}
+                                            <div style={{ position: "absolute", inset: 8, display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "flex-start" }}>
+                                                <button
+                                                    type="button"
+                                                    className="portal-home__table-btn"
+                                                    onClick={() => setCover(img.id)}
+                                                    disabled={uploadingMedia || isFetchingImages}
+                                                    aria-label={img.is_primary ? "Cover" : "Set cover"}
+                                                    title={img.is_primary ? "Cover" : "Set cover"}
+                                                >
+                                                    {img.is_primary ? (
+                                                        <IconStarFilled size={16} aria-hidden />
+                                                    ) : (
+                                                        <IconStar size={16} aria-hidden />
+                                                    )}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="portal-home__table-btn"
+                                                    onClick={() => removeMedia(img.id)}
+                                                    disabled={uploadingMedia || isFetchingImages}
+                                                    aria-label="Remove"
+                                                    title="Remove"
+                                                >
+                                                    <IconTrash size={16} aria-hidden />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <p className="admin-uploader__help">No images for this product yet.</p>
+                                <p className="admin-uploader__help">No media for this product yet.</p>
                             )}
                         </div>
 

@@ -54,6 +54,21 @@ export async function POST(req: Request){
                 message: "Invalid Price Range"
             }, {status: 400})
         }
+
+        const validFiles = files.filter((f) => f instanceof File && f.size > 0)
+        if (validFiles.length < 1) {
+            return NextResponse.json(
+                { success: false, message: "Select at least 1 media file" },
+                { status: 400 }
+            )
+        }
+
+        if (validFiles.length > 8) {
+            return NextResponse.json(
+                { success: false, message: "Select up to 8 media files" },
+                { status: 400 }
+            )
+        }
         
         await client.query("BEGIN")
 
@@ -64,11 +79,16 @@ export async function POST(req: Request){
         `, [data.name, data.description, data.category_id, data.price, data.stock_quantity, data.low_stock_threshold, data.weight, data.is_featured, session.user_id, session.user_id ])
 
         const id = rows[0].id
-        const uploadedImages: string[] = []
+        const uploadedMedia: { url: string; media_type: "image" | "video" }[] = []
 
 
-        for (const file of files) {
-            if(!(file instanceof File) || file.size === 0) continue
+        for (const file of validFiles) {
+            const isImage = file.type.startsWith("image/")
+            const isVideo = file.type.startsWith("video/")
+
+            if (!isImage && !isVideo) {
+                throw new Error("Unsupported media type")
+            }
 
             const filePath = `product${id}-${Date.now()}-${file.name}`
 
@@ -91,19 +111,19 @@ export async function POST(req: Request){
                 .from("products")
                 .getPublicUrl(filePath)
 
-            uploadedImages.push(publicUrl.publicUrl)
+            uploadedMedia.push({ url: publicUrl.publicUrl, media_type: isVideo ? "video" : "image" })
         }
 
-        if (uploadedImages.length > 0) {
+        if (uploadedMedia.length > 0) {
             const values: unknown[] = []
-            const rowsSql = uploadedImages.map((url, index) => {
-                const base = index * 3
-                values.push(id, url, index === 0)
-                return `($${base + 1}, $${base + 2}, $${base + 3})`
+            const rowsSql = uploadedMedia.map((m, index) => {
+                const base = index * 4
+                values.push(id, m.url, index === 0, m.media_type)
+                return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4})`
             })
     
             await client.query(`
-                INSERT INTO product_images (product_id, image_url, is_primary)
+                INSERT INTO product_images (product_id, image_url, is_primary, media_type)
                 VALUES ${rowsSql.join(", ")}
             `, values)
         }            

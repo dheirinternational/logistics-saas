@@ -48,6 +48,7 @@ export function PortalQuoteAirForm({ addToCart }: { addToCart: AddToCart }) {
   const [loading, setLoading] = useState(true)
   const [weight, setWeight] = useState(1)
   const [numberOfItems, setNumberOfItems] = useState(1)
+  const weightUnit = selected?.rate_unit === "cbm" ? "cbm" : "kg"
 
   useEffect(() => {
     fetch("/api/pricing_template/air")
@@ -73,7 +74,7 @@ export function PortalQuoteAirForm({ addToCart }: { addToCart: AddToCart }) {
     <div className="portal-quote__form">
       <TemplateChips items={templates} selected={selected} onSelect={setSelected} />
       <div className="portal-quote__form-grid">
-        <PortalFormField label="Weight (kg)">
+        <PortalFormField label={weightUnit === "kg" ? "Weight (kg)" : "Volume (CBM)"}>
           <PortalFormInput
             type="number"
             min={0.1}
@@ -99,6 +100,7 @@ export function PortalQuoteAirForm({ addToCart }: { addToCart: AddToCart }) {
             id: Date.now(),
             name: selected?.name ?? "",
             weight,
+            unit: weightUnit,
             numberOfItems,
           })
         }
@@ -113,8 +115,9 @@ export function PortalQuoteSeaForm({ addToCart }: { addToCart: AddToCart }) {
   const [templates, setTemplates] = useState<SeaPricingTemplate[]>([])
   const [selected, setSelected] = useState<SeaPricingTemplate | null>(null)
   const [loading, setLoading] = useState(true)
-  const [cbm, setCbm] = useState(0.1)
+  const [measure, setMeasure] = useState(0.1)
   const [numberOfItems, setNumberOfItems] = useState(1)
+  const seaUnit = selected?.rate_unit === "kg" ? "kg" : "cbm"
 
   useEffect(() => {
     fetch("/api/pricing_template/sea")
@@ -140,13 +143,13 @@ export function PortalQuoteSeaForm({ addToCart }: { addToCart: AddToCart }) {
     <div className="portal-quote__form">
       <TemplateChips items={templates} selected={selected} onSelect={setSelected} />
       <div className="portal-quote__form-grid">
-        <PortalFormField label="Volume (CBM)">
+        <PortalFormField label={seaUnit === "kg" ? "Weight (kg)" : "Volume (CBM)"}>
           <PortalFormInput
             type="number"
             min={0.1}
             step={0.1}
-            value={cbm || ""}
-            onChange={(e) => setCbm(Number(e.target.value))}
+            value={measure || ""}
+            onChange={(e) => setMeasure(Number(e.target.value))}
           />
         </PortalFormField>
         <PortalFormField label="Quantity">
@@ -165,7 +168,8 @@ export function PortalQuoteSeaForm({ addToCart }: { addToCart: AddToCart }) {
           addToCart({
             id: Date.now(),
             name: selected?.name ?? "",
-            weight: cbm,
+            weight: measure,
+            unit: seaUnit,
             numberOfItems,
           })
         }
@@ -221,6 +225,7 @@ export function PortalQuoteExpressForm({ addToCart }: { addToCart: AddToCart }) 
             id: Date.now(),
             name: selected?.name ?? "",
             weight: 0,
+            unit: "kg",
             numberOfItems,
           })
         }

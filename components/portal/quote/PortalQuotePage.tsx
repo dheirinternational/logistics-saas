@@ -197,7 +197,7 @@ export function PortalQuotePage() {
                       {channel !== "express" && (
                         <>
                           {item.weight}
-                          {channel === "sea" ? " CBM" : " kg"}
+                          {item.unit === "cbm" ? " CBM" : " kg"}
                           {" · "}
                         </>
                       )}

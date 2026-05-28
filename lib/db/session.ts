@@ -38,22 +38,29 @@ export const getSession = cache(async () => {
     const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
 
     if (!sessionId) return null
-    const result = await pool.query(`
-        SELECT
-            sessions.id,
-            sessions.user_id,
-            sessions.expires_at,
-            users.email,
-            users.role,
-            users.first_name,
-            users.last_name,
-            users.profile_img
-        FROM sessions
-        JOIN users ON users.id = sessions.user_id
-        WHERE sessions.id = $1
-        LIMIT 1
-    `,
-    [sessionId])
+    let result
+    try {
+        result = await pool.query(`
+            SELECT
+                sessions.id,
+                sessions.user_id,
+                sessions.expires_at,
+                users.email,
+                users.role,
+                users.first_name,
+                users.last_name,
+                users.profile_img
+            FROM sessions
+            JOIN users ON users.id = sessions.user_id
+            WHERE sessions.id = $1
+            LIMIT 1
+        `,
+        [sessionId])
+    } catch (err) {
+        // Don't crash the whole app on transient DB disconnects.
+        console.error("getSession query failed:", err)
+        return null
+    }
 
     const session = result.rows[0];
 

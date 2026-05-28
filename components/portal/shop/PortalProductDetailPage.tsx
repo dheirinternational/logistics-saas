@@ -34,7 +34,10 @@ export function PortalProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null)
   const [images, setImages] = useState<ProductImage[]>([])
   const [categories, setCategories] = useState<ProductCategory[]>([])
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedMedia, setSelectedMedia] = useState<{
+    url: string
+    type: "image" | "video"
+  } | null>(null)
   const [address, setAddress] = useState<Address | null>(null)
   const [deliveryFee, setDeliveryFee] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -86,7 +89,15 @@ export function PortalProductDetailPage() {
         setProduct(prod)
         setImages(imgs)
         setCategories(catRes.data ?? [])
-        setSelectedImage(imgs[0]?.image_url ?? null)
+        const first = imgs[0]
+        setSelectedMedia(
+          first?.image_url
+            ? {
+                url: first.image_url,
+                type: first.media_type === "video" ? "video" : "image",
+              }
+            : null
+        )
         setQuantity(1)
       })
       .catch(() => {
@@ -132,7 +143,7 @@ export function PortalProductDetailPage() {
   }, [])
 
   const handleAddToCart = () => {
-    if (!product || !selectedImage) return
+    if (!product || !selectedMedia) return
 
     if (inCart) {
       toast.info("Already in your cart")
@@ -160,7 +171,7 @@ export function PortalProductDetailPage() {
       price: Number(product.price),
       discount_price: Number(product.discount_price ?? 0),
       quantity: product.stock_quantity,
-      image: selectedImage,
+      image: selectedMedia.type === "image" ? selectedMedia.url : "/logo-colored.png",
       amount_to_be_ordered: quantity,
     })
     toast.success("Added to cart")
@@ -204,15 +215,25 @@ export function PortalProductDetailPage() {
       <div className="portal-pdp__layout">
         <section className="portal-pdp__gallery portal-account__card">
           <figure className="portal-pdp__hero">
-            {selectedImage ? (
-              <Image
-                src={selectedImage}
-                alt={product.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 560px"
-                className="object-contain p-6"
-              />
+            {selectedMedia ? (
+              selectedMedia.type === "video" ? (
+                <video
+                  src={selectedMedia.url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  style={{ width: "100%", height: "100%", padding: 24 }}
+                />
+              ) : (
+                <Image
+                  src={selectedMedia.url}
+                  alt={product.name}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                  className="object-contain p-6"
+                />
+              )
             ) : (
               <span className="portal-pdp__no-image">No image</span>
             )}
@@ -221,24 +242,42 @@ export function PortalProductDetailPage() {
           {images.length > 1 ? (
             <div className="portal-pdp__thumbs" role="list">
               {images.map((image) => {
-                const active = image.image_url === selectedImage
+                const type = image.media_type === "video" ? "video" : "image"
+                const active = image.image_url === selectedMedia?.url
                 return (
                   <button
                     key={image.id}
                     type="button"
                     role="listitem"
                     className={`portal-pdp__thumb${active ? " is-active" : ""}`}
-                    onClick={() => setSelectedImage(image.image_url)}
+                    onClick={() => setSelectedMedia({ url: image.image_url, type })}
                     aria-label="View product image"
                     aria-current={active ? "true" : undefined}
                   >
-                    <Image
-                      src={image.image_url}
-                      alt=""
-                      fill
-                      sizes="72px"
-                      className="object-contain p-1"
-                    />
+                    {type === "video" ? (
+                      <video
+                        src={image.image_url}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                          padding: 4,
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        src={image.image_url}
+                        alt=""
+                        fill
+                        sizes="72px"
+                        className="object-contain p-1"
+                      />
+                    )}
                   </button>
                 )
               })}
@@ -328,7 +367,7 @@ export function PortalProductDetailPage() {
             <button
               type="button"
               className="portal-packages__btn-primary portal-packages__btn-primary--block"
-              disabled={!inStock || !selectedImage || inCart}
+              disabled={!inStock || !selectedMedia || inCart}
               onClick={handleAddToCart}
             >
               <IconShoppingCart size={20} stroke={1.5} aria-hidden />

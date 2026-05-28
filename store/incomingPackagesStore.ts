@@ -6,6 +6,7 @@ type StoreType = {
     selectedPackage : Package | null
     setSelectedPackage: (value: Package) => void
     handleSelectedPackageInput : (e: ChangeEvent<HTMLInputElement>) => void
+    handleSelectedPackageSelect : (e: ChangeEvent<HTMLSelectElement>) => void
     setPackageWarehouse: (value: number) => void
     resetSelectedPackage: () => void
     trigger: number
@@ -40,6 +41,18 @@ export const usePackageStore = create<StoreType>((set) => ({
                     ...state.selectedPackage,
                     [name]: parsedValue
                 }
+            }
+        })
+    },
+    handleSelectedPackageSelect: (e) => {
+        const { name, value } = e.currentTarget
+        set((state) => {
+            if (!state.selectedPackage) return state
+            return {
+                selectedPackage: {
+                    ...state.selectedPackage,
+                    [name]: value,
+                },
             }
         })
     },

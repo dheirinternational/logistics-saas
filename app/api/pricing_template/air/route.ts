@@ -63,9 +63,10 @@ export async function PATCH(req: NextRequest){
                 clearance = COALESCE($2, clearance),
                 min_duration = COALESCE($3, min_duration),
                 max_duration = COALESCE($4, max_duration),
-                duration_type = COALESCE($5, duration_type)
-            WHERE id = $6
-        `, [body.price, body.clearance, body.min_duration, body.max_duration, body.duration_type, body.id])
+                duration_type = COALESCE($5, duration_type),
+                rate_unit = COALESCE($6, rate_unit)
+            WHERE id = $7
+        `, [body.price, body.clearance, body.min_duration, body.max_duration, body.duration_type, body.rate_unit, body.id])
 
         return NextResponse.json({
             success: true,

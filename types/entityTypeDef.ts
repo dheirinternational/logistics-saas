@@ -111,6 +111,7 @@ export type IncomingPackage = {
     declared_item_name: string
     declared_item_quantity: number
     declared_item_weight: number 
+    declared_item_weight_unit?: "kg" | "cbm"
     created_at: string
     customer_note: string
 }
@@ -125,6 +126,7 @@ export type Package = {
     customer_code: string // Fk -> Customers(code)
     warehouse_id: number // Fk -> Warehouses(id)
     weight: number
+    weight_unit?: "kg" | "cbm"
     amount: number
     condition: "good" | "damaged"
     status: PackageStatus
@@ -145,6 +147,7 @@ export type ShippingRequest = {
     payment_time: "before" | "after"
     shipping_note: string
     total_weight: number
+    total_weight_unit?: "kg" | "cbm"
     customer_note: string
     packaging: string
 }
@@ -270,6 +273,8 @@ export type ProductImage = {
     product_id: number // (FK -> Proudtc)
     image_url: string // unique
     alt_text: string
+    media_type?: "image" | "video"
+    is_primary?: boolean
     created_at: string
 }
 
@@ -323,6 +328,7 @@ export type AirPricingTemplate = {
     max_duration: number,
     clearance: number 
     duration_type: "days" | "weeks" | "months"
+    rate_unit?: "kg" | "cbm"
 } 
 
 export type ExpressPricingTemplate = {
@@ -333,6 +339,7 @@ export type ExpressPricingTemplate = {
     max_duration: number,
     clearance: number 
     duration_type: "days" | "weeks" | "months"
+    rate_unit?: "kg" | "cbm"
 }
 
 export type SeaPricingTemplate = {
@@ -343,6 +350,7 @@ export type SeaPricingTemplate = {
     max_duration: number,
     clearance: number 
     duration_type: "days" | "weeks" | "months"
+    rate_unit?: "kg" | "cbm"
 }
 
 export type State = {

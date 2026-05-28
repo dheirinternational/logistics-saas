@@ -11,6 +11,7 @@ import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
 import { FaImage } from 'react-icons/fa'
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DheirSelect } from "@/components/ui/DheirSelect"
 import { toast } from "@/lib/ui/toast"
 import { IconChecks, IconClock } from "@tabler/icons-react"
 import { getShippingQuantityFieldLabel } from "@/lib/shipping/channelUnits"
@@ -36,6 +37,7 @@ const Page: NextPage = () => {
 
     const [totalPrice, setTotalPrice] = useState("") 
     const [totalWeight, setTotalWeight] = useState("")
+    const [weightUnit, setWeightUnit] = useState<"kg" | "cbm">("kg")
     const [images, setImages] = useState<File[]>([])
     const [previews, setPreviews] = useState<string[]>([])
 
@@ -54,6 +56,14 @@ const Page: NextPage = () => {
     })
 
     const [modalSelectedRequest, setModalSelectedRequest] = useState<null | ShippingRequest>(null)
+    
+    useEffect(() => {
+        const inferred = modalSelectedRequest?.channel === "sea" ? "cbm" : "kg"
+        setWeightUnit((modalSelectedRequest?.total_weight_unit as any) ?? inferred)
+        if (modalSelectedRequest?.total_weight != null) {
+            setTotalWeight(String(Number(modalSelectedRequest.total_weight).toFixed(2)))
+        }
+    }, [modalSelectedRequest])
 
     const fetchShipmentData = async () => {
         try{
@@ -120,6 +130,7 @@ const Page: NextPage = () => {
         formData.append("user_id", `${modalSelectedRequest?.user_id}` || "")
         formData.append("payment_time", `${modalSelectedRequest?.payment_time}` || "")
         formData.append("package_ids", `${modalSelectedRequest?.package_ids}` || "")
+        formData.append("total_weight_unit", weightUnit)
 
         console.log(Object.fromEntries(formData))
 
@@ -382,6 +393,18 @@ const Page: NextPage = () => {
                         step="0.01"
                         required
                       />
+                    </label>
+
+                    <label className="portal-packages__field">
+                      <span className="portal-packages__field-label">Unit</span>
+                      <DheirSelect
+                        value={weightUnit}
+                        onChange={(e) => setWeightUnit(e.target.value as "kg" | "cbm")}
+                        disabled={modalSelectedRequest?.channel !== "sea"}
+                      >
+                        <option value="kg">KG</option>
+                        <option value="cbm">CBM</option>
+                      </DheirSelect>
                     </label>
 
                     <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>

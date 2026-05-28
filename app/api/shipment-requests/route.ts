@@ -18,7 +18,13 @@ export async function POST(req: NextRequest){
 
         const body = await req.json()
 
-        const {customer_code, package_ids, channel, wrapping, payment_time, customer_note, packaging} = body
+        const {customer_code, package_ids, channel, wrapping, payment_time, customer_note, packaging, total_weight, total_weight_unit} = body
+
+        const inferredUnit = channel === "sea" ? "cbm" : "kg"
+        const unit = (total_weight_unit ?? inferredUnit) as string
+        if (!["kg", "cbm"].includes(unit)) {
+            return NextResponse.json({ success: false, message: "Invalid weight unit" }, { status: 400 })
+        }
 
         const {user_id} = session
 
@@ -30,13 +36,15 @@ export async function POST(req: NextRequest){
                 channel,
                 payment_time,
                 customer_note,
-                packaging
+                packaging,
+                total_weight,
+                total_weight_unit
             )
             VALUES (
-                $1, $2, $3, $4, $5, $6, $7
+                $1, $2, $3, $4, $5, $6, $7, $8, $9
             )
             RETURNING *     
-        `, [user_id, customer_code, package_ids, channel, payment_time, customer_note, packaging])
+        `, [user_id, customer_code, package_ids, channel, payment_time, customer_note, packaging, total_weight ?? null, unit])
 
         await pool.query(`
             UPDATE packages

@@ -22,6 +22,7 @@ export function PortalShopProductCard({
 }: PortalShopProductCardProps) {
   const addProduct = useCartStore((s) => s.addProduct)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [mediaType, setMediaType] = useState<"image" | "video">("image")
   const [loadingImage, setLoadingImage] = useState(true)
 
   const displayPrice =
@@ -39,7 +40,13 @@ export function PortalShopProductCard({
     fetch(`/api/products/images/${product.id}`)
       .then((r) => r.json())
       .then((result) => {
-        if (!cancelled) setImageUrl(result.data?.[0]?.image_url ?? null)
+        const items = (result.data ?? []) as { image_url: string; media_type?: string }[]
+        const firstImage = items.find((x) => (x.media_type ?? "image") === "image")
+        const first = firstImage ?? items[0]
+        if (!cancelled) {
+          setImageUrl(first?.image_url ?? null)
+          setMediaType(((first?.media_type as any) ?? "image") === "video" ? "video" : "image")
+        }
       })
       .finally(() => {
         if (!cancelled) setLoadingImage(false)
@@ -53,10 +60,7 @@ export function PortalShopProductCard({
     e.preventDefault()
     e.stopPropagation()
 
-    if (!imageUrl) {
-      toast.error("Product image still loading")
-      return
-    }
+    const cartThumb = imageUrl ?? "/logo-colored.png"
 
     addProduct({
       id: product.id,
@@ -64,7 +68,7 @@ export function PortalShopProductCard({
       price: Number(product.price),
       discount_price: Number(product.discount_price ?? 0),
       quantity: product.stock_quantity,
-      image: imageUrl,
+      image: cartThumb,
       amount_to_be_ordered: 1,
     })
     toast.success("Added to cart")
@@ -78,13 +82,24 @@ export function PortalShopProductCard({
             <DheirLoader size={8} color="var(--color-dheir-blue)" />
           </span>
         ) : imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 260px"
-            className="object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-          />
+          mediaType === "video" ? (
+            <video
+              src={imageUrl}
+              muted
+              playsInline
+              preload="metadata"
+              className="object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              style={{ width: "100%", height: "100%" }}
+            />
+          ) : (
+            <Image
+              src={imageUrl}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 260px"
+              className="object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            />
+          )
         ) : (
           <span className="flex h-full w-full items-center justify-center text-sm text-dheir-muted">
             No image

@@ -171,6 +171,7 @@ function PricingTemplateEditModal({
     initialMinDuration,
     initialMaxDuration,
     initialDurationType,
+    initialRateUnit,
     onClose,
     onSaved,
 }: {
@@ -184,6 +185,7 @@ function PricingTemplateEditModal({
     initialMinDuration: number | string | null | undefined
     initialMaxDuration: number | string | null | undefined
     initialDurationType: DurationType | string | null | undefined
+    initialRateUnit?: "kg" | "cbm" | string | null | undefined
     onClose: () => void
     onSaved: () => void
 }) {
@@ -193,6 +195,9 @@ function PricingTemplateEditModal({
     const [maxDuration, setMaxDuration] = useState<number>(Number(initialMaxDuration ?? 0))
     const [durationType, setDurationType] = useState<DurationType>(
         (initialDurationType as DurationType) || "days"
+    )
+    const [rateUnit, setRateUnit] = useState<"kg" | "cbm">(
+        (initialRateUnit as "kg" | "cbm") || "kg"
     )
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -216,6 +221,10 @@ function PricingTemplateEditModal({
         setDurationType((initialDurationType as DurationType) || "days")
     }, [initialDurationType])
 
+    useEffect(() => {
+        setRateUnit((initialRateUnit as "kg" | "cbm") || "kg")
+    }, [initialRateUnit])
+
     const submit = async () => {
         setIsSubmitting(true)
         try {
@@ -229,6 +238,7 @@ function PricingTemplateEditModal({
                     min_duration: minDuration,
                     max_duration: maxDuration,
                     duration_type: durationType,
+                    rate_unit: rateUnit,
                 }),
             })
             const result = await res.json()
@@ -270,6 +280,16 @@ function PricingTemplateEditModal({
                 <div className="admin-modal__body" style={{ paddingTop: 10 }}>
                     <div className="admin-modal__form" style={{ gridTemplateColumns: "1fr" }}>
                         <div className="admin-modal__fields" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                            <label className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
+                                <span className="portal-packages__field-label">Rate unit</span>
+                                <DheirSelect
+                                    value={rateUnit}
+                                    onChange={(e) => setRateUnit(e.target.value as "kg" | "cbm")}
+                                >
+                                    <option value="kg">KG</option>
+                                    <option value="cbm">CBM</option>
+                                </DheirSelect>
+                            </label>
                             <label className="portal-packages__field">
                                 <span className="portal-packages__field-label">{priceLabel}</span>
                                 <input
@@ -430,6 +450,7 @@ const AirTemplateComponent = ({ currencyValue }: { currencyValue: number }) => {
                     initialMinDuration={selectedTemplate.min_duration}
                     initialMaxDuration={selectedTemplate.max_duration}
                     initialDurationType={selectedTemplate.duration_type}
+                    initialRateUnit={selectedTemplate.rate_unit ?? "kg"}
                     onClose={() => setSelectedTemplate(null)}
                     onSaved={() => {
                         setSelectedTemplate(null)
@@ -467,10 +488,10 @@ const AirComp = ({
         </div>
         <div className="portal-home__section-sub" style={{ marginTop: 10 }}>
             <p style={{ margin: 0 }}>
-                Price per kg: {currencyValue === 1 ? "$" : "₦"}
+                Price per {(template.rate_unit ?? "kg")}: {currencyValue === 1 ? "$" : "₦"}
                 {(template.price * currencyValue).toFixed(2)}
             </p>
-            <p style={{ margin: 0 }}>Clearance fee per kg: ₦{template.clearance}</p>
+            <p style={{ margin: 0 }}>Clearance fee per {(template.rate_unit ?? "kg")}: ₦{template.clearance}</p>
             <p style={{ margin: 0 }}>
                         Minimum expected delivery: {template.min_duration} {template.duration_type}
                     </p>
@@ -552,6 +573,7 @@ const SeaTemplateComponent = () => {
                     initialMinDuration={selectedTemplate.min_duration}
                     initialMaxDuration={selectedTemplate.max_duration}
                     initialDurationType={selectedTemplate.duration_type}
+                    initialRateUnit={selectedTemplate.rate_unit ?? "cbm"}
                     onClose={() => setSelectedTemplate(null)}
                     onSaved={() => {
                         setSelectedTemplate(null)
@@ -579,8 +601,8 @@ const SeaTemp = ({ template, onEdit }: { template: SeaPricingTemplate; onEdit: (
             </button>
         </div>
         <div className="portal-home__section-sub" style={{ marginTop: 10 }}>
-            <p style={{ margin: 0 }}>Price per cbm: ₦{template.price}</p>
-            <p style={{ margin: 0 }}>Clearance fee per cbm: ₦{template.clearance}</p>
+            <p style={{ margin: 0 }}>Price per {(template.rate_unit ?? "cbm")}: ₦{template.price}</p>
+            <p style={{ margin: 0 }}>Clearance fee per {(template.rate_unit ?? "cbm")}: ₦{template.clearance}</p>
             <p style={{ margin: 0 }}>
                         Minimum expected delivery: {template.min_duration} {template.duration_type}
                     </p>
@@ -670,6 +692,7 @@ const ExpressTemplateComponent = ({currencyValue} : {currencyValue : number}) =>
                     initialMinDuration={selectedTemplate.min_duration}
                     initialMaxDuration={selectedTemplate.max_duration}
                     initialDurationType={selectedTemplate.duration_type}
+                    initialRateUnit={selectedTemplate.rate_unit ?? "kg"}
                     onClose={() => setSelectedTemplate(null)}
                     onSaved={() => {
                         setSelectedTemplate(null)

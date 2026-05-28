@@ -23,6 +23,8 @@ export const pool =
     ssl: {
       rejectUnauthorized: false,
     },
+    // Reduce random disconnects on long-lived dev processes.
+    keepAlive: true,
     max: POOL_MAX,
     idleTimeoutMillis: 20_000,
     connectionTimeoutMillis: 10_000,
@@ -30,3 +32,8 @@ export const pool =
   })
 
 global.pgPool = pool
+
+// If the pool's underlying connection dies, avoid crashing the process on next query.
+pool.on("error", (err) => {
+  console.error("Postgres pool error:", err)
+})

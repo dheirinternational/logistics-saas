@@ -39,8 +39,10 @@ export async function POST(req: NextRequest) {
         }
 
         const itemPriceRes = await pool.query(`
-            SELECT price_per_kg FROM item_pricing_methods
+            SELECT price_per_unit, price_per_kg, rate_unit
+            FROM item_pricing_methods
             WHERE name = 'standard' 
+            LIMIT 1
         `)
 
         if (itemPriceRes.rows.length === 0) {
@@ -64,7 +66,10 @@ export async function POST(req: NextRequest) {
         console.log({
             shipping_fee: Number(shipRes.rows[0].price),
             wrapping_fee: Number(wrapRes.rows[0].price),
-            item_fee: Number((itemPriceRes.rows[0].price_per_kg * (weight * number_of_items))),
+            item_fee: Number(
+                (Number(itemPriceRes.rows[0]?.price_per_unit ?? itemPriceRes.rows[0]?.price_per_kg ?? 0) *
+                (weight * number_of_items))
+            ),
             other_fee: Number(otherPriceRes.rows[0].price),
             payment_time_fee: Number(payTimeRes.rows[0].price)
         })
@@ -75,7 +80,7 @@ export async function POST(req: NextRequest) {
         const payTime = Number(payTimeRes.rows[0]?.price || 0)
 
         const itemCost =
-            Number(itemPriceRes.rows[0]?.price_per_kg || 0) *
+            Number(itemPriceRes.rows[0]?.price_per_unit ?? itemPriceRes.rows[0]?.price_per_kg ?? 0) *
             (Number(weight) * Number(number_of_items))
 
         const total_fee = Number(

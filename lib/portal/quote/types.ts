@@ -2,6 +2,7 @@ export type QuoteItemCart = {
   id: number
   name: string
   weight: number
+  unit: "kg" | "cbm"
   numberOfItems: number
 }
 
