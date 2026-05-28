@@ -71,3 +71,25 @@ export async function PATCH(req: Request, { params }: {params: Promise<{id: stri
         message: "Order updated"
     })
 }
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const session = await getSession()
+        if (!session) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
+        }
+        if (session.role !== "admin") {
+            return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
+        }
+
+        const { id } = await params
+
+        await pool.query(`DELETE FROM order_items WHERE order_id = $1`, [id])
+        await pool.query(`DELETE FROM orders WHERE order_id = $1`, [id])
+
+        return NextResponse.json({ success: true, message: "Order deleted" })
+    } catch (err) {
+        console.error("Error deleting order", err)
+        return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 })
+    }
+}

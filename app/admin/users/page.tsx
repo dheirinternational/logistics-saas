@@ -97,6 +97,35 @@ const Page: NextPage = () => {
         }),
     ]
 
+    const deleteUsers = async (rows: CustomerDetails[]) => {
+        const ids = rows.map((r) => Number(r.id)).filter((x) => Number.isFinite(x))
+        if (ids.length === 0) return
+
+        try {
+            const results = await Promise.all(
+                ids.map((id) =>
+                    fetch(`/api/users/${id}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                    })
+                )
+            )
+            const failed = results.filter((r) => !r.ok).length
+            if (failed > 0) {
+                toast.error(`Could not delete ${failed} user(s)`)
+            } else {
+                toast.success("Deleted")
+            }
+            // Refresh list
+            const res = await fetch("/api/users", { credentials: "include" })
+            const result = await res.json()
+            if (res.ok) setUsers(result.data ?? [])
+        } catch (err) {
+            console.error(err)
+            toast.error("Could not delete users")
+        }
+    }
+
     return (
         <div className="portal-home">
             <header className="portal-home__greeting">
@@ -192,6 +221,9 @@ const Page: NextPage = () => {
                                 importedData={filteredData}
                                 columnDef={columnDef}
                                 globalFilter={filterValues.search}
+                                enableRowSelection
+                                getRowId={(row) => String(row.id)}
+                                onDeleteSelected={deleteUsers}
                             />
                         )}
                     </section>

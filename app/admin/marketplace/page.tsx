@@ -93,6 +93,29 @@ const Page: NextPage = () => {
         return { total, active, inactive, featured }
     }, [products])
 
+    const deleteProducts = async (rows: Product[]) => {
+        const ids = rows.map((r) => Number(r.id)).filter((x) => Number.isFinite(x))
+        if (ids.length === 0) return
+
+        try {
+            const results = await Promise.all(
+                ids.map((id) =>
+                    fetch(`/api/products/${id}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                    })
+                )
+            )
+            const failed = results.filter((r) => !r.ok).length
+            if (failed > 0) toast.error(`Could not delete ${failed} product(s)`)
+            else toast.success("Deleted")
+            await fetchProducts()
+        } catch (err) {
+            console.error(err)
+            toast.error("Could not delete products")
+        }
+    }
+
     const productsTableDef = [
         columnHelper.accessor("id", { header: "ID" }),
         columnHelper.accessor("name", { header: "Product name" }),
@@ -237,6 +260,9 @@ const Page: NextPage = () => {
                                     importedData={filteredData}
                                     columnDef={productsTableDef}
                                     globalFilter={filterValue.search}
+                                    enableRowSelection
+                                    getRowId={(row) => String(row.id)}
+                                    onDeleteSelected={deleteProducts}
                                 />
                             )}
                         </section>

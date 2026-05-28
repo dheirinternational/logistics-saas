@@ -11,6 +11,7 @@ import { PackageStatus } from "@/types/statusTypes"
 import { createColumnHelper } from "@tanstack/react-table"
 import { IconBox, IconChecks, IconLoader2, IconPackage } from "@tabler/icons-react"
 import { NextPage } from "next"
+import { useRouter } from "next/navigation"
 import { ChangeEvent, useEffect, useMemo, useState } from "react"
 
 type FilterValues = {
@@ -22,8 +23,9 @@ type FilterValues = {
 const columnHelper = createColumnHelper<Package>()
 
 const Page: NextPage = () => {
-  const { trigger, setSelectedPackage: setPackage, resetReadOnly } = usePackageStore()
+  const { trigger, setSelectedPackage: setPackage, setReadOnly, resetReadOnly } = usePackageStore()
   const { setIsModalActive } = useEditModalStore()
+  const router = useRouter()
 
   const [packages, setPackages] = useState<Package[]>([])
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
@@ -136,6 +138,40 @@ const Page: NextPage = () => {
     }),
   ]
 
+  const deletePackages = async (rows: Package[]) => {
+    const ids = rows.map((row) => String(row.id))
+    try {
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const res = await fetch(`/api/packages/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+          })
+          const result = await res.json().catch(() => ({ message: "Delete failed" }))
+          return { ok: res.ok, id, message: result.message as string }
+        })
+      )
+
+      const failed = results.filter((x) => !x.ok)
+      if (failed.length > 0) {
+        const firstError = failed[0]?.message || "Delete failed"
+        if (/unauthorized/i.test(firstError)) {
+          toast.error("Session expired. Please sign in again.")
+          router.push("/auth/login")
+          return
+        }
+        toast.error(failed.length === 1 ? firstError : `Failed to delete ${failed.length} package(s). ${firstError}`)
+        return
+      }
+
+      setPackages((prev) => prev.filter((item) => !ids.includes(String(item.id))))
+      toast.success(`${ids.length} package(s) deleted.`)
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to delete selected packages.")
+    }
+  }
+
   return (
     <div className="portal-home">
       <header className="portal-home__greeting">
@@ -146,6 +182,32 @@ const Page: NextPage = () => {
             Monitor, filter, and manage all packages from one control deck.
           </p>
         </div>
+        <button
+          type="button"
+          className="portal-home__btn portal-home__btn--primary"
+          onClick={() => {
+            setReadOnly()
+            setPackage({
+              id: 0,
+              incoming_package_id: "",
+              package_name: "",
+              user_id: 0,
+              customer_code: "",
+              warehouse_id: 0,
+              weight: 0,
+              weight_unit: "kg",
+              amount: 0,
+              condition: "good",
+              status: "stored",
+              received_at: "",
+              stored_at: "",
+              created_at: "",
+            })
+            setIsModalActive()
+          }}
+        >
+          Add package
+        </button>
       </header>
 
       {isDataLoading ? (
@@ -273,7 +335,14 @@ const Page: NextPage = () => {
                 </p>
               </div>
             ) : (
-              <Table importedData={filteredData} columnDef={columnDef} globalFilter={filterValues.search} />
+              <Table
+                importedData={filteredData}
+                columnDef={columnDef}
+                globalFilter={filterValues.search}
+                enableRowSelection
+                getRowId={(row) => String(row.id)}
+                onDeleteSelected={deletePackages}
+              />
             )}
           </section>
         </>

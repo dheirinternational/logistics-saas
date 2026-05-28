@@ -3,6 +3,7 @@ import { getSession } from "@/lib/db/session";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import type { DatabaseError } from "pg";
 
 
 const supabase = createClient(
@@ -83,6 +84,22 @@ export async function POST(req: NextRequest){
             }, {status: 404})
         }
 
+
+        const existingPackage = await client.query(
+            `SELECT id FROM packages WHERE incoming_package_id = $1 LIMIT 1`,
+            [data.incoming_package_id]
+        )
+
+        if (existingPackage.rows.length > 0) {
+            await client.query("ROLLBACK")
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: `Package identifier ${data.incoming_package_id} already exists. Use a different identifier.`,
+                },
+                { status: 409 }
+            )
+        }
 
         const res = await client.query(`
             INSERT INTO packages(
@@ -208,6 +225,21 @@ export async function POST(req: NextRequest){
     catch(err){
 
         await client.query("ROLLBACK")
+
+        const dbError = err as DatabaseError
+        if (
+            dbError?.code === "23505" &&
+            dbError?.constraint === "packages_incoming_package_id_key"
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Package identifier already exists. Use a different identifier.",
+                },
+                { status: 409 }
+            )
+        }
+
         console.error("Internal server error", err)
 
         return NextResponse.json({

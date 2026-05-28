@@ -89,6 +89,32 @@ const Page: NextPage = () => {
         }),
     ]
 
+    const deleteWarehouses = async (rows: Warehouse[]) => {
+        const ids = rows.map((r) => Number(r.id)).filter((x) => Number.isFinite(x))
+        if (ids.length === 0) return
+
+        try {
+            const results = await Promise.all(
+                ids.map((id) =>
+                    fetch(`/api/warehouses/${id}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                    })
+                )
+            )
+            const failed = results.filter((r) => !r.ok).length
+            if (failed > 0) toast.error(`Could not delete ${failed} warehouse(s)`)
+            else toast.success("Deleted")
+
+            const res = await fetch("/api/warehouses", { credentials: "include" })
+            const result = await res.json()
+            if (res.ok) setWarehouses(result.data ?? [])
+        } catch (err) {
+            console.error(err)
+            toast.error("Could not delete warehouses")
+        }
+    }
+
     return (
         <div className="portal-home">
             <header className="portal-home__greeting">
@@ -186,6 +212,9 @@ const Page: NextPage = () => {
                                 importedData={filteredData}
                                 columnDef={columnDef}
                                 globalFilter={filterValues.search}
+                                enableRowSelection
+                                getRowId={(row) => String(row.id)}
+                                onDeleteSelected={deleteWarehouses}
                             />
                         )}
                     </section>

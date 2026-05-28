@@ -65,6 +65,33 @@ const Page: NextPage = () => {
     
     }, [trigger])
 
+    const deleteIncomingPackages = async (rows: IncomingPackage[]) => {
+        const ids = rows.map((row) => String(row.id))
+      try {
+        const results = await Promise.all(
+          ids.map(async (id) => {
+            const res = await fetch(`/api/incoming-packages/${id}`, {
+              method: "DELETE",
+              credentials: "include",
+            })
+            return { ok: res.ok, id }
+          })
+        )
+
+        const failed = results.filter((x) => !x.ok)
+        if (failed.length > 0) {
+          toast.error(`Failed to delete ${failed.length} incoming package(s).`)
+          return
+        }
+
+        setIncomingPackages((prev) => prev.filter((item) => !ids.includes(String(item.id))))
+        toast.success(`${ids.length} incoming package(s) deleted.`)
+      } catch (err) {
+        console.error(err)
+        toast.error("Failed to delete selected incoming packages.")
+      }
+    }
+
     // Table Column Def
     const incomingPackageColumnDef = [
         columnHelper.accessor("incoming_tracking_number", {
@@ -207,6 +234,9 @@ const Page: NextPage = () => {
                 importedData={data}
                 columnDef={incomingPackageColumnDef}
                 globalFilter={filterValues.search}
+                enableRowSelection
+                getRowId={(row) => String(row.id)}
+                onDeleteSelected={deleteIncomingPackages}
               />
             ) : null}
           </section>

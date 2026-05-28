@@ -130,6 +130,32 @@ const Page: NextPage = () => {
         return { total, confirmed, processing, shipped, delivered }
     }, [orders])
 
+    const deleteOrders = async (rows: Order[]) => {
+        const ids = rows.map((r) => r.order_id).filter(Boolean)
+        if (ids.length === 0) return
+
+        try {
+            const results = await Promise.all(
+                ids.map((id) =>
+                    fetch(`/api/orders/${encodeURIComponent(id)}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                    })
+                )
+            )
+            const failed = results.filter((r) => !r.ok).length
+            if (failed > 0) toast.error(`Could not delete ${failed} order(s)`)
+            else toast.success("Deleted")
+
+            const res = await fetch("/api/orders", { credentials: "include" })
+            const result = await res.json()
+            if (res.ok) setOrders(result.data ?? [])
+        } catch (err) {
+            console.error(err)
+            toast.error("Could not delete orders")
+        }
+    }
+
     return (
         <>
             <div className="portal-home">
@@ -237,7 +263,14 @@ const Page: NextPage = () => {
                                     <p className="portal-home__empty">No orders found.</p>
                                 </div>
                             ) : (
-                                <Table importedData={filteredData} columnDef={columnDef} globalFilter={filterValues.search} />
+                                <Table
+                                    importedData={filteredData}
+                                    columnDef={columnDef}
+                                    globalFilter={filterValues.search}
+                                    enableRowSelection
+                                    getRowId={(row) => String(row.order_id)}
+                                    onDeleteSelected={deleteOrders}
+                                />
                             )}
                         </section>
                     </>

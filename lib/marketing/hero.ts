@@ -1,8 +1,8 @@
 /** Replace with client photography when available. */
 
 export const HERO_IMAGE = {
-  src: "https://images.unsplash.com/photo-1709837655222-3ffd8c290a60?auto=format&fit=crop&w=1920&q=80",
-  alt: "A large cargo ship in the water with a bridge in the background",
+  src: "https://images.unsplash.com/photo-1605745341112-85968b19335b?auto=format&fit=crop&w=1920&q=80",
+  alt: "Cargo containers being handled at a port",
 } as const
 
 export const HERO_COPY = {

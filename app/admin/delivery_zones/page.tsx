@@ -94,6 +94,33 @@ export default function Page() {
         [fetchDeliveryLocations]
     )
 
+    const deleteDeliveryZones = async (rows: DeliveryLocation[]) => {
+        const ids = rows.map((row) => String(row.id))
+        try {
+            const results = await Promise.all(
+                ids.map(async (id) => {
+                    const res = await fetch(`/api/delivery-zones/${id}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                    })
+                    return { ok: res.ok, id }
+                })
+            )
+
+            const failed = results.filter((x) => !x.ok)
+            if (failed.length > 0) {
+                toast.error(`Failed to delete ${failed.length} delivery zone(s).`)
+                return
+            }
+
+            setDeliveryLocations((prev) => prev.filter((item) => !ids.includes(String(item.id))))
+            toast.success(`${ids.length} delivery zone(s) deleted.`)
+        } catch (err) {
+            console.error("ERR:: Deleting Delivery Zones", err)
+            toast.error("Failed to delete selected delivery zones")
+        }
+    }
+
     return (
         <div className="portal-home">
             <header className="portal-home__greeting">
@@ -195,6 +222,9 @@ export default function Page() {
                                 importedData={filteredData}
                                 columnDef={columnDef}
                                 globalFilter={filterValues.search}
+                                enableRowSelection
+                                getRowId={(row) => String(row.id)}
+                                onDeleteSelected={deleteDeliveryZones}
                             />
                         )}
                     </section>

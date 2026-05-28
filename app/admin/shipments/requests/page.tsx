@@ -90,6 +90,33 @@ const Page: NextPage = () => {
         }
     }
 
+    const deleteShipmentRequests = async (rows: ShippingRequest[]) => {
+        const ids = rows.map((row) => String(row.id))
+        try {
+            const results = await Promise.all(
+                ids.map(async (id) => {
+                    const res = await fetch(`/api/shipment-requests/${id}`, {
+                        method: "DELETE",
+                        credentials: "include"
+                    })
+                    return { ok: res.ok, id }
+                })
+            )
+
+            const failed = results.filter((x) => !x.ok)
+            if (failed.length > 0) {
+                toast.error(`Failed to delete ${failed.length} shipment request(s).`)
+                return
+            }
+
+            setShipmentRequests((prev) => prev.filter((item) => !ids.includes(String(item.id))))
+            toast.success(`${ids.length} shipment request(s) deleted.`)
+        } catch (err) {
+            console.error(err)
+            toast.error("Failed to delete selected shipment requests.")
+        }
+    }
+
 
     // handle image selection
     const hanldeImageChange = (e:ChangeEvent<HTMLInputElement>) => {
@@ -277,6 +304,9 @@ const Page: NextPage = () => {
                 columnDef={shipmentRequestColumnDef}
                 globalFilter={`${filterValues.search}`}
                 pageSize={15}
+                enableRowSelection
+                getRowId={(row) => String(row.id)}
+                onDeleteSelected={deleteShipmentRequests}
               />
             ) : null}
           </section>

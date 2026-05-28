@@ -42,3 +42,25 @@ export async function GET(req: NextRequest, {params} : {params: Promise<{id: str
         })
     }
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const session = await getSession()
+        const { id } = await params
+
+        if (!session) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
+        }
+
+        if (session.role !== "admin") {
+            return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
+        }
+
+        await pool.query(`DELETE FROM incoming_packages WHERE id = $1`, [Number(id)])
+
+        return NextResponse.json({ success: true, message: "Incoming package deleted" })
+    } catch (err) {
+        console.error("Error deleting incoming package", err)
+        return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 })
+    }
+}

@@ -9,12 +9,16 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { useMemo, useState } from "react"
+import { DheirConfirmDialog } from "@/components/ui/DheirConfirmDialog"
 
 type TableProps<T> = {
     importedData: T[],
     columnDef: ColumnDef<T, any>[],  // eslint-disable-line @typescript-eslint/no-explicit-any
     globalFilter: string
     pageSize?: number
+    getRowId?: (row: T) => string
+    enableRowSelection?: boolean
+    onDeleteSelected?: (rows: T[]) => Promise<void> | void
 }   
 
 export function Table <T,>({
@@ -22,16 +26,59 @@ export function Table <T,>({
   columnDef,
   globalFilter,
   pageSize = 15,
+  getRowId,
+  enableRowSelection = false,
+  onDeleteSelected,
 }: TableProps<T>){
     const data = useMemo(() => importedData, [importedData]) 
     const columns = useMemo(() => {
-        return ([...columnDef])
-    }, [columnDef])
+        if (!enableRowSelection) return ([...columnDef])
+
+        const selectCol: ColumnDef<T, any> = {
+          id: "__select",
+          header: ({ table }) => (
+            <label className="dheir-checkbox">
+              <input
+                type="checkbox"
+                checked={table.getIsAllPageRowsSelected()}
+                ref={(el) => {
+                  if (!el) return
+                  el.indeterminate = table.getIsSomePageRowsSelected()
+                }}
+                onChange={table.getToggleAllPageRowsSelectedHandler()}
+                aria-label="Select all rows on page"
+              />
+              <span className="dheir-checkbox__box" aria-hidden />
+            </label>
+          ),
+          cell: ({ row }) => (
+            <label className="dheir-checkbox">
+              <input
+                type="checkbox"
+                checked={row.getIsSelected()}
+                disabled={!row.getCanSelect()}
+                onChange={row.getToggleSelectedHandler()}
+                aria-label="Select row"
+              />
+              <span className="dheir-checkbox__box" aria-hidden />
+            </label>
+          ),
+          enableSorting: false,
+          enableColumnFilter: false,
+          size: 44,
+        }
+
+        return ([selectCol, ...columnDef])
+    }, [columnDef, enableRowSelection])
 
     const [pagination, setPagination] = useState({
       pageIndex: 0,
       pageSize,
     })
+
+    const [rowSelection, setRowSelection] = useState({})
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
+    const [isDeletingSelected, setIsDeletingSelected] = useState(false)
 
     const table = useReactTable({
         data,
@@ -39,13 +86,21 @@ export function Table <T,>({
         state: {
             globalFilter,
             pagination,
+            rowSelection,
         },
         onPaginationChange: setPagination,
+        onRowSelectionChange: setRowSelection,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        globalFilterFn: "includesString"
+        globalFilterFn: "includesString",
+        enableRowSelection,
+        getRowId: getRowId as any,
+        autoResetPageIndex: false,
     })
+
+    const selectedRows = table.getSelectedRowModel().rows
+    const selectedCount = selectedRows.length
 
     
 
@@ -90,6 +145,15 @@ export function Table <T,>({
               {table.getPageCount()}
             </span>
             <div className="portal-home__table-pagination-actions">
+              {enableRowSelection && onDeleteSelected && selectedCount > 0 ? (
+                <button
+                  type="button"
+                  className="portal-home__btn portal-home__btn--secondary"
+                  onClick={() => setIsDeleteConfirmOpen(true)}
+                >
+                  Delete selected ({selectedCount})
+                </button>
+              ) : null}
               <button
                 type="button"
                 className="portal-home__btn portal-home__btn--secondary"
@@ -108,6 +172,30 @@ export function Table <T,>({
               </button>
             </div>
           </div>
+
+          <DheirConfirmDialog
+            open={isDeleteConfirmOpen}
+            onClose={() => {
+              if (!isDeletingSelected) setIsDeleteConfirmOpen(false)
+            }}
+            onConfirm={async () => {
+              setIsDeletingSelected(true)
+              try {
+                const originals = selectedRows.map((r) => r.original)
+                await onDeleteSelected?.(originals)
+                table.resetRowSelection()
+                setIsDeleteConfirmOpen(false)
+              } finally {
+                setIsDeletingSelected(false)
+              }
+            }}
+            title="Delete selected records?"
+            description={`This will delete ${selectedCount} selected record${selectedCount === 1 ? "" : "s"}.`}
+            cancelLabel="Cancel"
+            confirmLabel="Delete selected"
+            variant="danger"
+            loading={isDeletingSelected}
+          />
         </div>
     )
 }
