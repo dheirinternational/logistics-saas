@@ -126,12 +126,17 @@ const PackageEditComponent = () => {
         setIsUploadingPackage(true)
 
         const formData = new FormData(e.currentTarget)
+        const isEditing = Number(selectedPackage?.id ?? 0) > 0
 
         try{
-            const res = await fetch("/api/packages", {
-                method: "POST",
-                body: formData
-            })
+            const res = await fetch(
+                isEditing ? `/api/packages/${selectedPackage?.id}` : "/api/packages",
+                {
+                    method: isEditing ? "PUT" : "POST",
+                    credentials: "include",
+                    body: formData
+                }
+            )
 
             const result = await res.json()
 
@@ -140,7 +145,7 @@ const PackageEditComponent = () => {
                 return
             }
 
-            toast.success("Successfully Added package")
+            toast.success(isEditing ? "Package updated successfully" : "Successfully Added package")
             setTrigger()
             resetSelectedPackage()
             setIsModalActive()

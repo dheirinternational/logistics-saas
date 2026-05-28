@@ -103,16 +103,24 @@ const Page: NextPage = () => {
 
         try {
             const results = await Promise.all(
-                ids.map((id) =>
-                    fetch(`/api/users/${id}`, {
+                ids.map(async (id) => {
+                    const res = await fetch(`/api/users/${id}`, {
                         method: "DELETE",
                         credentials: "include",
                     })
-                )
+                    const payload = await res.json().catch(() => ({ message: "Delete failed" }))
+                    return { ok: res.ok, message: payload.message as string }
+                })
             )
-            const failed = results.filter((r) => !r.ok).length
-            if (failed > 0) {
-                toast.error(`Could not delete ${failed} user(s)`)
+
+            const failed = results.filter((r) => !r.ok)
+            if (failed.length > 0) {
+                const firstError = failed[0]?.message || "Delete failed"
+                toast.error(
+                    failed.length === 1
+                        ? firstError
+                        : `Could not delete ${failed.length} user(s). ${firstError}`
+                )
             } else {
                 toast.success("Deleted")
             }

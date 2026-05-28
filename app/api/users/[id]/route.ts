@@ -51,6 +51,7 @@ export async function GET(request: Request, {params}: {params: Promise<{id: stri
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+    const client = await pool.connect()
     try {
         const session = await getSession()
 
@@ -63,15 +64,69 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
         }
 
         const { id } = await params
+        const userId = Number(id)
 
-        await pool.query(`DELETE FROM users WHERE id = $1`, [id])
+        if (!Number.isFinite(userId)) {
+            return NextResponse.json({ success: false, message: "Invalid user id" }, { status: 400 })
+        }
+
+        if (session.id === userId) {
+            return NextResponse.json(
+                { success: false, message: "You cannot delete your own admin account." },
+                { status: 400 }
+            )
+        }
+
+        await client.query("BEGIN")
+
+        const customerRes = await client.query(`SELECT code FROM customers WHERE user_id = $1 LIMIT 1`, [userId])
+        const customerCode: string | null = customerRes.rows[0]?.code ?? null
+
+        await client.query(`DELETE FROM package_images WHERE package_id IN (SELECT id FROM packages WHERE user_id = $1)`, [userId])
+        await client.query(`DELETE FROM shipment_images WHERE shipment_id IN (SELECT id FROM shipments WHERE user_id = $1)`, [userId])
+        await client.query(
+            `DELETE FROM payments
+             WHERE user_id = $1
+                OR shipment_tracking_number IN (
+                    SELECT tracking_number FROM shipments WHERE user_id = $1
+                )`,
+            [userId]
+        )
+        await client.query(`DELETE FROM order_items WHERE order_id IN (SELECT order_id FROM orders WHERE user_id = $1)`, [userId])
+        await client.query(`DELETE FROM orders WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM shipment_requests WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM shipments WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM incoming_packages WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM packages WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM addresses WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM notifications WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM reviews WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM staff WHERE user_id = $1`, [userId])
+        await client.query(`DELETE FROM admins WHERE user_id = $1`, [userId])
+
+        if (customerCode) {
+            await client.query(`DELETE FROM customers WHERE code = $1`, [customerCode])
+        } else {
+            await client.query(`DELETE FROM customers WHERE user_id = $1`, [userId])
+        }
+
+        const deleteUserRes = await client.query(`DELETE FROM users WHERE id = $1`, [userId])
+        if (deleteUserRes.rowCount === 0) {
+            await client.query("ROLLBACK")
+            return NextResponse.json({ success: false, message: "User not found" }, { status: 404 })
+        }
+
+        await client.query("COMMIT")
 
         return NextResponse.json({ success: true, message: "User deleted" })
     } catch (err) {
+        await client.query("ROLLBACK")
         console.error("ERROR DELETING USER", err)
         return NextResponse.json(
-            { success: false, message: "Error deleting user" },
+            { success: false, message: "Error deleting user. User may still have linked records." },
             { status: 500 }
         )
+    } finally {
+        client.release()
     }
 }
