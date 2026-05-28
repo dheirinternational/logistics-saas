@@ -4,7 +4,7 @@ import { usePackageStore } from "@/store/incomingPackagesStore";
 import { useEditModalStore } from "@/types/editModalStore";
 import { PackageImage, Warehouse } from "@/types/entityTypeDef";
 import Image from "next/image";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "@/lib/ui/toast";
 import { DheirLoader } from "@/components/ui/DheirLoader";
 import { IconX } from "@tabler/icons-react";
@@ -12,6 +12,8 @@ import { DheirSelect } from "@/components/ui/DheirSelect";
 
 export default function PageLayout({children}: {children: ReactNode}){
     const { isModalActive, setIsModalActive } = useEditModalStore()
+    const selectedPackage = usePackageStore((s) => s.selectedPackage)
+    const isEditing = Number(selectedPackage?.id ?? 0) > 0
 
     return (
         <div className="h-full max-h-full w-full overflow-y-auto">
@@ -25,11 +27,22 @@ export default function PageLayout({children}: {children: ReactNode}){
                         if (e.target === e.currentTarget) setIsModalActive()
                     }}
                 >
-                    <div className="dheir-dialog admin-modal" role="dialog" aria-modal="true" aria-label="Edit package">
+                    <div
+                        className="dheir-dialog admin-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={isEditing ? "Edit package" : "Add package"}
+                    >
                         <div className="dheir-dialog__head">
                             <div>
-                                <h2 className="dheir-dialog__title">Edit package</h2>
-                                <p className="admin-modal__subtitle">Manage, view, and edit packages stored in warehouse.</p>
+                                <h2 className="dheir-dialog__title">
+                                    {isEditing ? "Edit package" : "Add package"}
+                                </h2>
+                                <p className="admin-modal__subtitle">
+                                    {isEditing
+                                        ? "Update package details and optionally add photos."
+                                        : "Register a package in the warehouse. Photos are optional."}
+                                </p>
                             </div>
                             <button
                                 type="button"
@@ -60,6 +73,8 @@ const PackageEditComponent = () => {
     // Arrays
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
     const [images, setImages] = useState<PackageImage[]>([])
+    const [newPreviews, setNewPreviews] = useState<string[]>([])
+    const fileInputRef = useRef<HTMLInputElement | null>(null)
 
     // Selected Objects
     const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
@@ -69,6 +84,9 @@ const PackageEditComponent = () => {
     const [isFetchingWarehouse, setIsFetchingWarehouse] = useState(true)
     const [isUploadingPackage, setIsUploadingPackage] = useState(false)
     const [isFetchingImages, setIsFetchingImages] = useState(false)
+
+    const packageId = Number(selectedPackage?.id ?? 0)
+    const isEditing = Number.isFinite(packageId) && packageId > 0
 
 
     // Fetch Warehouses
@@ -107,8 +125,7 @@ const PackageEditComponent = () => {
                 return
             }
 
-            console.log(result.data)
-            setImages(result.data)
+            setImages(result.data ?? [])
 
         }
         catch(err){
@@ -120,17 +137,23 @@ const PackageEditComponent = () => {
         }
     }
 
+    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.length) return
+        const files = Array.from(e.target.files)
+        newPreviews.forEach((url) => URL.revokeObjectURL(url))
+        setNewPreviews(files.map((file) => URL.createObjectURL(file)))
+    }
+
     // handle uploading packages
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsUploadingPackage(true)
 
         const formData = new FormData(e.currentTarget)
-        const isEditing = Number(selectedPackage?.id ?? 0) > 0
 
         try{
             const res = await fetch(
-                isEditing ? `/api/packages/${selectedPackage?.id}` : "/api/packages",
+                isEditing ? `/api/packages/${packageId}` : "/api/packages",
                 {
                     method: isEditing ? "PUT" : "POST",
                     credentials: "include",
@@ -150,6 +173,9 @@ const PackageEditComponent = () => {
             resetSelectedPackage()
             setIsModalActive()
             setImages([])
+            newPreviews.forEach((url) => URL.revokeObjectURL(url))
+            setNewPreviews([])
+            if (fileInputRef.current) fileInputRef.current.value = ""
         }
         catch(err){
             toast.error("Network Error")
@@ -164,10 +190,17 @@ const PackageEditComponent = () => {
     
     // Fetch Data upon initial load 
     useEffect(() => {
-        if(!selectedPackage) return
+        if (!selectedPackage) return
         fetchWarehouses()
-        fetchImages()
-    }, [selectedPackage])
+        if (isEditing) {
+            fetchImages()
+        } else {
+            setImages([])
+        }
+        newPreviews.forEach((url) => URL.revokeObjectURL(url))
+        setNewPreviews([])
+        if (fileInputRef.current) fileInputRef.current.value = ""
+    }, [selectedPackage?.id])
 
 
     // Set Selected Warehouse
@@ -339,22 +372,54 @@ const PackageEditComponent = () => {
                         <p className="portal-packages__field-label" style={{ margin: 0 }}>
                             Photos
                         </p>
-                        <p className="admin-uploader__help">Existing package photos.</p>
+                        <p className="admin-uploader__help">
+                            {isEditing
+                                ? "Existing photos and any new uploads you add below."
+                                : "Optional — add one or more images when registering the package."}
+                        </p>
                     </div>
-                    {isFetchingImages ? <DheirLoader color="var(--color-dheir-blue)" size={10} /> : null}
+                    <button
+                        type="button"
+                        className="portal-home__btn portal-home__btn--secondary"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        Choose images
+                    </button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        name="images"
+                        onChange={handleImageChange}
+                        style={{ display: "none" }}
+                    />
+                    {isEditing && isFetchingImages ? (
+                        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                    ) : null}
                 </div>
 
                 {images.length > 0 ? (
                     <div className="admin-uploader__previews">
                         {images.map((img) => (
                             <div key={img.id} className="admin-uploader__preview">
-                                <Image src={img.image_url} alt="" fill className="object-cover" />
+                                <Image src={img.image_url} alt="" fill className="object-cover" unoptimized />
                             </div>
                         ))}
                     </div>
-                ) : (
+                ) : isEditing ? (
                     <p className="admin-uploader__help">No images for this package yet.</p>
-                )}
+                ) : null}
+
+                {newPreviews.length > 0 ? (
+                    <div className="admin-uploader__previews" style={{ marginTop: "0.75rem" }}>
+                        {newPreviews.map((src) => (
+                            <div key={src} className="admin-uploader__preview">
+                                <Image src={src} alt="" fill className="object-cover" unoptimized />
+                            </div>
+                        ))}
+                    </div>
+                ) : null}
             </div>
 
             <div className="admin-modal__actions">
@@ -363,7 +428,13 @@ const PackageEditComponent = () => {
                     className="portal-home__btn portal-home__btn--primary"
                     disabled={isUploadingPackage}
                 >
-                    {isUploadingPackage ? <DheirLoader color="#fff" size={10} /> : "Save changes"}
+                    {isUploadingPackage ? (
+                        <DheirLoader color="#fff" size={10} />
+                    ) : isEditing ? (
+                        "Save changes"
+                    ) : (
+                        "Add package"
+                    )}
                 </button>
             </div>
         </form>

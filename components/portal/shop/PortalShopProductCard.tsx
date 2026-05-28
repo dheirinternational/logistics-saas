@@ -5,7 +5,9 @@ import { DheirLoader } from "@/components/ui/DheirLoader"
 import { useCartStore } from "@/store/cartStore"
 import type { Product } from "@/types/entityTypeDef"
 import { slugify } from "@/lib/portal/slug"
-import Image from "next/image"
+import { getTierPricingLabel, getUnitPriceForQuantity, hasTierDiscount } from "@/lib/shop/pricing"
+import { ProductStorageImage } from "@/components/shop/ProductStorageImage"
+import { pickPreferredProductImage } from "@/lib/shop/productMedia"
 import Link from "next/link"
 import type { MouseEvent } from "react"
 import { useEffect, useState } from "react"
@@ -25,12 +27,17 @@ export function PortalShopProductCard({
   const [mediaType, setMediaType] = useState<"image" | "video">("image")
   const [loadingImage, setLoadingImage] = useState(true)
 
-  const displayPrice =
-    product.discount_price &&
-    Number(product.discount_price) > 0 &&
-    Number(product.discount_price) < Number(product.price)
-      ? Number(product.discount_price)
-      : Number(product.price)
+  const displayPrice = getUnitPriceForQuantity({
+    price: Number(product.price),
+    discount_price: Number(product.discount_price ?? 0),
+    discount_min_qty: Number(product.discount_min_qty ?? 0),
+    quantity: 1,
+  })
+  const tierPricingLabel = getTierPricingLabel({
+    price: Number(product.price),
+    discount_price: Number(product.discount_price ?? 0),
+    discount_min_qty: Number(product.discount_min_qty ?? 0),
+  })
 
   const detailHref = `/customer/marketplace/${slugify(product.name)}-${product.id}`
 
@@ -40,12 +47,23 @@ export function PortalShopProductCard({
     fetch(`/api/products/images/${product.id}`)
       .then((r) => r.json())
       .then((result) => {
-        const items = (result.data ?? []) as { image_url: string; media_type?: string }[]
-        const firstImage = items.find((x) => (x.media_type ?? "image") === "image")
-        const first = firstImage ?? items[0]
+        const items = (result.data ?? []) as {
+          image_url: string
+          media_type?: string
+          is_primary?: boolean
+          id: number
+        }[]
+        const preferred = pickPreferredProductImage(
+          items.map((item, index) => ({
+            id: item.id ?? index,
+            image_url: item.image_url,
+            is_primary: Boolean(item.is_primary),
+            media_type: item.media_type === "video" ? "video" : "image",
+          }))
+        )
         if (!cancelled) {
-          setImageUrl(first?.image_url ?? null)
-          setMediaType(((first?.media_type as any) ?? "image") === "video" ? "video" : "image")
+          setImageUrl(preferred?.image_url ?? null)
+          setMediaType(preferred?.media_type === "video" ? "video" : "image")
         }
       })
       .finally(() => {
@@ -67,6 +85,7 @@ export function PortalShopProductCard({
       name: product.name,
       price: Number(product.price),
       discount_price: Number(product.discount_price ?? 0),
+      discount_min_qty: product.discount_min_qty ?? null,
       quantity: product.stock_quantity,
       image: cartThumb,
       amount_to_be_ordered: 1,
@@ -92,7 +111,7 @@ export function PortalShopProductCard({
               style={{ width: "100%", height: "100%" }}
             />
           ) : (
-            <Image
+            <ProductStorageImage
               src={imageUrl}
               alt={product.name}
               fill
@@ -124,6 +143,9 @@ export function PortalShopProductCard({
             addAriaLabel={`Add ${product.name} to cart`}
           />
         </div>
+        {hasTierDiscount(product) && tierPricingLabel ? (
+          <p className="shop-product-card__meta">{tierPricingLabel}</p>
+        ) : null}
       </div>
     </article>
   )

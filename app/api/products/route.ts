@@ -2,13 +2,12 @@ export const runtime = "nodejs"
 
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
-import { createClient } from "@supabase/supabase-js"
+import {
+    getValidProductMediaFiles,
+    uploadProductMediaFiles,
+} from "@/lib/products/uploadProductMedia"
+import { isValidProductWeightUnit } from "@/lib/shop/productWeight"
 import { NextRequest, NextResponse } from "next/server"
-
-const supabase = createClient(
-    process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_SUPABASE_URL! : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST!, 
-    process.env.NODE_ENV === "production" ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
-)
 
 export async function POST(req: Request){
 
@@ -39,10 +38,13 @@ export async function POST(req: Request){
             description: formData.get("description") as string,
             category_id: Number(formData.get("category_id")),
             price: Number(formData.get("price")),
-            cost_price: Number(formData.get("cost_price")),
+            discount_price: Number(formData.get("discount_price") ?? 0),
+            discount_min_qty: formData.get("discount_min_qty")
+              ? Number(formData.get("discount_min_qty"))
+              : null,
             stock_quantity: Number(formData.get("stock_quantity")),
-            low_stock_threshold: Number(formData.get("low_stock_threshold")),
             weight: Number(formData.get("weight")),
+            weight_unit: String(formData.get("weight_unit") ?? "kg"),
             is_featured: formData.get("is_featured") === "true"
         }
 
@@ -54,8 +56,47 @@ export async function POST(req: Request){
                 message: "Invalid Price Range"
             }, {status: 400})
         }
+        if (data.discount_price > 0 && data.discount_price >= data.price) {
+            return NextResponse.json(
+                { success: false, message: "Discounted price must be less than price" },
+                { status: 400 }
+            )
+        }
+        if (data.discount_min_qty !== null && data.discount_min_qty < 2) {
+            return NextResponse.json(
+                { success: false, message: "Qty for discounted price must be at least 2" },
+                { status: 400 }
+            )
+        }
+        if (data.discount_price > 0 && (data.discount_min_qty === null || data.discount_min_qty < 2)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Qty for discounted price is required when a discounted price is set",
+                },
+                { status: 400 }
+            )
+        }
+        if (!data.category_id || Number.isNaN(data.category_id)) {
+            return NextResponse.json(
+                { success: false, message: "Select a valid category" },
+                { status: 400 }
+            )
+        }
+        if (!isValidProductWeightUnit(data.weight_unit)) {
+            return NextResponse.json(
+                { success: false, message: "Weight unit must be kg or cbm" },
+                { status: 400 }
+            )
+        }
+        if (data.weight <= 0) {
+            return NextResponse.json(
+                { success: false, message: "Product weight must be greater than 0" },
+                { status: 400 }
+            )
+        }
 
-        const validFiles = files.filter((f) => f instanceof File && f.size > 0)
+        const validFiles = getValidProductMediaFiles(files)
         if (validFiles.length < 1) {
             return NextResponse.json(
                 { success: false, message: "Select at least 1 media file" },
@@ -73,46 +114,44 @@ export async function POST(req: Request){
         await client.query("BEGIN")
 
         const { rows } = await client.query(`
-            INSERT INTO products ( name, description, category_id, price, stock_quantity, low_stock_threshold, weight, is_featured, created_at, created_by, updated_at, updated_by, status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), $9, NOW(), $10, 'active')
+            INSERT INTO products (
+                name,
+                description,
+                category_id,
+                price,
+                discount_price,
+                discount_min_qty,
+                stock_quantity,
+                low_stock_threshold,
+                cost_price,
+                weight,
+                weight_unit,
+                is_featured,
+                created_at,
+                created_by,
+                updated_at,
+                updated_by,
+                status
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8, $9, $10, NOW(), $11, NOW(), $12, 'active')
             RETURNING *
-        `, [data.name, data.description, data.category_id, data.price, data.stock_quantity, data.low_stock_threshold, data.weight, data.is_featured, session.user_id, session.user_id ])
+        `, [
+            data.name,
+            data.description,
+            data.category_id,
+            data.price,
+            data.discount_price || 0,
+            data.discount_min_qty,
+            data.stock_quantity,
+            data.weight,
+            data.weight_unit,
+            data.is_featured,
+            session.user_id,
+            session.user_id
+        ])
 
-        const id = rows[0].id
-        const uploadedMedia: { url: string; media_type: "image" | "video" }[] = []
-
-
-        for (const file of validFiles) {
-            const isImage = file.type.startsWith("image/")
-            const isVideo = file.type.startsWith("video/")
-
-            if (!isImage && !isVideo) {
-                throw new Error("Unsupported media type")
-            }
-
-            const filePath = `product${id}-${Date.now()}-${file.name}`
-
-
-            const arrayBuffer = await file.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
-
-            const { error} = await supabase.storage
-                .from("products")
-                .upload(filePath, buffer, {
-                    contentType: file.type,
-                    upsert: false
-                })
-
-            if (error){
-                throw new Error(`Supabase upload failed: ${error.message}`)
-            }
-
-            const { data: publicUrl } = supabase.storage
-                .from("products")
-                .getPublicUrl(filePath)
-
-            uploadedMedia.push({ url: publicUrl.publicUrl, media_type: isVideo ? "video" : "image" })
-        }
+        const id = Number(rows[0].id)
+        const uploadedMedia = await uploadProductMediaFiles(id, validFiles)
 
         if (uploadedMedia.length > 0) {
             const values: unknown[] = []
@@ -136,11 +175,18 @@ export async function POST(req: Request){
         })
         
     } catch(err){
-        await client.query("ROLLBACK")
+        try {
+            await client.query("ROLLBACK")
+        } catch {
+            /* no active transaction */
+        }
         console.error("Error Adding Product to System", err)
 
+        const message =
+            err instanceof Error ? err.message : "Error Adding Product to System"
+
         return NextResponse.json({
-            message: "Error Adding Product to System",
+            message,
             success: false
         },{status: 500})
     }
@@ -211,6 +257,14 @@ export async function PUT(req: Request) {
 
 
         const data = await req.json()
+        const weightUnit = String(data.weight_unit ?? "kg")
+
+        if (!isValidProductWeightUnit(weightUnit)) {
+            return NextResponse.json(
+                { success: false, message: "Weight unit must be kg or cbm" },
+                { status: 400 }
+            )
+        }
 
         const { rows } = await pool.query(`
             UPDATE products 
@@ -222,15 +276,31 @@ export async function PUT(req: Request) {
                 stock_quantity = $5, 
                 low_stock_threshold = $6, 
                 weight = $7, 
-                is_featured = $8, 
+                weight_unit = $8,
+                is_featured = $9, 
                 updated_at = NOW(), 
-                updated_by = $9, 
-                status = $10, 
-                discount_price = $11, 
-                cost_price = $12
-            WHERE id = $13
+                updated_by = $10, 
+                status = $11, 
+                discount_price = $12, 
+                cost_price = $13
+            WHERE id = $14
             RETURNING *
-        `, [data.name, data.description, data.category_id, data.price, data.stock_quantity, data.low_stock_threshold, data.weight, data.is_featured, session.user_id, data.status, data.discount_price, data.cost_price, data.id])
+        `, [
+            data.name,
+            data.description,
+            data.category_id,
+            data.price,
+            data.stock_quantity,
+            data.low_stock_threshold,
+            data.weight,
+            weightUnit,
+            data.is_featured,
+            session.user_id,
+            data.status,
+            data.discount_price,
+            data.cost_price,
+            data.id,
+        ])
         
         return NextResponse.json({
             message: "Product succesfully Updated",

@@ -61,9 +61,11 @@ export async function GET(req: NextRequest) {
           p.category_id,
           p.price,
           p.discount_price,
+          p.discount_min_qty,
           p.stock_quantity,
           p.low_stock_threshold,
           p.weight,
+          p.weight_unit,
           p.is_featured,
           p.created_at,
           p.updated_at

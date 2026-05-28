@@ -3,6 +3,7 @@
 import { PortalAccountPageHeader } from "@/components/portal/account/PortalAccountPageHeader"
 import { PortalCartItem } from "@/components/portal/shop/PortalCartItem"
 import { calculateDeliveryZonePrice } from "@/lib/calculators/calculateDeliveryZonePrice"
+import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 import { useCartStore } from "@/store/cartStore"
 import type { Address } from "@/types/entityTypeDef"
 import Link from "next/link"
@@ -31,10 +32,12 @@ export function PortalCartPage() {
 
   const subtotal = useMemo(() => {
     return cart.reduce((acc, item) => {
-      const price =
-        item.discount_price && item.discount_price > 0
-          ? item.discount_price
-          : item.price
+      const price = getUnitPriceForQuantity({
+        price: item.price,
+        discount_price: item.discount_price,
+        discount_min_qty: item.discount_min_qty,
+        quantity: item.amount_to_be_ordered,
+      })
       return acc + price * item.amount_to_be_ordered
     }, 0)
   }, [cart])

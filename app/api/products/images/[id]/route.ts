@@ -1,5 +1,9 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import {
+  getValidProductMediaFiles,
+  uploadProductMediaFiles,
+} from "@/lib/products/uploadProductMedia"
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
@@ -72,8 +76,7 @@ export async function POST(
 
     const { id } = await params
     const formData = await req.formData()
-    const files = formData.getAll("media") as File[]
-    const validFiles = files.filter((f) => f instanceof File && f.size > 0)
+    const validFiles = getValidProductMediaFiles(formData.getAll("media"))
 
     if (validFiles.length < 1) {
       return NextResponse.json(
@@ -98,35 +101,12 @@ export async function POST(
     )
     const hasPrimary = (primaryRes.rowCount ?? 0) > 0
 
-    const uploaded: { url: string; media_type: "image" | "video"; is_primary: boolean }[] =
-      []
-
-    for (let i = 0; i < validFiles.length; i++) {
-      const file = validFiles[i]
-      const isImage = file.type.startsWith("image/")
-      const isVideo = file.type.startsWith("video/")
-      if (!isImage && !isVideo) {
-        throw new Error("Unsupported media type")
-      }
-
-      const filePath = `product${id}-${Date.now()}-${file.name}`
-      const arrayBuffer = await file.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-
-      const { error } = await supabase.storage.from("products").upload(filePath, buffer, {
-        contentType: file.type,
-        upsert: false,
-      })
-      if (error) throw new Error(`Supabase upload failed: ${error.message}`)
-
-      const { data: publicUrl } = supabase.storage.from("products").getPublicUrl(filePath)
-      const makePrimary = !hasPrimary && i === 0
-      uploaded.push({
-        url: publicUrl.publicUrl,
-        media_type: isVideo ? "video" : "image",
-        is_primary: makePrimary,
-      })
-    }
+    const media = await uploadProductMediaFiles(Number(id), validFiles)
+    const uploaded = media.map((m, i) => ({
+      url: m.url,
+      media_type: m.media_type,
+      is_primary: !hasPrimary && i === 0,
+    }))
 
     const values: unknown[] = []
     const rowsSql = uploaded.map((m, index) => {

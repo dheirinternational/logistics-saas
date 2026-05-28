@@ -3,7 +3,8 @@
 import { ShopProductCartControls } from "@/components/shop/ShopProductCartControls"
 import type { MarketingShopProduct } from "@/lib/marketing/shopCatalog"
 import { useCartStore } from "@/store/cartStore"
-import Image from "next/image"
+import { getTierPricingLabel, getUnitPriceForQuantity, hasTierDiscount } from "@/lib/shop/pricing"
+import { ProductStorageImage } from "@/components/shop/ProductStorageImage"
 import Link from "next/link"
 import type { MouseEvent } from "react"
 import { toast } from "@/lib/ui/toast"
@@ -22,12 +23,17 @@ export function ShopProductCard({
 }: ShopProductCardProps) {
   const addProduct = useCartStore((s) => s.addProduct)
 
-  const displayPrice =
-    product.discount_price &&
-    Number(product.discount_price) > 0 &&
-    Number(product.discount_price) < Number(product.price)
-      ? Number(product.discount_price)
-      : Number(product.price)
+  const displayPrice = getUnitPriceForQuantity({
+    price: Number(product.price),
+    discount_price: Number(product.discount_price ?? 0),
+    discount_min_qty: Number(product.discount_min_qty ?? 0),
+    quantity: 1,
+  })
+  const tierPricingLabel = getTierPricingLabel({
+    price: Number(product.price),
+    discount_price: Number(product.discount_price ?? 0),
+    discount_min_qty: Number(product.discount_min_qty ?? 0),
+  })
 
   const label =
     categoryLabel ||
@@ -51,6 +57,7 @@ export function ShopProductCard({
       name: product.name,
       price: Number(product.price),
       discount_price: Number(product.discount_price ?? 0),
+      discount_min_qty: product.discount_min_qty ?? null,
       quantity: product.stock_quantity,
       image: imageSrc,
       amount_to_be_ordered: 1,
@@ -62,7 +69,7 @@ export function ShopProductCard({
     <article className="shop-product-card group">
       <Link href={detailHref} className="shop-product-card__media block">
         {imageSrc ? (
-          <Image
+          <ProductStorageImage
             src={imageSrc}
             alt={product.name}
             fill
@@ -93,6 +100,9 @@ export function ShopProductCard({
             addAriaLabel={`Add ${product.name} to cart`}
           />
         </div>
+        {hasTierDiscount(product) && tierPricingLabel ? (
+          <p className="shop-product-card__meta">{tierPricingLabel}</p>
+        ) : null}
       </div>
     </article>
   )

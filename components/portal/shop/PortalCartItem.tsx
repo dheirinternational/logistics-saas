@@ -1,6 +1,11 @@
 "use client"
 
 import { useCartStore } from "@/store/cartStore"
+import {
+  getTierPricingLabel,
+  getUnitPriceForQuantity,
+  isTierDiscountApplied,
+} from "@/lib/shop/pricing"
 import type { CartProduct } from "@/types/entityTypeDef"
 import { IconMinus, IconPlus, IconTrash } from "@tabler/icons-react"
 import Image from "next/image"
@@ -15,8 +20,17 @@ export function PortalCartItem({ item }: PortalCartItemProps) {
   const decreaseAmount = useCartStore((s) => s.decreaseAmount)
   const editIndividualItem = useCartStore((s) => s.editIndividualItem)
 
-  const unitPrice =
-    item.discount_price && item.discount_price > 0 ? item.discount_price : item.price
+  const unitPrice = getUnitPriceForQuantity({
+    price: item.price,
+    discount_price: item.discount_price,
+    discount_min_qty: item.discount_min_qty,
+    quantity: item.amount_to_be_ordered,
+  })
+  const tierLabel = getTierPricingLabel(item)
+  const discountApplied = isTierDiscountApplied({
+    ...item,
+    quantity: item.amount_to_be_ordered,
+  })
   const lineTotal = unitPrice * item.amount_to_be_ordered
 
   return (
@@ -77,6 +91,12 @@ export function PortalCartItem({ item }: PortalCartItemProps) {
           <span className="portal-cart-item__unit tabular-nums">
             ₦{Number(unitPrice).toLocaleString()} each
           </span>
+          {tierLabel ? (
+            <span className="portal-cart-item__unit tabular-nums">
+              {tierLabel}
+              {discountApplied ? " (applied)" : ""}
+            </span>
+          ) : null}
 
           <button
             type="button"

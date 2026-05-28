@@ -2,6 +2,7 @@ import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { generateOrderTrackingNumber } from "@/lib/generators/generateTrackingNumber"
 import { CartProduct } from "@/types/entityTypeDef"
+import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 import type { PoolClient } from "pg"
 import {
   assertOrderPayable,
@@ -85,10 +86,12 @@ export async function createOrderForBankTransfer(params: {
     )
 
     for (const item of params.cartItems) {
-      const price =
-        item.discount_price && item.discount_price !== 0
-          ? item.discount_price
-          : item.price
+      const price = getUnitPriceForQuantity({
+        price: Number(item.price),
+        discount_price: Number(item.discount_price ?? 0),
+        discount_min_qty: Number(item.discount_min_qty ?? 0),
+        quantity: Number(item.amount_to_be_ordered),
+      })
 
       await client.query(
         `

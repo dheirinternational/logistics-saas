@@ -1,30 +1,49 @@
 import type { PackageStatusChipVariant } from "@/lib/portal/packageStatus"
 import type { Order } from "@/types/entityTypeDef"
 
-const ORDER_STATUS_VARIANTS: Record<
-  Order["status"],
-  PackageStatusChipVariant
-> = {
+/** Values allowed by `orders.status` check constraint in Postgres. */
+export const ORDER_STATUSES = [
+  "Confirmed",
+  "preparing",
+  "shipped",
+  "delivered",
+  "cancelled",
+] as const
+
+export type OrderStatus = (typeof ORDER_STATUSES)[number]
+
+export const ORDER_ADMIN_STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
+  { value: "Confirmed", label: "Confirmed" },
+  { value: "preparing", label: "Processing" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "cancelled", label: "Cancelled" },
+]
+
+const ORDER_STATUS_VARIANTS: Record<OrderStatus, PackageStatusChipVariant> = {
   Confirmed: "blue",
   preparing: "orange",
   shipped: "blue",
   delivered: "green",
+  cancelled: "neutral",
 }
 
-const ORDER_STATUS_LABELS: Record<Order["status"], string> = {
+const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   Confirmed: "Confirmed",
-  preparing: "Preparing",
+  preparing: "Processing",
   shipped: "Shipped",
   delivered: "Delivered",
+  cancelled: "Cancelled",
 }
 
 export const ORDER_FILTER_OPTIONS = [
   { value: "", label: "All statuses" },
-  { value: "Confirmed", label: "Confirmed" },
-  { value: "preparing", label: "Preparing" },
-  { value: "shipped", label: "Shipped" },
-  { value: "delivered", label: "Delivered" },
+  ...ORDER_ADMIN_STATUS_OPTIONS,
 ] as const
+
+export function isValidOrderStatus(status: string): status is OrderStatus {
+  return (ORDER_STATUSES as readonly string[]).includes(status)
+}
 
 export function getOrderStatusLabel(status: string): string {
   return (

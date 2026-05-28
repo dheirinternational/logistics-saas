@@ -18,7 +18,7 @@ export async function GET() {
       `
         SELECT COUNT(*)::int AS count
         FROM orders
-        WHERE status IN ('Confirmed', 'processing')
+        WHERE status IN ('Confirmed', 'preparing')
       `
     )
 

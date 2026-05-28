@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { uploadPackageImages } from "@/lib/packages/uploadPackageImages"
 import { NextResponse } from "next/server"
 import type { DatabaseError } from "pg"
 
@@ -19,7 +20,13 @@ export async function PUT(
     }
 
     const { id } = await params
+    const packageId = Number(id)
+    if (!Number.isFinite(packageId)) {
+      return NextResponse.json({ success: false, message: "Invalid package id" }, { status: 400 })
+    }
+
     const formData = await req.formData()
+    const imageEntries = formData.getAll("images")
 
     const package_name = String(formData.get("package_name") ?? "").trim()
     const incoming_package_id = String(formData.get("incoming_package_id") ?? "").trim()
@@ -50,7 +57,7 @@ export async function PUT(
 
     const existingIdentifier = await client.query(
       `SELECT id FROM packages WHERE incoming_package_id = $1 AND id <> $2 LIMIT 1`,
-      [incoming_package_id, Number(id)]
+      [incoming_package_id, packageId]
     )
 
     if (existingIdentifier.rows.length > 0) {
@@ -90,7 +97,7 @@ export async function PUT(
         received_at,
         stored_at,
         amount,
-        Number(id),
+        packageId,
       ]
     )
 
@@ -98,6 +105,8 @@ export async function PUT(
       await client.query("ROLLBACK")
       return NextResponse.json({ success: false, message: "Package not found" }, { status: 404 })
     }
+
+    await uploadPackageImages(client, packageId, imageEntries)
 
     await client.query("COMMIT")
     return NextResponse.json({ success: true, message: "Package updated successfully" })

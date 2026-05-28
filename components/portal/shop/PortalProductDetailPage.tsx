@@ -9,20 +9,22 @@ import {
   IconPlus,
   IconShoppingCart,
 } from "@tabler/icons-react"
-import Image from "next/image"
+import { ProductStorageImage } from "@/components/shop/ProductStorageImage"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
 import { extractTrailingNumericId } from "@/lib/portal/slug"
-
-function getDisplayPrice(product: Product) {
-  const discount = Number(product.discount_price ?? 0)
-  const price = Number(product.price)
-  if (discount > 0 && discount < price) return discount
-  return price
-}
+import {
+  getTierPricingLabel,
+  getUnitPriceForQuantity,
+  isTierDiscountApplied,
+} from "@/lib/shop/pricing"
+import {
+  pickPreferredProductImage,
+  sortProductImagesForGallery,
+} from "@/lib/shop/productMedia"
 
 export function PortalProductDetailPage() {
   const params = useParams()
@@ -52,11 +54,23 @@ export function PortalProductDetailPage() {
     return cat.name.charAt(0).toUpperCase() + cat.name.slice(1)
   }, [product, categories])
 
-  const displayPrice = product ? getDisplayPrice(product) : 0
-  const hasDiscount =
-    product &&
-    Number(product.discount_price) > 0 &&
-    Number(product.discount_price) < Number(product.price)
+  const displayPrice = product
+    ? getUnitPriceForQuantity({
+        price: Number(product.price),
+        discount_price: Number(product.discount_price ?? 0),
+        discount_min_qty: Number(product.discount_min_qty ?? 0),
+        quantity,
+      })
+    : 0
+  const tierPricingLabel = product ? getTierPricingLabel(product) : null
+  const discountActive = product
+    ? isTierDiscountApplied({
+        price: Number(product.price),
+        discount_price: Number(product.discount_price ?? 0),
+        discount_min_qty: Number(product.discount_min_qty ?? 0),
+        quantity,
+      })
+    : false
 
   const inCart = product ? cart.some((item) => item.id === product.id) : false
   const inStock = (product?.stock_quantity ?? 0) > 0
@@ -71,30 +85,28 @@ export function PortalProductDetailPage() {
       fetch(`/api/products/${productId}`, { credentials: "include" }).then((r) =>
         r.json(),
       ),
-      fetch(`/api/products/images/${productId}`, { credentials: "include" }).then(
-        (r) => r.json(),
-      ),
       fetch("/api/products/categories", { credentials: "include" }).then((r) =>
         r.json(),
       ),
     ])
-      .then(([prodRes, imgRes, catRes]) => {
+      .then(([prodRes, catRes]) => {
         if (cancelled) return
         if (!prodRes?.data) {
           setProduct(null)
           return
         }
-        const prod = prodRes.data as Product
-        const imgs = (imgRes.data ?? []) as ProductImage[]
+        const payload = prodRes.data as Product & { images?: ProductImage[] }
+        const { images: rawImages = [], ...prod } = payload
+        const imgs = sortProductImagesForGallery(rawImages)
+        const preferred = pickPreferredProductImage(imgs)
         setProduct(prod)
         setImages(imgs)
         setCategories(catRes.data ?? [])
-        const first = imgs[0]
         setSelectedMedia(
-          first?.image_url
+          preferred?.image_url
             ? {
-                url: first.image_url,
-                type: first.media_type === "video" ? "video" : "image",
+                url: preferred.image_url,
+                type: preferred.media_type === "video" ? "video" : "image",
               }
             : null
         )
@@ -170,6 +182,7 @@ export function PortalProductDetailPage() {
       name: product.name,
       price: Number(product.price),
       discount_price: Number(product.discount_price ?? 0),
+      discount_min_qty: product.discount_min_qty ?? null,
       quantity: product.stock_quantity,
       image: selectedMedia.type === "image" ? selectedMedia.url : "/logo-colored.png",
       amount_to_be_ordered: quantity,
@@ -225,7 +238,7 @@ export function PortalProductDetailPage() {
                   style={{ width: "100%", height: "100%", padding: 24 }}
                 />
               ) : (
-                <Image
+                <ProductStorageImage
                   src={selectedMedia.url}
                   alt={product.name}
                   fill
@@ -255,27 +268,17 @@ export function PortalProductDetailPage() {
                     aria-current={active ? "true" : undefined}
                   >
                     {type === "video" ? (
-                      <video
-                        src={image.image_url}
-                        muted
-                        playsInline
-                        preload="metadata"
-                        style={{
-                          position: "absolute",
-                          inset: 0,
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "contain",
-                          padding: 4,
-                        }}
-                      />
+                      <span className="portal-pdp__thumb-video" aria-hidden>
+                        Video
+                      </span>
                     ) : (
-                      <Image
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
                         src={image.image_url}
                         alt=""
-                        fill
-                        sizes="72px"
-                        className="object-contain p-1"
+                        loading="lazy"
+                        decoding="async"
+                        className="portal-pdp__thumb-img"
                       />
                     )}
                   </button>
@@ -292,10 +295,13 @@ export function PortalProductDetailPage() {
             <p className="portal-pdp__price tabular-nums">
               ₦{displayPrice.toLocaleString()}
             </p>
-            {hasDiscount ? (
+            {discountActive ? (
               <p className="portal-pdp__price-was tabular-nums">
                 ₦{Number(product.price).toLocaleString()}
               </p>
+            ) : null}
+            {tierPricingLabel ? (
+              <p className="portal-cart__muted">{tierPricingLabel}</p>
             ) : null}
           </div>
 

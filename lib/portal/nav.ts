@@ -1,9 +1,9 @@
 import type { TablerIcon } from "@tabler/icons-react"
 import {
   IconCalculator,
-  IconHome,
   IconPackage,
   IconShoppingBag,
+  IconTruckDelivery,
   IconUser,
 } from "@tabler/icons-react"
 
@@ -18,7 +18,8 @@ export type PortalNavItem = {
 
 /** Primary sidebar navigation - see plan.md §9 */
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
-  { id: "home", label: "Home", href: "/customer", icon: IconHome },
+  { id: "shop", label: "Shop", href: "/customer/shop", icon: IconShoppingBag },
+  { id: "home", label: "Logistics", href: "/customer", icon: IconTruckDelivery },
   {
     id: "packages",
     label: "Packages",
@@ -26,7 +27,6 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
     icon: IconPackage,
   },
   { id: "quote", label: "Quote", href: "/customer/estimate", icon: IconCalculator },
-  { id: "shop", label: "Shop", href: "/customer/shop", icon: IconShoppingBag },
   { id: "account", label: "Account", href: "/customer/profile", icon: IconUser },
 ]
 
@@ -77,7 +77,7 @@ function matchesAnyPrefix(
  * Highlights the correct sidebar tab on nested portal routes.
  *
  * Route map (all `/customer` pages):
- * - home: `/customer`, `/customer/announcements/*`
+ * - home (Logistics): `/customer`, `/customer/announcements/*`
  * - quote: `/customer/estimate`
  * - shop: `/customer/shop`, `/customer/marketplace/*`, `/customer/orders/*`, `/customer/verify_order_payment`
  * - packages: packages hub, add/request/track flows, shipment payments

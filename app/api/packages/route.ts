@@ -1,15 +1,9 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
-import { createClient } from "@supabase/supabase-js";
+import { uploadPackageImages } from "@/lib/packages/uploadPackageImages";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import type { DatabaseError } from "pg";
-
-
-const supabase = createClient(
-    process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_SUPABASE_URL! : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST!, 
-    process.env.NODE_ENV === "production" ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
-)
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -37,9 +31,8 @@ export async function POST(req: NextRequest){
         }
 
         const formData = await req.formData()
-        const fileImages = formData.getAll("images")
-        
-        console.log(fileImages)
+        const imageEntries = formData.getAll("images")
+
         const data = {
             package_name: formData.get("package_name"),
             incoming_package_id: formData.get("incoming_package_id"),
@@ -63,13 +56,6 @@ export async function POST(req: NextRequest){
             )
         }
 
-        if(fileImages.length < 1 ){
-            return NextResponse.json({
-                success: false,
-                message: "No Images Selected"
-            }, {status: 400})
-        }
-
         await client.query("BEGIN")
 
         const userId = await client.query(
@@ -78,6 +64,7 @@ export async function POST(req: NextRequest){
         );
 
         if (userId.rows.length === 0){
+            await client.query("ROLLBACK")
             return NextResponse.json({
                 success: false,
                 message: `User with Customer code ${data.customer_code} was not found`
@@ -118,48 +105,8 @@ export async function POST(req: NextRequest){
 
         
         const { id } = res.rows[0]
-        const uploadedImages: string[] = []
+        await uploadPackageImages(client, Number(id), imageEntries)
 
-        for(const file of fileImages){
-            if(!(file instanceof File) || file.size === 0) continue
-
-            const filePath = `package${id}-${Date.now()}-${file.name}`
-            const arrayBuffer = await file.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
-
-            const { error } = await supabase.storage
-                .from("packages")
-                .upload(filePath, buffer, {
-                    contentType: file.type,
-                    upsert: false
-                })
-
-            if (error) {
-                throw new Error(`Supabase upload failed: ${error.message}`)
-            }
-
-            const { data: publicUrl } = supabase.storage
-                .from("packages")
-                .getPublicUrl(filePath)
-
-            uploadedImages.push(publicUrl.publicUrl)
-
-        }
-
-        if (uploadedImages.length > 0) {
-            const values: unknown[] = []
-            const rowsSql = uploadedImages.map((url, index) => {
-                const base = index * 3
-                values.push(id, url, index === 0)
-                return `($${base + 1}, $${base + 2}, $${base + 3})`
-            })
-    
-            await client.query(`
-                INSERT INTO package_images (package_id, image_url, is_primary)
-                VALUES ${rowsSql.join(", ")}
-            `, values)
-        }  
-        
         // Get user email
         const userRes = await client.query(
             `SELECT email FROM users WHERE id = $1`,

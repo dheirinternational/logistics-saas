@@ -9,6 +9,23 @@ import { IconX } from "@tabler/icons-react"
 
 type DurationType = "days" | "weeks" | "months"
 
+function formatNairaAmount(amount: number) {
+    const value = Number(amount)
+    if (!Number.isFinite(value)) return "₦0"
+    return `₦${value.toLocaleString("en-NG", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    })}`
+}
+
+function formatDollarAmount(amount: number) {
+    const value = Number(amount)
+    if (!Number.isFinite(value)) return "$0"
+    return `$${value.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    })}`
+}
 
 type MoneyExchangeRate = {
     name: string,
@@ -488,10 +505,14 @@ const AirComp = ({
         </div>
         <div className="portal-home__section-sub" style={{ marginTop: 10 }}>
             <p style={{ margin: 0 }}>
-                Price per {(template.rate_unit ?? "kg")}: {currencyValue === 1 ? "$" : "₦"}
-                {(template.price * currencyValue).toFixed(2)}
+                Price per {(template.rate_unit ?? "kg")}:{" "}
+                {currencyValue === 1
+                    ? formatDollarAmount(template.price)
+                    : formatNairaAmount(template.price * currencyValue)}
             </p>
-            <p style={{ margin: 0 }}>Clearance fee per {(template.rate_unit ?? "kg")}: ₦{template.clearance}</p>
+            <p style={{ margin: 0 }}>
+                Clearance fee per {(template.rate_unit ?? "kg")}: {formatNairaAmount(template.clearance)}
+            </p>
             <p style={{ margin: 0 }}>
                         Minimum expected delivery: {template.min_duration} {template.duration_type}
                     </p>
@@ -601,8 +622,12 @@ const SeaTemp = ({ template, onEdit }: { template: SeaPricingTemplate; onEdit: (
             </button>
         </div>
         <div className="portal-home__section-sub" style={{ marginTop: 10 }}>
-            <p style={{ margin: 0 }}>Price per {(template.rate_unit ?? "cbm")}: ₦{template.price}</p>
-            <p style={{ margin: 0 }}>Clearance fee per {(template.rate_unit ?? "cbm")}: ₦{template.clearance}</p>
+            <p style={{ margin: 0 }}>
+                Price per {(template.rate_unit ?? "cbm")}: {formatNairaAmount(template.price)}
+            </p>
+            <p style={{ margin: 0 }}>
+                Clearance fee per {(template.rate_unit ?? "cbm")}: {formatNairaAmount(template.clearance)}
+            </p>
             <p style={{ margin: 0 }}>
                         Minimum expected delivery: {template.min_duration} {template.duration_type}
                     </p>
@@ -730,10 +755,12 @@ const ExpressContainer = ({
         </div>
         <div className="portal-home__section-sub" style={{ marginTop: 10 }}>
             <p style={{ margin: 0 }}>
-                Price: {currencyValue === 1 ? "$" : "₦"}
-                {(template.price * currencyValue).toFixed(2)}
+                Price:{" "}
+                {currencyValue === 1
+                    ? formatDollarAmount(template.price)
+                    : formatNairaAmount(template.price * currencyValue)}
             </p>
-            <p style={{ margin: 0 }}>Clearance fee: ₦{template.clearance}</p>
+            <p style={{ margin: 0 }}>Clearance fee: {formatNairaAmount(template.clearance)}</p>
             <p style={{ margin: 0 }}>
                         Minimum expected delivery: {template.min_duration} {template.duration_type}
                     </p>

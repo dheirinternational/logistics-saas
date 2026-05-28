@@ -1,3 +1,5 @@
+import { resolveDashboardHref } from "@/lib/auth/postAuthRedirect"
+
 export type MarketingHeaderUser = {
   id: number
   email: string
@@ -33,6 +35,6 @@ export function toMarketingHeaderUser(session: SessionRow): MarketingHeaderUser 
     lastName,
     profileImg: session.profile_img?.trim() || null,
     displayName,
-    dashboardHref: session.role === "admin" ? "/admin" : "/customer/profile",
+    dashboardHref: resolveDashboardHref(session.role),
   }
 }

@@ -12,14 +12,27 @@ export async function GET() {
           p.name,
           p.price,
           p.discount_price,
+          p.discount_min_qty,
           p.stock_quantity,
+          p.weight,
+          p.weight_unit,
           c.name AS category_name,
-          (
-            SELECT pi.image_url
-            FROM product_images pi
-            WHERE pi.product_id = p.id
-            ORDER BY pi.id ASC
-            LIMIT 1
+          COALESCE(
+            (
+              SELECT pi.image_url
+              FROM product_images pi
+              WHERE pi.product_id = p.id
+                AND COALESCE(pi.media_type, 'image') <> 'video'
+              ORDER BY pi.is_primary DESC, pi.id ASC
+              LIMIT 1
+            ),
+            (
+              SELECT pi.image_url
+              FROM product_images pi
+              WHERE pi.product_id = p.id
+              ORDER BY pi.is_primary DESC, pi.id ASC
+              LIMIT 1
+            )
           ) AS image_url
         FROM products p
         LEFT JOIN categories c ON c.id = p.category_id

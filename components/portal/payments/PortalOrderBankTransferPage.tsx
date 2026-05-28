@@ -4,6 +4,7 @@ import { PortalPageBack } from "@/components/portal/PortalPageBack"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { calculateDeliveryZonePrice } from "@/lib/calculators/calculateDeliveryZonePrice"
 import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
+import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 import { toast } from "@/lib/ui/toast"
 import { useCartStore } from "@/store/cartStore"
 import type { Address, CartProduct } from "@/types/entityTypeDef"
@@ -44,10 +45,12 @@ export function PortalOrderBankTransferPage() {
 
   const subtotal = useMemo(() => {
     return cart.reduce((acc, item) => {
-      const price =
-        item.discount_price && item.discount_price > 0
-          ? item.discount_price
-          : item.price
+      const price = getUnitPriceForQuantity({
+        price: item.price,
+        discount_price: item.discount_price,
+        discount_min_qty: item.discount_min_qty,
+        quantity: item.amount_to_be_ordered,
+      })
       return acc + price * item.amount_to_be_ordered
     }, 0)
   }, [cart])

@@ -3,17 +3,31 @@
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
 import { toast } from "@/lib/ui/toast"
-import { Product, ProductCategory } from "@/types/entityTypeDef"
+import { getProductWeightFieldLabel } from "@/lib/shop/productWeight"
+import type { ProductWeightUnit } from "@/lib/shop/productWeight"
+import { ProductCategory } from "@/types/entityTypeDef"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { IconPlayerPlay, IconX } from "@tabler/icons-react"
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react"
 
-type ProductValues = Omit<
-    Product,
-    "id" | "status" | "created_at" | "created_by" | "updated_by" | "updated_at" | "discount_price"
->
+const MAX_MEDIA = 8
 
-type ImagePreview = {
+type ProductValues = {
+    name: string
+    description: string
+    category_id: number
+    price: number
+    discount_price: number | ""
+    discount_min_qty: number | ""
+    stock_quantity: number
+    weight: number
+    weight_unit: ProductWeightUnit
+    is_featured: boolean
+}
+
+type MediaPreview = {
+    id: string
     preview: string
     file: File
 }
@@ -24,18 +38,23 @@ const AddProduct = () => {
         description: "",
         category_id: 0,
         price: 0,
-        cost_price: 0,
+        discount_price: "",
+        discount_min_qty: "",
         stock_quantity: 0,
-        low_stock_threshold: 0,
         weight: 0,
+        weight_unit: "kg",
         is_featured: false,
     })
 
     const [categories, setCategories] = useState<ProductCategory[]>([])
-    const [images, setImages] = useState<ImagePreview[]>([])
+    const [images, setImages] = useState<MediaPreview[]>([])
     const [isAddingProduct, setIsAddingProduct] = useState(false)
+    const [fullscreenVideoSrc, setFullscreenVideoSrc] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement | null>(null)
+    const imagesRef = useRef<MediaPreview[]>([])
     const router = useRouter()
+
+    imagesRef.current = images
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -57,6 +76,23 @@ const AddProduct = () => {
             setIsAddingProduct(false)
             return
         }
+        if (
+            productValues.discount_price !== "" &&
+            Number(productValues.discount_price) > 0 &&
+            Number(productValues.discount_price) >= Number(productValues.price)
+        ) {
+            toast.error("Discounted price must be less than price")
+            setIsAddingProduct(false)
+            return
+        }
+        if (
+            productValues.discount_min_qty !== "" &&
+            Number(productValues.discount_min_qty) < 1
+        ) {
+            toast.error("Qty for discounted price must be 2 or more")
+            setIsAddingProduct(false)
+            return
+        }
         if (productValues.weight === 0) {
             toast.error("Product weight cannot be equal to or less than 0")
             setIsAddingProduct(false)
@@ -73,6 +109,12 @@ const AddProduct = () => {
         } else {
             formData.delete("is_featured")
         }
+        if (productValues.discount_price === "") {
+            formData.delete("discount_price")
+        }
+        if (productValues.discount_min_qty === "") {
+            formData.delete("discount_min_qty")
+        }
 
         try {
             const res = await fetch("/api/products", {
@@ -83,7 +125,7 @@ const AddProduct = () => {
             const result = await res.json()
 
             if (!res.ok) {
-                toast.error(result.message)
+                toast.error(result.message || "Could not add product")
                 return
             }
 
@@ -97,19 +139,38 @@ const AddProduct = () => {
         }
     }
 
+    const removeMedia = (id: string) => {
+        setImages((prev) => {
+            const target = prev.find((item) => item.id === id)
+            if (target) URL.revokeObjectURL(target.preview)
+            return prev.filter((item) => item.id !== id)
+        })
+    }
+
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
-        if (!files || files.length < 1) {
-            toast.error("No media selected")
+        if (!files || files.length < 1) return
+
+        const remaining = MAX_MEDIA - images.length
+        if (remaining <= 0) {
+            toast.error(`Maximum ${MAX_MEDIA} media files per product`)
+            if (fileInputRef.current) fileInputRef.current.value = ""
             return
         }
 
-        images.forEach((image) => URL.revokeObjectURL(image.preview))
-        const previewUrls = Array.from(files).map((file) => ({
+        const incoming = Array.from(files).slice(0, remaining)
+        if (incoming.length < files.length) {
+            toast.error(`Only ${remaining} more file(s) allowed (max ${MAX_MEDIA})`)
+        }
+
+        const added: MediaPreview[] = incoming.map((file) => ({
+            id: crypto.randomUUID(),
             preview: URL.createObjectURL(file),
             file,
         }))
-        setImages(previewUrls.slice(0, 8))
+
+        setImages((prev) => [...prev, ...added])
+        if (fileInputRef.current) fileInputRef.current.value = ""
     }
 
     useEffect(() => {
@@ -138,9 +199,9 @@ const AddProduct = () => {
 
     useEffect(() => {
         return () => {
-            images.forEach((image) => URL.revokeObjectURL(image.preview))
+            imagesRef.current.forEach((image) => URL.revokeObjectURL(image.preview))
         }
-    }, [images])
+    }, [])
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, type } = e.currentTarget
@@ -201,18 +262,6 @@ const AddProduct = () => {
                 </label>
 
                 <label className="portal-packages__field">
-                    <span className="portal-packages__field-label">Cost price (₦)</span>
-                    <input
-                        type="number"
-                        name="cost_price"
-                        className="dheir-input"
-                        value={productValues.cost_price}
-                        onChange={handleInputChange}
-                        min={0}
-                    />
-                </label>
-
-                <label className="portal-packages__field">
                     <span className="portal-packages__field-label">Stock quantity</span>
                     <input
                         type="number"
@@ -226,20 +275,35 @@ const AddProduct = () => {
                 </label>
 
                 <label className="portal-packages__field">
-                    <span className="portal-packages__field-label">Low stock threshold</span>
+                    <span className="portal-packages__field-label">Discounted price (₦)</span>
                     <input
                         type="number"
-                        name="low_stock_threshold"
+                        name="discount_price"
                         className="dheir-input"
-                        value={productValues.low_stock_threshold}
+                        value={productValues.discount_price}
                         onChange={handleInputChange}
                         min={0}
-                        required
+                        placeholder="Optional"
                     />
                 </label>
 
                 <label className="portal-packages__field">
-                    <span className="portal-packages__field-label">Weight (kg)</span>
+                    <span className="portal-packages__field-label">Qty for discounted price</span>
+                    <input
+                        type="number"
+                        name="discount_min_qty"
+                        className="dheir-input"
+                        value={productValues.discount_min_qty}
+                        onChange={handleInputChange}
+                        min={2}
+                        placeholder="Exact qty only (e.g. 4)"
+                    />
+                </label>
+
+                <label className="portal-packages__field">
+                    <span className="portal-packages__field-label">
+                        {getProductWeightFieldLabel(productValues.weight_unit)}
+                    </span>
                     <input
                         type="number"
                         name="weight"
@@ -250,6 +314,24 @@ const AddProduct = () => {
                         step="0.01"
                         required
                     />
+                </label>
+
+                <label className="portal-packages__field">
+                    <span className="portal-packages__field-label">Unit</span>
+                    <DheirSelect
+                        name="weight_unit"
+                        value={productValues.weight_unit}
+                        onChange={(e) =>
+                            setProductValues((prev) => ({
+                                ...prev,
+                                weight_unit: e.target.value as ProductWeightUnit,
+                            }))
+                        }
+                        required
+                    >
+                        <option value="kg">KG</option>
+                        <option value="cbm">CBM</option>
+                    </DheirSelect>
                 </label>
 
                 <label className="portal-packages__field">
@@ -285,21 +367,22 @@ const AddProduct = () => {
                         <p className="portal-packages__field-label" style={{ margin: 0 }}>
                             Media
                         </p>
-                        <p className="admin-uploader__help">Upload at least 1 product media (images or videos).</p>
+                        <p className="admin-uploader__help">
+                            Upload at least 1 product media (images or videos). You can add more in batches (max {MAX_MEDIA}).
+                        </p>
                     </div>
                     <button
                         type="button"
                         className="portal-home__btn portal-home__btn--secondary"
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        Choose media
+                        {images.length > 0 ? "Add more media" : "Choose media"}
                     </button>
                     <input
                         ref={fileInputRef}
                         type="file"
                         accept="image/*,video/*"
                         multiple
-                        name="images"
                         onChange={handleImageChange}
                         style={{ display: "none" }}
                     />
@@ -307,32 +390,82 @@ const AddProduct = () => {
 
                 {images.length > 0 ? (
                     <div className="admin-uploader__previews">
-                        {images.map((img, index) => (
-                            <div key={img.preview + index} className="admin-uploader__preview">
-                                {img.file.type.startsWith("video/") ? (
-                                    <video
-                                        src={img.preview}
-                                        muted
-                                        playsInline
-                                        preload="metadata"
-                                        className="object-cover"
-                                        style={{
-                                            position: "absolute",
-                                            inset: 0,
-                                            width: "100%",
-                                            height: "100%",
-                                        }}
-                                    />
-                                ) : (
-                                    <Image src={img.preview} alt="" fill className="object-cover" />
-                                )}
-                            </div>
-                        ))}
+                        {images.map((img) => {
+                            const isVideo = img.file.type.startsWith("video/")
+                            return (
+                                <div key={img.id} className="admin-uploader__preview">
+                                    <div className="admin-uploader__preview-media">
+                                        {isVideo ? (
+                                            <video
+                                                src={img.preview}
+                                                muted
+                                                playsInline
+                                                preload="metadata"
+                                            />
+                                        ) : (
+                                            <Image src={img.preview} alt="" fill className="object-cover" unoptimized />
+                                        )}
+                                    </div>
+                                    <div className="admin-uploader__preview-actions">
+                                        {isVideo ? (
+                                            <button
+                                                type="button"
+                                                className="admin-uploader__play-btn"
+                                                onClick={() => setFullscreenVideoSrc(img.preview)}
+                                                aria-label="Play video"
+                                            >
+                                                <IconPlayerPlay size={28} stroke={1.5} aria-hidden />
+                                            </button>
+                                        ) : null}
+                                        <button
+                                            type="button"
+                                            className="admin-uploader__remove-btn"
+                                            onClick={() => removeMedia(img.id)}
+                                            aria-label="Remove media"
+                                        >
+                                            <IconX size={18} stroke={2} aria-hidden />
+                                        </button>
+                                    </div>
+                                </div>
+                            )
+                        })}
                     </div>
                 ) : (
                     <p className="admin-uploader__help">No media selected yet.</p>
                 )}
             </div>
+
+            {fullscreenVideoSrc ? (
+                <div
+                    className="dheir-dialog-backdrop admin-media-lightbox"
+                    role="presentation"
+                    onClick={() => setFullscreenVideoSrc(null)}
+                >
+                    <div
+                        className="admin-media-lightbox__panel"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Product video"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            className="dheir-dialog__close admin-media-lightbox__close"
+                            onClick={() => setFullscreenVideoSrc(null)}
+                            aria-label="Close video"
+                        >
+                            <IconX size={22} stroke={1.5} />
+                        </button>
+                        <video
+                            src={fullscreenVideoSrc}
+                            controls
+                            autoPlay
+                            playsInline
+                            className="admin-media-lightbox__video"
+                        />
+                    </div>
+                </div>
+            ) : null}
 
             <div className="admin-modal__actions">
                 <button type="submit" className="portal-home__btn portal-home__btn--primary" disabled={isAddingProduct}>

@@ -5,12 +5,13 @@ import { Table } from "@/components/admin/table/Table"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
 import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
+import { ORDER_ADMIN_STATUS_OPTIONS } from "@/lib/portal/orderStatus"
 import { toast } from "@/lib/ui/toast"
 import { Order } from "@/types/entityTypeDef"
 import { createColumnHelper } from "@tanstack/react-table"
 import { IconCircleCheck, IconClock, IconPackage, IconTruckDelivery, IconX } from "@tabler/icons-react"
 import { NextPage } from "next"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 type FilterValues = {
     search: string
@@ -28,35 +29,42 @@ const Page: NextPage = () => {
         status: "",
     })
 
-    useEffect(() => {
-        const fetchOrders = async () => {
+    const loadOrders = useCallback(async (options?: { silent?: boolean }) => {
+        if (!options?.silent) {
             setIsDataLoading(true)
+        }
 
-            try {
-                const res = await fetch("/api/orders", {
-                    method: "GET",
-                    credentials: "include"
-                })
+        try {
+            const res = await fetch("/api/orders", {
+                method: "GET",
+                credentials: "include",
+            })
 
-                const result = await res.json()
+            const result = await res.json()
 
-                if (!res.ok) {
-                    toast.error(result.message)
-                    setError(result.message)
-                    return
-                }
+            if (!res.ok) {
+                toast.error(result.message)
+                setError(result.message)
+                return
+            }
 
-                setOrders(result.data)
-
-            } catch (err) {
-                console.error("ERR fetching orders", err)
-            } finally {
+            setError(null)
+            setOrders(result.data ?? [])
+        } catch (err) {
+            console.error("ERR fetching orders", err)
+            if (!options?.silent) {
+                toast.error("Could not load orders")
+            }
+        } finally {
+            if (!options?.silent) {
                 setIsDataLoading(false)
             }
         }
-
-        fetchOrders()
     }, [])
+
+    useEffect(() => {
+        loadOrders()
+    }, [loadOrders])
 
     const columnHelper = createColumnHelper<Order>()
 
@@ -124,7 +132,7 @@ const Page: NextPage = () => {
     const stats = useMemo(() => {
         const total = orders.length
         const confirmed = orders.filter((o) => String(o.status).toLowerCase() === "confirmed").length
-        const processing = orders.filter((o) => String(o.status).toLowerCase() === "processing").length
+        const processing = orders.filter((o) => String(o.status).toLowerCase() === "preparing").length
         const shipped = orders.filter((o) => String(o.status).toLowerCase() === "shipped").length
         const delivered = orders.filter((o) => String(o.status).toLowerCase() === "delivered").length
         return { total, confirmed, processing, shipped, delivered }
@@ -147,9 +155,7 @@ const Page: NextPage = () => {
             if (failed > 0) toast.error(`Could not delete ${failed} order(s)`)
             else toast.success("Deleted")
 
-            const res = await fetch("/api/orders", { credentials: "include" })
-            const result = await res.json()
-            if (res.ok) setOrders(result.data ?? [])
+            if (failed === 0) await loadOrders({ silent: true })
         } catch (err) {
             console.error(err)
             toast.error("Could not delete orders")
@@ -282,9 +288,14 @@ const Page: NextPage = () => {
                     key={selectedOrder.order_id}
                     order={selectedOrder}
                     onClose={() => setSelectedOrder(null)}
-                    onUpdated={() => {
+                    onUpdated={async (updated) => {
+                        setOrders((prev) =>
+                            prev.map((o) =>
+                                o.order_id === updated.order_id ? { ...o, ...updated } : o
+                            )
+                        )
+                        await loadOrders({ silent: true })
                         setSelectedOrder(null)
-                        setFilterValues((prev) => ({ ...prev }))
                     }}
                 />
             ) : null}
@@ -299,7 +310,7 @@ const OrderModal = ({
 }: {
     order: Order
     onClose: () => void
-    onUpdated: () => void
+    onUpdated: (updated: Order) => void | Promise<void>
 }) => {
     const [status, setStatus] = useState<Order["status"]>(
         order?.status || "Confirmed"
@@ -339,23 +350,33 @@ const OrderModal = ({
         setIsUpdating(true)
 
         try {
-            const res = await fetch(`/api/orders/${order.order_id}`, {
+            const res = await fetch(`/api/orders/${encodeURIComponent(order.order_id)}`, {
                 method: "PATCH",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ status })
+                credentials: "include",
+                body: JSON.stringify({ status }),
             })
 
-            const result = await res.json()
+            const text = await res.text()
+            let result: { message?: string; data?: Order } = {}
+            if (text) {
+                try {
+                    result = JSON.parse(text)
+                } catch {
+                    result = {}
+                }
+            }
 
             if (!res.ok) {
                 toast.error(result.message || "Failed to update order")
                 return
             }
 
+            const updated: Order = result.data ?? { ...order, status }
             toast.success("Order status updated")
-            onUpdated()
+            await onUpdated(updated)
 
         } catch (err) {
             console.error("Update error:", err)
@@ -544,11 +565,11 @@ const OrderModal = ({
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value as Order["status"])}
                                 >
-                                    <option value="Confirmed">Confirmed</option>
-                                    <option value="processing">Processing</option>
-                                    <option value="shipped">Shipped</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="cancelled">Cancelled</option>
+                                    {ORDER_ADMIN_STATUS_OPTIONS.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
                                 </DheirSelect>
                             </label>
 

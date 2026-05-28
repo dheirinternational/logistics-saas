@@ -270,7 +270,18 @@ export function AdminPaymentConfirmationsPage() {
                     aria-label="Payment confirmations pages"
                   >
                     <span className="portal-home__table-pagination-text tabular-nums">
-                      Page {page} of {totalPages}
+                      <strong className="portal-home__table-pagination-total">
+                        {total.toLocaleString()} {total === 1 ? "submission" : "submissions"} total
+                      </strong>
+                      {total > 0 ? (
+                        <>
+                          {" "}
+                          · Showing {(page - 1) * pageSize + 1}–
+                          {Math.min(page * pageSize, total)}
+                        </>
+                      ) : null}
+                      {" "}
+                      · Page {page} of {totalPages}
                     </span>
                     <div className="portal-home__table-pagination-actions">
                       <button

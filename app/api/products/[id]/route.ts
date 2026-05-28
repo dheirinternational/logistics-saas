@@ -16,15 +16,31 @@ export async function GET(req: Request, {params} : {params: Promise<{id: string}
         const {id} = await params
 
 
-        const res = await pool.query(`
-            SELECT * FROM products   
-                WHERE id = $1 
-        `, [id])
+        const [productRes, imagesRes] = await Promise.all([
+            pool.query(`SELECT * FROM products WHERE id = $1`, [id]),
+            pool.query(
+                `
+                SELECT id, created_at, product_id, image_url, is_primary, media_type
+                FROM product_images
+                WHERE product_id = $1
+                ORDER BY is_primary DESC, id ASC
+                `,
+                [id]
+            ),
+        ])
+
+        const product = productRes.rows[0]
+        if (!product) {
+            return NextResponse.json(
+                { success: false, message: "Product not found" },
+                { status: 404 }
+            )
+        }
 
         return NextResponse.json({
             message: "Products succesfully fetched from database",
-            data: res.rows[0],
-            success: true
+            data: { ...product, images: imagesRes.rows },
+            success: true,
         })
     }
     catch(err){

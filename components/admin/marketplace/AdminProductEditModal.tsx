@@ -3,6 +3,8 @@
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
 import { toast } from "@/lib/ui/toast"
+import { getProductWeightFieldLabel } from "@/lib/shop/productWeight"
+import type { ProductWeightUnit } from "@/lib/shop/productWeight"
 import { Product, ProductCategory, ProductImage } from "@/types/entityTypeDef"
 import { IconHelp, IconStar, IconStarFilled, IconTrash, IconX } from "@tabler/icons-react"
 import Image from "next/image"
@@ -268,7 +270,9 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                             </label>
 
                             <label className="portal-packages__field">
-                                <span className="portal-packages__field-label">Weight (kg)</span>
+                                <span className="portal-packages__field-label">
+                                    {getProductWeightFieldLabel(draft.weight_unit)}
+                                </span>
                                 <input
                                     type="number"
                                     name="weight"
@@ -279,6 +283,24 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                     step="0.01"
                                     required
                                 />
+                            </label>
+
+                            <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Unit</span>
+                                <DheirSelect
+                                    name="weight_unit"
+                                    value={draft.weight_unit ?? "kg"}
+                                    onChange={(e) =>
+                                        setDraft((prev) => ({
+                                            ...prev,
+                                            weight_unit: e.target.value as ProductWeightUnit,
+                                        }))
+                                    }
+                                    required
+                                >
+                                    <option value="kg">KG</option>
+                                    <option value="cbm">CBM</option>
+                                </DheirSelect>
                             </label>
 
                             <label className="portal-packages__field">

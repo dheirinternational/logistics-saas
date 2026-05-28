@@ -18,7 +18,7 @@ export async function GET() {
       SELECT COUNT(*)::int AS count
       FROM orders
       WHERE user_id = $1
-        AND status IN ('Confirmed', 'processing', 'shipped')
+        AND status IN ('Confirmed', 'preparing', 'shipped')
       `,
       [session.user_id]
     )

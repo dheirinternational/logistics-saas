@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { pool } from "@/lib/db/db"
 import type { CartProduct } from "@/types/entityTypeDef"
 import { getManualPaymentContextForUser } from "@/lib/manualPayments/actions"
+import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 
 export async function GET(
   _req: NextRequest,
@@ -159,10 +160,12 @@ export async function POST(
       )
 
       for (const item of cartItems) {
-        const price =
-          item.discount_price && item.discount_price !== 0
-            ? item.discount_price
-            : item.price
+        const price = getUnitPriceForQuantity({
+          price: Number(item.price),
+          discount_price: Number(item.discount_price ?? 0),
+          discount_min_qty: Number(item.discount_min_qty ?? 0),
+          quantity: Number(item.amount_to_be_ordered),
+        })
 
         await client.query(
           `

@@ -1,13 +1,14 @@
 "use client"
 
 import { Table } from "@/components/admin/table/Table"
+import { AddWarehouseModal } from "@/components/admin/warehouse/AddWarehouseModal"
 import SearchComponent from "@/components/admin/warehouse/SearchComponent"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { Warehouse } from "@/types/entityTypeDef"
 import { createColumnHelper } from "@tanstack/react-table"
 import { IconBuildingWarehouse, IconPlane, IconShip, IconWorld } from "@tabler/icons-react"
 import { NextPage } from "next"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "@/lib/ui/toast"
 
 type FilterParams = {
@@ -23,32 +24,41 @@ const Page: NextPage = () => {
     const [filterValues, setFilterValues] = useState<FilterParams>({
         search: "",
     })
+    const [showAddModal, setShowAddModal] = useState(false)
 
-    useEffect(() => {
-        const fetchWarehouses = async () => {
+    const loadWarehouses = useCallback(async (options?: { silent?: boolean }) => {
+        if (!options?.silent) {
             setIsDataLoading(true)
-            try {
-                const res = await fetch("/api/warehouses", { credentials: "include" })
-                const result = await res.json()
+        }
 
-                if (!res.ok) {
-                    toast.error(result.message ?? "Failed to fetch warehouses")
-                    setError(result.message ?? "Failed to fetch warehouses")
-                    return
-                }
+        try {
+            const res = await fetch("/api/warehouses", { credentials: "include" })
+            const result = await res.json()
 
-                setWarehouses(result.data ?? [])
-            } catch (err) {
-                const message = err instanceof Error ? err.message : "Something went wrong"
-                setError(message)
+            if (!res.ok) {
+                toast.error(result.message ?? "Failed to fetch warehouses")
+                setError(result.message ?? "Failed to fetch warehouses")
+                return
+            }
+
+            setWarehouses(result.data ?? [])
+            setError(null)
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Something went wrong"
+            setError(message)
+            if (!options?.silent) {
                 toast.error(message)
-            } finally {
+            }
+        } finally {
+            if (!options?.silent) {
                 setIsDataLoading(false)
             }
         }
-
-        fetchWarehouses()
     }, [])
+
+    useEffect(() => {
+        loadWarehouses()
+    }, [loadWarehouses])
 
     const filteredData = useMemo(() => {
         const q = filterValues.search.trim().toLowerCase()
@@ -106,9 +116,7 @@ const Page: NextPage = () => {
             if (failed > 0) toast.error(`Could not delete ${failed} warehouse(s)`)
             else toast.success("Deleted")
 
-            const res = await fetch("/api/warehouses", { credentials: "include" })
-            const result = await res.json()
-            if (res.ok) setWarehouses(result.data ?? [])
+            if (failed === 0) await loadWarehouses({ silent: true })
         } catch (err) {
             console.error(err)
             toast.error("Could not delete warehouses")
@@ -199,6 +207,13 @@ const Page: NextPage = () => {
                                 </h2>
                                 <p className="portal-home__section-sub">A list of all warehouses in the system.</p>
                             </div>
+                            <button
+                                type="button"
+                                className="portal-home__btn portal-home__btn--primary"
+                                onClick={() => setShowAddModal(true)}
+                            >
+                                Add warehouse
+                            </button>
                         </div>
 
                         {error ? (
@@ -220,6 +235,13 @@ const Page: NextPage = () => {
                     </section>
                 </>
             )}
+
+            {showAddModal ? (
+                <AddWarehouseModal
+                    onClose={() => setShowAddModal(false)}
+                    onSaved={() => loadWarehouses({ silent: true })}
+                />
+            ) : null}
         </div>
     )
 }

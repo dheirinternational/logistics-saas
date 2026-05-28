@@ -21,6 +21,7 @@ export type MarketingShopProduct = {
   name: string
   price: number
   discount_price?: number | null
+  discount_min_qty?: number | null
   stock_quantity: number
   category_name?: string | null
   image_url?: string | null

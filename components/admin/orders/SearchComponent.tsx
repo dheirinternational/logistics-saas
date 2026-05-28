@@ -1,6 +1,7 @@
 "use client"
 
 import { DheirSelect } from "@/components/ui/DheirSelect"
+import { ORDER_ADMIN_STATUS_OPTIONS } from "@/lib/portal/orderStatus"
 import { Dispatch, SetStateAction } from "react"
 
 type InputSafe = string | number
@@ -33,11 +34,11 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({ state, setState
                     onChange={(e) => setState((prev) => ({ ...prev, status: e.target.value }))}
                 >
                     <option value="">All statuses</option>
-                    <option value="Confirmed">Confirmed</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
+                    {ORDER_ADMIN_STATUS_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
                 </DheirSelect>
             </label>
         </div>

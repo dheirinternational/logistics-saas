@@ -109,12 +109,17 @@ const Page: NextPage = () => {
                         credentials: "include",
                     })
                     const payload = await res.json().catch(() => ({ message: "Delete failed" }))
-                    return { ok: res.ok, message: payload.message as string }
+                    return {
+                        ok: res.ok,
+                        id,
+                        message: (payload.message as string) || `Delete failed (${res.status})`,
+                    }
                 })
             )
 
             const failed = results.filter((r) => !r.ok)
             if (failed.length > 0) {
+                console.error("User delete failures:", failed)
                 const firstError = failed[0]?.message || "Delete failed"
                 toast.error(
                     failed.length === 1

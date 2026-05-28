@@ -16,12 +16,18 @@ import {
   IconMail,
 } from "@tabler/icons-react"
 import Link from "next/link"
+import { resolvePostAuthEntry } from "@/lib/auth/postAuthRedirect"
 import { useRouter } from "next/navigation"
 import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
 
 type AuthView = "login" | "forgot-password"
+
+function getNextParam(): string | null {
+  if (typeof window === "undefined") return null
+  return new URLSearchParams(window.location.search).get("next")
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -45,7 +51,9 @@ export default function LoginPage() {
         credentials: "include",
       })
       const data = await res.json()
-      if (data.user) router.push("/customer")
+      if (data.user?.role) {
+        router.push(resolvePostAuthEntry(data.user.role, getNextParam()))
+      }
     } catch (err) {
       console.error(err)
     }

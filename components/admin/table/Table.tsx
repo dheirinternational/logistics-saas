@@ -102,7 +102,18 @@ export function Table <T,>({
     const selectedRows = table.getSelectedRowModel().rows
     const selectedCount = selectedRows.length
 
-    
+    const filteredCount = table.getFilteredRowModel().rows.length
+    const totalCount = data.length
+    const pageIndex = table.getState().pagination.pageIndex
+    const pageSizeState = table.getState().pagination.pageSize
+    const pageCount = Math.max(table.getPageCount(), 1)
+    const rangeStart = filteredCount === 0 ? 0 : pageIndex * pageSizeState + 1
+    const rangeEnd = Math.min((pageIndex + 1) * pageSizeState, filteredCount)
+
+    const totalLabel =
+      globalFilter.trim() && filteredCount !== totalCount
+        ? `${filteredCount.toLocaleString()} of ${totalCount.toLocaleString()} records`
+        : `${filteredCount.toLocaleString()} ${filteredCount === 1 ? "record" : "records"} total`
 
     return(
         <div>
@@ -141,8 +152,15 @@ export function Table <T,>({
 
           <div className="portal-home__table-pagination" aria-label="Pagination">
             <span className="portal-home__table-pagination-text">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()}
+              <strong className="portal-home__table-pagination-total">{totalLabel}</strong>
+              {filteredCount > 0 ? (
+                <>
+                  {" "}
+                  · Showing {rangeStart.toLocaleString()}–{rangeEnd.toLocaleString()}
+                </>
+              ) : null}
+              {" "}
+              · Page {pageIndex + 1} of {pageCount}
             </span>
             <div className="portal-home__table-pagination-actions">
               {enableRowSelection && onDeleteSelected && selectedCount > 0 ? (

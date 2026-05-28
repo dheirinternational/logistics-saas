@@ -6,6 +6,7 @@ import { initializeMonnifyPayment } from "@/lib/monnify/initialize"
 import { isMonnifyCheckoutEnabled } from "@/lib/bankTransfer/config"
 import { CartProduct } from "@/types/entityTypeDef"
 import { NextRequest, NextResponse } from "next/server"
+import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 
 export async function POST(req: NextRequest) {
   const origin = getHost(req)
@@ -99,10 +100,12 @@ export async function POST(req: NextRequest) {
     )
 
     for (const item of cart_items) {
-      const price =
-        item.discount_price && item.discount_price !== 0
-          ? item.discount_price
-          : item.price
+      const price = getUnitPriceForQuantity({
+        price: Number(item.price),
+        discount_price: Number(item.discount_price ?? 0),
+        discount_min_qty: Number(item.discount_min_qty ?? 0),
+        quantity: Number(item.amount_to_be_ordered),
+      })
 
       await client.query(
         `

@@ -239,10 +239,12 @@ export type Product = {
     category_id: number
     price: number
     discount_price?: number
+    discount_min_qty?: number | null
     cost_price: number
     stock_quantity: number
     low_stock_threshold: number
     weight: number
+    weight_unit?: "kg" | "cbm"
     status: ProductStatus
     is_featured: boolean
     created_by: string
@@ -256,6 +258,7 @@ export type CartProduct = {
     name: string
     price: number
     discount_price: number
+    discount_min_qty?: number | null
     quantity: number
     image: string
     amount_to_be_ordered: number
@@ -294,7 +297,7 @@ export type Order = {
     payment_status?: "pending" | "paid" | "failed" | "awaiting_confirmation" | "abandoned"
     latest_manual_payment_status?: "awaiting_confirmation" | "confirmed" | "rejected" | "superseded" | null
     latest_manual_payment_admin_note?: string | null
-    status: "Confirmed" | "preparing" | "shipped" | "delivered"
+    status: "Confirmed" | "preparing" | "shipped" | "delivered" | "cancelled"
     product_ids: string[]
     created_at: string
     updated_at: string

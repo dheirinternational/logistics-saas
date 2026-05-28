@@ -14,6 +14,7 @@ import {
   IconUser,
 } from "@tabler/icons-react"
 import Link from "next/link"
+import { CUSTOMER_PORTAL_ENTRY } from "@/lib/portal/customerEntry"
 import { useRouter } from "next/navigation"
 import { ChangeEvent, FormEvent, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
@@ -90,7 +91,7 @@ export default function SignupPage() {
         return
       }
       toast.success(result.message ?? "Account created")
-      router.push("/customer")
+      router.push(CUSTOMER_PORTAL_ENTRY)
     } catch {
       toast.error("Could not create account. Try again.")
     } finally {
