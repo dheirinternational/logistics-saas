@@ -44,7 +44,7 @@ const Page: NextPage = () => {
     
 
     // DELETE Announcement
-    const deleteAnnouncement = async (id) => {
+    const deleteAnnouncement = async (id: number) => {
         setIsDeletingAnnouncement(true)
         try{
             const res = await fetch("/api/announcements", {
@@ -79,15 +79,22 @@ const Page: NextPage = () => {
     // FETCH Announcements 
     const fetchAnnouncements = async () => {
         try{
-            const res = await fetch('/api/announcements')
+            const res = await fetch('/api/announcements', {
+                credentials: "include"
+            })
             const result = await res.json()
+            if(!res.ok){
+                toast.error(result.message ?? "Failed to fetch announcements")
+                setAnnouncements([])
+                return
+            }
 
-            setAnnouncements(result.data)
-            console.log(result.data)
+            setAnnouncements(Array.isArray(result.data) ? result.data : [])
         }
         catch(err){
             console.error("ERR:: Fetching Announcement Data", err)
             toast.error("ERR:: Fetching Announcement Data")
+            setAnnouncements([])
         }
     }
     
