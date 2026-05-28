@@ -2328,6 +2328,15 @@ a{
     line-height: 1;
 }
 
+.portal-view-switch {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--color-dheir-border);
+}
+
 .portal-sidebar__footer {
     display: flex;
     flex-shrink: 0;
@@ -2548,6 +2557,10 @@ a{
     font-size: 12px;
     font-weight: 700;
     line-height: 1;
+}
+
+.admin-sidebar__footer .portal-view-switch {
+    border-bottom-color: var(--color-dheir-border);
 }
 
 .admin-sidebar__footer {

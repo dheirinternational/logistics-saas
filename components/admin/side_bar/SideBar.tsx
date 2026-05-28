@@ -1,6 +1,7 @@
 "use client"
 
 import { AdminSidebarLogout } from "@/components/admin/AdminSidebarLogout"
+import { PortalViewSwitch } from "@/components/PortalViewSwitch"
 import { navLinks } from "@/components_map_definitions/NavigationLinks"
 import { useNavbarStore } from "@/store/navBarStore"
 import { IconX } from "@tabler/icons-react"
@@ -134,6 +135,7 @@ export const SideBar = () => {
         </nav>
 
         <div className="admin-sidebar__footer">
+          <PortalViewSwitch userRole="admin" variant="admin" />
           <AdminSidebarLogout />
         </div>
       </aside>

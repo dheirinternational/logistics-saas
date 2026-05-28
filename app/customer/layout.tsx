@@ -2,7 +2,6 @@ import { PortalShell } from "@/components/portal/PortalShell";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/db/session";
 import { toMarketingHeaderUser } from "@/lib/marketing/headerUser";
-import { handleRedirect } from "@/lib/redirect/handleRedirect";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
@@ -19,8 +18,8 @@ export default async function BaseLayout({ children }: { children: ReactNode }) 
   if (!session) {
     redirect("/auth/login");
   }
-  if (session.role !== "customer") {
-    handleRedirect(session.role);
+  if (session.role !== "customer" && session.role !== "admin") {
+    redirect("/auth/login")
   }
 
   const user = toMarketingHeaderUser(session);

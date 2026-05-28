@@ -7,6 +7,7 @@ import {
   resolvePortalNavId,
 } from "@/lib/portal/nav"
 import { PortalHeader } from "@/components/portal/PortalHeader"
+import { PortalViewSwitch } from "@/components/PortalViewSwitch"
 import { PortalSidebarLogout } from "@/components/portal/PortalSidebarLogout"
 import { IconX } from "@tabler/icons-react"
 import Image from "next/image"
@@ -173,6 +174,11 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
         </nav>
 
         <div className="portal-sidebar__footer">
+          <PortalViewSwitch
+            userRole={user.role}
+            variant="customer"
+            onNavigate={() => setMobileOpen(false)}
+          />
           <MarketingHeaderUserMenu
             user={user}
             onHero={false}
