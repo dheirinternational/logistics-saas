@@ -1,4 +1,4 @@
-/** How it works step illustrations - `public/custom/step*.png` */
+/** How it works step illustrations — `public/step-0*.png` */
 
 export type HowItWorksStep = {
   step: number
@@ -14,7 +14,7 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
     title: "Create your account",
     description:
       "Sign up in minutes and get your customer code for every package you send to China.",
-    imageSrc: "/custom/step1.png",
+    imageSrc: "/step-01.png",
     imageAlt: "Account signup illustration with user icon and customer code",
   },
   {
@@ -22,7 +22,7 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
     title: "Copy your China warehouse address",
     description:
       "Use your DHEIR address at checkout on Taobao, 1688, or any Chinese supplier.",
-    imageSrc: "/custom/step2.png",
+    imageSrc: "/step-02.png",
     imageAlt: "China warehouse address and shipping route illustration",
   },
   {
@@ -30,7 +30,7 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
     title: "We receive, measure, and quote",
     description:
       "Packages are logged, weighed, and consolidated. You see fees clearly before you pay.",
-    imageSrc: "/custom/step3.png",
+    imageSrc: "/step-03.png",
     imageAlt: "Parcels on a scale with checklist illustration",
   },
   {
@@ -38,7 +38,7 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
     title: "Pay and ship to Nigeria",
     description:
       "Pay your balance, choose air or sea, and track delivery to your door in Nigeria.",
-    imageSrc: "/custom/step4.png",
+    imageSrc: "/step-04.png",
     imageAlt: "Payment, air and sea freight, and delivery illustration",
   },
 ]
