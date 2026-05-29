@@ -84,89 +84,149 @@ export async function POST(req: Request) {
     const auth = await requireAdminSession()
     if (!auth.ok) return auth.response
 
-    const formData = await req.formData()
-    const file = formData.get("file")
-
-    if (!(file instanceof File) || file.size === 0) {
-      return NextResponse.json(
-        { success: false, message: "Select one file to upload." },
-        { status: 400 }
-      )
+    const ct = (req.headers.get("content-type") ?? "").toLowerCase()
+    if (ct.includes("application/json")) {
+      return registerUploadedAsset(req, auth.session.user_id)
     }
-
-    if (file.size > MAX_PRODUCT_MEDIA_FILE_BYTES) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `"${file.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`,
-        },
-        { status: 400 }
-      )
-    }
-
-    let media_type: "image" | "video"
-    let contentType: string
-    try {
-      ;({ media_type, contentType } = resolveProductMediaType(file))
-    } catch (typeErr) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            typeErr instanceof Error
-              ? typeErr.message
-              : "Unsupported file type. Use JPG, PNG, WEBP, MP4, or MOV.",
-        },
-        { status: 400 }
-      )
-    }
-    const path = buildMediaLibraryPath(file.name, media_type)
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const supabase = getSupabaseAdmin()
-    const { error } = await supabase.storage.from(LIBRARY_BUCKET).upload(path, buffer, {
-      contentType,
-      upsert: false,
-    })
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, message: `Upload failed: ${error.message}` },
-        { status: 500 }
-      )
-    }
-
-    const { data: pub } = supabase.storage.from(LIBRARY_BUCKET).getPublicUrl(path)
-
-    let asset
-    try {
-      asset = await insertMediaAsset({
-        storage_bucket: LIBRARY_BUCKET,
-        storage_path: path,
-        public_url: pub.publicUrl,
-        media_type,
-        file_name: file.name,
-        size_bytes: file.size,
-        created_by: auth.session.user_id,
-      })
-    } catch (dbErr) {
-      await supabase.storage.from(LIBRARY_BUCKET).remove([path]).catch(() => undefined)
-      throw dbErr
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: "Media uploaded successfully.",
-      data: {
-        id: asset.id,
-        path,
-        publicUrl: asset.public_url,
-        mediaType: asset.media_type === "video" ? "video" : "photo",
-      },
-    })
+    return proxyUpload(req, auth.session.user_id)
   } catch (err) {
     const { message, status } = databaseErrorResponse(err, "Could not upload media")
     return NextResponse.json({ success: false, message }, { status })
   }
+}
+
+/**
+ * Register a file that was already uploaded directly to Supabase via a signed URL.
+ * Expects JSON: { storagePath, publicUrl, mediaType, fileName, sizeBytes, bucket? }
+ */
+async function registerUploadedAsset(req: Request, userId: number) {
+  const body = await req.json().catch(() => null)
+  if (!body?.storagePath || !body?.publicUrl || !body?.mediaType || !body?.fileName) {
+    return NextResponse.json(
+      { success: false, message: "Missing required fields for asset registration." },
+      { status: 400 },
+    )
+  }
+
+  const { storagePath, publicUrl, mediaType, fileName, sizeBytes, bucket } = body as {
+    storagePath: string
+    publicUrl: string
+    mediaType: "image" | "video"
+    fileName: string
+    sizeBytes: number
+    bucket?: string
+  }
+
+  if (mediaType !== "image" && mediaType !== "video") {
+    return NextResponse.json(
+      { success: false, message: "mediaType must be 'image' or 'video'." },
+      { status: 400 },
+    )
+  }
+
+  const asset = await insertMediaAsset({
+    storage_bucket: bucket || LIBRARY_BUCKET,
+    storage_path: storagePath,
+    public_url: publicUrl,
+    media_type: mediaType,
+    file_name: fileName,
+    size_bytes: Number(sizeBytes) || 0,
+    created_by: userId,
+  })
+
+  return NextResponse.json({
+    success: true,
+    message: "Media uploaded successfully.",
+    data: {
+      id: asset.id,
+      path: storagePath,
+      publicUrl: asset.public_url,
+      mediaType: asset.media_type === "video" ? "video" : "photo",
+    },
+  })
+}
+
+/** Legacy flow: file is proxied through the serverless function to Supabase. */
+async function proxyUpload(req: Request, userId: number) {
+  const formData = await req.formData()
+  const file = formData.get("file")
+
+  if (!(file instanceof File) || file.size === 0) {
+    return NextResponse.json(
+      { success: false, message: "Select one file to upload." },
+      { status: 400 }
+    )
+  }
+
+  if (file.size > MAX_PRODUCT_MEDIA_FILE_BYTES) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: `"${file.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`,
+      },
+      { status: 400 }
+    )
+  }
+
+  let media_type: "image" | "video"
+  let contentType: string
+  try {
+    ;({ media_type, contentType } = resolveProductMediaType(file))
+  } catch (typeErr) {
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          typeErr instanceof Error
+            ? typeErr.message
+            : "Unsupported file type. Use JPG, PNG, WEBP, MP4, or MOV.",
+      },
+      { status: 400 }
+    )
+  }
+  const path = buildMediaLibraryPath(file.name, media_type)
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const supabase = getSupabaseAdmin()
+  const { error } = await supabase.storage.from(LIBRARY_BUCKET).upload(path, buffer, {
+    contentType,
+    upsert: false,
+  })
+
+  if (error) {
+    return NextResponse.json(
+      { success: false, message: `Upload failed: ${error.message}` },
+      { status: 500 }
+    )
+  }
+
+  const { data: pub } = supabase.storage.from(LIBRARY_BUCKET).getPublicUrl(path)
+
+  let asset
+  try {
+    asset = await insertMediaAsset({
+      storage_bucket: LIBRARY_BUCKET,
+      storage_path: path,
+      public_url: pub.publicUrl,
+      media_type,
+      file_name: file.name,
+      size_bytes: file.size,
+      created_by: userId,
+    })
+  } catch (dbErr) {
+    await supabase.storage.from(LIBRARY_BUCKET).remove([path]).catch(() => undefined)
+    throw dbErr
+  }
+
+  return NextResponse.json({
+    success: true,
+    message: "Media uploaded successfully.",
+    data: {
+      id: asset.id,
+      path,
+      publicUrl: asset.public_url,
+      mediaType: asset.media_type === "video" ? "video" : "photo",
+    },
+  })
 }
 
 export async function DELETE(req: Request) {

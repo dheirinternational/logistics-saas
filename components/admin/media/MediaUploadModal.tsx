@@ -206,7 +206,7 @@ export function MediaUploadModal({ open, onClose, onFinished }: MediaUploadModal
         <h2 className="media-vault-modal__title">Upload media</h2>
         <p className="media-vault-modal__sub">
           Choose multiple photos or videos (max {MAX_PRODUCT_MEDIA_FILE_LABEL} each). Files upload
-          one at a time with a short pause between each so the server stays stable.
+          directly to storage one at a time.
         </p>
 
         <label className={`media-vault-upload-picker${running ? " is-busy" : ""}`}>
