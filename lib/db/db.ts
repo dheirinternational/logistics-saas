@@ -1,4 +1,5 @@
-import { Pool, type PoolConfig } from "pg"
+import { isTransientConnectionError, withDbRetry } from "@/lib/db/retry"
+import { Pool, type PoolConfig, type QueryResult, type QueryResultRow } from "pg"
 
 declare global {
   var pgPool: Pool | undefined
@@ -6,6 +7,15 @@ declare global {
 
 const DB_BUSY_MESSAGE =
   "Database is busy (too many connections). Wait 10–20 seconds and try again."
+
+export class DatabaseUnavailableError extends Error {
+  constructor(message = DB_BUSY_MESSAGE) {
+    super(message)
+    this.name = "DatabaseUnavailableError"
+  }
+}
+
+export { isTransientConnectionError, withDbRetry }
 
 /**
  * Supabase session pooler (:5432) allows ~15 connections total across all
@@ -65,8 +75,9 @@ const poolConfig: PoolConfig = {
   },
   max: POOL_MAX,
   min: 0,
-  idleTimeoutMillis: 10_000,
-  connectionTimeoutMillis: 10_000,
+  idleTimeoutMillis: 5_000,
+  connectionTimeoutMillis:
+    process.env.NODE_ENV === "production" ? 25_000 : 10_000,
   allowExitOnIdle: true,
 }
 
@@ -84,15 +95,14 @@ pool.on("error", (err) => {
 })
 
 export function isDatabaseCapacityError(err: unknown): boolean {
-  const message = err instanceof Error ? err.message : String(err)
-  const code = (err as { code?: string })?.code
-  return (
-    code === "XX000" ||
-    message.includes("max clients reached") ||
-    message.includes("EMAXCONNSESSION") ||
-    message.includes("too many connections") ||
-    message.includes("53300")
-  )
+  return isTransientConnectionError(err)
+}
+
+export async function dbQuery<R extends QueryResultRow = QueryResultRow>(
+  text: string,
+  params?: unknown[]
+): Promise<QueryResult<R>> {
+  return withDbRetry(() => pool.query<R>(text, params), "dbQuery")
 }
 
 export function databaseCapacityMessage(): string {
@@ -103,7 +113,18 @@ export function databaseErrorResponse(
   err: unknown,
   fallback: string
 ): { message: string; status: number } {
+  if (err instanceof DatabaseUnavailableError) {
+    return { message: err.message, status: 503 }
+  }
+
   if (isDatabaseCapacityError(err)) {
+    return { message: DB_BUSY_MESSAGE, status: 503 }
+  }
+
+  if (
+    err instanceof Error &&
+    err.message.includes("timeout exceeded when trying to connect")
+  ) {
     return { message: DB_BUSY_MESSAGE, status: 503 }
   }
 

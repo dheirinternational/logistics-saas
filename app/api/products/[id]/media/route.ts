@@ -1,14 +1,13 @@
 export const runtime = "nodejs"
 export const maxDuration = 60
 
-import { pool } from "@/lib/db/db"
+import { databaseErrorResponse, dbQuery, DatabaseUnavailableError } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import {
   MAX_PRODUCT_MEDIA_COUNT,
   MAX_PRODUCT_MEDIA_FILE_BYTES,
   MAX_PRODUCT_MEDIA_FILE_LABEL,
 } from "@/lib/products/productMediaLimits"
-import { databaseErrorResponse } from "@/lib/db/db"
 import { productApiErrorMessage } from "@/lib/products/productApiErrors"
 import { uploadOneProductMediaFile } from "@/lib/products/uploadProductMedia"
 import { NextResponse } from "next/server"
@@ -18,7 +17,18 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    let session
+    try {
+      session = await getSession()
+    } catch (err) {
+      if (err instanceof DatabaseUnavailableError) {
+        return NextResponse.json(
+          { success: false, message: err.message },
+          { status: 503 }
+        )
+      }
+      throw err
+    }
 
     if (!session) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
@@ -35,7 +45,7 @@ export async function POST(
       return NextResponse.json({ success: false, message: "Invalid product id" }, { status: 400 })
     }
 
-    const productRes = await pool.query(`SELECT id FROM products WHERE id = $1`, [productId])
+    const productRes = await dbQuery(`SELECT id FROM products WHERE id = $1`, [productId])
     if (productRes.rows.length === 0) {
       return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 })
     }
@@ -57,7 +67,7 @@ export async function POST(
       )
     }
 
-    const countRes = await pool.query(
+    const countRes = await dbQuery(
       `SELECT COUNT(*)::int AS count FROM product_images WHERE product_id = $1`,
       [productId]
     )
@@ -78,7 +88,7 @@ export async function POST(
 
     const uploaded = await uploadOneProductMediaFile(productId, file, existingCount)
 
-    await pool.query(
+    await dbQuery(
       `
       INSERT INTO product_images (product_id, image_url, is_primary, media_type)
       VALUES ($1, $2, $3, $4)

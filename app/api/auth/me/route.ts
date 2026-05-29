@@ -1,3 +1,4 @@
+import { DatabaseUnavailableError } from "@/lib/db/db"
 import { loginErrorResponse } from "@/lib/db/loginErrors"
 import { getSession } from "@/lib/db/session"
 import { NextResponse } from "next/server"
@@ -19,6 +20,12 @@ export async function GET() {
     })
   } catch (err) {
     console.error("auth/me error", err)
+    if (err instanceof DatabaseUnavailableError) {
+      return NextResponse.json(
+        { user: null, error: err.message },
+        { status: 503 }
+      )
+    }
     const { error: message, status } = loginErrorResponse(err)
     return NextResponse.json({ user: null, error: message }, { status })
   }

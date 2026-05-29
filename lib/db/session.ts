@@ -1,46 +1,52 @@
 import { cookies } from "next/headers"
 import { randomUUID } from "crypto"
 import { cache } from "react"
+import { DatabaseUnavailableError, dbQuery, withDbRetry } from "./db"
 import { pool } from "./db"
 import { redirect } from "next/navigation"
 
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "session"
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 4
 
-export async function createSession(userId: number, userRole: string = "customer"){
-    const sessionId = randomUUID()
-    const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
+export async function createSession(userId: number, userRole: string = "customer") {
+  const sessionId = randomUUID()
+  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
 
-    await pool.query(`
+  await withDbRetry(
+    () =>
+      pool.query(
+        `
         INSERT INTO sessions (id, user_id, expires_at, user_role)
         VALUES ($1, $2, $3, $4)
     `,
-    [sessionId, userId, expiresAt, userRole]
-    )
+        [sessionId, userId, expiresAt, userRole]
+      ),
+    "createSession"
+  )
 
-    const cookieStore = await cookies()
+  const cookieStore = await cookies()
 
-    cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        expires: expiresAt,
-        path: "/"
-    })
+  cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    expires: expiresAt,
+    path: "/",
+  })
 
-    return {sessionId, expiresAt}
+  return { sessionId, expiresAt }
 }
 
-// GET SESSION
-
 export const getSession = cache(async () => {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
 
-    if (!sessionId) return null
-    let result
-    try {
-        result = await pool.query(`
+  if (!sessionId) return null
+
+  let result
+  try {
+    result = await dbQuery(
+      `
             SELECT
                 sessions.id,
                 sessions.user_id,
@@ -55,65 +61,61 @@ export const getSession = cache(async () => {
             WHERE sessions.id = $1
             LIMIT 1
         `,
-        [sessionId])
-    } catch (err) {
-        // Don't crash the whole app on transient DB disconnects.
-        console.error("getSession query failed:", err)
-        return null
-    }
+      [sessionId]
+    )
+  } catch (err) {
+    console.error("getSession query failed:", err)
+    throw new DatabaseUnavailableError()
+  }
 
-    const session = result.rows[0];
+  const session = result.rows[0]
 
-    if(!session) {
-        return null;
-    }
+  if (!session) {
+    return null
+  }
 
-    const expired = new Date(session.expires_at).getTime() < Date.now()
+  const expired = new Date(session.expires_at).getTime() < Date.now()
 
-    if(expired) {
-        await pool.query(`
-            DELETE FROM sessions where id = $1            
-        `, [sessionId])
+  if (expired) {
+    await withDbRetry(
+      () => pool.query(`DELETE FROM sessions where id = $1`, [sessionId]),
+      "deleteExpiredSession"
+    ).catch((err) => console.error("deleteExpiredSession failed:", err))
 
-        cookieStore.set(SESSION_COOKIE_NAME, "", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            expires: new Date(0),
-            path: "/"
-        })
-        return null
-    }
+    cookieStore.set(SESSION_COOKIE_NAME, "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires: new Date(0),
+      path: "/",
+    })
+    return null
+  }
 
-    return session
+  return session
 })
-
-
 
 /** Clears the session cookie and removes the row from the database. */
 export async function clearSession() {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
 
-    if (sessionId) {
-        await pool.query(
-            `
-            DELETE FROM sessions WHERE id = $1
-        `,
-            [sessionId],
-        )
-    }
-
-    cookieStore.set(SESSION_COOKIE_NAME, "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        expires: new Date(0),
-        path: "/",
+  if (sessionId) {
+    await pool.query(`DELETE FROM sessions WHERE id = $1`, [sessionId]).catch((err) => {
+      console.error("clearSession delete failed:", err)
     })
+  }
+
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    expires: new Date(0),
+    path: "/",
+  })
 }
 
 export async function deleteSession() {
-    await clearSession()
-    redirect("/auth/login")
+  await clearSession()
+  redirect("/auth/login")
 }

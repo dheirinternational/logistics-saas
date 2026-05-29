@@ -1,7 +1,7 @@
 export const runtime = "nodejs"
 export const maxDuration = 60
 
-import { pool } from "@/lib/db/db"
+import { databaseErrorResponse, dbQuery, pool, DatabaseUnavailableError } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
 import {
@@ -12,7 +12,6 @@ import {
   type ProductCreateInput,
   validateProductCreateInput,
 } from "@/lib/products/validateProductCreate"
-import { databaseErrorResponse } from "@/lib/db/db"
 import { productApiErrorMessage } from "@/lib/products/productApiErrors"
 import { isValidProductWeightUnit } from "@/lib/shop/productWeight"
 import { NextRequest, NextResponse } from "next/server"
@@ -35,7 +34,7 @@ function parseProductFields(raw: Record<string, FormDataEntryValue | unknown>): 
 }
 
 async function insertProduct(data: ProductCreateInput, userId: number) {
-  const { rows } = await pool.query(
+  const { rows } = await dbQuery(
     `
             INSERT INTO products (
                 name,
@@ -82,13 +81,24 @@ export async function POST(req: Request) {
   const client = await pool.connect()
 
   try {
-    const session = await getSession()
+    let session
+    try {
+      session = await getSession()
+    } catch (err) {
+      if (err instanceof DatabaseUnavailableError) {
+        return NextResponse.json(
+          { success: false, message: err.message },
+          { status: 503 }
+        )
+      }
+      throw err
+    }
 
     if (!session) {
       return NextResponse.json(
         {
           success: false,
-          messgae: "Unauthorized",
+          message: "Unauthorized",
         },
         { status: 401 }
       )
@@ -261,7 +271,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          messgae: "Unauthorized",
+          message: "Unauthorized",
         },
         { status: 401 }
       )
@@ -303,7 +313,7 @@ export async function PUT(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          messgae: "Unauthorized",
+          message: "Unauthorized",
         },
         { status: 401 }
       )
