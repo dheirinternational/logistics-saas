@@ -194,10 +194,16 @@ export async function POST(req: Request) {
             .filter((n: number) => Number.isFinite(n) && n > 0)
         : []
 
+      if (assetIds.length < 1) {
+        await dbQuery(`DELETE FROM products WHERE id = $1`, [id]).catch(() => undefined)
+        return NextResponse.json(
+          { success: false, message: "Select at least one item from the media library." },
+          { status: 400 }
+        )
+      }
+
       try {
-        if (assetIds.length > 0) {
-          await linkProductMediaAssets(id, assetIds)
-        }
+        await linkProductMediaAssets(id, assetIds)
       } catch (linkErr) {
         await dbQuery(`DELETE FROM products WHERE id = $1`, [id]).catch(() => undefined)
         throw linkErr

@@ -18,9 +18,18 @@ export type MediaAssetRow = {
   size_bytes: number
 }
 
+/** node-pg returns bigint columns as strings; normalize for comparisons and API. */
+export function normalizeMediaAssetRow(row: MediaAssetRow & { id: number | string }): MediaAssetRow {
+  return {
+    ...row,
+    id: Number(row.id),
+    size_bytes: Number(row.size_bytes ?? 0),
+  }
+}
+
 export function mapMediaAssetRowToAdminItem(row: MediaAssetRow): AdminMediaItem {
   return {
-    id: row.id,
+    id: Number(row.id),
     name: row.file_name || row.storage_path.split("/").pop() || "media",
     path: row.storage_path,
     publicUrl: row.public_url,
@@ -41,7 +50,7 @@ export async function listAdminMediaAssets(): Promise<AdminMediaItem[]> {
     LIMIT 1000
     `
   )
-  return rows.map(mapMediaAssetRowToAdminItem)
+  return rows.map((row) => mapMediaAssetRowToAdminItem(normalizeMediaAssetRow(row)))
 }
 
 /** @deprecated Use listAdminMediaAssets — picker and vault share the full catalog. */
@@ -61,7 +70,7 @@ export async function getMediaAssetsByIds(ids: number[]): Promise<MediaAssetRow[
     `,
     [unique]
   )
-  return rows
+  return rows.map((row) => normalizeMediaAssetRow(row))
 }
 
 export async function insertMediaAsset(input: {
@@ -96,7 +105,7 @@ export async function insertMediaAsset(input: {
       input.created_by ?? null,
     ]
   )
-  return rows[0]
+  return normalizeMediaAssetRow(rows[0])
 }
 
 export async function countMediaAssetReferences(assetId: number): Promise<number> {
@@ -173,14 +182,19 @@ async function linkAssetsToTable(
   assetIds: number[],
   opts?: { maxCount?: number }
 ) {
-  const assets = await getMediaAssetsByIds(assetIds)
-  if (assets.length !== assetIds.length) {
+  const uniqueIds = [...new Set(assetIds.map((id) => Number(id)).filter((id) => id > 0))]
+  const assets = await getMediaAssetsByIds(uniqueIds)
+  if (assets.length !== uniqueIds.length) {
     throw new Error("One or more selected media items were not found.")
   }
 
-  const order = assetIds
-    .map((id) => assets.find((a) => a.id === id))
+  const order = uniqueIds
+    .map((id) => assets.find((a) => Number(a.id) === id))
     .filter((a): a is MediaAssetRow => Boolean(a))
+
+  if (order.length === 0) {
+    throw new Error("One or more selected media items were not found.")
+  }
 
   const countRes = await client.query(
     `SELECT COUNT(*)::int AS count FROM ${table} WHERE ${entityColumn} = $1`,

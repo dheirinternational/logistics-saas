@@ -8,7 +8,7 @@ export async function linkProductMediaAssets(
   assetIds: number[],
   maxCount = MAX_PRODUCT_MEDIA_COUNT
 ): Promise<void> {
-  const uniqueIds = [...new Set(assetIds.filter((id) => Number.isFinite(id) && id > 0))]
+  const uniqueIds = [...new Set(assetIds.map((id) => Number(id)).filter((id) => id > 0))]
   if (uniqueIds.length === 0) {
     throw new Error("Select at least one item from the media library.")
   }
@@ -19,8 +19,12 @@ export async function linkProductMediaAssets(
   }
 
   const order = uniqueIds
-    .map((id) => assets.find((a) => a.id === id))
+    .map((id) => assets.find((a) => Number(a.id) === id))
     .filter((a): a is NonNullable<typeof a> => Boolean(a))
+
+  if (order.length === 0) {
+    throw new Error("One or more selected media items were not found.")
+  }
 
   const countRes = await dbQuery<{ count: number }>(
     `SELECT COUNT(*)::int AS count FROM product_images WHERE product_id = $1`,
@@ -42,9 +46,13 @@ export async function linkProductMediaAssets(
     const isPrimary = !hasPrimary && index === 0
     if (isPrimary) hasPrimary = true
     const base = index * 5
-    values.push(productId, asset.public_url, isPrimary, asset.media_type, asset.id)
+    values.push(productId, asset.public_url, isPrimary, asset.media_type, Number(asset.id))
     return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`
   })
+
+  if (rowsSql.length === 0) {
+    throw new Error("Could not link media to product.")
+  }
 
   await dbQuery(
     `

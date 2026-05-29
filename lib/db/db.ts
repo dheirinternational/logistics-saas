@@ -19,8 +19,23 @@ export { isTransientConnectionError, withDbRetry }
 
 /**
  * Supabase session pooler (:5432) allows ~15 connections total across all
- * serverless instances. Production must use transaction pooler (:6543).
+ * serverless instances. Production should use transaction pooler (:6543).
+ *
+ * DATABASE_URL_TRANSACTION is optional. If unset, DATABASE_URL is auto-rewritten
+ * :5432 → :6543 on pooler hosts. Only set TRANSACTION if you paste the
+ * "Transaction" URI from Supabase (port 6543), not Session (5432) or direct db.*.
  */
+function stripEnvQuotes(value: string) {
+  const t = value.trim()
+  if (
+    (t.startsWith('"') && t.endsWith('"')) ||
+    (t.startsWith("'") && t.endsWith("'"))
+  ) {
+    return t.slice(1, -1).trim()
+  }
+  return t
+}
+
 function withPgbouncer(url: string): string {
   if (/[?&]pgbouncer=true/i.test(url)) {
     return url
@@ -28,27 +43,54 @@ function withPgbouncer(url: string): string {
   return url.includes("?") ? `${url}&pgbouncer=true` : `${url}?pgbouncer=true`
 }
 
+function isDirectSupabaseHost(url: string): boolean {
+  return /db\.[a-z0-9]+\.supabase\.co/i.test(url) && !url.includes("pooler.supabase.com")
+}
+
+function isPoolerHost(url: string): boolean {
+  return url.includes("pooler.supabase.com")
+}
+
+/** Normalize any Supabase pooler URL to transaction mode (:6543) + pgbouncer. */
+function normalizePoolerUrl(url: string): string {
+  let out = stripEnvQuotes(url)
+  if (!out.startsWith("postgres")) {
+    throw new Error("Database URL must start with postgresql:// or postgres://")
+  }
+  if (isDirectSupabaseHost(out)) {
+    throw new Error("Use the pooler host (pooler.supabase.com:6543), not db.*.supabase.co")
+  }
+  if (isPoolerHost(out)) {
+    out = out.replace(/:5432(?=\/|$)/, ":6543")
+  }
+  return withPgbouncer(out)
+}
+
 function toTransactionPoolerUrl(url: string): string {
-  if (!url.includes("pooler.supabase.com")) {
-    return url
-  }
-  if (url.includes(":6543")) {
-    return withPgbouncer(url)
-  }
-  // Session mode :5432 → transaction mode :6543
-  return withPgbouncer(url.replace(/:5432(?=\/|$)/, ":6543"))
+  return normalizePoolerUrl(url)
 }
 
 function resolveConnectionString(): string {
   const isProd = process.env.NODE_ENV === "production"
-  const raw = isProd ? process.env.DATABASE_URL : process.env.TEST_DATABASE_URL
+  const raw = stripEnvQuotes(
+    (isProd ? process.env.DATABASE_URL : process.env.TEST_DATABASE_URL) ?? ""
+  )
 
   if (!raw) {
     throw new Error("Missing DATABASE_URL")
   }
 
-  if (process.env.DATABASE_URL_TRANSACTION) {
-    return withPgbouncer(process.env.DATABASE_URL_TRANSACTION)
+  const transactionOverride = stripEnvQuotes(process.env.DATABASE_URL_TRANSACTION ?? "")
+
+  if (transactionOverride && isProd) {
+    try {
+      return normalizePoolerUrl(transactionOverride)
+    } catch (err) {
+      console.error(
+        "DATABASE_URL_TRANSACTION is invalid; falling back to DATABASE_URL with :6543 rewrite:",
+        err instanceof Error ? err.message : err
+      )
+    }
   }
 
   if (isProd && process.env.USE_SUPABASE_SESSION_POOLER !== "true") {
