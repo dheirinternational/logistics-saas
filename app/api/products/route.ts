@@ -364,6 +364,11 @@ export async function PUT(req: Request) {
       )
     }
 
+    const discountMinQty =
+      data.discount_min_qty === null || data.discount_min_qty === undefined || data.discount_min_qty === ""
+        ? null
+        : Number(data.discount_min_qty)
+
     const { rows } = await dbQuery(
       `
       UPDATE products 
@@ -373,16 +378,14 @@ export async function PUT(req: Request) {
         category_id = $3, 
         price = $4, 
         stock_quantity = $5, 
-        low_stock_threshold = $6, 
-        weight = $7, 
-        weight_unit = $8,
-        is_featured = $9, 
+        weight = $6, 
+        weight_unit = $7,
+        is_featured = $8, 
         updated_at = NOW(), 
-        updated_by = $10, 
-        status = $11, 
-        discount_price = $12, 
-        cost_price = $13
-      WHERE id = $14
+        updated_by = $9, 
+        discount_price = $10, 
+        discount_min_qty = $11
+      WHERE id = $12
       RETURNING *
       `,
       [
@@ -391,14 +394,12 @@ export async function PUT(req: Request) {
         data.category_id,
         data.price,
         data.stock_quantity,
-        data.low_stock_threshold,
         data.weight,
         weightUnit,
         data.is_featured,
         session.user_id,
-        data.status,
-        data.discount_price,
-        data.cost_price,
+        Number(data.discount_price ?? 0),
+        discountMinQty,
         data.id,
       ]
     )
@@ -409,10 +410,8 @@ export async function PUT(req: Request) {
       success: true,
     })
   } catch (err) {
-    console.error("Error Fetching Data from Database", err)
-    return NextResponse.json({
-      message: "Error Fetching Products from Database",
-      success: false,
-    })
+    console.error("Error updating product", err)
+    const { message, status } = databaseErrorResponse(err, "Could not update product")
+    return NextResponse.json({ success: false, message }, { status })
   }
 }

@@ -3,6 +3,7 @@
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
+import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
 import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
 import { getProductWeightFieldLabel } from "@/lib/shop/productWeight"
@@ -12,6 +13,20 @@ import { IconHelp, IconStar, IconStarFilled, IconTrash, IconX } from "@tabler/ic
 import Image from "next/image"
 import { ChangeEvent, useEffect, useState } from "react"
 
+type ProductDraft = {
+    id: number
+    name: string
+    description: string
+    category_id: number
+    price: number
+    discount_price: number | ""
+    discount_min_qty: number | ""
+    stock_quantity: number
+    weight: number
+    weight_unit: ProductWeightUnit
+    is_featured: boolean
+}
+
 type Props = {
     product: Product
     categories: ProductCategory[]
@@ -19,13 +34,36 @@ type Props = {
     onSaved: () => void
 }
 
+function toDraft(product: Product): ProductDraft {
+    return {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        category_id: product.category_id,
+        price: product.price,
+        discount_price: product.discount_price ? product.discount_price : "",
+        discount_min_qty:
+            product.discount_min_qty != null && product.discount_min_qty > 0
+                ? product.discount_min_qty
+                : "",
+        stock_quantity: product.stock_quantity,
+        weight: product.weight,
+        weight_unit: product.weight_unit ?? "kg",
+        is_featured: product.is_featured,
+    }
+}
+
 export default function AdminProductEditModal({ product, categories, onClose, onSaved }: Props) {
-    const [draft, setDraft] = useState<Product>(product)
+    const [draft, setDraft] = useState<ProductDraft>(() => toDraft(product))
     const [images, setImages] = useState<ProductImage[]>([])
     const [isFetchingImages, setIsFetchingImages] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [uploadingMedia, setUploadingMedia] = useState(false)
     const [pickerOpen, setPickerOpen] = useState(false)
+
+    useEffect(() => {
+        setDraft(toDraft(product))
+    }, [product])
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -144,17 +182,58 @@ export default function AdminProductEditModal({ product, categories, onClose, on
     }
 
     const updateProduct = async () => {
+        if (draft.price === 0) {
+            toast.error("Price cannot be 0")
+            return
+        }
+        if (draft.stock_quantity === 0) {
+            toast.error("Stock in inventory cannot be zero")
+            return
+        }
+        if (
+            draft.discount_price !== "" &&
+            Number(draft.discount_price) > 0 &&
+            Number(draft.discount_price) >= Number(draft.price)
+        ) {
+            toast.error("Discounted price must be less than price")
+            return
+        }
+        if (draft.discount_min_qty !== "" && Number(draft.discount_min_qty) < 1) {
+            toast.error("Qty for discounted price must be 2 or more")
+            return
+        }
+        if (draft.weight === 0) {
+            toast.error("Product weight cannot be equal to or less than 0")
+            return
+        }
+
+        const payload = {
+            id: draft.id,
+            name: draft.name,
+            description: draft.description,
+            category_id: draft.category_id,
+            price: draft.price,
+            discount_price: draft.discount_price === "" ? 0 : Number(draft.discount_price),
+            discount_min_qty:
+                draft.discount_min_qty === "" ? null : Number(draft.discount_min_qty),
+            stock_quantity: draft.stock_quantity,
+            weight: draft.weight,
+            weight_unit: draft.weight_unit,
+            is_featured: draft.is_featured,
+        }
+
         setIsSubmitting(true)
         try {
             const res = await fetch("/api/products", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(draft),
+                credentials: "include",
+                body: JSON.stringify(payload),
             })
-            const result = await res.json()
+            const result = await parseJsonResponse(res)
 
             if (!res.ok) {
-                toast.error(result.message)
+                toast.error(apiErrorMessage(result, "Could not save product"))
                 return
             }
 
@@ -162,8 +241,9 @@ export default function AdminProductEditModal({ product, categories, onClose, on
             onSaved()
             onClose()
         } catch (err) {
-            console.error("Network Error", err)
-            toast.error("Network Error")
+            const message = err instanceof Error ? err.message : "Network error"
+            toast.error(message)
+            console.error("Product update failed", err)
         } finally {
             setIsSubmitting(false)
         }
@@ -242,27 +322,41 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                             </label>
 
                             <label className="portal-packages__field">
-                                <span className="portal-packages__field-label">Discount price (₦)</span>
+                                <span className="portal-packages__field-label">Stock quantity</span>
                                 <input
                                     type="number"
-                                    name="discount_price"
+                                    name="stock_quantity"
                                     className="dheir-input"
-                                    value={draft.discount_price ?? ""}
+                                    value={draft.stock_quantity}
                                     onChange={handleInputChange}
                                     min={0}
+                                    required
                                 />
                             </label>
 
                             <label className="portal-packages__field">
-                                <span className="portal-packages__field-label">Cost price (₦)</span>
+                                <span className="portal-packages__field-label">Discounted price (₦)</span>
                                 <input
                                     type="number"
-                                    name="cost_price"
+                                    name="discount_price"
                                     className="dheir-input"
-                                    value={draft.cost_price}
+                                    value={draft.discount_price}
                                     onChange={handleInputChange}
                                     min={0}
-                                    required
+                                    placeholder="Optional"
+                                />
+                            </label>
+
+                            <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Qty for discounted price</span>
+                                <input
+                                    type="number"
+                                    name="discount_min_qty"
+                                    className="dheir-input"
+                                    value={draft.discount_min_qty}
+                                    onChange={handleInputChange}
+                                    min={2}
+                                    placeholder="Exact qty only (e.g. 4)"
                                 />
                             </label>
 
@@ -286,7 +380,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                 <span className="portal-packages__field-label">Unit</span>
                                 <DheirSelect
                                     name="weight_unit"
-                                    value={draft.weight_unit ?? "kg"}
+                                    value={draft.weight_unit}
                                     onChange={(e) =>
                                         setDraft((prev) => ({
                                             ...prev,
@@ -301,51 +395,6 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                             </label>
 
                             <label className="portal-packages__field">
-                                <span className="portal-packages__field-label">Stock quantity</span>
-                                <input
-                                    type="number"
-                                    name="stock_quantity"
-                                    className="dheir-input"
-                                    value={draft.stock_quantity}
-                                    onChange={handleInputChange}
-                                    min={0}
-                                    required
-                                />
-                            </label>
-
-                            <label className="portal-packages__field">
-                                <span className="portal-packages__field-label">Low stock threshold</span>
-                                <input
-                                    type="number"
-                                    name="low_stock_threshold"
-                                    className="dheir-input"
-                                    value={draft.low_stock_threshold}
-                                    onChange={handleInputChange}
-                                    min={0}
-                                    required
-                                />
-                            </label>
-
-                            <label className="portal-packages__field">
-                                <span className="portal-packages__field-label">Status</span>
-                                <DheirSelect
-                                    name="status"
-                                    value={draft.status}
-                                    onChange={(e) =>
-                                        setDraft((prev) => ({
-                                            ...prev,
-                                            status: e.target.value as Product["status"],
-                                        }))
-                                    }
-                                    required
-                                >
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="out_of_stock">Out of stock</option>
-                                </DheirSelect>
-                            </label>
-
-                            <label className="portal-packages__field">
                                 <span className="portal-packages__field-label">Featured</span>
                                 <DheirSelect
                                     name="is_featured"
@@ -353,10 +402,9 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                     onChange={(e) =>
                                         setDraft((prev) => ({ ...prev, is_featured: e.target.value === "true" }))
                                     }
-                                    required
                                 >
-                                    <option value="true">Yes</option>
                                     <option value="false">No</option>
+                                    <option value="true">Yes</option>
                                 </DheirSelect>
                             </label>
 

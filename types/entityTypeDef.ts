@@ -240,9 +240,11 @@ export type Product = {
     price: number
     discount_price?: number
     discount_min_qty?: number | null
-    cost_price: number
+    /** @deprecated No longer edited in admin UI */
+    cost_price?: number
     stock_quantity: number
-    low_stock_threshold: number
+    /** @deprecated No longer edited in admin UI */
+    low_stock_threshold?: number
     weight: number
     weight_unit?: "kg" | "cbm"
     status: ProductStatus
