@@ -1,5 +1,7 @@
 "use client"
 
+import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
+import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import SearchComponent from '@/components/admin/shipments/requests/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
 import { ShipmentImage, ShippingRequest } from '@/types/entityTypeDef'
@@ -7,7 +9,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
 import { FaImage } from 'react-icons/fa'
 import { DheirLoader } from "@/components/ui/DheirLoader"
@@ -29,7 +31,6 @@ const columnHelper = createColumnHelper<ShippingRequest>()
 const Page: NextPage = () => {
 
     const router = useRouter()
-    const fileInputRef = useRef<HTMLInputElement | null>(null)
 
     const [shipmentRequests, setShipmentRequests] = useState<ShippingRequest[]>([])
 
@@ -38,8 +39,8 @@ const Page: NextPage = () => {
     const [totalPrice, setTotalPrice] = useState("") 
     const [totalWeight, setTotalWeight] = useState("")
     const [weightUnit, setWeightUnit] = useState<"kg" | "cbm">("kg")
-    const [images, setImages] = useState<File[]>([])
-    const [previews, setPreviews] = useState<string[]>([])
+    const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
+    const [pickerOpen, setPickerOpen] = useState(false)
 
 
 
@@ -117,33 +118,19 @@ const Page: NextPage = () => {
     }
 
 
-    // handle image selection
-    const hanldeImageChange = (e:ChangeEvent<HTMLInputElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
-        if(!e.target.files) return
-
-        const files = Array.from(e.target.files)
-
-        if(files.length < 1){
-            toast.error("Select Images")
+        if (libraryMedia.length < 1) {
+            toast.error("Select at least one item from the media library")
             return
         }
 
-        const urls = files.map( file => URL.createObjectURL(file) )
-        setPreviews(urls)
-        setImages(files)
-    }
-
-
-
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
         setIsCreatingShipmentData(true)
         const formData = new FormData(e.currentTarget)
 
-        images.forEach((image) => {
-            formData.append("images", image)
+        libraryMedia.forEach((item) => {
+            formData.append("media_asset_ids", String(item.id))
         })
 
         formData.append("customer_code", modalSelectedRequest?.customer_code || "")
@@ -191,7 +178,7 @@ const Page: NextPage = () => {
             setIsCreatingShipmentData(false)
             setIsModalActive(false)
             setModalSelectedRequest(null)
-            setImages([])
+            setLibraryMedia([])
         }
     }
 
@@ -453,42 +440,54 @@ const Page: NextPage = () => {
                           Images
                         </p>
                         <p className="admin-uploader__help">
-                          Upload shipment request images (optional).
+                          Choose photos or videos from the media library (required).
                         </p>
                       </div>
                       <button
                         type="button"
                         className="portal-home__btn portal-home__btn--secondary"
                         disabled={isCreatingShipmentData}
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => setPickerOpen(true)}
                       >
                         <span className="inline-flex items-center gap-2">
-                          Select images <FaImage />
+                          Choose from library <FaImage />
                         </span>
                       </button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        name="images"
-                        onChange={hanldeImageChange}
-                        style={{ display: "none" }}
-                      />
                     </div>
 
-                    {previews.length > 0 ? (
+                    {libraryMedia.length > 0 ? (
                       <div className="admin-uploader__previews">
-                        {previews.map((src, idx) => (
-                          <div key={`${src}-${idx}`} className="admin-uploader__preview">
-                            <Image src={src} alt="" fill className="object-cover" />
+                        {libraryMedia.map((item) => (
+                          <div key={item.id} className="admin-uploader__preview">
+                            {item.mediaType === "video" ? (
+                              <video
+                                src={item.publicUrl}
+                                muted
+                                playsInline
+                                preload="metadata"
+                                className="object-cover"
+                                style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                              />
+                            ) : (
+                              <Image src={item.publicUrl} alt="" fill className="object-cover" unoptimized />
+                            )}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="admin-uploader__help">No images selected yet.</p>
+                      <p className="admin-uploader__help">No media selected yet.</p>
                     )}
                   </div>
+
+                  <MediaPickerModal
+                    open={pickerOpen}
+                    maxCount={8}
+                    minCount={1}
+                    initialSelected={libraryMedia}
+                    title="Shipment media"
+                    onClose={() => setPickerOpen(false)}
+                    onConfirm={setLibraryMedia}
+                  />
 
                   <div className="admin-modal__actions">
                     <button

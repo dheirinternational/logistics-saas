@@ -6,8 +6,8 @@ export async function deleteProductById(productId: number): Promise<void> {
   try {
     await client.query("BEGIN")
 
-    const imagesRes = await client.query<{ image_url: string }>(
-      `SELECT image_url FROM product_images WHERE product_id = $1`,
+    const imagesRes = await client.query<{ image_url: string; media_asset_id: number | null }>(
+      `SELECT image_url, media_asset_id FROM product_images WHERE product_id = $1`,
       [productId]
     )
 
@@ -17,8 +17,9 @@ export async function deleteProductById(productId: number): Promise<void> {
     await client.query("COMMIT")
 
     const paths = imagesRes.rows
+      .filter((row) => row.media_asset_id == null)
       .map((row) => parseProductStoragePath(row.image_url))
-      .filter((p): p is string => Boolean(p))
+      .filter((p): p is string => Boolean(p && !p.startsWith("media-library/")))
 
     if (paths.length > 0) {
       try {

@@ -1,9 +1,8 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
-import {
-  getValidProductMediaFiles,
-  uploadProductMediaFiles,
-} from "@/lib/products/uploadProductMedia"
+import { linkMediaAssetsToProduct } from "@/lib/media/mediaAssets"
+import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
+import { parseProductStoragePath } from "@/lib/products/uploadProductMedia"
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
@@ -15,15 +14,6 @@ const supabase = createClient(
     ? process.env.SUPABASE_SERVICE_ROLE_KEY!
     : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
 )
-
-function parseStoragePathFromPublicUrl(url: string): string | null {
-  // Expected: .../storage/v1/object/public/products/<path>
-  const marker = "/storage/v1/object/public/products/"
-  const idx = url.indexOf(marker)
-  if (idx === -1) return null
-  return url.slice(idx + marker.length)
-}
-
 
 export async function GET(req: Request, { params }: {params: Promise<{id: string}>}){
     try{
@@ -38,7 +28,7 @@ export async function GET(req: Request, { params }: {params: Promise<{id: string
         const { id } = await params
 
         const res = await pool.query(`
-            SELECT id, created_at, product_id, image_url, is_primary, media_type
+            SELECT id, created_at, product_id, image_url, is_primary, media_type, media_asset_id
             FROM product_images
             WHERE product_id = $1
             ORDER BY is_primary DESC, id ASC
@@ -75,56 +65,38 @@ export async function POST(
     }
 
     const { id } = await params
-    const formData = await req.formData()
-    const validFiles = getValidProductMediaFiles(formData.getAll("media"))
+    const productId = Number(id)
+    const body = await req.json().catch(() => null)
+    const assetIds = Array.isArray(body?.media_asset_ids)
+      ? body.media_asset_ids.map((v: unknown) => Number(v)).filter((n: number) => Number.isFinite(n) && n > 0)
+      : []
 
-    if (validFiles.length < 1) {
+    if (assetIds.length < 1) {
       return NextResponse.json(
-        { success: false, message: "Select at least 1 media file" },
+        { success: false, message: "Select media from the library." },
         { status: 400 }
       )
     }
 
-    if (validFiles.length > 8) {
+    const countRes = await client.query(
+      `SELECT COUNT(*)::int AS count FROM product_images WHERE product_id = $1`,
+      [productId]
+    )
+    const existingCount = Number(countRes.rows[0]?.count ?? 0)
+    if (existingCount + assetIds.length > MAX_PRODUCT_MEDIA_COUNT) {
       return NextResponse.json(
-        { success: false, message: "Select up to 8 media files" },
+        {
+          success: false,
+          message: `This product can have at most ${MAX_PRODUCT_MEDIA_COUNT} media items.`,
+        },
         { status: 400 }
       )
     }
 
     await client.query("BEGIN")
-
-    // If product has no primary media yet, first upload becomes primary.
-    const primaryRes = await client.query(
-      `SELECT id FROM product_images WHERE product_id = $1 AND is_primary = true LIMIT 1`,
-      [id]
-    )
-    const hasPrimary = (primaryRes.rowCount ?? 0) > 0
-
-    const media = await uploadProductMediaFiles(Number(id), validFiles)
-    const uploaded = media.map((m, i) => ({
-      url: m.url,
-      media_type: m.media_type,
-      is_primary: !hasPrimary && i === 0,
-    }))
-
-    const values: unknown[] = []
-    const rowsSql = uploaded.map((m, index) => {
-      const base = index * 4
-      values.push(id, m.url, m.is_primary, m.media_type)
-      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4})`
-    })
-
-    await client.query(
-      `
-      INSERT INTO product_images (product_id, image_url, is_primary, media_type)
-      VALUES ${rowsSql.join(", ")}
-      `,
-      values
-    )
-
+    await linkMediaAssetsToProduct(client, productId, assetIds, MAX_PRODUCT_MEDIA_COUNT)
     await client.query("COMMIT")
-    return NextResponse.json({ success: true, message: "Media uploaded" })
+    return NextResponse.json({ success: true, message: "Media linked to product" })
   } catch (err) {
     await client.query("ROLLBACK")
     console.error("Error uploading product media:", err)
@@ -209,7 +181,7 @@ export async function DELETE(
 
     await client.query("BEGIN")
     const imgRes = await client.query(
-      `SELECT id, image_url, is_primary FROM product_images WHERE id = $1 AND product_id = $2 FOR UPDATE`,
+      `SELECT id, image_url, is_primary, media_asset_id FROM product_images WHERE id = $1 AND product_id = $2 FOR UPDATE`,
       [imageId, productId]
     )
     if (imgRes.rowCount === 0) {
@@ -217,7 +189,11 @@ export async function DELETE(
       return NextResponse.json({ success: false, message: "Media not found" }, { status: 404 })
     }
 
-    const row = imgRes.rows[0] as { image_url: string; is_primary: boolean }
+    const row = imgRes.rows[0] as {
+      image_url: string
+      is_primary: boolean
+      media_asset_id: number | null
+    }
 
     await client.query(`DELETE FROM product_images WHERE id = $1 AND product_id = $2`, [
       imageId,
@@ -225,7 +201,6 @@ export async function DELETE(
     ])
 
     if (row.is_primary) {
-      // Promote next media (if any) to primary.
       await client.query(
         `
         UPDATE product_images
@@ -243,11 +218,13 @@ export async function DELETE(
 
     await client.query("COMMIT")
 
-    const storagePath = parseStoragePathFromPublicUrl(row.image_url)
-    if (storagePath) {
-      const { error } = await supabase.storage.from("products").remove([storagePath])
-      if (error) {
-        console.error("Supabase media delete failed:", error)
+    if (row.media_asset_id == null) {
+      const storagePath = parseProductStoragePath(row.image_url)
+      if (storagePath && !storagePath.startsWith("media-library/")) {
+        const { error } = await supabase.storage.from("products").remove([storagePath])
+        if (error) {
+          console.error("Supabase media delete failed:", error)
+        }
       }
     }
 

@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
-import { uploadPackageImages } from "@/lib/packages/uploadPackageImages"
+import { linkPackageMediaFromLibrary } from "@/lib/packages/uploadPackageImages"
 import { NextResponse } from "next/server"
 import type { DatabaseError } from "pg"
 
@@ -26,7 +26,7 @@ export async function PUT(
     }
 
     const formData = await req.formData()
-    const imageEntries = formData.getAll("images")
+    const mediaAssetEntries = formData.getAll("media_asset_ids")
 
     const package_name = String(formData.get("package_name") ?? "").trim()
     const incoming_package_id = String(formData.get("incoming_package_id") ?? "").trim()
@@ -106,7 +106,7 @@ export async function PUT(
       return NextResponse.json({ success: false, message: "Package not found" }, { status: 404 })
     }
 
-    await uploadPackageImages(client, packageId, imageEntries)
+    await linkPackageMediaFromLibrary(client, packageId, mediaAssetEntries)
 
     await client.query("COMMIT")
     return NextResponse.json({ success: true, message: "Package updated successfully" })

@@ -1,13 +1,15 @@
 "use client"
 
+import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal";
 import { usePackageStore } from "@/store/incomingPackagesStore";
 import { useShipmentStore } from "@/store/shipmentsStore";
 import { useEditModalStore } from "@/types/editModalStore";
+import type { AdminMediaItem } from "@/lib/media/adminMedia";
 import { Warehouse } from "@/types/entityTypeDef";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChangeEvent, FormEvent, ReactNode, useEffect, useRef, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { FaGlobe, FaImage, FaPlus } from "react-icons/fa";
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast";
@@ -204,8 +206,8 @@ const IncomingPackageEditComponent = () => {
 
     // Arrays
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-    const [images, setImages] = useState<File[]>([])
-    const [previews, setPreviews] = useState<string[]>([])
+    const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
+    const [pickerOpen, setPickerOpen] = useState(false)
 
     // Selected Objects
     const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
@@ -218,11 +220,6 @@ const IncomingPackageEditComponent = () => {
 
     // Set DropDown States
     const [isWarehouseDropDownActive, setIsWarehouseDropDownActice] = useState(false)
-    const fileInputRef = useRef<HTMLInputElement | null>(null)
-
-    
-
-
     // Fetch Warehouses
     const fetchWarehouses = async () => {
         setIsFetchingWarehouse(true)
@@ -247,29 +244,15 @@ const IncomingPackageEditComponent = () => {
         }
     }
 
-    // handle image selection
-    const hanldeImageChange = (e:ChangeEvent<HTMLInputElement>) => {
-
-        if(!e.target.files) return
-
-        const files = Array.from(e.target.files)
-
-        if(files.length < 1){
-            toast.error("Select Images")
-            return
-        }
-
-        const urls = files.map( file => URL.createObjectURL(file) )
-        setPreviews(urls)
-        setImages(files)
-    }
-
     // handle uploading packages
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsUploadingPackage(true)
 
         const formData = new FormData(e.currentTarget)
+        libraryMedia.forEach((item) => {
+            formData.append("media_asset_ids", String(item.id))
+        })
         formData.append("inp_status", "stored")
         formData.append("user_id", String(selectedPackage?.user_id))
 
@@ -471,39 +454,51 @@ const IncomingPackageEditComponent = () => {
                                         Photos
                                     </p>
                                     <p className="admin-uploader__help">
-                                        Upload clear images of the package. You can select multiple.
+                                        Optional — choose photos or videos from the media library.
                                     </p>
                                 </div>
                                 <button
                                     type="button"
                                     className="portal-home__btn portal-home__btn--secondary"
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() => setPickerOpen(true)}
                                 >
-                                    Choose images
+                                    Choose from library
                                 </button>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    name="images"
-                                    onChange={hanldeImageChange}
-                                    style={{ display: "none" }}
-                                />
                             </div>
 
-                            {previews.length > 0 ? (
+                            {libraryMedia.length > 0 ? (
                                 <div className="admin-uploader__previews">
-                                    {previews.map((src, i) => (
-                                        <div key={src + i} className="admin-uploader__preview">
-                                            <Image src={src} alt="" fill className="object-cover" />
+                                    {libraryMedia.map((item) => (
+                                        <div key={item.id} className="admin-uploader__preview">
+                                            {item.mediaType === "video" ? (
+                                                <video
+                                                    src={item.publicUrl}
+                                                    muted
+                                                    playsInline
+                                                    preload="metadata"
+                                                    className="object-cover"
+                                                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                                                />
+                                            ) : (
+                                                <Image src={item.publicUrl} alt="" fill className="object-cover" unoptimized />
+                                            )}
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <p className="admin-uploader__help">No images selected yet.</p>
+                                <p className="admin-uploader__help">No media selected yet.</p>
                             )}
                         </div>
+
+                        <MediaPickerModal
+                            open={pickerOpen}
+                            maxCount={8}
+                            minCount={0}
+                            initialSelected={libraryMedia}
+                            title="Package media"
+                            onClose={() => setPickerOpen(false)}
+                            onConfirm={setLibraryMedia}
+                        />
 
                     <div className="admin-modal__actions">
                             <button

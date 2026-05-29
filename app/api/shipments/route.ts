@@ -1,19 +1,9 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
 import { generateTrackingNumber } from "@/lib/generators/generateTrackingNumber";
-import { createClient } from "@supabase/supabase-js";
+import { linkMediaAssetsToShipment } from "@/lib/media/mediaAssets";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-
-
-
-
-
-const supabase = createClient(
-    process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_SUPABASE_URL! : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST!, 
-    process.env.NODE_ENV === "production" ? process.env.SUPABASE_SERVICE_ROLE_KEY! : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
-)
-
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -39,14 +29,16 @@ export async function POST(req: NextRequest) {
         }
 
         const formData = await req.formData()
-        const fileImages = formData.getAll("images") as File[]
+        const mediaAssetIds = formData
+            .getAll("media_asset_ids")
+            .map((entry) => Number(String(entry)))
+            .filter((id) => Number.isFinite(id) && id > 0)
 
-
-        if(fileImages.length < 1 ){
+        if (mediaAssetIds.length < 1) {
             return NextResponse.json({
                 success: false,
-                message: "No Images Selected"
-            }, {status: 400})
+                message: "Select at least one image or video from the media library.",
+            }, { status: 400 })
         }
 
         const data = {
@@ -103,58 +95,7 @@ export async function POST(req: NextRequest) {
         ]);
 
         const { id } = shipmentRes.rows[0]
-        const uploadedImages: string[] = []
-
-        console.log(fileImages)
-
-        for(const file of fileImages){
-            if (!file || file.size === 0) continue
-
-            console.log("FILE:", file)
-            console.log("NAME:", file.name)
-            console.log("SIZE:", file.size)
-            console.log("TYPE:", file.type)
-
-            const filePath = `shipment${id}-${Date.now()}-${file.name}`
-            const arrayBuffer = await file.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
-
-            const { error } = await supabase.storage
-                .from("shipments")
-                .upload(filePath, buffer, {
-                    contentType: file.type,
-                    upsert: false
-                })
-
-            if (error) {
-                throw new Error(`Supabase upload failed: ${error.message}`)
-            }
-
-            const { data: publicUrl } = supabase.storage
-                .from("shipments")
-                .getPublicUrl(filePath)
-
-            uploadedImages.push(publicUrl.publicUrl)
-
-        }
-
-        console.log("worked!")
-
-        console.log(uploadedImages)
-
-        if (uploadedImages.length > 0) {
-            const values: unknown[] = []
-            const rowsSql = uploadedImages.map((url, index) => {
-                const base = index * 3
-                values.push(id, url, index === 0)
-                return `($${base + 1}, $${base + 2}, $${base + 3})`
-            })
-    
-            await client.query(`
-                INSERT INTO shipment_images (shipment_id, image_url, is_primary)
-                VALUES ${rowsSql.join(", ")}
-            `, values)
-        }  
+        await linkMediaAssetsToShipment(client, Number(id), mediaAssetIds)
 
 
 

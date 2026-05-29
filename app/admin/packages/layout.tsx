@@ -4,8 +4,10 @@ import { usePackageStore } from "@/store/incomingPackagesStore";
 import { useEditModalStore } from "@/types/editModalStore";
 import { PackageImage, Warehouse } from "@/types/entityTypeDef";
 import Image from "next/image";
-import { ChangeEvent, FormEvent, ReactNode, useEffect, useRef, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { toast } from "@/lib/ui/toast";
+import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal";
+import type { AdminMediaItem } from "@/lib/media/adminMedia";
 import { DheirLoader } from "@/components/ui/DheirLoader";
 import { IconX } from "@tabler/icons-react";
 import { DheirSelect } from "@/components/ui/DheirSelect";
@@ -73,8 +75,8 @@ const PackageEditComponent = () => {
     // Arrays
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
     const [images, setImages] = useState<PackageImage[]>([])
-    const [newPreviews, setNewPreviews] = useState<string[]>([])
-    const fileInputRef = useRef<HTMLInputElement | null>(null)
+    const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
+    const [pickerOpen, setPickerOpen] = useState(false)
 
     // Selected Objects
     const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
@@ -137,19 +139,15 @@ const PackageEditComponent = () => {
         }
     }
 
-    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files?.length) return
-        const files = Array.from(e.target.files)
-        newPreviews.forEach((url) => URL.revokeObjectURL(url))
-        setNewPreviews(files.map((file) => URL.createObjectURL(file)))
-    }
-
     // handle uploading packages
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsUploadingPackage(true)
 
         const formData = new FormData(e.currentTarget)
+        libraryMedia.forEach((item) => {
+            formData.append("media_asset_ids", String(item.id))
+        })
 
         try{
             const res = await fetch(
@@ -173,9 +171,7 @@ const PackageEditComponent = () => {
             resetSelectedPackage()
             setIsModalActive()
             setImages([])
-            newPreviews.forEach((url) => URL.revokeObjectURL(url))
-            setNewPreviews([])
-            if (fileInputRef.current) fileInputRef.current.value = ""
+            setLibraryMedia([])
         }
         catch(err){
             toast.error("Network Error")
@@ -197,9 +193,7 @@ const PackageEditComponent = () => {
         } else {
             setImages([])
         }
-        newPreviews.forEach((url) => URL.revokeObjectURL(url))
-        setNewPreviews([])
-        if (fileInputRef.current) fileInputRef.current.value = ""
+        setLibraryMedia([])
     }, [selectedPackage?.id])
 
 
@@ -373,27 +367,18 @@ const PackageEditComponent = () => {
                             Photos
                         </p>
                         <p className="admin-uploader__help">
-                            {isEditing
-                                ? "Existing photos and any new uploads you add below."
-                                : "Optional — add one or more images when registering the package."}
+                                    {isEditing
+                                ? "Existing photos plus any new items you pick from the media library."
+                                : "Optional — choose photos or videos from the media library."}
                         </p>
                     </div>
                     <button
                         type="button"
                         className="portal-home__btn portal-home__btn--secondary"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => setPickerOpen(true)}
                     >
-                        Choose images
+                        Choose from library
                     </button>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        name="images"
-                        onChange={handleImageChange}
-                        style={{ display: "none" }}
-                    />
                     {isEditing && isFetchingImages ? (
                         <DheirLoader color="var(--color-dheir-blue)" size={10} />
                     ) : null}
@@ -411,16 +396,37 @@ const PackageEditComponent = () => {
                     <p className="admin-uploader__help">No images for this package yet.</p>
                 ) : null}
 
-                {newPreviews.length > 0 ? (
+                {libraryMedia.length > 0 ? (
                     <div className="admin-uploader__previews" style={{ marginTop: "0.75rem" }}>
-                        {newPreviews.map((src) => (
-                            <div key={src} className="admin-uploader__preview">
-                                <Image src={src} alt="" fill className="object-cover" unoptimized />
+                        {libraryMedia.map((item) => (
+                            <div key={item.id} className="admin-uploader__preview">
+                                {item.mediaType === "video" ? (
+                                    <video
+                                        src={item.publicUrl}
+                                        muted
+                                        playsInline
+                                        preload="metadata"
+                                        className="object-cover"
+                                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                                    />
+                                ) : (
+                                    <Image src={item.publicUrl} alt="" fill className="object-cover" unoptimized />
+                                )}
                             </div>
                         ))}
                     </div>
                 ) : null}
             </div>
+
+            <MediaPickerModal
+                open={pickerOpen}
+                maxCount={8}
+                minCount={0}
+                initialSelected={libraryMedia}
+                title="Package media"
+                onClose={() => setPickerOpen(false)}
+                onConfirm={setLibraryMedia}
+            />
 
             <div className="admin-modal__actions">
                 <button

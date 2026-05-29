@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
-import { uploadPackageImages } from "@/lib/packages/uploadPackageImages";
+import { linkPackageMediaFromLibrary } from "@/lib/packages/uploadPackageImages";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import type { DatabaseError } from "pg";
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest){
         }
 
         const formData = await req.formData()
-        const imageEntries = formData.getAll("images")
+        const mediaAssetEntries = formData.getAll("media_asset_ids")
 
         const data = {
             package_name: formData.get("package_name"),
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest){
 
         
         const { id } = res.rows[0]
-        await uploadPackageImages(client, Number(id), imageEntries)
+        await linkPackageMediaFromLibrary(client, Number(id), mediaAssetEntries)
 
         // Get user email
         const userRes = await client.query(

@@ -3,11 +3,10 @@
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
-import {
-  MAX_PRODUCT_MEDIA_COUNT,
-  MAX_PRODUCT_MEDIA_FILE_BYTES,
-  MAX_PRODUCT_MEDIA_FILE_LABEL,
-} from "@/lib/products/productMediaLimits"
+import { AdminMediaVideoLightbox } from "@/components/admin/media/AdminMediaVideoLightbox"
+import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
+import type { AdminMediaItem } from "@/lib/media/adminMedia"
+import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
 import { getProductWeightFieldLabel } from "@/lib/shop/productWeight"
 import type { ProductWeightUnit } from "@/lib/shop/productWeight"
@@ -16,12 +15,6 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { IconPlayerPlay, IconX } from "@tabler/icons-react"
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react"
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
 
 type ProductValues = {
     name: string
@@ -34,12 +27,6 @@ type ProductValues = {
     weight: number
     weight_unit: ProductWeightUnit
     is_featured: boolean
-}
-
-type MediaPreview = {
-    id: string
-    preview: string
-    file: File
 }
 
 const AddProduct = () => {
@@ -57,26 +44,20 @@ const AddProduct = () => {
     })
 
     const [categories, setCategories] = useState<ProductCategory[]>([])
-    const [images, setImages] = useState<MediaPreview[]>([])
+    const [selectedMedia, setSelectedMedia] = useState<AdminMediaItem[]>([])
+    const [pickerOpen, setPickerOpen] = useState(false)
     const [isAddingProduct, setIsAddingProduct] = useState(false)
-    const [uploadProgress, setUploadProgress] = useState<string | null>(null)
     const isSubmittingRef = useRef(false)
     const [fullscreenVideoSrc, setFullscreenVideoSrc] = useState<string | null>(null)
-    const fileInputRef = useRef<HTMLInputElement | null>(null)
-    const imagesRef = useRef<MediaPreview[]>([])
     const router = useRouter()
-
-    imagesRef.current = images
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (isSubmittingRef.current) return
         isSubmittingRef.current = true
         setIsAddingProduct(true)
-        setUploadProgress(null)
-
-        if (images.length < 1) {
-            toast.error("Select at least 1 media file")
+        if (selectedMedia.length < 1) {
+            toast.error("Select at least 1 item from the media library")
             setIsAddingProduct(false)
             return
         }
@@ -110,17 +91,6 @@ const AddProduct = () => {
         }
         if (productValues.weight === 0) {
             toast.error("Product weight cannot be equal to or less than 0")
-            setIsAddingProduct(false)
-            return
-        }
-
-        const oversized = images.find(
-            (img) => img.file.size > MAX_PRODUCT_MEDIA_FILE_BYTES
-        )
-        if (oversized) {
-            toast.error(
-                `"${oversized.file.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`
-            )
             setIsAddingProduct(false)
             return
         }
@@ -167,45 +137,23 @@ const AddProduct = () => {
                 return
             }
 
-            for (let i = 0; i < images.length; i++) {
-                setUploadProgress(`Uploading media ${i + 1} of ${images.length}…`)
+            const mediaRes = await fetch(`/api/products/${productId}/media`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    media_asset_ids: selectedMedia.map((m) => m.id),
+                }),
+            })
+            const mediaResult = await parseJsonResponse(mediaRes)
 
-                const mediaForm = new FormData()
-                mediaForm.append("file", images[i].file)
-                mediaForm.append("is_primary", i === 0 ? "true" : "false")
-
-                let mediaRes: Response
-                try {
-                    mediaRes = await fetch(`/api/products/${productId}/media`, {
-                        method: "POST",
-                        body: mediaForm,
-                    })
-                } catch {
-                    await fetch(`/api/products/${productId}`, {
-                        method: "DELETE",
-                        credentials: "include",
-                    }).catch(() => undefined)
-                    toast.error(
-                        `Network error while uploading "${images[i].file.name}". Check your connection and try again.`
-                    )
-                    return
-                }
-
-                const mediaResult = await parseJsonResponse(mediaRes)
-
-                if (!mediaRes.ok) {
-                    await fetch(`/api/products/${productId}`, {
-                        method: "DELETE",
-                        credentials: "include",
-                    }).catch(() => undefined)
-                    toast.error(
-                        apiErrorMessage(
-                            mediaResult,
-                            `Could not upload "${images[i].file.name}"`
-                        )
-                    )
-                    return
-                }
+            if (!mediaRes.ok) {
+                await fetch(`/api/products/${productId}`, {
+                    method: "DELETE",
+                    credentials: "include",
+                }).catch(() => undefined)
+                toast.error(apiErrorMessage(mediaResult, "Could not link media to product"))
+                return
             }
 
             toast.success("Product successfully added to system")
@@ -223,54 +171,12 @@ const AddProduct = () => {
             console.error("Add product failed", err)
         } finally {
             isSubmittingRef.current = false
-            setUploadProgress(null)
             setIsAddingProduct(false)
         }
     }
 
-    const removeMedia = (id: string) => {
-        setImages((prev) => {
-            const target = prev.find((item) => item.id === id)
-            if (target) URL.revokeObjectURL(target.preview)
-            return prev.filter((item) => item.id !== id)
-        })
-    }
-
-    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files
-        if (!files || files.length < 1) return
-
-        const remaining = MAX_PRODUCT_MEDIA_COUNT - images.length
-        if (remaining <= 0) {
-            toast.error(`Maximum ${MAX_PRODUCT_MEDIA_COUNT} media files per product`)
-            if (fileInputRef.current) fileInputRef.current.value = ""
-            return
-        }
-
-        const incoming = Array.from(files).slice(0, remaining)
-        if (incoming.length < files.length) {
-            toast.error(
-                `Only ${remaining} more file(s) allowed (max ${MAX_PRODUCT_MEDIA_COUNT})`
-            )
-        }
-
-        const tooLarge = incoming.find((file) => file.size > MAX_PRODUCT_MEDIA_FILE_BYTES)
-        if (tooLarge) {
-            toast.error(
-                `"${tooLarge.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`
-            )
-            if (fileInputRef.current) fileInputRef.current.value = ""
-            return
-        }
-
-        const added: MediaPreview[] = incoming.map((file) => ({
-            id: crypto.randomUUID(),
-            preview: URL.createObjectURL(file),
-            file,
-        }))
-
-        setImages((prev) => [...prev, ...added])
-        if (fileInputRef.current) fileInputRef.current.value = ""
+    const removeMedia = (assetId: number) => {
+        setSelectedMedia((prev) => prev.filter((item) => item.id !== assetId))
     }
 
     useEffect(() => {
@@ -295,12 +201,6 @@ const AddProduct = () => {
         }
 
         fetchCategories()
-    }, [])
-
-    useEffect(() => {
-        return () => {
-            imagesRef.current.forEach((image) => URL.revokeObjectURL(image.preview))
-        }
     }, [])
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -468,69 +368,49 @@ const AddProduct = () => {
                             Media
                         </p>
                         <p className="admin-uploader__help">
-                            Upload at least 1 image or video. Up to {MAX_PRODUCT_MEDIA_COUNT}{" "}
-                            files per product.
+                            Select from the media library. Upload new files on Admin → Media.
+                            Up to {MAX_PRODUCT_MEDIA_COUNT} per product.
                         </p>
                     </div>
                     <button
                         type="button"
                         className="portal-home__btn portal-home__btn--secondary"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => setPickerOpen(true)}
                     >
-                        {images.length > 0 ? "Add more media" : "Choose media"}
+                        {selectedMedia.length > 0 ? "Change selection" : "Choose from library"}
                     </button>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*,video/*"
-                        multiple
-                        onChange={handleImageChange}
-                        style={{ display: "none" }}
-                    />
                 </div>
 
-                <p className="admin-uploader__notice" role="note">
-                    <strong>File size limit:</strong> each image or video must be{" "}
-                    {MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller. Files over this limit cannot be
-                    uploaded. Compress larger videos on your device before adding them.
-                </p>
-
-                {images.length > 0 ? (
+                {selectedMedia.length > 0 ? (
                     <div className="admin-uploader__previews">
-                        {images.map((img) => {
-                            const isVideo = img.file.type.startsWith("video/")
+                        {selectedMedia.map((item) => {
+                            const isVideo = item.mediaType === "video"
                             return (
-                                <div key={img.id} className="admin-uploader__preview">
+                                <div key={item.id} className="admin-uploader__preview">
                                     <div className="admin-uploader__preview-media">
                                         {isVideo ? (
                                             <video
-                                                src={img.preview}
+                                                src={item.publicUrl}
                                                 muted
                                                 playsInline
                                                 preload="metadata"
                                             />
                                         ) : (
-                                            <Image src={img.preview} alt="" fill className="object-cover" unoptimized />
+                                            <Image
+                                                src={item.publicUrl}
+                                                alt=""
+                                                fill
+                                                className="object-cover"
+                                                unoptimized
+                                            />
                                         )}
                                     </div>
-                                    <p
-                                        className={`admin-uploader__file-size${
-                                            img.file.size > MAX_PRODUCT_MEDIA_FILE_BYTES
-                                                ? " admin-uploader__file-size--over"
-                                                : ""
-                                        }`}
-                                    >
-                                        {formatFileSize(img.file.size)}
-                                        {img.file.size > MAX_PRODUCT_MEDIA_FILE_BYTES
-                                            ? ` — over ${MAX_PRODUCT_MEDIA_FILE_LABEL} limit`
-                                            : ""}
-                                    </p>
                                     <div className="admin-uploader__preview-actions">
                                         {isVideo ? (
                                             <button
                                                 type="button"
                                                 className="admin-uploader__play-btn"
-                                                onClick={() => setFullscreenVideoSrc(img.preview)}
+                                                onClick={() => setFullscreenVideoSrc(item.publicUrl)}
                                                 aria-label="Play video"
                                             >
                                                 <IconPlayerPlay size={28} stroke={1.5} aria-hidden />
@@ -539,7 +419,7 @@ const AddProduct = () => {
                                         <button
                                             type="button"
                                             className="admin-uploader__remove-btn"
-                                            onClick={() => removeMedia(img.id)}
+                                            onClick={() => removeMedia(item.id)}
                                             aria-label="Remove media"
                                         >
                                             <IconX size={18} stroke={2} aria-hidden />
@@ -554,36 +434,21 @@ const AddProduct = () => {
                 )}
             </div>
 
+            <MediaPickerModal
+                open={pickerOpen}
+                maxCount={MAX_PRODUCT_MEDIA_COUNT}
+                initialSelected={selectedMedia}
+                title="Product media"
+                onClose={() => setPickerOpen(false)}
+                onConfirm={setSelectedMedia}
+            />
+
             {fullscreenVideoSrc ? (
-                <div
-                    className="dheir-dialog-backdrop admin-media-lightbox"
-                    role="presentation"
-                    onClick={() => setFullscreenVideoSrc(null)}
-                >
-                    <div
-                        className="admin-media-lightbox__panel"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Product video"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button
-                            type="button"
-                            className="dheir-dialog__close admin-media-lightbox__close"
-                            onClick={() => setFullscreenVideoSrc(null)}
-                            aria-label="Close video"
-                        >
-                            <IconX size={22} stroke={1.5} />
-                        </button>
-                        <video
-                            src={fullscreenVideoSrc}
-                            controls
-                            autoPlay
-                            playsInline
-                            className="admin-media-lightbox__video"
-                        />
-                    </div>
-                </div>
+                <AdminMediaVideoLightbox
+                    src={fullscreenVideoSrc}
+                    label="Product video"
+                    onClose={() => setFullscreenVideoSrc(null)}
+                />
             ) : null}
 
             <div className="admin-modal__actions">
@@ -591,7 +456,7 @@ const AddProduct = () => {
                     {isAddingProduct ? (
                         <>
                             <DheirLoader color="#fff" size={10} />
-                            {uploadProgress ?? "Saving…"}
+                            Saving…
                         </>
                     ) : (
                         "Add product"

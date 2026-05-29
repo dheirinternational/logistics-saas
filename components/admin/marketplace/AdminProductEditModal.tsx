@@ -1,14 +1,16 @@
 "use client"
 
+import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
+import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
 import { getProductWeightFieldLabel } from "@/lib/shop/productWeight"
 import type { ProductWeightUnit } from "@/lib/shop/productWeight"
 import { Product, ProductCategory, ProductImage } from "@/types/entityTypeDef"
 import { IconHelp, IconStar, IconStarFilled, IconTrash, IconX } from "@tabler/icons-react"
 import Image from "next/image"
-import { ChangeEvent, useEffect, useRef, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 
 type Props = {
     product: Product
@@ -23,7 +25,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
     const [isFetchingImages, setIsFetchingImages] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [uploadingMedia, setUploadingMedia] = useState(false)
-    const fileInputRef = useRef<HTMLInputElement | null>(null)
+    const [pickerOpen, setPickerOpen] = useState(false)
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -65,31 +67,26 @@ export default function AdminProductEditModal({ product, categories, onClose, on
         }
     }
 
-    const uploadMedia = async (files: FileList | null) => {
-        if (!files || files.length < 1) return
-        const formData = new FormData()
-        Array.from(files)
-            .slice(0, 8)
-            .forEach((file) => formData.append("media", file))
-
+    const linkMediaFromLibrary = async (assetIds: number[]) => {
+        if (assetIds.length < 1) return
         setUploadingMedia(true)
         try {
             const res = await fetch(`/api/products/images/${product.id}`, {
                 method: "POST",
                 credentials: "include",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ media_asset_ids: assetIds }),
             })
             const result = await res.json()
             if (!res.ok) {
-                toast.error(result.message ?? "Could not upload media")
+                toast.error(result.message ?? "Could not add media")
                 return
             }
-            toast.success("Media uploaded")
-            if (fileInputRef.current) fileInputRef.current.value = ""
+            toast.success("Media added")
             await refreshMedia()
         } catch (err) {
             console.error(err)
-            toast.error("Could not upload media")
+            toast.error("Could not add media")
         } finally {
             setUploadingMedia(false)
         }
@@ -395,7 +392,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                         </span>
                                     </p>
                                     <p className="admin-uploader__help">
-                                        Images and videos shown in the marketplace. Upload at least 1.
+                                        Choose from the media library. Upload new files on Admin → Media.
                                     </p>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -405,21 +402,22 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                     <button
                                         type="button"
                                         className="portal-home__btn portal-home__btn--secondary"
-                                        onClick={() => fileInputRef.current?.click()}
-                                        disabled={uploadingMedia}
+                                        onClick={() => setPickerOpen(true)}
+                                        disabled={uploadingMedia || images.length >= MAX_PRODUCT_MEDIA_COUNT}
                                     >
-                                        Add media
+                                        Add from library
                                     </button>
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/*,video/*"
-                                        multiple
-                                        onChange={(e) => uploadMedia(e.currentTarget.files)}
-                                        style={{ display: "none" }}
-                                    />
                                 </div>
                             </div>
+
+                            <MediaPickerModal
+                                open={pickerOpen}
+                                maxCount={Math.max(1, MAX_PRODUCT_MEDIA_COUNT - images.length)}
+                                minCount={1}
+                                title="Add product media"
+                                onClose={() => setPickerOpen(false)}
+                                onConfirm={(items) => linkMediaFromLibrary(items.map((m) => m.id))}
+                            />
 
                             {images.length > 0 ? (
                                 <div className="admin-uploader__previews">

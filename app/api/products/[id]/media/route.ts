@@ -3,13 +3,9 @@ export const maxDuration = 60
 
 import { databaseErrorResponse, dbQuery, DatabaseUnavailableError } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
-import {
-  MAX_PRODUCT_MEDIA_COUNT,
-  MAX_PRODUCT_MEDIA_FILE_BYTES,
-  MAX_PRODUCT_MEDIA_FILE_LABEL,
-} from "@/lib/products/productMediaLimits"
+import { linkMediaAssetsToProductWithPool } from "@/lib/media/mediaAssets"
+import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
 import { productApiErrorMessage } from "@/lib/products/productApiErrors"
-import { uploadOneProductMediaFile } from "@/lib/products/uploadProductMedia"
 import { NextResponse } from "next/server"
 
 export async function POST(
@@ -50,19 +46,14 @@ export async function POST(
       return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 })
     }
 
-    const formData = await req.formData()
-    const file = formData.get("file")
+    const body = await req.json().catch(() => null)
+    const assetIds = Array.isArray(body?.media_asset_ids)
+      ? body.media_asset_ids.map((v: unknown) => Number(v)).filter((n: number) => Number.isFinite(n) && n > 0)
+      : []
 
-    if (!(file instanceof File) || file.size === 0) {
-      return NextResponse.json({ success: false, message: "Media file is required" }, { status: 400 })
-    }
-
-    if (file.size > MAX_PRODUCT_MEDIA_FILE_BYTES) {
+    if (assetIds.length < 1) {
       return NextResponse.json(
-        {
-          success: false,
-          message: `"${file.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`,
-        },
+        { success: false, message: "Select at least one item from the media library." },
         { status: 400 }
       )
     }
@@ -73,38 +64,26 @@ export async function POST(
     )
     const existingCount = Number(countRes.rows[0]?.count ?? 0)
 
-    if (existingCount >= MAX_PRODUCT_MEDIA_COUNT) {
+    if (existingCount + assetIds.length > MAX_PRODUCT_MEDIA_COUNT) {
       return NextResponse.json(
         {
           success: false,
-          message: `This product already has the maximum of ${MAX_PRODUCT_MEDIA_COUNT} media files`,
+          message: `This product can have at most ${MAX_PRODUCT_MEDIA_COUNT} media items.`,
         },
         { status: 400 }
       )
     }
 
-    const isPrimary =
-      formData.get("is_primary") === "true" || existingCount === 0
-
-    const uploaded = await uploadOneProductMediaFile(productId, file, existingCount)
-
-    await dbQuery(
-      `
-      INSERT INTO product_images (product_id, image_url, is_primary, media_type)
-      VALUES ($1, $2, $3, $4)
-      `,
-      [productId, uploaded.url, isPrimary, uploaded.media_type]
-    )
+    await linkMediaAssetsToProductWithPool(productId, assetIds, MAX_PRODUCT_MEDIA_COUNT)
 
     return NextResponse.json({
       success: true,
-      message: "Media uploaded",
-      data: uploaded,
+      message: "Media linked to product",
     })
   } catch (err) {
-    console.error("Error uploading product media", err)
+    console.error("Error linking product media", err)
 
-    const { message, status } = databaseErrorResponse(err, "Could not upload product media")
+    const { message, status } = databaseErrorResponse(err, "Could not link product media")
 
     return NextResponse.json(
       {
