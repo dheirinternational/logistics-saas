@@ -84,15 +84,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ success: false, message: "Invalid media id" }, { status: 400 })
     }
 
-    await dbQuery(`UPDATE product_images SET is_primary = false WHERE product_id = $1`, [
-      productId,
-    ])
     const res = await dbQuery(
-      `UPDATE product_images SET is_primary = true WHERE id = $1 AND product_id = $2`,
+      `UPDATE product_images SET is_primary = (id = $1) WHERE product_id = $2 RETURNING id`,
       [imageId, productId]
     )
 
     if (res.rowCount === 0) {
+      return NextResponse.json({ success: false, message: "Media not found" }, { status: 404 })
+    }
+    if (!res.rows.some((r) => r.id === imageId)) {
       return NextResponse.json({ success: false, message: "Media not found" }, { status: 404 })
     }
 

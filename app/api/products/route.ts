@@ -211,7 +211,7 @@ export async function POST(req: Request) {
       const id = await insertProduct(data, session.user_id)
 
       try {
-        await linkProductMediaAssets(id, assetIds)
+        await linkProductMediaAssets(id, assetIds, { prefetchedAssets: assets })
       } catch (linkErr) {
         await dbQuery(`DELETE FROM products WHERE id = $1`, [id]).catch(() => undefined)
         throw linkErr

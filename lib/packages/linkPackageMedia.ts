@@ -38,11 +38,13 @@ export async function linkPackageMediaAssets(
     throw new Error("One or more selected media items were not found.")
   }
 
-  const primaryRes = await dbQuery(
-    `SELECT 1 FROM package_images WHERE package_id = $1 AND is_primary = true LIMIT 1`,
+  const statsRes = await dbQuery<{ has_primary: boolean }>(
+    `SELECT EXISTS(
+       SELECT 1 FROM package_images WHERE package_id = $1 AND is_primary = true
+     ) AS has_primary`,
     [packageId]
   )
-  let hasPrimary = (primaryRes.rowCount ?? 0) > 0
+  let hasPrimary = statsRes.rows[0]?.has_primary ?? false
 
   const values: unknown[] = []
   const rowsSql = order.map((asset, index) => {

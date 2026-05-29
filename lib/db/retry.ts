@@ -1,4 +1,4 @@
-const RETRY_DELAYS_MS = [150, 400, 900]
+const RETRY_DELAYS_MS = [200, 600, 1_500, 3_000]
 
 export function isTransientConnectionError(err: unknown): boolean {
   const message = err instanceof Error ? err.message : String(err)
@@ -14,10 +14,19 @@ export function isTransientConnectionError(err: unknown): boolean {
     message.includes("max clients reached") ||
     message.includes("EMAXCONNSESSION") ||
     message.includes("too many connections") ||
+    message.includes("remaining connection slots are reserved") ||
+    message.includes("server closed the connection unexpectedly") ||
     code === "XX000" ||
     code === "53300" ||
-    code === "57P01"
+    code === "57P01" ||
+    code === "57P03" ||
+    code === "08006" ||
+    code === "08003"
   )
+}
+
+function jitter(base: number): number {
+  return base + Math.floor(Math.random() * base * 0.3)
 }
 
 function sleep(ms: number) {
@@ -38,11 +47,12 @@ export async function withDbRetry<T>(
       if (!isTransientConnectionError(err) || attempt >= RETRY_DELAYS_MS.length) {
         throw err
       }
+      const delay = jitter(RETRY_DELAYS_MS[attempt])
       console.warn(
-        `${label} failed (attempt ${attempt + 1}/${RETRY_DELAYS_MS.length + 1}), retrying…`,
+        `${label} failed (attempt ${attempt + 1}/${RETRY_DELAYS_MS.length + 1}), retrying in ${delay}ms…`,
         err instanceof Error ? err.message : err
       )
-      await sleep(RETRY_DELAYS_MS[attempt])
+      await sleep(delay)
     }
   }
 

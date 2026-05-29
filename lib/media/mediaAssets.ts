@@ -196,53 +196,34 @@ async function linkAssetsToTable(
     throw new Error("One or more selected media items were not found.")
   }
 
-  const countRes = await client.query(
-    `SELECT COUNT(*)::int AS count FROM ${table} WHERE ${entityColumn} = $1`,
+  const statsRes = await client.query(
+    `SELECT COUNT(*)::int AS count, EXISTS(
+       SELECT 1 FROM ${table} WHERE ${entityColumn} = $1 AND is_primary = true
+     ) AS has_primary FROM ${table} WHERE ${entityColumn} = $1`,
     [entityId]
   )
-  const existing = Number(countRes.rows[0]?.count ?? 0)
+  const existing = Number(statsRes.rows[0]?.count ?? 0)
   const max = opts?.maxCount
   if (max != null && existing + order.length > max) {
     throw new Error(`Cannot attach more than ${max} media items.`)
   }
 
-  const primaryRes = await client.query(
-    `SELECT 1 FROM ${table} WHERE ${entityColumn} = $1 AND is_primary = true LIMIT 1`,
-    [entityId]
-  )
-  let hasPrimary = (primaryRes.rowCount ?? 0) > 0
+  let hasPrimary = statsRes.rows[0]?.has_primary ?? false
 
-  for (let i = 0; i < order.length; i++) {
-    const asset = order[i]
+  const values: unknown[] = []
+  const rowsSql = order.map((asset, i) => {
     const isPrimary = !hasPrimary && i === 0
     if (isPrimary) hasPrimary = true
+    const base = i * 5
+    values.push(entityId, asset.public_url, isPrimary, asset.media_type, Number(asset.id))
+    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`
+  })
 
-    if (table === "product_images") {
-      await client.query(
-        `
-        INSERT INTO product_images (product_id, image_url, is_primary, media_type, media_asset_id)
-        VALUES ($1, $2, $3, $4, $5)
-        `,
-        [entityId, asset.public_url, isPrimary, asset.media_type, asset.id]
-      )
-    } else if (table === "package_images") {
-      await client.query(
-        `
-        INSERT INTO package_images (package_id, image_url, is_primary, media_type, media_asset_id)
-        VALUES ($1, $2, $3, $4, $5)
-        `,
-        [entityId, asset.public_url, isPrimary, asset.media_type, asset.id]
-      )
-    } else {
-      await client.query(
-        `
-        INSERT INTO shipment_images (shipment_id, image_url, is_primary, media_type, media_asset_id)
-        VALUES ($1, $2, $3, $4, $5)
-        `,
-        [entityId, asset.public_url, isPrimary, asset.media_type, asset.id]
-      )
-    }
-  }
+  await client.query(
+    `INSERT INTO ${table} (${entityColumn}, image_url, is_primary, media_type, media_asset_id)
+     VALUES ${rowsSql.join(", ")}`,
+    values,
+  )
 }
 
 export function linkMediaAssetsToProduct(
