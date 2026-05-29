@@ -120,7 +120,10 @@ const AddProduct = () => {
             const createRes = await fetch("/api/products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({
+                    ...payload,
+                    media_asset_ids: selectedMedia.map((m) => m.id),
+                }),
                 credentials: "include",
             })
 
@@ -134,25 +137,6 @@ const AddProduct = () => {
             productId = Number(createResult.id)
             if (!productId) {
                 toast.error("Product was created but the server did not return an id")
-                return
-            }
-
-            const mediaRes = await fetch(`/api/products/${productId}/media`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
-                    media_asset_ids: selectedMedia.map((m) => m.id),
-                }),
-            })
-            const mediaResult = await parseJsonResponse(mediaRes)
-
-            if (!mediaRes.ok) {
-                await fetch(`/api/products/${productId}`, {
-                    method: "DELETE",
-                    credentials: "include",
-                }).catch(() => undefined)
-                toast.error(apiErrorMessage(mediaResult, "Could not link media to product"))
                 return
             }
 

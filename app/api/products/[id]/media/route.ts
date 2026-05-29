@@ -3,8 +3,7 @@ export const maxDuration = 60
 
 import { databaseErrorResponse, dbQuery, DatabaseUnavailableError } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
-import { linkMediaAssetsToProductWithPool } from "@/lib/media/mediaAssets"
-import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
+import { linkProductMediaAssets } from "@/lib/products/linkProductMedia"
 import { productApiErrorMessage } from "@/lib/products/productApiErrors"
 import { NextResponse } from "next/server"
 
@@ -51,30 +50,7 @@ export async function POST(
       ? body.media_asset_ids.map((v: unknown) => Number(v)).filter((n: number) => Number.isFinite(n) && n > 0)
       : []
 
-    if (assetIds.length < 1) {
-      return NextResponse.json(
-        { success: false, message: "Select at least one item from the media library." },
-        { status: 400 }
-      )
-    }
-
-    const countRes = await dbQuery(
-      `SELECT COUNT(*)::int AS count FROM product_images WHERE product_id = $1`,
-      [productId]
-    )
-    const existingCount = Number(countRes.rows[0]?.count ?? 0)
-
-    if (existingCount + assetIds.length > MAX_PRODUCT_MEDIA_COUNT) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `This product can have at most ${MAX_PRODUCT_MEDIA_COUNT} media items.`,
-        },
-        { status: 400 }
-      )
-    }
-
-    await linkMediaAssetsToProductWithPool(productId, assetIds, MAX_PRODUCT_MEDIA_COUNT)
+    await linkProductMediaAssets(productId, assetIds)
 
     return NextResponse.json({
       success: true,

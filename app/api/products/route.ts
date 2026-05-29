@@ -1,7 +1,7 @@
 export const runtime = "nodejs"
 export const maxDuration = 60
 
-import { databaseErrorResponse, dbQuery, pool, DatabaseUnavailableError } from "@/lib/db/db"
+import { databaseErrorResponse, dbQuery, DatabaseUnavailableError } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
 import {
@@ -12,9 +12,12 @@ import {
   type ProductCreateInput,
   validateProductCreateInput,
 } from "@/lib/products/validateProductCreate"
+import { linkProductMediaAssets } from "@/lib/products/linkProductMedia"
 import { productApiErrorMessage } from "@/lib/products/productApiErrors"
 import { isValidProductWeightUnit } from "@/lib/shop/productWeight"
 import { NextRequest, NextResponse } from "next/server"
+import type { PoolClient } from "pg"
+import { pool } from "@/lib/db/db"
 
 function parseProductFields(raw: Record<string, FormDataEntryValue | unknown>): ProductCreateInput {
   return {
@@ -34,30 +37,30 @@ function parseProductFields(raw: Record<string, FormDataEntryValue | unknown>): 
 }
 
 async function insertProduct(data: ProductCreateInput, userId: number) {
-  const { rows } = await dbQuery(
+  const { rows } = await dbQuery<{ id: number }>(
     `
-            INSERT INTO products (
-                name,
-                description,
-                category_id,
-                price,
-                discount_price,
-                discount_min_qty,
-                stock_quantity,
-                low_stock_threshold,
-                cost_price,
-                weight,
-                weight_unit,
-                is_featured,
-                created_at,
-                created_by,
-                updated_at,
-                updated_by,
-                status
-            )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8, $9, $10, NOW(), $11, NOW(), $12, 'active')
-            RETURNING id
-        `,
+    INSERT INTO products (
+      name,
+      description,
+      category_id,
+      price,
+      discount_price,
+      discount_min_qty,
+      stock_quantity,
+      low_stock_threshold,
+      cost_price,
+      weight,
+      weight_unit,
+      is_featured,
+      created_at,
+      created_by,
+      updated_at,
+      updated_by,
+      status
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8, $9, $10, NOW(), $11, NOW(), $12, 'active')
+    RETURNING id
+    `,
     [
       data.name,
       data.description,
@@ -77,9 +80,79 @@ async function insertProduct(data: ProductCreateInput, userId: number) {
   return Number(rows[0].id)
 }
 
-export async function POST(req: Request) {
-  const client = await pool.connect()
+async function createProductWithMultipartUpload(
+  client: PoolClient,
+  data: ProductCreateInput,
+  userId: number,
+  validFiles: File[]
+) {
+  await client.query("BEGIN")
 
+  const { rows } = await client.query(
+    `
+    INSERT INTO products (
+      name,
+      description,
+      category_id,
+      price,
+      discount_price,
+      discount_min_qty,
+      stock_quantity,
+      low_stock_threshold,
+      cost_price,
+      weight,
+      weight_unit,
+      is_featured,
+      created_at,
+      created_by,
+      updated_at,
+      updated_by,
+      status
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8, $9, $10, NOW(), $11, NOW(), $12, 'active')
+    RETURNING id
+    `,
+    [
+      data.name,
+      data.description,
+      data.category_id,
+      data.price,
+      data.discount_price || 0,
+      data.discount_min_qty,
+      data.stock_quantity,
+      data.weight,
+      data.weight_unit,
+      data.is_featured,
+      userId,
+      userId,
+    ]
+  )
+
+  const id = Number(rows[0].id)
+  const uploadedMedia = await uploadProductMediaFiles(id, validFiles)
+
+  if (uploadedMedia.length > 0) {
+    const values: unknown[] = []
+    const rowsSql = uploadedMedia.map((m, index) => {
+      const base = index * 4
+      values.push(id, m.url, index === 0, m.media_type)
+      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4})`
+    })
+
+    await client.query(
+      `
+      INSERT INTO product_images (product_id, image_url, is_primary, media_type)
+      VALUES ${rowsSql.join(", ")}
+      `,
+      values
+    )
+  }
+
+  await client.query("COMMIT")
+  return id
+}
+
+export async function POST(req: Request) {
   try {
     let session
     try {
@@ -95,23 +168,11 @@ export async function POST(req: Request) {
     }
 
     if (!session) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized",
-        },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
     }
 
     if (session.role !== "admin") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Forbidden",
-        },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
     }
 
     const contentType = req.headers.get("content-type") ?? ""
@@ -126,6 +187,21 @@ export async function POST(req: Request) {
       }
 
       const id = await insertProduct(data, session.user_id)
+
+      const assetIds = Array.isArray(body.media_asset_ids)
+        ? body.media_asset_ids
+            .map((v: unknown) => Number(v))
+            .filter((n: number) => Number.isFinite(n) && n > 0)
+        : []
+
+      try {
+        if (assetIds.length > 0) {
+          await linkProductMediaAssets(id, assetIds)
+        }
+      } catch (linkErr) {
+        await dbQuery(`DELETE FROM products WHERE id = $1`, [id]).catch(() => undefined)
+        throw linkErr
+      }
 
       return NextResponse.json({
         success: true,
@@ -172,81 +248,27 @@ export async function POST(req: Request) {
       )
     }
 
-    await client.query("BEGIN")
-
-    const { rows } = await client.query(
-      `
-            INSERT INTO products (
-                name,
-                description,
-                category_id,
-                price,
-                discount_price,
-                discount_min_qty,
-                stock_quantity,
-                low_stock_threshold,
-                cost_price,
-                weight,
-                weight_unit,
-                is_featured,
-                created_at,
-                created_by,
-                updated_at,
-                updated_by,
-                status
-            )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8, $9, $10, NOW(), $11, NOW(), $12, 'active')
-            RETURNING *
-        `,
-      [
-        data.name,
-        data.description,
-        data.category_id,
-        data.price,
-        data.discount_price || 0,
-        data.discount_min_qty,
-        data.stock_quantity,
-        data.weight,
-        data.weight_unit,
-        data.is_featured,
-        session.user_id,
-        session.user_id,
-      ]
-    )
-
-    const id = Number(rows[0].id)
-    const uploadedMedia = await uploadProductMediaFiles(id, validFiles)
-
-    if (uploadedMedia.length > 0) {
-      const values: unknown[] = []
-      const rowsSql = uploadedMedia.map((m, index) => {
-        const base = index * 4
-        values.push(id, m.url, index === 0, m.media_type)
-        return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4})`
-      })
-
-      await client.query(
-        `
-                INSERT INTO product_images (product_id, image_url, is_primary, media_type)
-                VALUES ${rowsSql.join(", ")}
-            `,
-        values
-      )
-    }
-
-    await client.query("COMMIT")
-
-    return NextResponse.json({
-      message: "Successfully added product to system",
-      success: true,
-      id,
-    })
-  } catch (err) {
+    const client = await pool.connect()
     try {
-      await client.query("ROLLBACK")
-    } catch {
-      /* no active transaction */
+      const id = await createProductWithMultipartUpload(
+        client,
+        data,
+        session.user_id,
+        validFiles
+      )
+
+      return NextResponse.json({
+        message: "Successfully added product to system",
+        success: true,
+        id,
+      })
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => undefined)
+      throw err
+    } finally {
+      client.release()
     }
+  } catch (err) {
     console.error("Error Adding Product to System", err)
 
     const { message, status } = databaseErrorResponse(err, "Could not add product")
@@ -258,8 +280,6 @@ export async function POST(req: Request) {
       },
       { status }
     )
-  } finally {
-    client.release()
   }
 }
 
@@ -281,15 +301,14 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search")
 
     let query = `SELECT * FROM products`
-    let values: any[] = []
-    values = []
+    const values: unknown[] = []
 
     if (search) {
       query += ` WHERE name ILIKE $1`
       values.push(`%${search}%`)
     }
 
-    const res = await pool.query(query, values)
+    const res = await dbQuery(query, values)
 
     return NextResponse.json({
       message: "Products succesfully fetched from database",
@@ -339,27 +358,27 @@ export async function PUT(req: Request) {
       )
     }
 
-    const { rows } = await pool.query(
+    const { rows } = await dbQuery(
       `
-            UPDATE products 
-            SET 
-                name = $1, 
-                description = $2, 
-                category_id = $3, 
-                price = $4, 
-                stock_quantity = $5, 
-                low_stock_threshold = $6, 
-                weight = $7, 
-                weight_unit = $8,
-                is_featured = $9, 
-                updated_at = NOW(), 
-                updated_by = $10, 
-                status = $11, 
-                discount_price = $12, 
-                cost_price = $13
-            WHERE id = $14
-            RETURNING *
-        `,
+      UPDATE products 
+      SET 
+        name = $1, 
+        description = $2, 
+        category_id = $3, 
+        price = $4, 
+        stock_quantity = $5, 
+        low_stock_threshold = $6, 
+        weight = $7, 
+        weight_unit = $8,
+        is_featured = $9, 
+        updated_at = NOW(), 
+        updated_by = $10, 
+        status = $11, 
+        discount_price = $12, 
+        cost_price = $13
+      WHERE id = $14
+      RETURNING *
+      `,
       [
         data.name,
         data.description,
