@@ -252,7 +252,10 @@ export type Product = {
     created_by: string
     updated_by: string
     created_at: string
-    updated_at: string 
+    updated_at: string
+    /** Primary (or first) product image for admin lists */
+    cover_image_url?: string | null
+    cover_media_type?: "image" | "video" | null
 }
 
 export type CartProduct = {

@@ -306,11 +306,29 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const search = searchParams.get("search")
 
-    let query = `SELECT * FROM products`
+    let query = `
+      SELECT
+        p.*,
+        (
+          SELECT pi.image_url
+          FROM product_images pi
+          WHERE pi.product_id = p.id
+          ORDER BY pi.is_primary DESC, pi.id ASC
+          LIMIT 1
+        ) AS cover_image_url,
+        (
+          SELECT pi.media_type
+          FROM product_images pi
+          WHERE pi.product_id = p.id
+          ORDER BY pi.is_primary DESC, pi.id ASC
+          LIMIT 1
+        ) AS cover_media_type
+      FROM products p
+    `
     const values: unknown[] = []
 
     if (search) {
-      query += ` WHERE name ILIKE $1`
+      query += ` WHERE p.name ILIKE $1`
       values.push(`%${search}%`)
     }
 

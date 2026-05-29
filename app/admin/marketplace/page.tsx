@@ -1,6 +1,7 @@
 "use client"
 
 import AdminProductEditModal from "@/components/admin/marketplace/AdminProductEditModal"
+import { ProductCoverThumb } from "@/components/admin/marketplace/ProductCoverThumb"
 import SearchComponent, { MarketplaceFilterValue } from "@/components/admin/marketplace/SearchComponent"
 import { Table } from "@/components/admin/table/Table"
 import { DheirLoader } from "@/components/ui/DheirLoader"
@@ -118,6 +119,17 @@ const Page: NextPage = () => {
 
     const productsTableDef = [
         columnHelper.accessor("id", { header: "ID" }),
+        columnHelper.display({
+            id: "cover",
+            header: "Cover",
+            cell: ({ row }) => (
+                <ProductCoverThumb
+                    imageUrl={row.original.cover_image_url}
+                    mediaType={row.original.cover_media_type}
+                    alt={row.original.name}
+                />
+            ),
+        }),
         columnHelper.accessor("name", { header: "Product name" }),
         columnHelper.accessor("price", {
             header: "Price",
@@ -132,7 +144,14 @@ const Page: NextPage = () => {
         }),
         columnHelper.accessor("weight", {
             header: "Weight",
-            cell: ({ getValue }) => <p>{getValue()} kg</p>,
+            cell: ({ row }) => {
+                const unit = row.original.weight_unit === "cbm" ? "cbm" : "kg"
+                return (
+                    <p>
+                        {row.original.weight} {unit}
+                    </p>
+                )
+            },
         }),
         columnHelper.accessor("created_at", {
             header: "Added on",
