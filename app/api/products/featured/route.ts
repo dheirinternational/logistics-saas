@@ -11,8 +11,10 @@ export async function GET() {
       SELECT
         p.id,
         p.name,
+        p.category_id,
         p.price,
         p.discount_price,
+        p.discount_min_qty,
         p.stock_quantity,
         c.name AS category_name,
         (

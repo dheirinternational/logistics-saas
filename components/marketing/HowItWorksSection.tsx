@@ -16,15 +16,19 @@ function StepCard({
 
   return (
     <article className="how-it-works-card flex h-[min(80vh,580px)] min-h-[460px] w-[min(82vw,300px)] shrink-0 flex-col overflow-hidden rounded-2xl bg-dheir-surface shadow-[var(--shadow-dheir-soft)] sm:w-[300px] md:h-[560px] md:w-auto">
-      <div className="relative mx-2 mt-2 min-h-[280px] flex-[2.4] overflow-hidden rounded-2xl bg-dheir-ink md:min-h-[320px]">
+      <div className="relative mx-2 mt-2 min-h-[280px] flex-[2.4] overflow-hidden rounded-2xl bg-dheir-muted/20 md:min-h-[320px]">
         <Image
           src={imageSrc}
           alt={imageAlt}
           fill
           sizes="(max-width: 768px) 86vw, 320px"
-          className="object-contain p-0.5"
+          className="object-cover"
         />
-        <span className="absolute left-4 top-4 font-display text-3xl font-extrabold tracking-tight text-white md:text-4xl">
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-transparent"
+          aria-hidden
+        />
+        <span className="absolute left-4 top-4 z-10 font-display text-3xl font-extrabold tracking-tight text-white drop-shadow-md md:text-4xl">
           {stepLabel}
         </span>
       </div>
