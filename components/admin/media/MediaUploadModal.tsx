@@ -1,6 +1,7 @@
 "use client"
 
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { MAX_PRODUCT_MEDIA_FILE_LABEL } from "@/lib/products/productMediaLimits"
 import { IconCloudUpload, IconX } from "@tabler/icons-react"
 
 type MediaUploadModalProps = {
