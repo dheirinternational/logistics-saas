@@ -9,6 +9,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { matchesStatusFilter, matchesWarehouseFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
 import { IconBox, IconTruck } from "@tabler/icons-react"
 
@@ -168,7 +169,11 @@ const Page: NextPage = () => {
         })
     ]
 
-    const data = incomingPackages.filter(x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()) && x.warehouse_id.toString().includes(filterValues.warehouse_id))
+    const data = incomingPackages.filter(
+        (x) =>
+            matchesStatusFilter(x.status, filterValues.status) &&
+            matchesWarehouseFilter(x.warehouse_id, filterValues.warehouse_id)
+    )
 
   return (
     <div className="portal-home">

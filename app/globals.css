@@ -3136,6 +3136,36 @@ a{
     color: var(--color-dheir-muted);
 }
 
+.admin-uploader__notice {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--color-dheir-blue) 28%, var(--color-dheir-border));
+    background: color-mix(in srgb, var(--color-dheir-hero-wash) 70%, var(--color-dheir-page));
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-dheir-ink);
+}
+
+.admin-uploader__notice strong {
+    font-weight: 600;
+}
+
+.admin-uploader__file-size {
+    margin: 0;
+    padding: 6px 8px 0;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-dheir-muted);
+}
+
+.admin-uploader__file-size--over {
+    color: var(--color-dheir-red);
+    font-weight: 600;
+}
+
 .admin-uploader__previews {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

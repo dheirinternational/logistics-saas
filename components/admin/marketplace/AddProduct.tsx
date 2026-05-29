@@ -2,6 +2,12 @@
 
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
+import { parseJsonResponse } from "@/lib/api/parseJsonResponse"
+import {
+  MAX_PRODUCT_MEDIA_COUNT,
+  MAX_PRODUCT_MEDIA_FILE_BYTES,
+  MAX_PRODUCT_MEDIA_FILE_LABEL,
+} from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
 import { getProductWeightFieldLabel } from "@/lib/shop/productWeight"
 import type { ProductWeightUnit } from "@/lib/shop/productWeight"
@@ -11,7 +17,11 @@ import { useRouter } from "next/navigation"
 import { IconPlayerPlay, IconX } from "@tabler/icons-react"
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react"
 
-const MAX_MEDIA = 8
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 type ProductValues = {
     name: string
@@ -99,41 +109,92 @@ const AddProduct = () => {
             return
         }
 
-        const formData = new FormData(e.currentTarget)
-        images.forEach((image) => {
-            formData.append("images", image.file)
-        })
+        const oversized = images.find(
+            (img) => img.file.size > MAX_PRODUCT_MEDIA_FILE_BYTES
+        )
+        if (oversized) {
+            toast.error(
+                `"${oversized.file.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`
+            )
+            setIsAddingProduct(false)
+            return
+        }
 
-        if (productValues.is_featured) {
-            formData.set("is_featured", "true")
-        } else {
-            formData.delete("is_featured")
+        const payload = {
+            name: productValues.name,
+            description: productValues.description,
+            category_id: productValues.category_id,
+            price: productValues.price,
+            discount_price:
+                productValues.discount_price === ""
+                    ? 0
+                    : Number(productValues.discount_price),
+            discount_min_qty:
+                productValues.discount_min_qty === ""
+                    ? null
+                    : Number(productValues.discount_min_qty),
+            stock_quantity: productValues.stock_quantity,
+            weight: productValues.weight,
+            weight_unit: productValues.weight_unit,
+            is_featured: productValues.is_featured,
         }
-        if (productValues.discount_price === "") {
-            formData.delete("discount_price")
-        }
-        if (productValues.discount_min_qty === "") {
-            formData.delete("discount_min_qty")
-        }
+
+        let productId: number | null = null
 
         try {
-            const res = await fetch("/api/products", {
+            const createRes = await fetch("/api/products", {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
             })
 
-            const result = await res.json()
+            const createResult = await parseJsonResponse(createRes)
 
-            if (!res.ok) {
-                toast.error(result.message || "Could not add product")
+            if (!createRes.ok) {
+                toast.error(createResult.message || "Could not add product")
                 return
+            }
+
+            productId = Number(createResult.id)
+            if (!productId) {
+                toast.error("Product was created but the server did not return an id")
+                return
+            }
+
+            for (let i = 0; i < images.length; i++) {
+                const mediaForm = new FormData()
+                mediaForm.append("file", images[i].file)
+                mediaForm.append("is_primary", i === 0 ? "true" : "false")
+
+                const mediaRes = await fetch(`/api/products/${productId}/media`, {
+                    method: "POST",
+                    body: mediaForm,
+                })
+
+                const mediaResult = await parseJsonResponse(mediaRes)
+
+                if (!mediaRes.ok) {
+                    await fetch(`/api/products/${productId}`, { method: "DELETE" })
+                    toast.error(
+                        mediaResult.message ||
+                            `Could not upload "${images[i].file.name}"`
+                    )
+                    return
+                }
             }
 
             toast.success("Product successfully added to system")
             router.push("/admin/marketplace")
         } catch (err) {
-            toast.error("ERR:: Adding product to system")
-            console.error("ERR:: Adding product to system", err)
+            if (productId) {
+                await fetch(`/api/products/${productId}`, { method: "DELETE" }).catch(
+                    () => undefined
+                )
+            }
+            const message =
+                err instanceof Error ? err.message : "Could not add product"
+            toast.error(message)
+            console.error("Add product failed", err)
         } finally {
             setIsAddingProduct(false)
         }
@@ -151,16 +212,27 @@ const AddProduct = () => {
         const files = e.target.files
         if (!files || files.length < 1) return
 
-        const remaining = MAX_MEDIA - images.length
+        const remaining = MAX_PRODUCT_MEDIA_COUNT - images.length
         if (remaining <= 0) {
-            toast.error(`Maximum ${MAX_MEDIA} media files per product`)
+            toast.error(`Maximum ${MAX_PRODUCT_MEDIA_COUNT} media files per product`)
             if (fileInputRef.current) fileInputRef.current.value = ""
             return
         }
 
         const incoming = Array.from(files).slice(0, remaining)
         if (incoming.length < files.length) {
-            toast.error(`Only ${remaining} more file(s) allowed (max ${MAX_MEDIA})`)
+            toast.error(
+                `Only ${remaining} more file(s) allowed (max ${MAX_PRODUCT_MEDIA_COUNT})`
+            )
+        }
+
+        const tooLarge = incoming.find((file) => file.size > MAX_PRODUCT_MEDIA_FILE_BYTES)
+        if (tooLarge) {
+            toast.error(
+                `"${tooLarge.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`
+            )
+            if (fileInputRef.current) fileInputRef.current.value = ""
+            return
         }
 
         const added: MediaPreview[] = incoming.map((file) => ({
@@ -368,7 +440,8 @@ const AddProduct = () => {
                             Media
                         </p>
                         <p className="admin-uploader__help">
-                            Upload at least 1 product media (images or videos). You can add more in batches (max {MAX_MEDIA}).
+                            Upload at least 1 image or video. Up to {MAX_PRODUCT_MEDIA_COUNT}{" "}
+                            files per product.
                         </p>
                     </div>
                     <button
@@ -388,6 +461,12 @@ const AddProduct = () => {
                     />
                 </div>
 
+                <p className="admin-uploader__notice" role="note">
+                    <strong>File size limit:</strong> each image or video must be{" "}
+                    {MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller. Files over this limit cannot be
+                    uploaded. Compress larger videos on your device before adding them.
+                </p>
+
                 {images.length > 0 ? (
                     <div className="admin-uploader__previews">
                         {images.map((img) => {
@@ -406,6 +485,18 @@ const AddProduct = () => {
                                             <Image src={img.preview} alt="" fill className="object-cover" unoptimized />
                                         )}
                                     </div>
+                                    <p
+                                        className={`admin-uploader__file-size${
+                                            img.file.size > MAX_PRODUCT_MEDIA_FILE_BYTES
+                                                ? " admin-uploader__file-size--over"
+                                                : ""
+                                        }`}
+                                    >
+                                        {formatFileSize(img.file.size)}
+                                        {img.file.size > MAX_PRODUCT_MEDIA_FILE_BYTES
+                                            ? ` — over ${MAX_PRODUCT_MEDIA_FILE_LABEL} limit`
+                                            : ""}
+                                    </p>
                                     <div className="admin-uploader__preview-actions">
                                         {isVideo ? (
                                             <button

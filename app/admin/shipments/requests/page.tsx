@@ -12,15 +12,15 @@ import { BiCheck } from 'react-icons/bi'
 import { FaImage } from 'react-icons/fa'
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
+import { matchesStatusFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
 import { IconChecks, IconClock } from "@tabler/icons-react"
 import { getShippingQuantityFieldLabel } from "@/lib/shipping/channelUnits"
 import { IconX } from "@tabler/icons-react"
 
 export type SearchProps = {
-    search: string,
-    status: string,
-    warehouse_id: string
+    search: string
+    status: string
 }
 
 const columnHelper = createColumnHelper<ShippingRequest>()
@@ -51,8 +51,7 @@ const Page: NextPage = () => {
     
     const [filterValues, setFilterValues] = useState<SearchProps>({
         search: "",
-        warehouse_id: "",
-        status: ""
+        status: "",
     })
 
     const [modalSelectedRequest, setModalSelectedRequest] = useState<null | ShippingRequest>(null)
@@ -243,7 +242,9 @@ const Page: NextPage = () => {
     
     }, [])
 
-    const data = shipmentRequests.filter( x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()))
+    const data = shipmentRequests.filter((x) =>
+        matchesStatusFilter(x.status, filterValues.status)
+    )
 
   return (
     <div className="portal-home">

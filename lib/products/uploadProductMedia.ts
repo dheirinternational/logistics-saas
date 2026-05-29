@@ -1,14 +1,24 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import { randomUUID } from "crypto"
 
-const supabase = createClient(
-  process.env.NODE_ENV === "production"
-    ? process.env.NEXT_PUBLIC_SUPABASE_URL!
-    : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST!,
-  process.env.NODE_ENV === "production"
-    ? process.env.SUPABASE_SERVICE_ROLE_KEY!
-    : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
-)
+function getSupabaseAdmin(): SupabaseClient {
+  const url =
+    process.env.NODE_ENV === "production"
+      ? process.env.NEXT_PUBLIC_SUPABASE_URL
+      : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST
+  const key =
+    process.env.NODE_ENV === "production"
+      ? process.env.SUPABASE_SERVICE_ROLE_KEY
+      : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST
+
+  if (!url || !key) {
+    throw new Error(
+      "Supabase storage is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the server."
+    )
+  }
+
+  return createClient(url, key)
+}
 
 const EXTENSION_MIME: Record<string, string> = {
   jpg: "image/jpeg",
@@ -70,12 +80,35 @@ export async function uploadProductMediaFiles(
   productId: number,
   files: File[]
 ): Promise<ProductMediaUpload[]> {
+  const supabase = getSupabaseAdmin()
   const uploaded: ProductMediaUpload[] = []
 
   for (let i = 0; i < files.length; i++) {
-    const file = files[i]
+    uploaded.push(
+      await uploadOneProductMediaFileWithClient(supabase, productId, files[i], i)
+    )
+  }
+
+  return uploaded
+}
+
+export async function uploadOneProductMediaFile(
+  productId: number,
+  file: File,
+  index = 0
+): Promise<ProductMediaUpload> {
+  const supabase = getSupabaseAdmin()
+  return uploadOneProductMediaFileWithClient(supabase, productId, file, index)
+}
+
+async function uploadOneProductMediaFileWithClient(
+  supabase: SupabaseClient,
+  productId: number,
+  file: File,
+  index: number
+): Promise<ProductMediaUpload> {
     const { media_type, contentType } = resolveProductMediaType(file)
-    const filePath = `product${productId}-${Date.now()}-${i}-${randomUUID()}-${sanitizeFileName(file.name)}`
+    const filePath = `product${productId}-${Date.now()}-${index}-${randomUUID()}-${sanitizeFileName(file.name)}`
     const buffer = Buffer.from(await file.arrayBuffer())
 
     const { error } = await supabase.storage.from("products").upload(filePath, buffer, {
@@ -88,8 +121,5 @@ export async function uploadProductMediaFiles(
     }
 
     const { data: publicUrl } = supabase.storage.from("products").getPublicUrl(filePath)
-    uploaded.push({ url: publicUrl.publicUrl, media_type })
-  }
-
-  return uploaded
+    return { url: publicUrl.publicUrl, media_type }
 }

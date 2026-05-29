@@ -1,7 +1,6 @@
 "use client"
 
 import SearchComponent from '@/components/admin/shipments/accepted/SearchComponent'
-import InputComponent from '@/components/admin/shipments/InputComponent'
 import { Table } from '@/components/admin/table/Table'
 import { generateTrackingNumber } from '@/lib/generators/generateTrackingNumber'
 import { useShipmentStore } from '@/store/shipmentsStore'
@@ -14,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaX } from 'react-icons/fa6'
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { matchesStatusFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
 import { IconChecks, IconInbox, IconPackage, IconPlane, IconTruck } from "@tabler/icons-react"
 
@@ -191,7 +191,9 @@ const Page: NextPage = () => {
         }
     }
 
-    const data = shipments.filter( x => x.status.toLowerCase().includes(filterValues.status.toLowerCase()))
+    const data = shipments.filter((x) =>
+        matchesStatusFilter(x.status, filterValues.status)
+    )
 
 
   return (

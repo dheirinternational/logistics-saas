@@ -1,110 +1,51 @@
 "use client"
 
-import { Dispatch, FormEvent, SetStateAction, useEffect, useState} from "react"
+import { Dispatch, FormEvent, SetStateAction } from "react"
 import InputComponent from "../InputComponent"
-import { Warehouse } from "@/types/entityTypeDef"
-import { toast } from "@/lib/ui/toast"
 
-type InputSafe = string | number 
+type InputSafe = string | number
 
 type Props<T extends Record<string, InputSafe>> = {
-    state: T,
-    setState: Dispatch<SetStateAction<T>>,
-    globalFilter?: string
-    onGlobalFilterChange?: (value: string) => void;
+  state: T
+  setState: Dispatch<SetStateAction<T>>
 }
 
-
-const SearchComponent = <T extends Record<string, InputSafe>,>({state, setState}: Props<T>) => {
-
-    // const [warehouses, setWareHouses] = useState<Warehouse[]>([])
-
-    
-    
-    
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-    }
-
-    // useEffect(() => {
-    //     const fetchWarehouses = async () => {
-    //         try{
-    //             const res = await fetch("/api/warehouses", {
-    //                 method: "GET",
-    //                 credentials: "include"
-    //             })
-
-    //             const result = await res.json()
-    //             if(!res.ok){
-    //                 toast.error(result.message)
-    //                 return
-    //             }
-
-    //             setWareHouses(result.data)
-    //             setState( prev => ({...prev, ["warehouses"]: result.data[0].id}))
-                
-    //         }
-    //         catch(err){
-    //             console.error("Error Fetching Warehouses", err)
-    //             toast.error("Error fetching warehouses")
-    //         }
-    //     }
-
-    //     fetchWarehouses()
-    // }, [])
-
+const SearchComponent = <T extends Record<string, InputSafe>>({
+  state,
+  setState,
+}: Props<T>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+  }
 
   return (
     <form onSubmit={handleSubmit} className="admin-filters">
-
-
-        <InputComponent 
-        name="search" 
-        title="Search" 
-        type="text" 
-        state={state} 
+      <InputComponent
+        name="search"
+        title="Search"
+        type="text"
+        state={state}
         setState={setState}
-        placeHolder="Tracking number or customer code…"        
-        />
+        placeHolder="Tracking number or customer code…"
+      />
 
-        <InputComponent 
-        name="status" 
-        title="Status" 
-        type="text" 
-        state={state} 
+      <InputComponent
+        name="status"
+        title="Status"
+        type="text"
+        state={state}
         setState={setState}
-        readonly
         select
-        overshadow
         selectValues={[
-            {name: "-- none --", value: ""},
-            {name: "Processing", value: "processing"}, 
-            {name: "Shipped", value: "shipped"},
-            {name: "In Transit", value: "in_transit"},
-            {name: "Arrived", value: "arrived"},
-            {name: "Out for delivery", value: "out_for_delivery"},
-            {name: "Delivered", value: "delivered"}
+          { name: "All statuses", value: "" },
+          { name: "Processing", value: "processing" },
+          { name: "Shipped", value: "shipped" },
+          { name: "In Transit", value: "in_transit" },
+          { name: "Arrived", value: "arrived" },
+          { name: "Out for delivery", value: "out_for_delivery" },
+          { name: "Delivered", value: "delivered" },
         ]}
-        placeHolder="select shipment status"
-
-        />
-
-        {/* <InputComponent 
-        name="warehouse" 
-        title="Warehouse" 
-        type="number" 
-        state={state} 
-        setState={setState}
-        readonly
-        select
-        selectValues={warehouses.map( x => ({
-            name: x.name, value: x.id
-        }))}
-        overshadow
-        />
-         */}
-
-
+      />
     </form>
   )
 }

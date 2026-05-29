@@ -66,7 +66,6 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
           onChange={(e) =>
             setState((prev) => ({ ...prev, [key]: e.target.value as any }))
           }
-          disabled={readonly}
         >
           {selectValues.map((opt, i) => (
             <option key={i} value={String(opt.value ?? "")}>
