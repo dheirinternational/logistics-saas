@@ -3,11 +3,12 @@
 import { AdminMediaVideoLightbox } from "@/components/admin/media/AdminMediaVideoLightbox"
 import { AdminMediaVideoPlayButton } from "@/components/admin/media/AdminMediaVideoPlayButton"
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import { toast } from "@/lib/ui/toast"
 import { IconPhoto, IconPlayerPlay, IconX } from "@tabler/icons-react"
 import { MediaVaultThumbnail } from "@/components/admin/media/MediaVaultThumbnail"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 type Props = {
   open: boolean
@@ -18,6 +19,8 @@ type Props = {
   onClose: () => void
   onConfirm: (items: AdminMediaItem[]) => void
 }
+
+const EMPTY_SELECTED: AdminMediaItem[] = []
 
 function formatMediaSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
@@ -30,7 +33,7 @@ export function MediaPickerModal({
   title = "Choose from media library",
   maxCount,
   minCount = 1,
-  initialSelected = [],
+  initialSelected,
   onClose,
   onConfirm,
 }: Props) {
@@ -40,28 +43,60 @@ export function MediaPickerModal({
   const [tab, setTab] = useState<"all" | "photo" | "video">("all")
   const [fullscreenVideoSrc, setFullscreenVideoSrc] = useState<string | null>(null)
 
-  const loadMedia = useCallback(async () => {
+  const wasOpenRef = useRef(false)
+  const loadAbortRef = useRef<AbortController | null>(null)
+  const loadFailedRef = useRef(false)
+
+  const loadMedia = useCallback(async (signal: AbortSignal) => {
     setLoading(true)
     try {
-      const res = await fetch("/api/admin/media", { credentials: "include" })
-      // Default GET reads the catalog only — no storage import on every open.
-      const result = await res.json()
+      const res = await fetch("/api/admin/media", { credentials: "include", signal })
+      const result = await parseJsonResponse(res)
       if (!res.ok) {
-        toast.error(result.message ?? "Could not load media library")
+        if (!loadFailedRef.current) {
+          loadFailedRef.current = true
+          toast.error(apiErrorMessage(result, "Could not load media library"))
+        }
         return
       }
-      setAllMedia(result.data ?? [])
-    } catch {
-      toast.error("Could not load media library")
+      setAllMedia((result.data as AdminMediaItem[]) ?? [])
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return
+      if (!loadFailedRef.current) {
+        loadFailedRef.current = true
+        const message = err instanceof Error ? err.message : "Could not load media library"
+        toast.error(message)
+      }
     } finally {
-      setLoading(false)
+      if (!signal.aborted) {
+        setLoading(false)
+      }
     }
   }, [])
 
   useEffect(() => {
-    if (!open) return
-    setSelected(initialSelected)
-    loadMedia()
+    if (!open) {
+      wasOpenRef.current = false
+      loadAbortRef.current?.abort()
+      loadAbortRef.current = null
+      return
+    }
+
+    if (wasOpenRef.current) return
+    wasOpenRef.current = true
+    loadFailedRef.current = false
+
+    setSelected(initialSelected ?? EMPTY_SELECTED)
+    setTab("all")
+
+    loadAbortRef.current?.abort()
+    const ac = new AbortController()
+    loadAbortRef.current = ac
+    void loadMedia(ac.signal)
+
+    return () => {
+      ac.abort()
+    }
   }, [open, initialSelected, loadMedia])
 
   const filtered = useMemo(() => {
