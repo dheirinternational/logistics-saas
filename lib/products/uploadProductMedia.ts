@@ -1,7 +1,14 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import { randomUUID } from "crypto"
 
-function getSupabaseAdmin(): SupabaseClient {
+export function parseProductStoragePath(url: string): string | null {
+  const marker = "/storage/v1/object/public/products/"
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  return url.slice(idx + marker.length)
+}
+
+export function getSupabaseAdmin(): SupabaseClient {
   const url =
     process.env.NODE_ENV === "production"
       ? process.env.NEXT_PUBLIC_SUPABASE_URL

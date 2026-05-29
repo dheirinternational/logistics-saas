@@ -1,4 +1,5 @@
 export const runtime = "nodejs"
+export const maxDuration = 60
 
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
@@ -11,6 +12,7 @@ import {
   type ProductCreateInput,
   validateProductCreateInput,
 } from "@/lib/products/validateProductCreate"
+import { productApiErrorMessage } from "@/lib/products/productApiErrors"
 import { isValidProductWeightUnit } from "@/lib/shop/productWeight"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -251,12 +253,9 @@ export async function POST(req: Request) {
     }
     console.error("Error Adding Product to System", err)
 
-    const message =
-      err instanceof Error ? err.message : "Error Adding Product to System"
-
     return NextResponse.json(
       {
-        message,
+        message: productApiErrorMessage(err, "Could not add product"),
         success: false,
       },
       { status: 500 }

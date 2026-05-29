@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaX } from 'react-icons/fa6'
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { deleteSelectedRows, formatDeleteFailures } from "@/lib/admin/deleteSelected"
 import { matchesStatusFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
 import { IconChecks, IconInbox, IconPackage, IconPlane, IconTruck } from "@tabler/icons-react"
@@ -167,19 +168,21 @@ const Page: NextPage = () => {
     const deleteShipments = async (rows: Shipment[]) => {
         const ids = rows.map((row) => String(row.id))
         try {
-            const results = await Promise.all(
-                ids.map(async (id) => {
-                    const res = await fetch(`/api/shipments/${id}`, {
-                        method: "DELETE",
-                        credentials: "include"
-                    })
-                    return { ok: res.ok, id }
+            const results = await deleteSelectedRows(ids, (id) =>
+                fetch(`/api/shipments/${id}`, {
+                    method: "DELETE",
+                    credentials: "include",
                 })
             )
 
-            const failed = results.filter((x) => !x.ok)
-            if (failed.length > 0) {
-                toast.error(`Failed to delete ${failed.length} shipment(s).`)
+            const failureMessage = formatDeleteFailures(results)
+            if (failureMessage) {
+                if (/unauthorized/i.test(failureMessage)) {
+                    toast.error("Session expired. Please sign in again.")
+                    router.push("/auth/login")
+                    return
+                }
+                toast.error(failureMessage)
                 return
             }
 

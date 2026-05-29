@@ -8,6 +8,7 @@ import {
   MAX_PRODUCT_MEDIA_FILE_BYTES,
   MAX_PRODUCT_MEDIA_FILE_LABEL,
 } from "@/lib/products/productMediaLimits"
+import { productApiErrorMessage } from "@/lib/products/productApiErrors"
 import { uploadOneProductMediaFile } from "@/lib/products/uploadProductMedia"
 import { NextResponse } from "next/server"
 
@@ -15,8 +16,6 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const client = await pool.connect()
-
   try {
     const session = await getSession()
 
@@ -35,7 +34,7 @@ export async function POST(
       return NextResponse.json({ success: false, message: "Invalid product id" }, { status: 400 })
     }
 
-    const productRes = await client.query(`SELECT id FROM products WHERE id = $1`, [productId])
+    const productRes = await pool.query(`SELECT id FROM products WHERE id = $1`, [productId])
     if (productRes.rows.length === 0) {
       return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 })
     }
@@ -57,7 +56,7 @@ export async function POST(
       )
     }
 
-    const countRes = await client.query(
+    const countRes = await pool.query(
       `SELECT COUNT(*)::int AS count FROM product_images WHERE product_id = $1`,
       [productId]
     )
@@ -78,7 +77,7 @@ export async function POST(
 
     const uploaded = await uploadOneProductMediaFile(productId, file, existingCount)
 
-    await client.query(
+    await pool.query(
       `
       INSERT INTO product_images (product_id, image_url, is_primary, media_type)
       VALUES ($1, $2, $3, $4)
@@ -94,11 +93,12 @@ export async function POST(
   } catch (err) {
     console.error("Error uploading product media", err)
 
-    const message =
-      err instanceof Error ? err.message : "Error uploading product media"
-
-    return NextResponse.json({ success: false, message }, { status: 500 })
-  } finally {
-    client.release()
+    return NextResponse.json(
+      {
+        success: false,
+        message: productApiErrorMessage(err, "Could not upload product media"),
+      },
+      { status: 500 }
+    )
   }
 }

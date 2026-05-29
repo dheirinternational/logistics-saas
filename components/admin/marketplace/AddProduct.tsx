@@ -59,6 +59,8 @@ const AddProduct = () => {
     const [categories, setCategories] = useState<ProductCategory[]>([])
     const [images, setImages] = useState<MediaPreview[]>([])
     const [isAddingProduct, setIsAddingProduct] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState<string | null>(null)
+    const isSubmittingRef = useRef(false)
     const [fullscreenVideoSrc, setFullscreenVideoSrc] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const imagesRef = useRef<MediaPreview[]>([])
@@ -68,7 +70,10 @@ const AddProduct = () => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        if (isSubmittingRef.current) return
+        isSubmittingRef.current = true
         setIsAddingProduct(true)
+        setUploadProgress(null)
 
         if (images.length < 1) {
             toast.error("Select at least 1 media file")
@@ -146,6 +151,7 @@ const AddProduct = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
+                credentials: "include",
             })
 
             const createResult = await parseJsonResponse(createRes)
@@ -162,19 +168,36 @@ const AddProduct = () => {
             }
 
             for (let i = 0; i < images.length; i++) {
+                setUploadProgress(`Uploading media ${i + 1} of ${images.length}…`)
+
                 const mediaForm = new FormData()
                 mediaForm.append("file", images[i].file)
                 mediaForm.append("is_primary", i === 0 ? "true" : "false")
 
-                const mediaRes = await fetch(`/api/products/${productId}/media`, {
-                    method: "POST",
-                    body: mediaForm,
-                })
+                let mediaRes: Response
+                try {
+                    mediaRes = await fetch(`/api/products/${productId}/media`, {
+                        method: "POST",
+                        body: mediaForm,
+                    })
+                } catch {
+                    await fetch(`/api/products/${productId}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                    }).catch(() => undefined)
+                    toast.error(
+                        `Network error while uploading "${images[i].file.name}". Check your connection and try again.`
+                    )
+                    return
+                }
 
                 const mediaResult = await parseJsonResponse(mediaRes)
 
                 if (!mediaRes.ok) {
-                    await fetch(`/api/products/${productId}`, { method: "DELETE" })
+                    await fetch(`/api/products/${productId}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                    }).catch(() => undefined)
                     toast.error(
                         mediaResult.message ||
                             `Could not upload "${images[i].file.name}"`
@@ -187,15 +210,18 @@ const AddProduct = () => {
             router.push("/admin/marketplace")
         } catch (err) {
             if (productId) {
-                await fetch(`/api/products/${productId}`, { method: "DELETE" }).catch(
-                    () => undefined
-                )
+                await fetch(`/api/products/${productId}`, {
+                    method: "DELETE",
+                    credentials: "include",
+                }).catch(() => undefined)
             }
             const message =
                 err instanceof Error ? err.message : "Could not add product"
             toast.error(message)
             console.error("Add product failed", err)
         } finally {
+            isSubmittingRef.current = false
+            setUploadProgress(null)
             setIsAddingProduct(false)
         }
     }
@@ -560,7 +586,14 @@ const AddProduct = () => {
 
             <div className="admin-modal__actions">
                 <button type="submit" className="portal-home__btn portal-home__btn--primary" disabled={isAddingProduct}>
-                    {isAddingProduct ? <DheirLoader color="#fff" size={10} /> : "Add product"}
+                    {isAddingProduct ? (
+                        <>
+                            <DheirLoader color="#fff" size={10} />
+                            {uploadProgress ?? "Saving…"}
+                        </>
+                    ) : (
+                        "Add product"
+                    )}
                 </button>
             </div>
         </form>
