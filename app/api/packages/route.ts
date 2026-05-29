@@ -1,16 +1,14 @@
-import { pool } from "@/lib/db/db";
+import { databaseErrorResponse, dbQuery, pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
-import { linkPackageMediaFromLibrary } from "@/lib/packages/uploadPackageImages";
+import { linkPackageMediaAssets, parsePackageMediaAssetIds } from "@/lib/packages/linkPackageMedia";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import type { DatabaseError } from "pg";
+import type { DatabaseError, PoolClient } from "pg";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest){
-
-    const client = await pool.connect()
-
+    let client: PoolClient | null = null
     try{
         const session = await getSession()
 
@@ -31,7 +29,7 @@ export async function POST(req: NextRequest){
         }
 
         const formData = await req.formData()
-        const mediaAssetEntries = formData.getAll("media_asset_ids")
+        const mediaAssetIds = parsePackageMediaAssetIds(formData.getAll("media_asset_ids"))
 
         const data = {
             package_name: formData.get("package_name"),
@@ -55,6 +53,8 @@ export async function POST(req: NextRequest){
                 { status: 400 }
             )
         }
+
+        client = await pool.connect()
 
         await client.query("BEGIN")
 
@@ -105,18 +105,18 @@ export async function POST(req: NextRequest){
 
         
         const { id } = res.rows[0]
-        await linkPackageMediaFromLibrary(client, Number(id), mediaAssetEntries)
 
-        // Get user email
         const userRes = await client.query(
             `SELECT email FROM users WHERE id = $1`,
             [userId.rows[0].user_id]
-        );
-
-        const userEmail = userRes.rows[0]?.email;
+        )
+        const userEmail = userRes.rows[0]?.email as string | undefined
 
         await client.query("COMMIT")
+        client.release()
+        client = null
 
+        await linkPackageMediaAssets(Number(id), mediaAssetIds)
 
         if (userEmail) {
             try {
@@ -170,8 +170,13 @@ export async function POST(req: NextRequest){
         
     }
     catch(err){
-
-        await client.query("ROLLBACK")
+        if (client) {
+            try {
+                await client.query("ROLLBACK")
+            } catch {
+                /* connection may already be closed */
+            }
+        }
 
         const dbError = err as DatabaseError
         if (
@@ -187,15 +192,12 @@ export async function POST(req: NextRequest){
             )
         }
 
-        console.error("Internal server error", err)
-
-        return NextResponse.json({
-            success: false,
-            message: "Internal server error"
-        }, {status: 500})
+        console.error("Error adding package", err)
+        const { message, status } = databaseErrorResponse(err, "Could not add package")
+        return NextResponse.json({ success: false, message }, { status })
     }
     finally {
-        client.release()
+        client?.release()
     }
 }
 

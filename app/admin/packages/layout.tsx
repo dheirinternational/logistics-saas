@@ -11,6 +11,8 @@ import type { AdminMediaItem } from "@/lib/media/adminMedia";
 import { DheirLoader } from "@/components/ui/DheirLoader";
 import { IconX } from "@tabler/icons-react";
 import { DheirSelect } from "@/components/ui/DheirSelect";
+import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse";
+import { toDateInputValue } from "@/lib/dates/toDateInputValue";
 
 export default function PageLayout({children}: {children: ReactNode}){
     const { isModalActive, setIsModalActive } = useEditModalStore()
@@ -159,10 +161,10 @@ const PackageEditComponent = () => {
                 }
             )
 
-            const result = await res.json()
+            const result = await parseJsonResponse(res)
 
             if(!res.ok){
-                toast.error(result.message)
+                toast.error(apiErrorMessage(result, "Could not save package"))
                 return
             }
 
@@ -174,8 +176,9 @@ const PackageEditComponent = () => {
             setLibraryMedia([])
         }
         catch(err){
-            toast.error("Network Error")
-            console.error("Network Error",err)
+            const message = err instanceof Error ? err.message : "Network error"
+            toast.error(message)
+            console.error("Package save failed", err)
         }
         finally{
             setIsUploadingPackage(false)
@@ -204,8 +207,6 @@ const PackageEditComponent = () => {
         const warehouse = warehouses.find( warehouse =>
             Number(selectedPackage.warehouse_id) === Number(warehouse.id)
         )
-
-        console.log(warehouse)
 
         setSelectedWarehouse(warehouse || null)
         
@@ -341,7 +342,7 @@ const PackageEditComponent = () => {
                         type="date"
                         name="received_at"
                         className="dheir-input"
-                        value={selectedPackage.received_at}
+                        value={toDateInputValue(selectedPackage.received_at)}
                         onChange={handleSelectedPackageInput}
                         required
                     />
@@ -353,7 +354,7 @@ const PackageEditComponent = () => {
                         type="date"
                         name="stored_at"
                         className="dheir-input"
-                        value={selectedPackage.stored_at}
+                        value={toDateInputValue(selectedPackage.stored_at)}
                         onChange={handleSelectedPackageInput}
                         required
                     />

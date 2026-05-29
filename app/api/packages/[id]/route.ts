@@ -1,6 +1,9 @@
-import { pool } from "@/lib/db/db"
+import { databaseErrorResponse, dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
-import { linkPackageMediaFromLibrary } from "@/lib/packages/uploadPackageImages"
+import {
+  linkPackageMediaAssets,
+  parsePackageMediaAssetIds,
+} from "@/lib/packages/linkPackageMedia"
 import { NextResponse } from "next/server"
 import type { DatabaseError } from "pg"
 
@@ -8,7 +11,6 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const client = await pool.connect()
   try {
     const session = await getSession()
     if (!session) {
@@ -26,7 +28,7 @@ export async function PUT(
     }
 
     const formData = await req.formData()
-    const mediaAssetEntries = formData.getAll("media_asset_ids")
+    const mediaAssetIds = parsePackageMediaAssetIds(formData.getAll("media_asset_ids"))
 
     const package_name = String(formData.get("package_name") ?? "").trim()
     const incoming_package_id = String(formData.get("incoming_package_id") ?? "").trim()
@@ -47,21 +49,23 @@ export async function PUT(
       return NextResponse.json({ success: false, message: "Invalid weight unit" }, { status: 400 })
     }
 
-    await client.query("BEGIN")
-
-    const userResult = await client.query(`SELECT user_id FROM customers WHERE code = $1`, [customer_code])
+    const userResult = await dbQuery<{ user_id: number }>(
+      `SELECT user_id FROM customers WHERE code = $1`,
+      [customer_code]
+    )
     if (userResult.rows.length === 0) {
-      await client.query("ROLLBACK")
-      return NextResponse.json({ success: false, message: `User with Customer code ${customer_code} was not found` }, { status: 404 })
+      return NextResponse.json(
+        { success: false, message: `User with Customer code ${customer_code} was not found` },
+        { status: 404 }
+      )
     }
 
-    const existingIdentifier = await client.query(
+    const existingIdentifier = await dbQuery(
       `SELECT id FROM packages WHERE incoming_package_id = $1 AND id <> $2 LIMIT 1`,
       [incoming_package_id, packageId]
     )
 
     if (existingIdentifier.rows.length > 0) {
-      await client.query("ROLLBACK")
       return NextResponse.json(
         {
           success: false,
@@ -71,7 +75,7 @@ export async function PUT(
       )
     }
 
-    const updateResult = await client.query(
+    const updateResult = await dbQuery(
       `UPDATE packages
          SET incoming_package_id = $1,
              package_name = $2,
@@ -102,16 +106,13 @@ export async function PUT(
     )
 
     if (updateResult.rowCount === 0) {
-      await client.query("ROLLBACK")
       return NextResponse.json({ success: false, message: "Package not found" }, { status: 404 })
     }
 
-    await linkPackageMediaFromLibrary(client, packageId, mediaAssetEntries)
+    await linkPackageMediaAssets(packageId, mediaAssetIds)
 
-    await client.query("COMMIT")
     return NextResponse.json({ success: true, message: "Package updated successfully" })
   } catch (err) {
-    await client.query("ROLLBACK")
     const dbError = err as DatabaseError
     if (dbError?.code === "23505" && dbError?.constraint === "packages_incoming_package_id_key") {
       return NextResponse.json(
@@ -123,9 +124,8 @@ export async function PUT(
       )
     }
     console.error("Error updating package", err)
-    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })
-  } finally {
-    client.release()
+    const { message, status } = databaseErrorResponse(err, "Could not update package")
+    return NextResponse.json({ success: false, message }, { status })
   }
 }
 
@@ -133,7 +133,6 @@ export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const client = await pool.connect()
   try {
     const session = await getSession()
     if (!session) {
@@ -145,10 +144,10 @@ export async function DELETE(
     }
 
     const { id } = await params
-    await client.query("BEGIN")
-    await client.query(`DELETE FROM package_images WHERE package_id = $1`, [id])
-    const deleteResult = await client.query(`DELETE FROM packages WHERE id = $1`, [id])
-    await client.query("COMMIT")
+    const packageId = Number(id)
+
+    await dbQuery(`DELETE FROM package_images WHERE package_id = $1`, [packageId])
+    const deleteResult = await dbQuery(`DELETE FROM packages WHERE id = $1`, [packageId])
 
     if (deleteResult.rowCount === 0) {
       return NextResponse.json({ success: false, message: "Package not found" }, { status: 404 })
@@ -156,7 +155,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: "Package deleted" })
   } catch (err) {
-    await client.query("ROLLBACK")
     const dbError = err as DatabaseError
     if (dbError?.code === "23503") {
       return NextResponse.json(
@@ -168,8 +166,7 @@ export async function DELETE(
       )
     }
     console.error("Error deleting package", err)
-    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })
-  } finally {
-    client.release()
+    const { message, status } = databaseErrorResponse(err, "Could not delete package")
+    return NextResponse.json({ success: false, message }, { status })
   }
 }
