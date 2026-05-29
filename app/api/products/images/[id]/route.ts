@@ -1,18 +1,9 @@
 import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { linkProductMediaAssets } from "@/lib/products/linkProductMedia"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { parseProductStoragePath } from "@/lib/products/uploadProductMedia"
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NODE_ENV === "production"
-    ? process.env.NEXT_PUBLIC_SUPABASE_URL!
-    : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST!,
-  process.env.NODE_ENV === "production"
-    ? process.env.SUPABASE_SERVICE_ROLE_KEY!
-    : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
-)
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -175,7 +166,7 @@ export async function DELETE(
     if (row.media_asset_id == null) {
       const storagePath = parseProductStoragePath(row.image_url)
       if (storagePath && !storagePath.startsWith("media-library/")) {
-        const { error } = await supabase.storage.from("products").remove([storagePath])
+        const { error } = await getSupabaseAdmin().storage.from("products").remove([storagePath])
         if (error) {
           console.error("Supabase media delete failed:", error)
         }

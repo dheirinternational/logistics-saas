@@ -1,30 +1,14 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { randomUUID } from "crypto"
+
+export { getSupabaseAdmin }
 
 export function parseProductStoragePath(url: string): string | null {
   const marker = "/storage/v1/object/public/products/"
   const idx = url.indexOf(marker)
   if (idx === -1) return null
   return url.slice(idx + marker.length)
-}
-
-export function getSupabaseAdmin(): SupabaseClient {
-  const url =
-    process.env.NODE_ENV === "production"
-      ? process.env.NEXT_PUBLIC_SUPABASE_URL
-      : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST
-  const key =
-    process.env.NODE_ENV === "production"
-      ? process.env.SUPABASE_SERVICE_ROLE_KEY
-      : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST
-
-  if (!url || !key) {
-    throw new Error(
-      "Supabase storage is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the server."
-    )
-  }
-
-  return createClient(url, key)
 }
 
 const EXTENSION_MIME: Record<string, string> = {

@@ -186,8 +186,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false, message: validationError }, { status: 400 })
       }
 
-      const id = await insertProduct(data, session.user_id)
-
       const assetIds = Array.isArray(body.media_asset_ids)
         ? body.media_asset_ids
             .map((v: unknown) => Number(v))
@@ -195,12 +193,22 @@ export async function POST(req: Request) {
         : []
 
       if (assetIds.length < 1) {
-        await dbQuery(`DELETE FROM products WHERE id = $1`, [id]).catch(() => undefined)
         return NextResponse.json(
           { success: false, message: "Select at least one item from the media library." },
           { status: 400 }
         )
       }
+
+      const { getMediaAssetsByIds } = await import("@/lib/media/mediaAssets")
+      const assets = await getMediaAssetsByIds(assetIds)
+      if (assets.length !== assetIds.length) {
+        return NextResponse.json(
+          { success: false, message: "One or more selected media items were not found." },
+          { status: 400 }
+        )
+      }
+
+      const id = await insertProduct(data, session.user_id)
 
       try {
         await linkProductMediaAssets(id, assetIds)

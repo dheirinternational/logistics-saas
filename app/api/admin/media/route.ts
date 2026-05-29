@@ -7,7 +7,6 @@ import { buildMediaLibraryPath } from "@/lib/media/adminMedia"
 import {
   countMediaAssetReferences,
   deleteMediaAssetByPath,
-  getMediaAssetByPath,
   insertMediaAsset,
   listAdminMediaAssets,
 } from "@/lib/media/mediaAssets"
@@ -16,7 +15,8 @@ import {
   MAX_PRODUCT_MEDIA_FILE_BYTES,
   MAX_PRODUCT_MEDIA_FILE_LABEL,
 } from "@/lib/products/productMediaLimits"
-import { getSupabaseAdmin, resolveProductMediaType } from "@/lib/products/uploadProductMedia"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
+import { resolveProductMediaType } from "@/lib/products/uploadProductMedia"
 import { NextResponse } from "next/server"
 
 const LIBRARY_BUCKET = "products"

@@ -7,7 +7,7 @@ import {
   MAX_PRODUCT_MEDIA_FILE_BYTES,
   MAX_PRODUCT_MEDIA_FILE_LABEL,
 } from "@/lib/products/productMediaLimits"
-import { getSupabaseAdmin } from "@/lib/products/uploadProductMedia"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { NextResponse } from "next/server"
 
 const LIBRARY_BUCKET = "products"

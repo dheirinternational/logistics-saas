@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
-import { getSupabaseAdmin, parseProductStoragePath } from "@/lib/products/uploadProductMedia"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
+import { parseProductStoragePath } from "@/lib/products/uploadProductMedia"
 
 export async function deleteProductById(productId: number): Promise<void> {
   const client = await pool.connect()

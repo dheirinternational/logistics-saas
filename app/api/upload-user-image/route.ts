@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/db/session"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 import { NextResponse } from "next/server"
 import { pool } from '@/lib/db/db'
-import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: Request) {
   try {
@@ -11,17 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
     }
 
-    const supabaseUrl = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_SUPABASE_URL : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST
-    const serviceRoleKey = process.env.NODE_ENV === "production" ? process.env.SUPABASE_SERVICE_ROLE_KEY : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json(
-        { success: false, message: "Missing Supabase environment variables" },
-        { status: 500 }
-      )
-    }
-
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
+    const supabaseAdmin = getSupabaseAdmin()
 
     const formData = await request.formData()
     const file = formData.get("file")

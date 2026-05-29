@@ -1,7 +1,7 @@
 import { dbQuery } from "@/lib/db/db"
 import { inferMediaTypeFromPath, isValidMediaStoragePath } from "@/lib/media/parseStorageUrl"
 import { insertMediaAsset, upsertMediaAssetFromPublicUrl } from "@/lib/media/mediaAssets"
-import { getSupabaseAdmin } from "@/lib/products/uploadProductMedia"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 
 type StorageBucket = "products" | "packages" | "shipments"
 

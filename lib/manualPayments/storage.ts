@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
+import { getSupabaseAdmin } from "@/lib/supabase/admin"
 
 const RECEIPT_BUCKET = "payment-receipts"
 
@@ -10,19 +10,6 @@ const ALLOWED_MIME_TYPES = new Set([
 ])
 
 const MAX_RECEIPT_BYTES = 5 * 1024 * 1024
-
-function getSupabaseAdmin() {
-  const url =
-    process.env.NODE_ENV === "production"
-      ? process.env.NEXT_PUBLIC_SUPABASE_URL!
-      : process.env.NEXT_PUBLIC_SUPABASE_URL_TEST!
-  const key =
-    process.env.NODE_ENV === "production"
-      ? process.env.SUPABASE_SERVICE_ROLE_KEY!
-      : process.env.SUPABASE_SERVICE_ROLE_KEY_TEST!
-
-  return createClient(url, key)
-}
 
 export function validateReceiptFile(file: File) {
   if (!file || file.size === 0) {
