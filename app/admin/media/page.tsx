@@ -5,6 +5,10 @@ import { AdminMediaVideoPlayButton } from "@/components/admin/media/AdminMediaVi
 import { MediaDeleteConfirmModal } from "@/components/admin/media/MediaDeleteConfirmModal"
 import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import {
+  MAX_PRODUCT_MEDIA_FILE_BYTES,
+  MAX_PRODUCT_MEDIA_FILE_LABEL,
+} from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
 import { IconPhoto, IconPlayerPlay, IconUpload, IconVideo } from "@tabler/icons-react"
 import { MediaVaultThumbnail } from "@/components/admin/media/MediaVaultThumbnail"
@@ -99,6 +103,13 @@ const Page: NextPage = () => {
   )
 
   const handleUpload = async (file: File) => {
+    if (file.size > MAX_PRODUCT_MEDIA_FILE_BYTES) {
+      toast.error(
+        `"${file.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`,
+      )
+      return
+    }
+
     setUploading(true)
     setUploadingLabel(`Uploading ${file.name}...`)
 

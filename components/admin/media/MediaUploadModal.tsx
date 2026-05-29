@@ -50,7 +50,8 @@ export function MediaUploadModal({
 
         <h2 className="media-vault-modal__title">Upload media</h2>
         <p className="media-vault-modal__sub">
-          Choose one photo or video. It uploads directly to storage and updates the page.
+          Choose one photo or video (max {MAX_PRODUCT_MEDIA_FILE_LABEL} per file). It uploads
+          directly to storage and updates the page.
         </p>
 
         <label className={`media-vault-upload-picker${uploading ? " is-busy" : ""}`}>
