@@ -1,3 +1,4 @@
+import { fileExtension } from "@/lib/media/parseStorageUrl"
 import { randomUUID } from "crypto"
 
 export type AdminMediaItem = {
@@ -39,8 +40,18 @@ function inferMediaType(name: string, mimetype?: string): "photo" | "video" | nu
   return null
 }
 
-export function buildMediaLibraryPath(fileName: string) {
-  return `media-library/${Date.now()}-${randomUUID()}-${sanitizeFileName(fileName)}`
+const DEFAULT_EXT: Record<"image" | "video", string> = {
+  image: "jpg",
+  video: "mp4",
+}
+
+/** Storage path with a guaranteed file extension so DB list/prune logic keeps the asset. */
+export function buildMediaLibraryPath(fileName: string, mediaType: "image" | "video") {
+  const sanitized = sanitizeFileName(fileName)
+  const withExt = fileExtension(sanitized)
+    ? sanitized
+    : `${sanitized.replace(/\.+$/, "") || "media"}.${DEFAULT_EXT[mediaType]}`
+  return `media-library/${Date.now()}-${randomUUID()}-${withExt}`
 }
 
 export function mapSupabaseObjectToMediaItem(

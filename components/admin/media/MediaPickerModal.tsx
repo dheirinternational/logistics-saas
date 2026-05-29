@@ -6,7 +6,7 @@ import { DheirLoader } from "@/components/ui/DheirLoader"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import { toast } from "@/lib/ui/toast"
 import { IconPhoto, IconPlayerPlay, IconX } from "@tabler/icons-react"
-import Image from "next/image"
+import { MediaVaultThumbnail } from "@/components/admin/media/MediaVaultThumbnail"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 type Props = {
@@ -44,6 +44,7 @@ export function MediaPickerModal({
     setLoading(true)
     try {
       const res = await fetch("/api/admin/media", { credentials: "include" })
+      // Default GET reads the catalog only — no storage import on every open.
       const result = await res.json()
       if (!res.ok) {
         toast.error(result.message ?? "Could not load media library")
@@ -179,7 +180,7 @@ export function MediaPickerModal({
                         </span>
                       </>
                     ) : (
-                      <Image src={item.publicUrl} alt="" fill className="object-cover" unoptimized />
+                      <MediaVaultThumbnail src={item.publicUrl} alt={item.name} />
                     )}
                   </div>
                   <div className="media-vault-card__meta">

@@ -7,7 +7,7 @@ import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
 import { IconPhoto, IconPlayerPlay, IconUpload, IconVideo } from "@tabler/icons-react"
-import Image from "next/image"
+import { MediaVaultThumbnail } from "@/components/admin/media/MediaVaultThumbnail"
 import { NextPage } from "next"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
@@ -39,30 +39,36 @@ const Page: NextPage = () => {
   const [deleting, setDeleting] = useState(false)
   const [uploadingLabel, setUploadingLabel] = useState<string | null>(null)
   const [fullscreenVideoSrc, setFullscreenVideoSrc] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
 
-  const loadMedia = useCallback(async (opts?: { silent?: boolean }) => {
-    if (opts?.silent) {
+  const loadMedia = useCallback(async (opts?: { silent?: boolean; sync?: boolean }) => {
+    if (opts?.silent || opts?.sync) {
       setRefreshing(true)
     } else {
       setLoading(true)
     }
 
     try {
-      const res = await fetch(
-        `/api/admin/media${opts?.silent ? "?skipSync=1" : ""}`,
-        { credentials: "include" }
-      )
+      const params = opts?.sync ? "?sync=1" : ""
+      const res = await fetch(`/api/admin/media${params}`, { credentials: "include" })
       const result = await res.json()
       if (!res.ok) {
         toast.error(result.message ?? "Could not load media")
         return
       }
       setAllMedia(result.data ?? [])
-      const imported = Number(result.sync?.imported ?? 0)
-      if (!opts?.silent && imported > 0) {
-        toast.success(
-          `Imported ${imported} existing file(s) from storage and product/package records.`
-        )
+      if (opts?.sync) {
+        const imported = Number(result.sync?.imported ?? 0)
+        const pruned = Number(result.sync?.pruned ?? 0)
+        if (imported > 0 || pruned > 0) {
+          toast.success(
+            imported > 0
+              ? `Imported ${imported} file(s) from storage and existing records.`
+              : `Cleaned up ${pruned} invalid catalog row(s).`
+          )
+        } else {
+          toast.success("Library is up to date.")
+        }
       }
     } catch (err) {
       console.error(err)
@@ -70,8 +76,14 @@ const Page: NextPage = () => {
     } finally {
       setLoading(false)
       setRefreshing(false)
+      setImporting(false)
     }
   }, [])
+
+  const handleImportExisting = async () => {
+    setImporting(true)
+    await loadMedia({ sync: true })
+  }
 
   useEffect(() => {
     loadMedia()
@@ -153,19 +165,29 @@ const Page: NextPage = () => {
           <p className="portal-home__greeting-label">Admin</p>
           <h1 className="portal-home__greeting-title">Media</h1>
           <p className="portal-home__greeting-sub">
-            Upload new files or pick from existing storage (products, packages, shipments).
-            The library syncs automatically when you open this page.
+            Uploads are saved to your library immediately. Use import once to pull in older
+            files from packages, products, and shipments storage.
           </p>
         </div>
-        <button
-          type="button"
-          className="portal-home__btn portal-home__btn--primary"
-          onClick={() => setUploadOpen(true)}
-          disabled={uploading}
-        >
-          <IconUpload size={16} stroke={1.8} />
-          Upload media
-        </button>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+          <button
+            type="button"
+            className="portal-home__btn portal-home__btn--secondary"
+            onClick={handleImportExisting}
+            disabled={importing || uploading}
+          >
+            {importing ? "Importing…" : "Import existing files"}
+          </button>
+          <button
+            type="button"
+            className="portal-home__btn portal-home__btn--primary"
+            onClick={() => setUploadOpen(true)}
+            disabled={uploading}
+          >
+            <IconUpload size={16} stroke={1.8} />
+            Upload media
+          </button>
+        </div>
       </header>
 
       <div className="portal-home__stats" role="list" aria-label="Media stats">
@@ -220,7 +242,7 @@ const Page: NextPage = () => {
                 {photos.map((item) => (
                   <article key={item.id || item.path} className="media-vault-card">
                     <div className="media-vault-card__preview media-vault-card__preview--image">
-                      <Image src={item.publicUrl} alt={item.name} fill unoptimized className="object-cover" />
+                      <MediaVaultThumbnail src={item.publicUrl} alt={item.name} />
                     </div>
                     <div className="media-vault-card__meta">
                       <p title={item.name}>{item.name}</p>

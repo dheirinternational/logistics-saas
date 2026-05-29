@@ -1,6 +1,10 @@
 import { dbQuery } from "@/lib/db/db"
 import type { PoolClient } from "pg"
-import { inferMediaTypeFromPath, parseStorageUrl } from "@/lib/media/parseStorageUrl"
+import {
+  inferMediaTypeFromPath,
+  isValidMediaStoragePath,
+  parseStorageUrl,
+} from "@/lib/media/parseStorageUrl"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
 
 export type MediaAssetRow = {
@@ -32,6 +36,7 @@ export async function listAdminMediaAssets(): Promise<AdminMediaItem[]> {
     `
     SELECT id, created_at, storage_bucket, storage_path, public_url, media_type, file_name, size_bytes
     FROM media_assets
+    WHERE storage_path ~* '\.(jpg|jpeg|png|webp|gif|heic|heif|avif|mp4|mov|webm|m4v|mkv)$'
     ORDER BY created_at DESC
     LIMIT 1000
     `
@@ -146,12 +151,15 @@ export async function upsertMediaAssetFromPublicUrl(
   const parsed = parseStorageUrl(publicUrl)
   if (!parsed) return null
 
+  const mediaType = inferMediaTypeFromPath(parsed.path)
+  if (!mediaType) return null
+
   return insertMediaAsset({
     storage_bucket: parsed.bucket,
     storage_path: parsed.path,
     public_url: publicUrl,
-    media_type: inferMediaTypeFromPath(parsed.path),
-    file_name: opts?.file_name ?? parsed.path.split("/").pop() ?? "media",
+    media_type: mediaType,
+    file_name: opts?.file_name ?? decodeURIComponent(parsed.path.split("/").pop() ?? "media"),
     size_bytes: opts?.size_bytes ?? 0,
     created_by: opts?.created_by ?? null,
   })

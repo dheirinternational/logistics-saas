@@ -1,5 +1,5 @@
 import { dbQuery } from "@/lib/db/db"
-import { inferMediaTypeFromPath } from "@/lib/media/parseStorageUrl"
+import { inferMediaTypeFromPath, isValidMediaStoragePath } from "@/lib/media/parseStorageUrl"
 import { insertMediaAsset, upsertMediaAssetFromPublicUrl } from "@/lib/media/mediaAssets"
 import { getSupabaseAdmin } from "@/lib/products/uploadProductMedia"
 
@@ -7,7 +7,6 @@ type StorageBucket = "products" | "packages" | "shipments"
 
 const STORAGE_PREFIXES: { bucket: StorageBucket; prefix: string }[] = [
   { bucket: "products", prefix: "media-library" },
-  { bucket: "products", prefix: "" },
   { bucket: "packages", prefix: "" },
   { bucket: "shipments", prefix: "" },
 ]
@@ -19,9 +18,11 @@ type ListEntry = {
   metadata?: { mimetype?: string; size?: number } | null
 }
 
-function isLikelyFolder(entry: ListEntry) {
-  if (entry.metadata?.size != null && entry.metadata.size > 0) return false
-  return !inferMediaTypeFromPath(entry.name)
+function isLikelyFolder(entry: ListEntry, fullPath: string) {
+  if (entry.id == null && entry.metadata == null) return true
+  if (!isValidMediaStoragePath(fullPath)) return true
+  if (entry.metadata?.size === 0 && !inferMediaTypeFromPath(fullPath)) return true
+  return false
 }
 
 async function listStorageObjects(bucket: StorageBucket, prefix: string) {
@@ -45,9 +46,11 @@ async function listStorageObjects(bucket: StorageBucket, prefix: string) {
     if (batch.length === 0) break
 
     for (const entry of batch) {
-      if (!entry.name || isLikelyFolder(entry)) continue
+      if (!entry.name) continue
       const path = prefix ? `${prefix}/${entry.name}` : entry.name
-      if (!inferMediaTypeFromPath(path)) continue
+      if (isLikelyFolder(entry, path)) continue
+      const mediaType = inferMediaTypeFromPath(path)
+      if (!mediaType) continue
       collected.push({ path, entry })
     }
 
@@ -72,7 +75,7 @@ export async function syncMediaAssetsFromStorage(): Promise<number> {
         storage_bucket: bucket,
         storage_path: path,
         public_url: pub.publicUrl,
-        media_type: inferMediaTypeFromPath(path),
+        media_type: inferMediaTypeFromPath(path) ?? "image",
         file_name: decodeURIComponent(path.split("/").pop() ?? "media"),
         size_bytes: Number(entry.metadata?.size ?? 0),
         created_by: null,
@@ -148,12 +151,30 @@ export type MediaSyncResult = {
   fromStorage: number
   fromUrls: number
   linksUpdated: number
+  pruned: number
 }
 
-export async function syncAllMediaAssets(): Promise<MediaSyncResult> {
+/** Remove folder placeholders and other non-file rows mistaken for media. */
+export async function pruneInvalidMediaAssets(): Promise<number> {
+  const { rows } = await dbQuery<{ id: number }>(
+    `
+    DELETE FROM media_assets
+    WHERE NOT (
+      storage_path ~* '\.(jpg|jpeg|png|webp|gif|heic|heif|avif|mp4|mov|webm|m4v|mkv)$'
+    )
+    RETURNING id
+    `
+  )
+  return rows.length
+}
+
+export async function syncAllMediaAssets(opts?: {
+  pruneInvalid?: boolean
+}): Promise<MediaSyncResult> {
   const fromUrls = await syncMediaAssetsFromAttachmentUrls()
   const fromStorage = await syncMediaAssetsFromStorage()
+  const pruned = opts?.pruneInvalid ? await pruneInvalidMediaAssets() : 0
   const linksUpdated = await linkOrphanedAttachmentMedia()
 
-  return { fromStorage, fromUrls, linksUpdated }
+  return { fromStorage, fromUrls, linksUpdated, pruned }
 }

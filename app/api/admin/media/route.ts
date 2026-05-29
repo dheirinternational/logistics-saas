@@ -55,9 +55,11 @@ export async function GET(req: Request) {
     if (!auth.ok) return auth.response
 
     const url = new URL(req.url)
-    const skipSync = url.searchParams.get("skipSync") === "1"
+    const runSync = url.searchParams.get("sync") === "1"
 
-    const sync = skipSync ? null : await syncAllMediaAssets()
+    const sync = runSync
+      ? await syncAllMediaAssets({ pruneInvalid: true })
+      : null
     const items = await listAdminMediaAssets()
 
     return NextResponse.json({
@@ -65,9 +67,9 @@ export async function GET(req: Request) {
       data: items,
       sync: sync
         ? {
-            imported:
-              sync.fromStorage + sync.fromUrls,
+            imported: sync.fromStorage + sync.fromUrls,
             linksUpdated: sync.linksUpdated,
+            pruned: sync.pruned,
           }
         : null,
     })
@@ -103,7 +105,7 @@ export async function POST(req: Request) {
     }
 
     const { media_type, contentType } = resolveProductMediaType(file)
-    const path = buildMediaLibraryPath(file.name)
+    const path = buildMediaLibraryPath(file.name, media_type)
     const buffer = Buffer.from(await file.arrayBuffer())
     const supabase = getSupabaseAdmin()
     const { error } = await supabase.storage.from(LIBRARY_BUCKET).upload(path, buffer, {
@@ -119,15 +121,22 @@ export async function POST(req: Request) {
     }
 
     const { data: pub } = supabase.storage.from(LIBRARY_BUCKET).getPublicUrl(path)
-    const asset = await insertMediaAsset({
-      storage_bucket: LIBRARY_BUCKET,
-      storage_path: path,
-      public_url: pub.publicUrl,
-      media_type,
-      file_name: file.name,
-      size_bytes: file.size,
-      created_by: auth.session.user_id,
-    })
+
+    let asset
+    try {
+      asset = await insertMediaAsset({
+        storage_bucket: LIBRARY_BUCKET,
+        storage_path: path,
+        public_url: pub.publicUrl,
+        media_type,
+        file_name: file.name,
+        size_bytes: file.size,
+        created_by: auth.session.user_id,
+      })
+    } catch (dbErr) {
+      await supabase.storage.from(LIBRARY_BUCKET).remove([path]).catch(() => undefined)
+      throw dbErr
+    }
 
     return NextResponse.json({
       success: true,
