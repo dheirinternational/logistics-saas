@@ -5,6 +5,7 @@ import {
   getPackageStatusLabel,
   getPackageStatusVariant,
 } from "@/lib/portal/packageStatus"
+import { formatShippingQuantity } from "@/lib/shipping/channelUnits"
 import type { Package, PackageImage } from "@/types/entityTypeDef"
 import { IconCheck } from "@tabler/icons-react"
 import Image from "next/image"
@@ -63,7 +64,12 @@ export function PortalRequestMailPackageRow({
           <div>
             <p className="portal-request-mail__package-name">{packag.package_name}</p>
             <p className="portal-request-mail__package-meta">
-              Tracking: {packag.incoming_package_id} · {packag.weight} kg
+              Tracking: {packag.incoming_package_id} ·{" "}
+              {formatShippingQuantity(
+                packag.weight,
+                packag.weight_unit === "cbm" ? "sea" : "air",
+                { decimals: 2 },
+              )}
             </p>
           </div>
           <PortalPackageStatusBadge

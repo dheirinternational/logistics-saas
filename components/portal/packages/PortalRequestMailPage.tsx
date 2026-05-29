@@ -78,8 +78,6 @@ export function PortalRequestMailPage() {
     [packages, selectedIds],
   )
 
-  const requestedUnit = shippingMethod === "sea" ? "cbm" : "kg"
-
   const totalWeight = useMemo(
     () => selectedPackages.reduce((acc, p) => acc + Number(p.weight || 0), 0),
     [selectedPackages],
@@ -99,16 +97,7 @@ export function PortalRequestMailPage() {
 
     setSubmitting(true)
     try {
-      const invalidUnit = selectedPackages.find(
-        (p) => (p.weight_unit ?? "kg") !== requestedUnit,
-      )
-
-      if (invalidUnit) {
-        toast.error(
-          `Selected packages include a ${invalidUnit.weight_unit ?? "kg"} entry. Please use ${requestedUnit.toUpperCase()} for this shipping method.`,
-        )
-        return
-      }
+      const totalWeightUnit = shippingMethod === "sea" ? "cbm" : "kg"
 
       const res = await fetch("/api/shipment-requests", {
         method: "POST",
@@ -121,7 +110,7 @@ export function PortalRequestMailPage() {
           channel: shippingMethod,
           payment_time: shippingPayment,
           total_weight: totalWeight,
-          total_weight_unit: requestedUnit,
+          total_weight_unit: totalWeightUnit,
           customer_note: customerNote,
           packaging: packagingOption,
         }),
