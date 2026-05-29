@@ -12,6 +12,7 @@ import {
   type ProductCreateInput,
   validateProductCreateInput,
 } from "@/lib/products/validateProductCreate"
+import { databaseErrorResponse } from "@/lib/db/db"
 import { productApiErrorMessage } from "@/lib/products/productApiErrors"
 import { isValidProductWeightUnit } from "@/lib/shop/productWeight"
 import { NextRequest, NextResponse } from "next/server"
@@ -34,12 +35,8 @@ function parseProductFields(raw: Record<string, FormDataEntryValue | unknown>): 
 }
 
 async function insertProduct(data: ProductCreateInput, userId: number) {
-  const client = await pool.connect()
-  try {
-    await client.query("BEGIN")
-
-    const { rows } = await client.query(
-      `
+  const { rows } = await pool.query(
+    `
             INSERT INTO products (
                 name,
                 description,
@@ -62,34 +59,23 @@ async function insertProduct(data: ProductCreateInput, userId: number) {
             VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8, $9, $10, NOW(), $11, NOW(), $12, 'active')
             RETURNING id
         `,
-      [
-        data.name,
-        data.description,
-        data.category_id,
-        data.price,
-        data.discount_price || 0,
-        data.discount_min_qty,
-        data.stock_quantity,
-        data.weight,
-        data.weight_unit,
-        data.is_featured,
-        userId,
-        userId,
-      ]
-    )
+    [
+      data.name,
+      data.description,
+      data.category_id,
+      data.price,
+      data.discount_price || 0,
+      data.discount_min_qty,
+      data.stock_quantity,
+      data.weight,
+      data.weight_unit,
+      data.is_featured,
+      userId,
+      userId,
+    ]
+  )
 
-    await client.query("COMMIT")
-    return Number(rows[0].id)
-  } catch (err) {
-    try {
-      await client.query("ROLLBACK")
-    } catch {
-      /* no active transaction */
-    }
-    throw err
-  } finally {
-    client.release()
-  }
+  return Number(rows[0].id)
 }
 
 export async function POST(req: Request) {
@@ -253,12 +239,14 @@ export async function POST(req: Request) {
     }
     console.error("Error Adding Product to System", err)
 
+    const { message, status } = databaseErrorResponse(err, "Could not add product")
+
     return NextResponse.json(
       {
-        message: productApiErrorMessage(err, "Could not add product"),
+        message: productApiErrorMessage(err, message),
         success: false,
       },
-      { status: 500 }
+      { status }
     )
   } finally {
     client.release()

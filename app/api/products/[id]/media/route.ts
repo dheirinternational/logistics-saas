@@ -8,6 +8,7 @@ import {
   MAX_PRODUCT_MEDIA_FILE_BYTES,
   MAX_PRODUCT_MEDIA_FILE_LABEL,
 } from "@/lib/products/productMediaLimits"
+import { databaseErrorResponse } from "@/lib/db/db"
 import { productApiErrorMessage } from "@/lib/products/productApiErrors"
 import { uploadOneProductMediaFile } from "@/lib/products/uploadProductMedia"
 import { NextResponse } from "next/server"
@@ -93,12 +94,14 @@ export async function POST(
   } catch (err) {
     console.error("Error uploading product media", err)
 
+    const { message, status } = databaseErrorResponse(err, "Could not upload product media")
+
     return NextResponse.json(
       {
         success: false,
-        message: productApiErrorMessage(err, "Could not upload product media"),
+        message: productApiErrorMessage(err, message),
       },
-      { status: 500 }
+      { status }
     )
   }
 }

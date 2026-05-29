@@ -2,7 +2,7 @@
 
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
-import { parseJsonResponse } from "@/lib/api/parseJsonResponse"
+import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
 import {
   MAX_PRODUCT_MEDIA_COUNT,
   MAX_PRODUCT_MEDIA_FILE_BYTES,
@@ -157,7 +157,7 @@ const AddProduct = () => {
             const createResult = await parseJsonResponse(createRes)
 
             if (!createRes.ok) {
-                toast.error(createResult.message || "Could not add product")
+                toast.error(apiErrorMessage(createResult, "Could not add product"))
                 return
             }
 
@@ -199,8 +199,10 @@ const AddProduct = () => {
                         credentials: "include",
                     }).catch(() => undefined)
                     toast.error(
-                        mediaResult.message ||
+                        apiErrorMessage(
+                            mediaResult,
                             `Could not upload "${images[i].file.name}"`
+                        )
                     )
                     return
                 }

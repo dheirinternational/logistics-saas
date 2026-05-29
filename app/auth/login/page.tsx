@@ -41,18 +41,18 @@ export default function LoginPage() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
   useEffect(() => {
-    handleSession()
+    redirectIfAuthenticated()
   }, [])
 
-  const handleSession = async () => {
+  const redirectIfAuthenticated = async () => {
     try {
       const res = await fetch("/api/auth/me", {
         method: "GET",
         credentials: "include",
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (data.user?.role) {
-        router.push(resolvePostAuthEntry(data.user.role, getNextParam()))
+        router.replace(resolvePostAuthEntry(data.user.role, getNextParam()))
       }
     } catch (err) {
       console.error(err)
@@ -96,16 +96,37 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        credentials: "include",
       })
-      const result = await res.json()
+
+      let result: { error?: string; user?: { role?: string } } = {}
+      try {
+        result = await res.json()
+      } catch {
+        toast.error(
+          res.ok
+            ? "Login succeeded but the server response was invalid. Refresh the page."
+            : `Login failed (${res.status}). Try again in a few seconds.`
+        )
+        return
+      }
+
       if (!res.ok) {
         toast.error(result.error ?? "Login failed")
         return
       }
+
       toast.success("Welcome back")
-      await handleSession()
+
+      const role = result.user?.role
+      if (role) {
+        router.replace(resolvePostAuthEntry(role, getNextParam()))
+        return
+      }
+
+      await redirectIfAuthenticated()
     } catch {
-      toast.error("Something went wrong. Try again.")
+      toast.error("Network error. Check your connection and try again.")
     } finally {
       setIsLoading(false)
     }

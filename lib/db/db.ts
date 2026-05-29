@@ -1,39 +1,122 @@
-import { Pool } from "pg"
+import { Pool, type PoolConfig } from "pg"
 
 declare global {
   var pgPool: Pool | undefined
 }
 
-const connectionString =
-  process.env.NODE_ENV === "production"
-    ? process.env.DATABASE_URL
-    : process.env.TEST_DATABASE_URL
+const DB_BUSY_MESSAGE =
+  "Database is busy (too many connections). Wait 10–20 seconds and try again."
 
-if (!connectionString) {
-  throw new Error("Missing DATABASE_URL")
+/**
+ * Supabase session pooler (:5432) allows ~15 connections total across all
+ * serverless instances. Production must use transaction pooler (:6543).
+ */
+function withPgbouncer(url: string): string {
+  if (/[?&]pgbouncer=true/i.test(url)) {
+    return url
+  }
+  return url.includes("?") ? `${url}&pgbouncer=true` : `${url}?pgbouncer=true`
 }
 
-/** Keep below Supabase session pooler limit (often 15). */
-const POOL_MAX = Number(process.env.PG_POOL_MAX ?? 8)
+function toTransactionPoolerUrl(url: string): string {
+  if (!url.includes("pooler.supabase.com")) {
+    return url
+  }
+  if (url.includes(":6543")) {
+    return withPgbouncer(url)
+  }
+  // Session mode :5432 → transaction mode :6543
+  return withPgbouncer(url.replace(/:5432(?=\/|$)/, ":6543"))
+}
 
-export const pool =
-  global.pgPool ??
-  new Pool({
-    connectionString,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-    // Reduce random disconnects on long-lived dev processes.
-    keepAlive: true,
-    max: POOL_MAX,
-    idleTimeoutMillis: 20_000,
-    connectionTimeoutMillis: 10_000,
-    allowExitOnIdle: true,
-  })
+function resolveConnectionString(): string {
+  const isProd = process.env.NODE_ENV === "production"
+  const raw = isProd ? process.env.DATABASE_URL : process.env.TEST_DATABASE_URL
+
+  if (!raw) {
+    throw new Error("Missing DATABASE_URL")
+  }
+
+  if (process.env.DATABASE_URL_TRANSACTION) {
+    return withPgbouncer(process.env.DATABASE_URL_TRANSACTION)
+  }
+
+  if (isProd && process.env.USE_SUPABASE_SESSION_POOLER !== "true") {
+    return toTransactionPoolerUrl(raw)
+  }
+
+  return raw
+}
+
+const connectionString = resolveConnectionString()
+
+const isTransactionPooler =
+  connectionString.includes(":6543") || connectionString.includes("pgbouncer=true")
+
+/** One connection per serverless instance; transaction pooler supports many instances. */
+const POOL_MAX = Number(
+  process.env.PG_POOL_MAX ?? (process.env.NODE_ENV === "production" ? 1 : 8)
+)
+
+const poolConfig: PoolConfig = {
+  connectionString,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+  max: POOL_MAX,
+  min: 0,
+  idleTimeoutMillis: 10_000,
+  connectionTimeoutMillis: 10_000,
+  allowExitOnIdle: true,
+}
+
+// Transaction pooler (PgBouncer) does not support prepared statements.
+if (isTransactionPooler) {
+  ;(poolConfig as PoolConfig & { prepare?: boolean }).prepare = false
+}
+
+export const pool = global.pgPool ?? new Pool(poolConfig)
 
 global.pgPool = pool
 
-// If the pool's underlying connection dies, avoid crashing the process on next query.
 pool.on("error", (err) => {
   console.error("Postgres pool error:", err)
 })
+
+export function isDatabaseCapacityError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err)
+  const code = (err as { code?: string })?.code
+  return (
+    code === "XX000" ||
+    message.includes("max clients reached") ||
+    message.includes("EMAXCONNSESSION") ||
+    message.includes("too many connections") ||
+    message.includes("53300")
+  )
+}
+
+export function databaseCapacityMessage(): string {
+  return DB_BUSY_MESSAGE
+}
+
+export function databaseErrorResponse(
+  err: unknown,
+  fallback: string
+): { message: string; status: number } {
+  if (isDatabaseCapacityError(err)) {
+    return { message: DB_BUSY_MESSAGE, status: 503 }
+  }
+
+  if (err instanceof Error && err.message.includes("Missing DATABASE_URL")) {
+    return {
+      message: "Server database is not configured. Contact support.",
+      status: 500,
+    }
+  }
+
+  if (err instanceof Error && err.message) {
+    return { message: err.message, status: 500 }
+  }
+
+  return { message: fallback, status: 500 }
+}
