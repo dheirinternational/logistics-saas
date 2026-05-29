@@ -8182,6 +8182,95 @@ a.portal-packages__card--link:focus-visible {
     cursor: not-allowed;
 }
 
+.media-vault-upload-queue {
+    margin-top: 16px;
+    max-height: min(280px, 40vh);
+    overflow: auto;
+    border: 1px solid var(--color-dheir-border);
+    border-radius: 12px;
+    background: var(--color-dheir-page);
+}
+
+.media-vault-upload-queue__summary {
+    margin: 0;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-dheir-muted);
+    border-bottom: 1px solid var(--color-dheir-border);
+}
+
+.media-vault-upload-queue__list {
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+}
+
+.media-vault-upload-queue__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+
+.media-vault-upload-queue__item.is-uploading {
+    background: color-mix(in srgb, var(--color-dheir-blue) 10%, #fff);
+}
+
+.media-vault-upload-queue__item.is-done .media-vault-upload-queue__name {
+    color: var(--color-dheir-muted);
+}
+
+.media-vault-upload-queue__item.is-error .media-vault-upload-queue__meta,
+.media-vault-upload-queue__item.is-skipped .media-vault-upload-queue__meta {
+    color: var(--color-dheir-red);
+}
+
+.media-vault-upload-queue__item-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.media-vault-upload-queue__name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.media-vault-upload-queue__meta {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--color-dheir-muted);
+}
+
+.media-vault-upload-queue__ok {
+    color: var(--color-dheir-blue);
+    flex-shrink: 0;
+}
+
+.media-vault-upload-queue__remove {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-dheir-muted);
+    cursor: pointer;
+}
+
+.media-vault-upload-queue__remove:hover {
+    background: color-mix(in srgb, var(--color-dheir-red) 12%, #fff);
+    color: var(--color-dheir-red);
+}
+
 .media-vault-upload-state {
     margin-top: 14px;
     border: 1px dashed color-mix(in srgb, var(--color-dheir-blue) 45%, var(--color-dheir-border));

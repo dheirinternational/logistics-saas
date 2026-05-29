@@ -5,10 +5,6 @@ import { AdminMediaVideoPlayButton } from "@/components/admin/media/AdminMediaVi
 import { MediaDeleteConfirmModal } from "@/components/admin/media/MediaDeleteConfirmModal"
 import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import { DheirLoader } from "@/components/ui/DheirLoader"
-import {
-  MAX_PRODUCT_MEDIA_FILE_BYTES,
-  MAX_PRODUCT_MEDIA_FILE_LABEL,
-} from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
 import { IconPhoto, IconPlayerPlay, IconUpload, IconVideo } from "@tabler/icons-react"
 import { MediaVaultThumbnail } from "@/components/admin/media/MediaVaultThumbnail"
@@ -39,9 +35,8 @@ const Page: NextPage = () => {
   const [refreshing, setRefreshing] = useState(false)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null)
-  const [uploading, setUploading] = useState(false)
+  const [uploadBusy, setUploadBusy] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [uploadingLabel, setUploadingLabel] = useState<string | null>(null)
   const [fullscreenVideoSrc, setFullscreenVideoSrc] = useState<string | null>(null)
   const [importing, setImporting] = useState(false)
 
@@ -102,45 +97,6 @@ const Page: NextPage = () => {
     [allMedia]
   )
 
-  const handleUpload = async (file: File) => {
-    if (file.size > MAX_PRODUCT_MEDIA_FILE_BYTES) {
-      toast.error(
-        `"${file.name}" is too large. Each file must be ${MAX_PRODUCT_MEDIA_FILE_LABEL} or smaller.`,
-      )
-      return
-    }
-
-    setUploading(true)
-    setUploadingLabel(`Uploading ${file.name}...`)
-
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
-
-      const res = await fetch("/api/admin/media", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      })
-      const result = await res.json().catch(() => ({}))
-
-      if (!res.ok) {
-        toast.error(result.message ?? "Upload failed")
-        return
-      }
-
-      toast.success(result.message ?? "Uploaded")
-      setUploadOpen(false)
-      await loadMedia({ silent: true })
-    } catch (err) {
-      console.error(err)
-      toast.error("Upload failed")
-    } finally {
-      setUploading(false)
-      setUploadingLabel(null)
-    }
-  }
-
   const confirmDelete = async () => {
     if (!deleteTarget) return
     setDeleting(true)
@@ -185,7 +141,7 @@ const Page: NextPage = () => {
             type="button"
             className="portal-home__btn portal-home__btn--secondary"
             onClick={handleImportExisting}
-            disabled={importing || uploading}
+            disabled={importing || uploadBusy}
           >
             {importing ? "Importing…" : "Import existing files"}
           </button>
@@ -193,7 +149,7 @@ const Page: NextPage = () => {
             type="button"
             className="portal-home__btn portal-home__btn--primary"
             onClick={() => setUploadOpen(true)}
-            disabled={uploading}
+            disabled={uploadBusy}
           >
             <IconUpload size={16} stroke={1.8} />
             Upload media
@@ -319,12 +275,15 @@ const Page: NextPage = () => {
 
       <MediaUploadModal
         open={uploadOpen}
-        onClose={() => {
-          if (!uploading) setUploadOpen(false)
+        onClose={() => setUploadOpen(false)}
+        onFinished={async () => {
+          setUploadBusy(true)
+          try {
+            await loadMedia({ silent: true })
+          } finally {
+            setUploadBusy(false)
+          }
         }}
-        onSelectFile={handleUpload}
-        uploading={uploading}
-        uploadingLabel={uploadingLabel}
       />
 
       <MediaDeleteConfirmModal
