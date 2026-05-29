@@ -11,7 +11,6 @@ export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const client = await pool.connect()
   try {
     const session = await getSession()
     if (!session) {
@@ -28,9 +27,13 @@ export async function DELETE(
       return NextResponse.json({ success: false, message: "Invalid shipment id" }, { status: 400 })
     }
 
-    await deleteShipmentById(client, shipmentId)
-
-    return NextResponse.json({ success: true, message: "Shipment deleted" })
+    const client = await pool.connect()
+    try {
+      await deleteShipmentById(client, shipmentId)
+      return NextResponse.json({ success: true, message: "Shipment deleted" })
+    } finally {
+      client.release()
+    }
   } catch (err) {
     if (err instanceof ShipmentDeleteError) {
       return NextResponse.json(
@@ -45,7 +48,5 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: false, message }, { status })
-  } finally {
-    client.release()
   }
 }

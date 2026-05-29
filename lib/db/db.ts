@@ -6,7 +6,7 @@ declare global {
 }
 
 const DB_BUSY_MESSAGE =
-  "Database is busy (too many connections). Wait 10–20 seconds and try again."
+  "The server could not reach the database in time. Wait a few seconds and try again. If this keeps happening, avoid opening many admin tabs at once."
 
 export class DatabaseUnavailableError extends Error {
   constructor(message = DB_BUSY_MESSAGE) {

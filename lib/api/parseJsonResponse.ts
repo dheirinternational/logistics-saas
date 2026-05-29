@@ -7,7 +7,7 @@ type ApiJson = {
 }
 
 const DB_BUSY_MESSAGE =
-  "Database is busy (too many connections). Wait 10–20 seconds and try again."
+  "The server could not reach the database in time. Wait a few seconds and try again."
 
 export async function parseJsonResponse(res: Response): Promise<ApiJson> {
   const text = await res.text()

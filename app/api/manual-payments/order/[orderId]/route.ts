@@ -8,6 +8,7 @@ import { pool } from "@/lib/db/db"
 import type { CartProduct } from "@/types/entityTypeDef"
 import { getManualPaymentContextForUser } from "@/lib/manualPayments/actions"
 import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
+import type { PoolClient } from "pg"
 
 export async function GET(
   _req: NextRequest,
@@ -41,7 +42,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ orderId: string }> }
 ) {
-  const client = await pool.connect()
+  let client: PoolClient | null = null
 
   try {
     if (!isBankTransferEnabled()) {
@@ -73,6 +74,7 @@ export async function POST(
       return NextResponse.json({ message: "Invalid amount" }, { status: 400 })
     }
 
+    client = await pool.connect()
     await client.query("BEGIN")
 
     // If the order already exists, this is a resubmission flow.
@@ -206,7 +208,9 @@ export async function POST(
       )}`,
     })
   } catch (err) {
-    await client.query("ROLLBACK")
+    if (client) {
+      await client.query("ROLLBACK").catch(() => undefined)
+    }
     console.error("Manual order payment submit failed:", err)
     const message =
       err instanceof Error ? err.message : "Could not submit transfer proof"
@@ -219,6 +223,6 @@ export async function POST(
 
     return NextResponse.json({ message }, { status })
   } finally {
-    client.release()
+    client?.release()
   }
 }

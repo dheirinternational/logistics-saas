@@ -1,7 +1,7 @@
 import { cookies } from "next/headers"
 import { randomUUID } from "crypto"
 import { cache } from "react"
-import { DatabaseUnavailableError, dbQuery, withDbRetry } from "./db"
+import { DatabaseUnavailableError, dbQuery, isTransientConnectionError, withDbRetry } from "./db"
 import { pool } from "./db"
 import { redirect } from "next/navigation"
 
@@ -65,7 +65,10 @@ export const getSession = cache(async () => {
     )
   } catch (err) {
     console.error("getSession query failed:", err)
-    throw new DatabaseUnavailableError()
+    if (isTransientConnectionError(err)) {
+      throw new DatabaseUnavailableError()
+    }
+    throw err
   }
 
   const session = result.rows[0]

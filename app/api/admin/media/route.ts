@@ -104,7 +104,22 @@ export async function POST(req: Request) {
       )
     }
 
-    const { media_type, contentType } = resolveProductMediaType(file)
+    let media_type: "image" | "video"
+    let contentType: string
+    try {
+      ;({ media_type, contentType } = resolveProductMediaType(file))
+    } catch (typeErr) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            typeErr instanceof Error
+              ? typeErr.message
+              : "Unsupported file type. Use JPG, PNG, WEBP, MP4, or MOV.",
+        },
+        { status: 400 }
+      )
+    }
     const path = buildMediaLibraryPath(file.name, media_type)
     const buffer = Buffer.from(await file.arrayBuffer())
     const supabase = getSupabaseAdmin()

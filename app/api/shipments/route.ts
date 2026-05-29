@@ -9,8 +9,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 
 export async function POST(req: NextRequest) {
-    const client = await pool.connect();
-
     try {
         const session = await getSession();
 
@@ -68,12 +66,9 @@ export async function POST(req: NextRequest) {
 
         const tracking_number = generateTrackingNumber();
 
-
-
-        // 🔐 Start transaction
+        const client = await pool.connect();
+        try {
         await client.query("BEGIN");
-
-
 
         const shipmentRes = await client.query(`
             INSERT INTO shipments
@@ -157,19 +152,20 @@ export async function POST(req: NextRequest) {
             success: true,
             data: shipmentRes.rows[0]
         });
+        } catch (txErr) {
+            await client.query("ROLLBACK").catch(() => undefined);
+            throw txErr;
+        } finally {
+            client.release();
+        }
 
     } catch (err) {
-        await client.query("ROLLBACK");
-
         console.error("Error Creating Shipment", err);
 
         return NextResponse.json({
             success: false,
             message: "Something went wrong"
         }, { status: 500 });
-
-    } finally {
-        client.release();
     }
 }
 

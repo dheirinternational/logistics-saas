@@ -6,6 +6,7 @@ import {
   rejectManualPaymentSubmission,
 } from "@/lib/manualPayments/service"
 import { NextRequest, NextResponse } from "next/server"
+import type { PoolClient } from "pg"
 
 export async function GET(
   _req: NextRequest,
@@ -53,7 +54,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const client = await pool.connect()
+  let client: PoolClient | null = null
 
   try {
     const session = await requireAdminSession()
@@ -71,6 +72,7 @@ export async function POST(
       return NextResponse.json({ message: "Invalid action" }, { status: 400 })
     }
 
+    client = await pool.connect()
     await client.query("BEGIN")
 
     if (action === "confirm") {
@@ -113,7 +115,9 @@ export async function POST(
       message: "Transfer proof rejected. Customer can submit again.",
     })
   } catch (err) {
-    await client.query("ROLLBACK")
+    if (client) {
+      await client.query("ROLLBACK").catch(() => undefined)
+    }
     console.error("Manual payment review error:", err)
     return NextResponse.json(
       {
@@ -123,6 +127,6 @@ export async function POST(
       { status: 500 }
     )
   } finally {
-    client.release()
+    client?.release()
   }
 }

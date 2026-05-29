@@ -2,7 +2,7 @@ import { pool } from "@/lib/db/db"
 import { deleteUserCascade, UserDeleteError } from "@/lib/db/deleteUserCascade"
 import { getSession } from "@/lib/db/session"
 import { NextResponse } from "next/server"
-import type { DatabaseError } from "pg"
+import type { DatabaseError, PoolClient } from "pg"
 
 export async function GET(
   request: Request,
@@ -63,7 +63,7 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const client = await pool.connect()
+  let client: PoolClient | null = null
   let began = false
 
   try {
@@ -91,6 +91,7 @@ export async function DELETE(
       )
     }
 
+    client = await pool.connect()
     await client.query("BEGIN")
     began = true
 
@@ -100,7 +101,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: "User deleted" })
   } catch (err) {
-    if (began) {
+    if (client && began) {
       await client.query("ROLLBACK").catch(() => undefined)
     }
 
@@ -137,6 +138,6 @@ export async function DELETE(
       { status: 500 }
     )
   } finally {
-    client.release()
+    client?.release()
   }
 }

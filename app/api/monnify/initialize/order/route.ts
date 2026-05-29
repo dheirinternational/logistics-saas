@@ -6,11 +6,12 @@ import { initializeMonnifyPayment } from "@/lib/monnify/initialize"
 import { isMonnifyCheckoutEnabled } from "@/lib/bankTransfer/config"
 import { CartProduct } from "@/types/entityTypeDef"
 import { NextRequest, NextResponse } from "next/server"
+import type { PoolClient } from "pg"
 import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 
 export async function POST(req: NextRequest) {
   const origin = getHost(req)
-  const client = await pool.connect()
+  let client: PoolClient | null = null
 
   try {
     if (!isMonnifyCheckoutEnabled()) {
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
     const user_id = session.user_id
     const order_id = generateOrderTrackingNumber()
 
+    client = await pool.connect()
     await client.query("BEGIN")
 
     const productIds = cart_items.map((item: CartProduct) => item.id)
@@ -164,7 +166,9 @@ export async function POST(req: NextRequest) {
       order_id,
     })
   } catch (err) {
-    await client.query("ROLLBACK")
+    if (client) {
+      await client.query("ROLLBACK").catch(() => undefined)
+    }
     console.error("Order payment initialization failed:", err)
     return NextResponse.json(
       {
@@ -174,6 +178,6 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     )
   } finally {
-    client.release()
+    client?.release()
   }
 }
