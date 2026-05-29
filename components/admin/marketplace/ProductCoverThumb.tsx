@@ -1,7 +1,9 @@
 "use client"
 
 import { IconPhoto, IconPlayerPlay } from "@tabler/icons-react"
-import { MediaVaultThumbnail } from "@/components/admin/media/MediaVaultThumbnail"
+import { useCallback, useState } from "react"
+
+const THUMB_SIZE = 44
 
 type Props = {
   imageUrl?: string | null
@@ -10,18 +12,41 @@ type Props = {
 }
 
 export function ProductCoverThumb({ imageUrl, mediaType, alt = "" }: Props) {
+  const [failed, setFailed] = useState(false)
+
+  const handleImgError = useCallback(() => {
+    setFailed(true)
+  }, [])
+
   return (
     <div className="portal-home__table-thumb" aria-hidden={!imageUrl}>
-      {imageUrl ? (
+      {imageUrl && !failed ? (
         mediaType === "video" ? (
           <>
-            <video src={imageUrl} muted playsInline preload="metadata" />
+            <video
+              src={imageUrl}
+              width={THUMB_SIZE}
+              height={THUMB_SIZE}
+              muted
+              playsInline
+              preload="metadata"
+            />
             <span className="portal-home__table-thumb-play">
               <IconPlayerPlay size={14} stroke={1.5} />
             </span>
           </>
         ) : (
-          <MediaVaultThumbnail src={imageUrl} alt={alt} />
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={alt}
+            width={THUMB_SIZE}
+            height={THUMB_SIZE}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            onError={handleImgError}
+          />
         )
       ) : (
         <span className="portal-home__table-thumb-empty">
