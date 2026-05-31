@@ -2,7 +2,9 @@
 
 import MonnifyPaymentButton from "@/components/base/MonnifyPaymentBtn"
 import { PortalPageBack } from "@/components/portal/PortalPageBack"
+import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import {
   formatPaymentAmount,
   formatPaymentDate,
@@ -91,7 +93,13 @@ export function PortalPendingPaymentsPage() {
     <div className="portal-account portal-payments portal-payments--pending">
       <header className="portal-account__header">
         <PortalPageBack href="/customer" label="Home" />
-        <h1 className="portal-account__title">Pending payments</h1>
+        <h1 className="portal-account__title">
+          Pending payments
+          <PortalPolicyInfoButton
+            policy={LOGISTICS_SHIPPING_POLICY}
+            label="Shipping and waybill policy"
+          />
+        </h1>
         <p className="portal-account__subtitle">
           Pay shipment balances to release your packages for delivery.
         </p>

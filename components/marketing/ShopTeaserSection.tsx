@@ -3,13 +3,13 @@
 import { BlurReveal } from "@/components/auth/BlurReveal"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { NetLift } from "@/components/marketing/NetLift"
-import { ShopCategoryCard } from "@/components/marketing/ShopCategoryCard"
 import { ShopProductCard } from "@/components/marketing/ShopProductCard"
+import { ShopCatalogCard, getShopCatalogHref } from "@/components/shop/ShopCatalogCard"
 import {
   SHOP_TEASER_COPY,
-  type MarketingShopCategory,
   type MarketingShopProduct,
 } from "@/lib/marketing/shopCatalog"
+import type { ShopCatalogItem } from "@/lib/shop/shopCatalog"
 import { slugify } from "@/lib/portal/slug"
 import { useCartStore } from "@/store/cartStore"
 import Link from "next/link"
@@ -25,17 +25,13 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
   )
 
   const [featured, setFeatured] = useState<MarketingShopProduct[]>([])
-  const [categories, setCategories] = useState<MarketingShopCategory[]>([])
+  const [catalog, setCatalog] = useState<ShopCatalogItem[]>([])
   const [loading, setLoading] = useState(true)
 
   const shopHref = isAuthenticated ? "/customer/shop" : "/auth/signup"
   const productDetailHref = (product: MarketingShopProduct) =>
     isAuthenticated
       ? `/customer/marketplace/${slugify(product.name)}-${product.id}`
-      : "/auth/signup"
-  const categoryHref = (category: MarketingShopCategory) =>
-    isAuthenticated
-      ? `/customer/shop?category=${slugify(category.name)}`
       : "/auth/signup"
 
   useEffect(() => {
@@ -46,12 +42,12 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
       .then((result) => {
         if (cancelled || !result.success) return
         setFeatured(result.data?.featured ?? [])
-        setCategories(result.data?.categories ?? [])
+        setCatalog(result.data?.catalog ?? [])
       })
       .catch(() => {
         if (!cancelled) {
           setFeatured([])
-          setCategories([])
+          setCatalog([])
         }
       })
       .finally(() => {
@@ -142,16 +138,16 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
               <div className="col-span-full flex justify-center py-12">
                 <DheirLoader color="var(--color-dheir-blue)" size={12} />
               </div>
-            ) : categories.length === 0 ? (
+            ) : catalog.length === 0 ? (
               <p className="col-span-full py-8 text-center text-sm text-dheir-muted">
-                No categories available.
+                No catalog items available.
               </p>
             ) : (
-              categories.slice(0, 6).map((category, index) => (
-                <NetLift key={category.id} delay={index * 80}>
-                  <ShopCategoryCard
-                    category={category}
-                    href={categoryHref(category)}
+              catalog.slice(0, 6).map((item, index) => (
+                <NetLift key={item.id} delay={index * 80}>
+                  <ShopCatalogCard
+                    item={item}
+                    href={getShopCatalogHref(item, { authenticated: isAuthenticated })}
                   />
                 </NetLift>
               ))

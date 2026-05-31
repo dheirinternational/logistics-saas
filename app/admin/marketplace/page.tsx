@@ -31,6 +31,9 @@ const Page: NextPage = () => {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [freeDeliveryEnabled, setFreeDeliveryEnabled] = useState(false)
+    const [loadingShopSettings, setLoadingShopSettings] = useState(true)
+    const [savingShopSettings, setSavingShopSettings] = useState(false)
 
     const fetchProducts = async () => {
         setIsDataLoading(true)
@@ -61,6 +64,52 @@ const Page: NextPage = () => {
     useEffect(() => {
         fetchProducts()
     }, [])
+
+    useEffect(() => {
+        let cancelled = false
+        setLoadingShopSettings(true)
+        fetch("/api/shop/settings", { credentials: "include" })
+            .then((r) => r.json())
+            .then((result) => {
+                if (cancelled) return
+                if (result?.success) {
+                    setFreeDeliveryEnabled(result.data?.free_delivery_enabled === true)
+                }
+            })
+            .catch(() => {
+                if (!cancelled) toast.error("Could not load shop settings")
+            })
+            .finally(() => {
+                if (!cancelled) setLoadingShopSettings(false)
+            })
+
+        return () => {
+            cancelled = true
+        }
+    }, [])
+
+    const toggleFreeDelivery = async (enabled: boolean) => {
+        setSavingShopSettings(true)
+        try {
+            const res = await fetch("/api/shop/settings", {
+                method: "PATCH",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ free_delivery_enabled: enabled }),
+            })
+            const result = await res.json()
+            if (!res.ok) {
+                toast.error(result.message || "Could not update shop settings")
+                return
+            }
+            setFreeDeliveryEnabled(enabled)
+            toast.success(result.message || "Shop settings updated")
+        } catch {
+            toast.error("Could not update shop settings")
+        } finally {
+            setSavingShopSettings(false)
+        }
+    }
 
     const categoryOptions = useMemo(
         () =>
@@ -189,6 +238,35 @@ const Page: NextPage = () => {
                         Add product
                     </Link>
                 </header>
+
+                <section className="portal-home__panel" aria-label="Shop delivery settings">
+                    <div className="portal-home__panel-head">
+                        <div>
+                            <h2 className="portal-home__section-title">Free delivery</h2>
+                            <p className="portal-home__section-sub">
+                                When enabled, customers see zone delivery fees crossed out and pay ₦0
+                                at checkout. Zone rates in Delivery zones are unchanged.
+                            </p>
+                        </div>
+                        <label className="admin-shop-toggle">
+                            <input
+                                type="checkbox"
+                                className="admin-shop-toggle__input"
+                                checked={freeDeliveryEnabled}
+                                disabled={loadingShopSettings || savingShopSettings}
+                                onChange={(e) => toggleFreeDelivery(e.target.checked)}
+                            />
+                            <span className="admin-shop-toggle__track" aria-hidden />
+                            <span className="admin-shop-toggle__label">
+                                {loadingShopSettings
+                                    ? "Loading…"
+                                    : freeDeliveryEnabled
+                                      ? "On"
+                                      : "Off"}
+                            </span>
+                        </label>
+                    </div>
+                </section>
 
                 {isDataLoading ? (
                     <div className="portal-home__panel portal-home__loader">

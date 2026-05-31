@@ -4,6 +4,8 @@ import { PortalOrderLineItem } from "@/components/portal/orders/PortalOrderLineI
 import type { PortalOrderLineItemData } from "@/components/portal/orders/PortalOrderLineItem"
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
 import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPackagesPageHeader"
+import { PortalPolicyLabel } from "@/components/portal/PortalPolicyInfoButton"
+import { SHOP_DELIVERY_POLICY } from "@/lib/portal/customerPolicies"
 import {
   getOrderStatusLabel,
   getOrderStatusVariant,
@@ -211,7 +213,9 @@ export function PortalOrderDetailPage() {
                 </strong>
               </div>
               <div className="portal-cart__line">
-                <span>Delivery fee</span>
+                <PortalPolicyLabel policy={SHOP_DELIVERY_POLICY} label="Shop delivery policy">
+                  Delivery fee
+                </PortalPolicyLabel>
                 <strong className="tabular-nums">
                   {formatPaymentAmount(deliveryFee)}
                 </strong>

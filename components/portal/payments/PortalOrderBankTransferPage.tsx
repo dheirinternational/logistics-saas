@@ -2,7 +2,8 @@
 
 import { PortalPageBack } from "@/components/portal/PortalPageBack"
 import { DheirLoader } from "@/components/ui/DheirLoader"
-import { calculateDeliveryZonePrice } from "@/lib/calculators/calculateDeliveryZonePrice"
+import { fetchShopDeliveryQuote } from "@/lib/shop/fetchShopDeliveryQuote"
+import type { ShopDeliveryFeeQuote } from "@/lib/shop/deliveryFee"
 import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
 import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 import { toast } from "@/lib/ui/toast"
@@ -34,7 +35,11 @@ export function PortalOrderBankTransferPage() {
   const [bank, setBank] = useState<BankDetails | null>(null)
   const [user, setUser] = useState<UserCheckout>({ email: "", code: "" })
   const [address, setAddress] = useState<Address | null>(null)
-  const [deliveryFee, setDeliveryFee] = useState(0)
+  const [deliveryQuote, setDeliveryQuote] = useState<ShopDeliveryFeeQuote>({
+    zoneFee: 0,
+    chargedFee: 0,
+    freeDelivery: false,
+  })
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
@@ -54,6 +59,8 @@ export function PortalOrderBankTransferPage() {
       return acc + price * item.amount_to_be_ordered
     }, 0)
   }, [cart])
+
+  const deliveryFee = deliveryQuote.chargedFee
 
   const total = subtotal + deliveryFee
 
@@ -120,12 +127,12 @@ export function PortalOrderBankTransferPage() {
         return
       }
 
-      const fee = await calculateDeliveryZonePrice(addr.state)
+      const quote = await fetchShopDeliveryQuote(addr.state)
 
       setBank(bankJson.data)
       setUser({ email: userJson.data.email, code: userJson.data.code })
       setAddress(addr)
-      setDeliveryFee(Number(fee) || 0)
+      setDeliveryQuote(quote)
       setReference(refJson.data.reference)
     } catch {
       toast.error("Could not load transfer details")
@@ -165,6 +172,7 @@ export function PortalOrderBankTransferPage() {
       formData.append("receipt", receiptFile)
       formData.append("amount", String(total))
       formData.append("delivery_fee", String(deliveryFee))
+      formData.append("delivery_state", address.state)
       formData.append("extra_charges", "0")
       formData.append("destination_address", destinationAddress)
       formData.append("customer_code", user.code)

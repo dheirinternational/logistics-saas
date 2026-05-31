@@ -1,10 +1,12 @@
+import { listPublicShopCatalog } from "@/lib/shop/shopCatalog"
 import { pool } from "@/lib/db/db"
 import { NextResponse } from "next/server"
 
-/** Public shop catalog for landing page - featured products + categories. */
+/** Public shop catalog for landing page + customer shop category cards. */
 export async function GET() {
   try {
-    const [featuredRes, categoriesRes] = await Promise.all([
+    const [catalog, featuredRes] = await Promise.all([
+      listPublicShopCatalog(),
       pool.query(
         `
         SELECT
@@ -43,20 +45,13 @@ export async function GET() {
         LIMIT 4
         `
       ),
-      pool.query(
-        `
-        SELECT id, name, description, created_at
-        FROM categories
-        ORDER BY name ASC
-        `
-      ),
     ])
 
     return NextResponse.json({
       success: true,
       data: {
         featured: featuredRes.rows,
-        categories: categoriesRes.rows,
+        catalog,
       },
     })
   } catch (err) {

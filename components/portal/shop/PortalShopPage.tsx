@@ -1,8 +1,9 @@
 "use client"
 
-import { PortalShopCategoryCard } from "@/components/portal/shop/PortalShopCategoryCard"
 import { PortalShopProductCard } from "@/components/portal/shop/PortalShopProductCard"
+import { ShopCatalogCard, getShopCatalogHref } from "@/components/shop/ShopCatalogCard"
 import { SHOP_TEASER_COPY } from "@/lib/marketing/shopCatalog"
+import type { ShopCatalogItem } from "@/lib/shop/shopCatalog"
 import type { Product, ProductCategory } from "@/types/entityTypeDef"
 import { useCartStore } from "@/store/cartStore"
 import { IconSearch } from "@tabler/icons-react"
@@ -22,6 +23,7 @@ export function PortalShopPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [featured, setFeatured] = useState<Product[]>([])
   const [categories, setCategories] = useState<ProductCategory[]>([])
+  const [catalog, setCatalog] = useState<ShopCatalogItem[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingPage, setLoadingPage] = useState(true)
   const [search, setSearch] = useState("")
@@ -44,10 +46,12 @@ export function PortalShopPage() {
     Promise.all([
       fetch("/api/products/featured").then((r) => r.json()),
       fetch("/api/products/categories").then((r) => r.json()),
+      fetch("/api/shop/catalog").then((r) => r.json()),
     ])
-      .then(([featuredRes, catRes]) => {
+      .then(([featuredRes, catRes, catalogRes]) => {
         if (featuredRes.data) setFeatured(featuredRes.data)
         if (catRes.data) setCategories(catRes.data)
+        if (catalogRes.success) setCatalog(catalogRes.data?.catalog ?? [])
       })
       .catch(() => toast.error("Could not load shop"))
       .finally(() => setLoading(false))
@@ -203,16 +207,23 @@ export function PortalShopPage() {
           </h2>
 
           <div className="shop-category-grid mt-6 md:mt-8">
-            {categories.map((category) => (
-              <PortalShopCategoryCard
-                key={category.id}
-                id={category.id}
-                name={
-                  category.name.charAt(0).toUpperCase() + category.name.slice(1)
-                }
-                description={category.description}
-              />
-            ))}
+            {loading ? (
+              <div className="col-span-full flex justify-center py-12">
+                <DheirLoader color="var(--color-dheir-blue)" size={12} />
+              </div>
+            ) : catalog.length === 0 ? (
+              <p className="col-span-full text-center text-sm text-dheir-muted py-8">
+                No catalog items right now.
+              </p>
+            ) : (
+              catalog.map((item) => (
+                <ShopCatalogCard
+                  key={item.id}
+                  item={item}
+                  href={getShopCatalogHref(item, { authenticated: true })}
+                />
+              ))
+            )}
           </div>
         </div>
 

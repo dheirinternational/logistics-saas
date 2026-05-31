@@ -5,6 +5,7 @@ import {
   IconCash,
   IconCurrencyNaira,
   IconLayoutDashboard,
+  IconLayoutGrid,
   IconMapPin,
   IconPackage,
   IconPhotoVideo,
@@ -50,6 +51,11 @@ export const navLinks: NavLink[] = [
     name: "Marketplace",
     path: "/admin/marketplace",
     icon: IconBuildingStore,
+  },
+  {
+    name: "Shop catalog",
+    path: "/admin/shop_catalog",
+    icon: IconLayoutGrid,
   },
   {
     name: "Media",

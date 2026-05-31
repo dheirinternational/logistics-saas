@@ -1,7 +1,9 @@
 "use client"
 
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
+import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import { getShipmentStatusVariant } from "@/lib/portal/packageStatus"
 import {
   formatShippingQuantity,
@@ -179,6 +181,10 @@ export function PortalHomeTrackingView() {
           <div>
             <h2 id="tracking-list-heading" className="portal-home__section-title">
               Your shipments
+              <PortalPolicyInfoButton
+                policy={LOGISTICS_SHIPPING_POLICY}
+                label="Shipping and waybill policy"
+              />
             </h2>
             <p className="portal-home__section-sub">
               Track active and completed shipments in one place

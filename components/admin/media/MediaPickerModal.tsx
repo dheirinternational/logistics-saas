@@ -8,7 +8,7 @@ import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import { toast } from "@/lib/ui/toast"
 import { IconPhoto, IconPlayerPlay, IconX } from "@tabler/icons-react"
 import { MediaVaultThumbnail } from "@/components/admin/media/MediaVaultThumbnail"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 
 type Props = {
   open: boolean
@@ -126,6 +126,13 @@ export function MediaPickerModal({
     return selected.some((s) => (s.id > 0 ? String(s.id) : s.path) === key)
   }
 
+  const handleCardKeyDown = (e: KeyboardEvent<HTMLDivElement>, item: AdminMediaItem) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      toggle(item)
+    }
+  }
+
   const handleConfirm = () => {
     if (selected.length < minCount) {
       toast.error(`Select at least ${minCount} item(s) from the library`)
@@ -196,11 +203,15 @@ export function MediaPickerModal({
             {filtered.map((item) => {
               const picked = isSelected(item)
               return (
-                <button
+                <div
                   key={item.id > 0 ? item.id : item.path}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   className={`media-vault-card media-picker-card${picked ? " is-selected" : ""}`}
                   onClick={() => toggle(item)}
+                  onKeyDown={(e) => handleCardKeyDown(e, item)}
+                  aria-pressed={picked}
+                  aria-label={`${picked ? "Deselect" : "Select"} ${item.name}`}
                 >
                   <div className="media-vault-card__preview">
                     {item.mediaType === "video" ? (
@@ -223,7 +234,7 @@ export function MediaPickerModal({
                     <span>{formatMediaSize(item.sizeBytes)}</span>
                   </div>
                   {picked ? <span className="media-picker-check">Selected</span> : null}
-                </button>
+                </div>
               )
             })}
           </div>

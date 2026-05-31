@@ -3,6 +3,8 @@
 import { PortalQuoteInfoPanel } from "@/components/portal/quote/PortalQuoteInfoPanel"
 import { PortalQuoteItemForm } from "@/components/portal/quote/PortalQuoteItemForms"
 import { PortalQuotePageHeader } from "@/components/portal/quote/PortalQuotePageHeader"
+import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
+import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import { formatGoodLabel, formatMoney } from "@/lib/portal/quote/format"
 import type {
   MoneyExchangeRate,
@@ -122,7 +124,15 @@ export function PortalQuotePage() {
       <PortalQuotePageHeader
         title="Get a quote"
         description="Estimate shipping from China to Nigeria before you buy. Add items, pick air, sea, or express, and see a live total."
-        action={<PortalQuoteInfoPanel />}
+        action={
+          <div className="portal-quote__header-actions">
+            <PortalPolicyInfoButton
+              policy={LOGISTICS_SHIPPING_POLICY}
+              label="Shipping and waybill policy"
+            />
+            <PortalQuoteInfoPanel />
+          </div>
+        }
       />
 
       <div className="portal-quote__rates-card">

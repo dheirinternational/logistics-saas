@@ -75,13 +75,13 @@ export function MarketingHeader({ user = null }: MarketingHeaderProps) {
           }`}
           onClick={closeMenu}
         >
-          <figure className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg">
+          <figure className="relative h-10 w-10 shrink-0 overflow-hidden md:h-11 md:w-11">
             <Image
-              src="/Dheir-logo.png"
+              src="/Dheir colored.png"
               alt=""
-              fill
-              sizes="40px"
-              className="object-contain p-0.5 dheir-logo-img"
+              width={44}
+              height={44}
+              className="h-10 w-10 object-contain dheir-logo-img md:h-11 md:w-11"
               priority
             />
           </figure>

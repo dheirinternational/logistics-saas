@@ -7,7 +7,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { pool } from "@/lib/db/db"
 import type { CartProduct } from "@/types/entityTypeDef"
 import { getManualPaymentContextForUser } from "@/lib/manualPayments/actions"
-import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
+import { getCartSubtotal, getUnitPriceForQuantity } from "@/lib/shop/pricing"
+import { resolveAuthorizedShopDeliveryFee } from "@/lib/shop/deliveryFee"
 import type { PoolClient } from "pg"
 
 export async function GET(
@@ -62,7 +63,7 @@ export async function POST(
     const amount = Number(formData.get("amount"))
     const destinationAddress = String(formData.get("destination_address") ?? "")
     const customerCode = String(formData.get("customer_code") ?? "")
-    const deliveryFee = Number(formData.get("delivery_fee") ?? 0)
+    const deliveryState = String(formData.get("delivery_state") ?? "").trim()
     const extraCharges = Number(formData.get("extra_charges") ?? 0)
     const cartItemsRaw = String(formData.get("cart_items") ?? "")
 
@@ -72,6 +73,53 @@ export async function POST(
 
     if (!Number.isFinite(amount) || amount <= 0) {
       return NextResponse.json({ message: "Invalid amount" }, { status: 400 })
+    }
+
+    const existingCheck = await pool.query(
+      `SELECT order_id FROM orders WHERE order_id = $1 LIMIT 1`,
+      [orderId]
+    )
+    const isNewOrder = existingCheck.rowCount === 0
+
+    let cartItems: CartProduct[] = []
+    let deliveryFee = 0
+    let expectedTotal = amount
+
+    if (isNewOrder) {
+      if (!destinationAddress.trim() || !customerCode.trim() || !deliveryState) {
+        return NextResponse.json(
+          { message: "Missing delivery address or customer code" },
+          { status: 400 }
+        )
+      }
+
+      try {
+        cartItems = JSON.parse(cartItemsRaw) as CartProduct[]
+      } catch {
+        return NextResponse.json(
+          { message: "Invalid cart payload" },
+          { status: 400 }
+        )
+      }
+
+      if (!Array.isArray(cartItems) || cartItems.length === 0) {
+        return NextResponse.json({ message: "Cart is empty" }, { status: 400 })
+      }
+
+      const deliveryQuote = await resolveAuthorizedShopDeliveryFee({
+        stateName: deliveryState,
+      })
+      deliveryFee = deliveryQuote.chargedFee
+
+      const computedSubtotal = getCartSubtotal(cartItems)
+      expectedTotal = computedSubtotal + deliveryFee + extraCharges
+
+      if (Math.abs(amount - expectedTotal) > 0.01) {
+        return NextResponse.json(
+          { message: "Order total does not match current prices" },
+          { status: 400 }
+        )
+      }
     }
 
     client = await pool.connect()
@@ -86,28 +134,6 @@ export async function POST(
     )
 
     if (existingOrder.rowCount === 0) {
-      if (!destinationAddress.trim() || !customerCode.trim()) {
-        return NextResponse.json(
-          { message: "Missing delivery address or customer code" },
-          { status: 400 }
-        )
-      }
-
-      let cartItems: CartProduct[] = []
-      try {
-        cartItems = JSON.parse(cartItemsRaw) as CartProduct[]
-      } catch {
-        return NextResponse.json(
-          { message: "Invalid cart payload" },
-          { status: 400 }
-        )
-      }
-
-      if (!Array.isArray(cartItems) || cartItems.length === 0) {
-        return NextResponse.json({ message: "Cart is empty" }, { status: 400 })
-      }
-
-      // Create order ONLY at proof submission time.
       // Validate stock with row locks like Monnify init.
       const productIds = cartItems.map((item) => item.id)
       const productsRes = await client.query(
@@ -152,7 +178,7 @@ export async function POST(
         [
           orderId,
           session.user_id,
-          amount,
+          expectedTotal,
           deliveryFee,
           extraCharges,
           destinationAddress,

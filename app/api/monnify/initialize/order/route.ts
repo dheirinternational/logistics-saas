@@ -4,10 +4,11 @@ import { getSession } from "@/lib/db/session"
 import { generateOrderTrackingNumber } from "@/lib/generators/generateTrackingNumber"
 import { initializeMonnifyPayment } from "@/lib/monnify/initialize"
 import { isMonnifyCheckoutEnabled } from "@/lib/bankTransfer/config"
+import { resolveAuthorizedShopDeliveryFee } from "@/lib/shop/deliveryFee"
+import { getCartSubtotal, getUnitPriceForQuantity } from "@/lib/shop/pricing"
 import { CartProduct } from "@/types/entityTypeDef"
 import { NextRequest, NextResponse } from "next/server"
 import type { PoolClient } from "pg"
-import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 
 export async function POST(req: NextRequest) {
   const origin = getHost(req)
@@ -29,14 +30,21 @@ export async function POST(req: NextRequest) {
     const {
       email,
       amount,
-      delivery_fee = 0,
+      delivery_state,
       extra_charges = 0,
       destination_address,
       customer_code,
       cart_items,
     } = await req.json()
 
-    if (!email || !amount || !destination_address || !customer_code || !cart_items?.length) {
+    if (
+      !email ||
+      !amount ||
+      !destination_address ||
+      !customer_code ||
+      !cart_items?.length ||
+      !delivery_state?.trim()
+    ) {
       return NextResponse.json(
         { message: "Missing required checkout fields" },
         { status: 400 }
@@ -45,6 +53,21 @@ export async function POST(req: NextRequest) {
 
     const user_id = session.user_id
     const order_id = generateOrderTrackingNumber()
+
+    const { chargedFee: delivery_fee } = await resolveAuthorizedShopDeliveryFee({
+      stateName: String(delivery_state),
+    })
+
+    const computedSubtotal = getCartSubtotal(cart_items)
+    const expectedTotal =
+      computedSubtotal + delivery_fee + Number(extra_charges || 0)
+
+    if (Math.abs(Number(amount) - expectedTotal) > 0.01) {
+      return NextResponse.json(
+        { message: "Order total does not match current prices" },
+        { status: 400 }
+      )
+    }
 
     client = await pool.connect()
     await client.query("BEGIN")
@@ -93,7 +116,7 @@ export async function POST(req: NextRequest) {
       [
         order_id,
         user_id,
-        amount,
+        expectedTotal,
         delivery_fee,
         extra_charges,
         destination_address,
@@ -136,7 +159,7 @@ export async function POST(req: NextRequest) {
       `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() || email
 
     const checkout = await initializeMonnifyPayment({
-      amount: Number(amount),
+      amount: expectedTotal,
       customerName,
       customerEmail: email,
       paymentReference: order_id,

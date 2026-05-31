@@ -36,13 +36,13 @@ export function MarketingFooter() {
         <div className="marketing-footer__grid">
           <div className="marketing-footer__brand">
             <Link href="/" className="inline-flex items-center gap-2.5 no-underline">
-              <figure className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white/10">
+              <figure className="relative h-10 w-10 shrink-0 overflow-hidden bg-transparent md:h-11 md:w-11">
                 <Image
-                  src="/Dheir-logo.png"
+                  src="/Dheir colored.png"
                   alt=""
-                  fill
-                  sizes="40px"
-                  className="object-contain p-0.5"
+                  width={44}
+                  height={44}
+                  className="h-10 w-10 object-contain dheir-logo-img md:h-11 md:w-11"
                 />
               </figure>
               <span className="flex flex-col leading-tight">

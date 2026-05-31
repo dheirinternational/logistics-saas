@@ -1,3 +1,5 @@
+import type { CartProduct } from "@/types/entityTypeDef"
+
 type TierPriceInput = {
   price: number
   discount_price?: number | null
@@ -36,6 +38,19 @@ export function getUnitPriceForQuantity(input: TierPriceInput) {
   }
 
   return basePrice
+}
+
+export function getCartSubtotal(cartItems: CartProduct[]) {
+  return cartItems.reduce((acc, item) => {
+    const price = getUnitPriceForQuantity({
+      price: Number(item.price),
+      discount_price: Number(item.discount_price ?? 0),
+      discount_min_qty: Number(item.discount_min_qty ?? 0),
+      quantity: Number(item.amount_to_be_ordered),
+    })
+
+    return acc + price * Number(item.amount_to_be_ordered)
+  }, 0)
 }
 
 export function getTierPricingLabel(input: TierPriceInput) {

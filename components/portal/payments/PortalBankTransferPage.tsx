@@ -1,7 +1,9 @@
 "use client"
 
 import { PortalPageBack } from "@/components/portal/PortalPageBack"
+import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
 import { DheirLoader } from "@/components/ui/DheirLoader"
+import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
 import { useCartStore } from "@/store/cartStore"
 import { IconBuildingBank, IconCopy, IconUpload } from "@tabler/icons-react"
@@ -158,7 +160,15 @@ export function PortalBankTransferPage({
     <div className="portal-account portal-payments portal-bank-transfer">
       <header className="portal-account__header">
         <PortalPageBack href={backHref} label={backLabel} />
-        <h1 className="portal-account__title">Pay by bank transfer</h1>
+        <h1 className="portal-account__title">
+          Pay by bank transfer
+          {paymentType === "shipment" ? (
+            <PortalPolicyInfoButton
+              policy={LOGISTICS_SHIPPING_POLICY}
+              label="Shipping and waybill policy"
+            />
+          ) : null}
+        </h1>
         <p className="portal-account__subtitle">
           Transfer the exact amount, use the reference below, then upload your receipt.
         </p>

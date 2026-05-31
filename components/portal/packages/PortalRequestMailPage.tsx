@@ -4,6 +4,8 @@ import { PortalRequestMailConfirmDialog } from "@/components/portal/packages/Por
 import { PortalRequestMailPackageRow } from "@/components/portal/packages/PortalRequestMailPackageRow"
 import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPackagesPageHeader"
 import { PortalPackagesToolbar } from "@/components/portal/packages/PortalPackagesToolbar"
+import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
+import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import type { Package } from "@/types/entityTypeDef"
 import { IconPlane, IconShip, IconTruck } from "@tabler/icons-react"
 import Link from "next/link"
@@ -166,7 +168,13 @@ export function PortalRequestMailPage() {
         </div>
 
         <div>
-          <p className="portal-request-mail__label">Shipping method</p>
+          <p className="portal-request-mail__label portal-request-mail__label-row">
+            Shipping method
+            <PortalPolicyInfoButton
+              policy={LOGISTICS_SHIPPING_POLICY}
+              label="Shipping and waybill policy"
+            />
+          </p>
           <div className="portal-request-mail__channels" role="tablist">
             {SHIPPING_CHANNELS.map(({ id, label, icon: Icon }) => (
               <button

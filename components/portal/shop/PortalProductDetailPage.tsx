@@ -1,7 +1,11 @@
 "use client"
 
 import { PortalAccountPageHeader } from "@/components/portal/account/PortalAccountPageHeader"
-import { calculateDeliveryZonePrice } from "@/lib/calculators/calculateDeliveryZonePrice"
+import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
+import { ShopDeliveryFeeDisplay } from "@/components/portal/shop/ShopDeliveryFeeDisplay"
+import { fetchShopDeliveryQuote } from "@/lib/shop/fetchShopDeliveryQuote"
+import type { ShopDeliveryFeeQuote } from "@/lib/shop/deliveryFee"
+import { SHOP_DELIVERY_POLICY } from "@/lib/portal/customerPolicies"
 import { useCartStore } from "@/store/cartStore"
 import type { Address, Product, ProductCategory, ProductImage } from "@/types/entityTypeDef"
 import {
@@ -41,7 +45,11 @@ export function PortalProductDetailPage() {
     type: "image" | "video"
   } | null>(null)
   const [address, setAddress] = useState<Address | null>(null)
-  const [deliveryFee, setDeliveryFee] = useState(0)
+  const [deliveryQuote, setDeliveryQuote] = useState<ShopDeliveryFeeQuote>({
+    zoneFee: 0,
+    chargedFee: 0,
+    freeDelivery: false,
+  })
   const [quantity, setQuantity] = useState(1)
 
   const [loadingProduct, setLoadingProduct] = useState(true)
@@ -135,12 +143,12 @@ export function PortalProductDetailPage() {
         const addr = result?.data?.[0] as Address | undefined
         if (!addr) {
           setAddress(null)
-          setDeliveryFee(0)
+          setDeliveryQuote({ zoneFee: 0, chargedFee: 0, freeDelivery: false })
           return
         }
         setAddress(addr)
-        const fee = await calculateDeliveryZonePrice(addr.state)
-        if (!cancelled) setDeliveryFee(Number(fee) || 0)
+        const quote = await fetchShopDeliveryQuote(addr.state)
+        if (!cancelled) setDeliveryQuote(quote)
       })
       .catch(() => {
         if (!cancelled) setAddress(null)
@@ -315,10 +323,18 @@ export function PortalProductDetailPage() {
             <p className="portal-cart__muted">Loading delivery estimate…</p>
           ) : address ? (
             <p className="portal-pdp__shipping">
-              Delivery to {address.state}:{" "}
-              <strong className="tabular-nums">
-                ₦{deliveryFee.toLocaleString()}
-              </strong>
+              <span className="portal-pdp__shipping-row">
+                Delivery to {address.state}:{" "}
+                <ShopDeliveryFeeDisplay
+                  zoneFee={deliveryQuote.zoneFee}
+                  chargedFee={deliveryQuote.chargedFee}
+                  freeDelivery={deliveryQuote.freeDelivery}
+                />
+                <PortalPolicyInfoButton
+                  policy={SHOP_DELIVERY_POLICY}
+                  label="Shop delivery policy"
+                />
+              </span>
             </p>
           ) : (
             <p className="portal-pdp__shipping portal-pdp__shipping--warn">

@@ -2,7 +2,11 @@
 
 import { PortalAccountPageHeader } from "@/components/portal/account/PortalAccountPageHeader"
 import { PortalCartItem } from "@/components/portal/shop/PortalCartItem"
-import { calculateDeliveryZonePrice } from "@/lib/calculators/calculateDeliveryZonePrice"
+import { ShopDeliveryFeeDisplay } from "@/components/portal/shop/ShopDeliveryFeeDisplay"
+import { PortalPolicyLabel } from "@/components/portal/PortalPolicyInfoButton"
+import { fetchShopDeliveryQuote } from "@/lib/shop/fetchShopDeliveryQuote"
+import type { ShopDeliveryFeeQuote } from "@/lib/shop/deliveryFee"
+import { SHOP_DELIVERY_POLICY } from "@/lib/portal/customerPolicies"
 import { getUnitPriceForQuantity } from "@/lib/shop/pricing"
 import { useCartStore } from "@/store/cartStore"
 import type { Address } from "@/types/entityTypeDef"
@@ -21,7 +25,11 @@ export function PortalCartPage() {
 
   const [user, setUser] = useState<UserCheckout>({ email: "", code: "" })
   const [address, setAddress] = useState<Address | null>(null)
-  const [deliveryFee, setDeliveryFee] = useState(0)
+  const [deliveryQuote, setDeliveryQuote] = useState<ShopDeliveryFeeQuote>({
+    zoneFee: 0,
+    chargedFee: 0,
+    freeDelivery: false,
+  })
   const [loadingAddress, setLoadingAddress] = useState(true)
   const [loadingUser, setLoadingUser] = useState(true)
   const [isPaying, setIsPaying] = useState(false)
@@ -41,6 +49,8 @@ export function PortalCartPage() {
       return acc + price * item.amount_to_be_ordered
     }, 0)
   }, [cart])
+
+  const deliveryFee = deliveryQuote.chargedFee
 
   const total = subtotal + deliveryFee
 
@@ -81,12 +91,12 @@ export function PortalCartPage() {
         const addr = result?.data?.[0] as Address | undefined
         if (!addr) {
           setAddress(null)
-          setDeliveryFee(0)
+          setDeliveryQuote({ zoneFee: 0, chargedFee: 0, freeDelivery: false })
           return
         }
         setAddress(addr)
-        const fee = await calculateDeliveryZonePrice(addr.state)
-        if (!cancelled) setDeliveryFee(Number(fee) || 0)
+        const quote = await fetchShopDeliveryQuote(addr.state)
+        if (!cancelled) setDeliveryQuote(quote)
       })
       .catch(() => {
         if (!cancelled) toast.error("Could not load delivery address")
@@ -119,6 +129,7 @@ export function PortalCartPage() {
           email: user.email,
           amount: total,
           delivery_fee: deliveryFee,
+          delivery_state: address.state,
           extra_charges: 0,
           destination_address: `${address.street}, ${address.city}, ${address.state}, ${address.postal_code}`,
           cart_items: cart,
@@ -211,14 +222,15 @@ export function PortalCartPage() {
               <strong>₦{subtotal.toLocaleString()}</strong>
             </div>
             <div className="portal-cart__line">
-              <span>Delivery</span>
-              <strong>
-                {loadingAddress ? (
-                  <span className="portal-cart__muted">Loading…</span>
-                ) : (
-                  `₦${Number(deliveryFee).toLocaleString()}`
-                )}
-              </strong>
+              <PortalPolicyLabel policy={SHOP_DELIVERY_POLICY} label="Shop delivery policy">
+                Delivery
+              </PortalPolicyLabel>
+              <ShopDeliveryFeeDisplay
+                zoneFee={deliveryQuote.zoneFee}
+                chargedFee={deliveryQuote.chargedFee}
+                freeDelivery={deliveryQuote.freeDelivery}
+                loading={loadingAddress}
+              />
             </div>
             <div className="portal-cart__line portal-cart__line--total">
               <span>Total</span>
