@@ -55,8 +55,25 @@ export const OG_EYEBROW = HERO_COPY.eyebrow
 export const OG_HEADLINE = HERO_COPY.headline
 export const OG_SUBLINE = HERO_COPY.subline
 
+export const OG_IMAGE_ALT =
+  "DHEIR International — calm shipping from China to Nigeria with warehouse, air and sea freight"
+
+export function buildOgImageMetadata() {
+  const siteUrl = getSiteUrl()
+
+  return {
+    url: "/opengraph-image",
+    secureUrl: `${siteUrl}/opengraph-image`,
+    width: 1200,
+    height: 630,
+    alt: OG_IMAGE_ALT,
+    type: "image/png",
+  }
+}
+
 export function buildRootMetadata(overrides?: Partial<Metadata>): Metadata {
   const siteUrl = getSiteUrl()
+  const ogImage = buildOgImageMetadata()
 
   return {
     metadataBase: new URL(siteUrl),
@@ -92,11 +109,13 @@ export function buildRootMetadata(overrides?: Partial<Metadata>): Metadata {
       siteName: SITE_NAME,
       title: DEFAULT_TITLE,
       description: DEFAULT_DESCRIPTION,
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: DEFAULT_TITLE,
       description: DEFAULT_DESCRIPTION,
+      images: [ogImage.url],
     },
     icons: {
       icon: "/Dheir colored.png",
@@ -108,6 +127,7 @@ export function buildRootMetadata(overrides?: Partial<Metadata>): Metadata {
 
 export function buildHomeMetadata(): Metadata {
   const siteUrl = getSiteUrl()
+  const ogImage = buildOgImageMetadata()
 
   return {
     title: HOME_TITLE,
@@ -119,10 +139,12 @@ export function buildHomeMetadata(): Metadata {
       title: HOME_TITLE,
       description: DEFAULT_DESCRIPTION,
       url: siteUrl,
+      images: [ogImage],
     },
     twitter: {
       title: HOME_TITLE,
       description: DEFAULT_DESCRIPTION,
+      images: [ogImage.url],
     },
   }
 }
