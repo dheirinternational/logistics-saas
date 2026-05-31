@@ -14,8 +14,12 @@ import {
   IconShoppingCart,
 } from "@tabler/icons-react"
 import { ProductStorageImage } from "@/components/shop/ProductStorageImage"
+import {
+  SHOP_BUY_NOW_CHECKOUT_PATH,
+  startShopBuyNowCheckout,
+} from "@/lib/shop/buyNowCheckout"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
@@ -32,6 +36,7 @@ import {
 
 export function PortalProductDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const productId = extractTrailingNumericId(String(params.id ?? ""))
 
   const addProduct = useCartStore((s) => s.addProduct)
@@ -54,6 +59,7 @@ export function PortalProductDetailPage() {
 
   const [loadingProduct, setLoadingProduct] = useState(true)
   const [loadingAddress, setLoadingAddress] = useState(true)
+  const [buyNowLoading, setBuyNowLoading] = useState(false)
 
   const categoryLabel = useMemo(() => {
     if (!product) return "Shop"
@@ -196,6 +202,40 @@ export function PortalProductDetailPage() {
       amount_to_be_ordered: quantity,
     })
     toast.success("Added to cart")
+  }
+
+  const handleBuyNow = async () => {
+    if (!product || !selectedMedia) return
+
+    if (!inStock) {
+      toast.error("This product is out of stock")
+      return
+    }
+
+    if (quantity > product.stock_quantity) {
+      toast.error("Not enough stock available")
+      return
+    }
+
+    setBuyNowLoading(true)
+    try {
+      const ok = await startShopBuyNowCheckout({
+        id: product.id,
+        name: product.name,
+        price: Number(product.price),
+        discount_price: Number(product.discount_price ?? 0),
+        discount_min_qty: product.discount_min_qty ?? null,
+        quantity: product.stock_quantity,
+        image:
+          selectedMedia.type === "image"
+            ? selectedMedia.url
+            : "/logo-colored.png",
+        amount_to_be_ordered: quantity,
+      })
+      if (ok) router.push(SHOP_BUY_NOW_CHECKOUT_PATH)
+    } finally {
+      setBuyNowLoading(false)
+    }
   }
 
   if (loadingProduct) {
@@ -389,6 +429,16 @@ export function PortalProductDetailPage() {
             <button
               type="button"
               className="portal-packages__btn-primary portal-packages__btn-primary--block"
+              disabled={!inStock || !selectedMedia || buyNowLoading}
+              aria-busy={buyNowLoading}
+              onClick={handleBuyNow}
+            >
+              {buyNowLoading ? "Starting checkout…" : "Buy now"}
+            </button>
+
+            <button
+              type="button"
+              className="portal-account__btn-secondary portal-pdp__cart-link"
               disabled={!inStock || !selectedMedia || inCart}
               onClick={handleAddToCart}
             >
@@ -398,7 +448,7 @@ export function PortalProductDetailPage() {
 
             <Link
               href="/customer/marketplace/cart"
-              className="portal-account__btn-secondary portal-pdp__cart-link"
+              className="portal-pdp__view-cart-link"
             >
               View cart
               {cart.length > 0 ? ` (${cart.length})` : ""}

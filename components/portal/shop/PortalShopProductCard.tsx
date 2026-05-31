@@ -8,7 +8,12 @@ import { slugify } from "@/lib/portal/slug"
 import { getTierPricingLabel, getUnitPriceForQuantity, hasTierDiscount } from "@/lib/shop/pricing"
 import { ProductStorageImage } from "@/components/shop/ProductStorageImage"
 import { pickPreferredProductImage } from "@/lib/shop/productMedia"
+import {
+  SHOP_BUY_NOW_CHECKOUT_PATH,
+  startShopBuyNowCheckout,
+} from "@/lib/shop/buyNowCheckout"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import type { MouseEvent } from "react"
 import { useEffect, useState } from "react"
 import { toast } from "@/lib/ui/toast"
@@ -22,10 +27,12 @@ export function PortalShopProductCard({
   product,
   categoryLabel = "Shop",
 }: PortalShopProductCardProps) {
+  const router = useRouter()
   const addProduct = useCartStore((s) => s.addProduct)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [mediaType, setMediaType] = useState<"image" | "video">("image")
   const [loadingImage, setLoadingImage] = useState(true)
+  const [buyNowLoading, setBuyNowLoading] = useState(false)
 
   const displayPrice = getUnitPriceForQuantity({
     price: Number(product.price),
@@ -93,8 +100,36 @@ export function PortalShopProductCard({
     toast.success("Added to cart")
   }
 
+  const handleBuyNow = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (loadingImage || !imageUrl) return
+    if (product.stock_quantity < 1) {
+      toast.error("This product is out of stock")
+      return
+    }
+
+    setBuyNowLoading(true)
+    try {
+      const ok = await startShopBuyNowCheckout({
+        id: product.id,
+        name: product.name,
+        price: Number(product.price),
+        discount_price: Number(product.discount_price ?? 0),
+        discount_min_qty: product.discount_min_qty ?? null,
+        quantity: product.stock_quantity,
+        image: imageUrl ?? "/logo-colored.png",
+        amount_to_be_ordered: 1,
+      })
+      if (ok) router.push(SHOP_BUY_NOW_CHECKOUT_PATH)
+    } finally {
+      setBuyNowLoading(false)
+    }
+  }
+
   return (
-    <article className="shop-product-card group">
+    <article className="shop-product-card shop-product-card--portal group">
       <Link href={detailHref} className="shop-product-card__media block">
         {loadingImage ? (
           <span className="flex h-full w-full items-center justify-center">
@@ -131,6 +166,9 @@ export function PortalShopProductCard({
         <Link href={detailHref} className="shop-product-card__name">
           {product.name}
         </Link>
+        {hasTierDiscount(product) && tierPricingLabel ? (
+          <p className="shop-product-card__meta">{tierPricingLabel}</p>
+        ) : null}
         <div className="shop-product-card__footer">
           <p className="shop-product-card__price tabular-nums">
             ₦{displayPrice.toLocaleString()}
@@ -141,11 +179,11 @@ export function PortalShopProductCard({
             disabled={loadingImage || !imageUrl}
             onAdd={handleAddToCart}
             addAriaLabel={`Add ${product.name} to cart`}
+            showBuyNow
+            onBuyNow={handleBuyNow}
+            buyNowLoading={buyNowLoading}
           />
         </div>
-        {hasTierDiscount(product) && tierPricingLabel ? (
-          <p className="shop-product-card__meta">{tierPricingLabel}</p>
-        ) : null}
       </div>
     </article>
   )

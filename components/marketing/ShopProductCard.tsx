@@ -88,6 +88,9 @@ export function ShopProductCard({
         <Link href={detailHref} className="shop-product-card__name">
           {product.name}
         </Link>
+        {hasTierDiscount(product) && tierPricingLabel ? (
+          <p className="shop-product-card__meta">{tierPricingLabel}</p>
+        ) : null}
         <div className="shop-product-card__footer">
           <p className="shop-product-card__price tabular-nums">
             ₦{displayPrice.toLocaleString()}
@@ -100,9 +103,6 @@ export function ShopProductCard({
             addAriaLabel={`Add ${product.name} to cart`}
           />
         </div>
-        {hasTierDiscount(product) && tierPricingLabel ? (
-          <p className="shop-product-card__meta">{tierPricingLabel}</p>
-        ) : null}
       </div>
     </article>
   )

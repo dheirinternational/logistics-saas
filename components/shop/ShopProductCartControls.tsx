@@ -10,6 +10,10 @@ type ShopProductCartControlsProps = {
   disabled?: boolean
   onAdd: (e: MouseEvent<HTMLButtonElement>) => void
   addAriaLabel: string
+  showBuyNow?: boolean
+  onBuyNow?: (e: MouseEvent<HTMLButtonElement>) => void
+  buyNowDisabled?: boolean
+  buyNowLoading?: boolean
 }
 
 export function ShopProductCartControls({
@@ -18,6 +22,10 @@ export function ShopProductCartControls({
   disabled = false,
   onAdd,
   addAriaLabel,
+  showBuyNow = false,
+  onBuyNow,
+  buyNowDisabled = false,
+  buyNowLoading = false,
 }: ShopProductCartControlsProps) {
   const cartItem = useCartStore((s) => s.cart.find((item) => item.id === productId))
   const increaseAmount = useCartStore((s) => s.increaseAmount)
@@ -25,7 +33,7 @@ export function ShopProductCartControls({
   const removeProduct = useCartStore((s) => s.removeProduct)
 
   if (!cartItem) {
-    return (
+    const cartButton = (
       <button
         type="button"
         className="shop-product-card__cart-btn"
@@ -35,6 +43,27 @@ export function ShopProductCartControls({
       >
         <IconShoppingCartPlus size={20} stroke={1.5} aria-hidden />
       </button>
+    )
+
+    if (!showBuyNow || !onBuyNow) {
+      return cartButton
+    }
+
+    return (
+      <div className="shop-product-card__actions">
+        <button
+          type="button"
+          className="shop-product-card__buy-now"
+          disabled={
+            buyNowDisabled || buyNowLoading || disabled || stockQuantity < 1
+          }
+          aria-busy={buyNowLoading}
+          onClick={onBuyNow}
+        >
+          {buyNowLoading ? "…" : "Buy now"}
+        </button>
+        {cartButton}
+      </div>
     )
   }
 

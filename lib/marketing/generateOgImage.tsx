@@ -171,8 +171,8 @@ export async function generateOgImage() {
               color: INK,
             }}
           >
-            <span>Calm shipping from China </span>
-            <span style={{ color: BRAND_BLUE }}>home.</span>
+            <span>Calm shipping from China</span>
+            <span style={{ color: BRAND_BLUE, marginLeft: 18 }}>home.</span>
           </div>
 
           <div
