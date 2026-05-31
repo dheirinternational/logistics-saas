@@ -142,8 +142,7 @@ export function PortalShopProductCard({
               muted
               playsInline
               preload="metadata"
-              className="object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-              style={{ width: "100%", height: "100%" }}
+              className="h-full w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
           ) : (
             <ProductStorageImage
@@ -151,7 +150,7 @@ export function PortalShopProductCard({
               alt={product.name}
               fill
               sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 260px"
-              className="object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              className="transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
           )
         ) : (

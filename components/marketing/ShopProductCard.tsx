@@ -74,7 +74,7 @@ export function ShopProductCard({
             alt={product.name}
             fill
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 260px"
-            className="object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            className="transition-transform duration-500 ease-out group-hover:scale-[1.03]"
           />
         ) : (
           <span className="flex h-full w-full items-center justify-center text-sm text-dheir-muted">

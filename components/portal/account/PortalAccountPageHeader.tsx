@@ -1,7 +1,7 @@
 import { PortalPageBack } from "@/components/portal/PortalPageBack"
 
 type PortalAccountPageHeaderProps = {
-  title: string
+  title?: string
   description?: string
   backHref?: string
   backLabel?: string
@@ -16,7 +16,7 @@ export function PortalAccountPageHeader({
   return (
     <header className="portal-account__header">
       <PortalPageBack href={backHref} label={backLabel} />
-      <h1 className="portal-account__title">{title}</h1>
+      {title ? <h1 className="portal-account__title">{title}</h1> : null}
       {description ? (
         <p className="portal-account__subtitle">{description}</p>
       ) : null}

@@ -266,12 +266,7 @@ export function PortalProductDetailPage() {
 
   return (
     <div className="portal-account portal-pdp">
-      <PortalAccountPageHeader
-        title={product.name}
-        description={categoryLabel}
-        backHref="/customer/shop"
-        backLabel="Shop"
-      />
+      <PortalAccountPageHeader backHref="/customer/shop" backLabel="Shop" />
 
       <div className="portal-pdp__layout">
         <section className="portal-pdp__gallery portal-account__card">
@@ -283,7 +278,7 @@ export function PortalProductDetailPage() {
                   controls
                   playsInline
                   preload="metadata"
-                  style={{ width: "100%", height: "100%", padding: 24 }}
+                  className="portal-pdp__hero-media"
                 />
               ) : (
                 <ProductStorageImage
@@ -292,7 +287,7 @@ export function PortalProductDetailPage() {
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 560px"
-                  className="object-contain p-6"
+                  className="portal-pdp__hero-media"
                 />
               )
             ) : (
@@ -337,7 +332,10 @@ export function PortalProductDetailPage() {
         </section>
 
         <aside className="portal-pdp__buy portal-account__card">
-          <p className="portal-pdp__category">{categoryLabel}</p>
+          <div className="portal-pdp__heading">
+            <p className="portal-pdp__category">{categoryLabel}</p>
+            <h1 className="portal-pdp__title">{product.name}</h1>
+          </div>
 
           <div className="portal-pdp__price-block">
             <p className="portal-pdp__price tabular-nums">
@@ -362,7 +360,7 @@ export function PortalProductDetailPage() {
           {loadingAddress ? (
             <p className="portal-cart__muted">Loading delivery estimate…</p>
           ) : address ? (
-            <p className="portal-pdp__shipping">
+            <div className="portal-pdp__shipping">
               <span className="portal-pdp__shipping-row">
                 Delivery to {address.state}:{" "}
                 <ShopDeliveryFeeDisplay
@@ -375,7 +373,7 @@ export function PortalProductDetailPage() {
                   label="Shop delivery policy"
                 />
               </span>
-            </p>
+            </div>
           ) : (
             <p className="portal-pdp__shipping portal-pdp__shipping--warn">
               Add a{" "}
