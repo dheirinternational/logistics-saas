@@ -25,6 +25,9 @@ export const DEFAULT_TITLE =
 export const HOME_TITLE =
   "China to Nigeria Shipping | Warehouse, Air & Sea Freight | DHEIR International"
 
+export const ABOUT_TITLE =
+  "About DHEIR International | Procurement, E-commerce, and Logistics"
+
 export const DEFAULT_DESCRIPTION =
   "Ship from China to Nigeria with one portal for your China warehouse address, package consolidation, air and sea freight, customs support, and delivery. Trusted by importers across Nigeria."
 
@@ -144,6 +147,32 @@ export function buildHomeMetadata(): Metadata {
     twitter: {
       title: HOME_TITLE,
       description: DEFAULT_DESCRIPTION,
+      images: [ogImage.url],
+    },
+  }
+}
+
+export function buildAboutMetadata(): Metadata {
+  const siteUrl = getSiteUrl()
+  const ogImage = buildOgImageMetadata()
+  const aboutDescription =
+    "Learn about DHEIR International's procurement, supplier verification, logistics, private label sourcing, and procurement consultation services."
+
+  return {
+    title: ABOUT_TITLE,
+    description: aboutDescription,
+    alternates: {
+      canonical: `${siteUrl}/about`,
+    },
+    openGraph: {
+      title: ABOUT_TITLE,
+      description: aboutDescription,
+      url: `${siteUrl}/about`,
+      images: [ogImage],
+    },
+    twitter: {
+      title: ABOUT_TITLE,
+      description: aboutDescription,
       images: [ogImage.url],
     },
   }
