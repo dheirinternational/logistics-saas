@@ -73,6 +73,24 @@ export async function getMediaAssetsByIds(ids: number[]): Promise<MediaAssetRow[
   return rows.map((row) => normalizeMediaAssetRow(row))
 }
 
+async function getMediaAssetsByIdsWithClient(
+  client: PoolClient,
+  ids: number[]
+): Promise<MediaAssetRow[]> {
+  const unique = [...new Set(ids.filter((id) => Number.isFinite(id) && id > 0))]
+  if (unique.length === 0) return []
+
+  const { rows } = await client.query<MediaAssetRow>(
+    `
+    SELECT id, created_at, storage_bucket, storage_path, public_url, media_type, file_name, size_bytes
+    FROM media_assets
+    WHERE id = ANY($1::bigint[])
+    `,
+    [unique]
+  )
+  return rows.map((row) => normalizeMediaAssetRow(row))
+}
+
 export async function insertMediaAsset(input: {
   storage_bucket: string
   storage_path: string
@@ -183,7 +201,7 @@ async function linkAssetsToTable(
   opts?: { maxCount?: number }
 ) {
   const uniqueIds = [...new Set(assetIds.map((id) => Number(id)).filter((id) => id > 0))]
-  const assets = await getMediaAssetsByIds(uniqueIds)
+  const assets = await getMediaAssetsByIdsWithClient(client, uniqueIds)
   if (assets.length !== uniqueIds.length) {
     throw new Error("One or more selected media items were not found.")
   }

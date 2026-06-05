@@ -1,4 +1,4 @@
-import { pool } from "@/lib/db/db";
+import { databaseErrorResponse, pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
 import { generateTrackingNumber } from "@/lib/generators/generateTrackingNumber";
 import { linkMediaAssetsToShipment } from "@/lib/media/mediaAssets";
@@ -166,11 +166,15 @@ export async function POST(req: NextRequest) {
 
     } catch (err) {
         console.error("Error Creating Shipment", err);
+        const { message, status } = databaseErrorResponse(
+            err,
+            "Something went wrong"
+        );
 
         return NextResponse.json({
             success: false,
-            message: "Something went wrong"
-        }, { status: 500 });
+            message
+        }, { status });
     }
 }
 
