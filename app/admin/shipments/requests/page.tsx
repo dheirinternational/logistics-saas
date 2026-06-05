@@ -17,7 +17,7 @@ import { DheirSelect } from "@/components/ui/DheirSelect"
 import { matchesStatusFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
 import { IconChecks, IconClock } from "@tabler/icons-react"
-import { getShippingQuantityFieldLabel } from "@/lib/shipping/channelUnits"
+import { getProductWeightFieldLabel } from "@/lib/shop/productWeight"
 import { IconX } from "@tabler/icons-react"
 
 export type SearchProps = {
@@ -314,7 +314,7 @@ const Page: NextPage = () => {
                 <div>
                   <h2 className="dheir-dialog__title">Request details</h2>
                   <p className="admin-modal__subtitle">
-                    Review the request, set price + {getShippingQuantityFieldLabel(modalSelectedRequest?.channel).toLowerCase()}, then accept.
+                    Review the request, set price + {getProductWeightFieldLabel(weightUnit).toLowerCase()}, then accept.
                   </p>
                 </div>
                 <button
@@ -395,7 +395,7 @@ const Page: NextPage = () => {
 
                     <label className="portal-packages__field">
                       <span className="portal-packages__field-label">
-                        {getShippingQuantityFieldLabel(modalSelectedRequest?.channel)}
+                        {getProductWeightFieldLabel(weightUnit)}
                       </span>
                       <input
                         type="number"
@@ -418,7 +418,6 @@ const Page: NextPage = () => {
                       <DheirSelect
                         value={weightUnit}
                         onChange={(e) => setWeightUnit(e.target.value as "kg" | "cbm")}
-                        disabled={modalSelectedRequest?.channel !== "sea"}
                       >
                         <option value="kg">KG</option>
                         <option value="cbm">CBM</option>

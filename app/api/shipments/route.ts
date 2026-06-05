@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
             }, { status: 400 })
         }
 
+        const totalWeightUnitRaw = String(formData.get("total_weight_unit") ?? "kg").toLowerCase()
+        const total_weight_unit = totalWeightUnitRaw === "cbm" ? "cbm" : "kg"
+
         const data = {
             customer_code: formData.get("customer_code") as string,
             origin_warehouse_id: Number(formData.get("origin_warehouse_id")),
@@ -50,6 +53,7 @@ export async function POST(req: NextRequest) {
             payment_time: formData.get("payment_time"),
             package_ids: formData.get("package_ids"),
             total_weight: Number(formData.get("total_weight")).toFixed(2),
+            total_weight_unit,
             price: Number(formData.get("total_price")).toFixed(2),
             
         }
@@ -72,8 +76,8 @@ export async function POST(req: NextRequest) {
 
         const shipmentRes = await client.query(`
             INSERT INTO shipments
-            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
             RETURNING *
         `, [
             tracking_number,
@@ -86,7 +90,8 @@ export async function POST(req: NextRequest) {
             data.user_id,
             data.payment_time,
             package_ids,
-            data.total_weight
+            data.total_weight,
+            data.total_weight_unit,
         ]);
 
         const { id } = shipmentRes.rows[0]
