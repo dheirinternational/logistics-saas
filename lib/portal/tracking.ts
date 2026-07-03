@@ -14,12 +14,14 @@ export type PortalTrackingShipment = {
   channel: string
   totalCost: number
   totalWeight: number
+  totalWeightUnit?: string
   paymentTime: string
   paidFor: boolean
   shippingNote: string
   createdAt: string
   originLabel: string
   destinationLabel: string
+  images?: { imageUrl: string; mediaType: string }[]
 }
 
 export type PortalTrackingData = {
@@ -35,27 +37,33 @@ function warehouseLabel(
   return parts.length > 0 ? parts.join(", ") : "Warehouse"
 }
 
-function mapShipmentRow(row: {
-  tracking_number: string
-  status: string
-  channel: string | null
-  total_cost: string | number | null
-  total_weight: string | number | null
-  payment_time: string | null
-  paid_for: boolean | null
-  shipment_note: string | null
-  created_at: Date | string | null
-  origin_city: string | null
-  origin_country: string | null
-  dest_city: string | null
-  dest_country: string | null
-}): PortalTrackingShipment {
+function mapShipmentRow(
+  row: {
+    id: number
+    tracking_number: string
+    status: string
+    channel: string | null
+    total_cost: string | number | null
+    total_weight: string | number | null
+    total_weight_unit: string | null
+    payment_time: string | null
+    paid_for: boolean | null
+    shipment_note: string | null
+    created_at: Date | string | null
+    origin_city: string | null
+    origin_country: string | null
+    dest_city: string | null
+    dest_country: string | null
+  },
+  imagesMap: Record<number, { imageUrl: string; mediaType: string }[]>
+): PortalTrackingShipment {
   return {
     trackingNumber: row.tracking_number,
     status: row.status,
     channel: row.channel ?? "",
     totalCost: Number(row.total_cost ?? 0),
     totalWeight: Number(row.total_weight ?? 0),
+    totalWeightUnit: row.total_weight_unit ?? "kg",
     paymentTime: row.payment_time ?? "",
     paidFor: Boolean(row.paid_for),
     shippingNote: row.shipment_note?.trim() ?? "",
@@ -64,6 +72,7 @@ function mapShipmentRow(row: {
       : new Date().toISOString(),
     originLabel: warehouseLabel(row.origin_city, row.origin_country),
     destinationLabel: warehouseLabel(row.dest_city, row.dest_country),
+    images: imagesMap[Number(row.id)] ?? []
   }
 }
 
@@ -94,11 +103,13 @@ export async function getPortalTrackingData(
     pool.query(
       `
       SELECT
+        s.id,
         s.tracking_number,
         s.status,
         s.channel,
         s.total_cost,
         s.total_weight,
+        s.total_weight_unit,
         s.payment_time,
         s.paid_for,
         s.shipment_note,
@@ -120,12 +131,34 @@ export async function getPortalTrackingData(
 
   const summary = summaryRes.rows[0] ?? {}
 
+  const shipmentIds = shipmentsRes.rows.map((row) => Number(row.id)).filter(Boolean)
+  let imagesMap: Record<number, { imageUrl: string; mediaType: string }[]> = {}
+  if (shipmentIds.length > 0) {
+    const imagesRes = await pool.query(
+      `SELECT shipment_id, image_url, media_type
+       FROM shipment_images
+       WHERE shipment_id = ANY($1)
+       ORDER BY id ASC`,
+      [shipmentIds]
+    )
+    for (const r of imagesRes.rows) {
+      const sid = Number(r.shipment_id)
+      if (!imagesMap[sid]) {
+        imagesMap[sid] = []
+      }
+      imagesMap[sid].push({
+        imageUrl: r.image_url,
+        mediaType: r.media_type || "photo"
+      })
+    }
+  }
+
   return {
     summary: {
       active: Number(summary.active ?? 0),
       delivered: Number(summary.delivered ?? 0),
       total: Number(summary.total ?? 0),
     },
-    shipments: shipmentsRes.rows.map(mapShipmentRow),
+    shipments: shipmentsRes.rows.map((r) => mapShipmentRow(r, imagesMap)),
   }
 }

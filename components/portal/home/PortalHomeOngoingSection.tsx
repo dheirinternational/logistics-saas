@@ -9,6 +9,7 @@ import {
 import type { PortalDashboardShipment } from "@/lib/portal/dashboard"
 import { IconMapPin, IconTruck } from "@tabler/icons-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useState } from "react"
 
 type PortalHomeOngoingSectionProps = {
@@ -124,9 +125,11 @@ export function PortalHomeOngoingSection({
                   <dd>{active.channel?.toUpperCase() || "-"}</dd>
                 </div>
                 <div>
-                  <dt>{getShippingQuantityShortLabel(active.channel)}</dt>
+                  <dt>{active.totalWeightUnit === "cbm" ? "Volume" : active.totalWeightUnit === "kg" ? "Weight" : getShippingQuantityShortLabel(active.channel)}</dt>
                   <dd>
-                    {formatShippingQuantity(active.totalWeight, active.channel)}
+                    {active.totalWeightUnit
+                      ? `${Number(active.totalWeight).toFixed(2)} ${active.totalWeightUnit === "cbm" ? "CBM" : active.totalWeightUnit}`
+                      : formatShippingQuantity(active.totalWeight, active.channel)}
                   </dd>
                 </div>
                 <div>
@@ -146,6 +149,36 @@ export function PortalHomeOngoingSection({
                   <dd className="capitalize">{formatStatus(active.status)}</dd>
                 </div>
               </dl>
+              {active.images && active.images.length > 0 ? (
+                <div style={{ marginTop: 16 }}>
+                  <p className="portal-home__ongoing-detail-label" style={{ marginBottom: 8 }}>Shipment pictures</p>
+                  <div className="portal-packages__card-images" style={{ minHeight: "auto" }}>
+                    {active.images.map((img, idx) => (
+                      <figure key={idx} className="portal-packages__card-thumb" style={{ width: 64, height: 64 }}>
+                        {img.mediaType === "video" ? (
+                          <video
+                            src={img.imageUrl}
+                            className="object-cover w-full h-full"
+                            controls
+                            preload="metadata"
+                          />
+                        ) : (
+                          <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="relative block w-full h-full">
+                            <Image
+                              src={img.imageUrl}
+                              alt="Shipment media"
+                              fill
+                              className="object-cover"
+                              sizes="64px"
+                              unoptimized
+                            />
+                          </a>
+                        )}
+                      </figure>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </aside>
           ) : null}
         </div>

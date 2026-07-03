@@ -24,6 +24,7 @@ import {
   IconLayersLinked,
 } from "@tabler/icons-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useCallback, useEffect, useState } from "react"
 
 const FILTER_OPTIONS: { value: PortalTrackingFilter; label: string }[] = [
@@ -305,9 +306,11 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
           <dd>{shipment.channel?.toUpperCase() || "-"}</dd>
         </div>
         <div>
-          <dt>{getShippingQuantityShortLabel(shipment.channel)}</dt>
+          <dt>{shipment.totalWeightUnit === "cbm" ? "Volume" : shipment.totalWeightUnit === "kg" ? "Weight" : getShippingQuantityShortLabel(shipment.channel)}</dt>
           <dd>
-            {formatShippingQuantity(shipment.totalWeight, shipment.channel)}
+            {shipment.totalWeightUnit
+              ? `${Number(shipment.totalWeight).toFixed(2)} ${shipment.totalWeightUnit === "cbm" ? "CBM" : shipment.totalWeightUnit}`
+              : formatShippingQuantity(shipment.totalWeight, shipment.channel)}
           </dd>
         </div>
         <div>
@@ -331,6 +334,36 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
           <dd className="capitalize">{formatStatus(shipment.status)}</dd>
         </div>
       </dl>
+      {shipment.images && shipment.images.length > 0 ? (
+        <div style={{ marginTop: 16 }}>
+          <p className="portal-home__ongoing-detail-label" style={{ marginBottom: 8 }}>Shipment pictures</p>
+          <div className="portal-packages__card-images" style={{ minHeight: "auto" }}>
+            {shipment.images.map((img, idx) => (
+              <figure key={idx} className="portal-packages__card-thumb" style={{ width: 64, height: 64 }}>
+                {img.mediaType === "video" ? (
+                  <video
+                    src={img.imageUrl}
+                    className="object-cover w-full h-full"
+                    controls
+                    preload="metadata"
+                  />
+                ) : (
+                  <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="relative block w-full h-full">
+                    <Image
+                      src={img.imageUrl}
+                      alt="Shipment media"
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                      unoptimized
+                    />
+                  </a>
+                )}
+              </figure>
+            ))}
+          </div>
+        </div>
+      ) : null}
       {needsPayment ? (
         <Link
           href="/customer/pending_payments"

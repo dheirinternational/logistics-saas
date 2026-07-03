@@ -17,10 +17,12 @@ export type PortalDashboardShipment = {
   channel: string
   totalCost: number
   totalWeight: number
+  totalWeightUnit?: string
   paymentTime: string
   createdAt: string
   originLabel: string
   destinationLabel: string
+  images?: { imageUrl: string; mediaType: string }[]
 }
 
 export type PortalDashboardActivityRow = {
@@ -90,11 +92,13 @@ export async function getPortalDashboardData(
     pool.query(
       `
       SELECT
+        s.id,
         s.tracking_number,
         s.status,
         s.channel,
         s.total_cost,
         s.total_weight,
+        s.total_weight_unit,
         s.payment_time,
         s.created_at,
         ow.city AS origin_city,
@@ -171,6 +175,28 @@ export async function getPortalDashboardData(
   const user = userRes.rows[0]
   const counts = countsRes.rows[0] as PortalDashboardCounts
 
+  const activeShipmentIds = shipmentsRes.rows.map((row) => Number(row.id)).filter(Boolean)
+  let imagesMap: Record<number, { imageUrl: string; mediaType: string }[]> = {}
+  if (activeShipmentIds.length > 0) {
+    const imagesRes = await pool.query(
+      `SELECT shipment_id, image_url, media_type
+       FROM shipment_images
+       WHERE shipment_id = ANY($1)
+       ORDER BY id ASC`,
+      [activeShipmentIds]
+    )
+    for (const r of imagesRes.rows) {
+      const sid = Number(r.shipment_id)
+      if (!imagesMap[sid]) {
+        imagesMap[sid] = []
+      }
+      imagesMap[sid].push({
+        imageUrl: r.image_url,
+        mediaType: r.media_type || "photo"
+      })
+    }
+  }
+
   const activeShipments: PortalDashboardShipment[] = shipmentsRes.rows.map(
     (row) => ({
       trackingNumber: row.tracking_number,
@@ -178,12 +204,14 @@ export async function getPortalDashboardData(
       channel: row.channel ?? "",
       totalCost: Number(row.total_cost ?? 0),
       totalWeight: Number(row.total_weight ?? 0),
+      totalWeightUnit: row.total_weight_unit ?? "kg",
       paymentTime: row.payment_time ?? "",
       createdAt: row.created_at
         ? new Date(row.created_at).toISOString()
         : new Date().toISOString(),
       originLabel: warehouseLabel(row.origin_city, row.origin_country),
       destinationLabel: warehouseLabel(row.dest_city, row.dest_country),
+      images: imagesMap[Number(row.id)] ?? []
     }),
   )
 
