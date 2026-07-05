@@ -14,6 +14,7 @@ import {
   buildHomeMetadata,
   buildOrganizationJsonLd,
 } from "@/lib/marketing/siteMetadata"
+import { PortalWhatsAppFab } from "@/components/portal/home/PortalWhatsAppFab"
 
 export const metadata = buildHomeMetadata()
 
@@ -42,6 +43,7 @@ export default async function Home() {
         <FAQSection />
       </main>
       <MarketingFooter />
+      <PortalWhatsAppFab />
     </div>
   )
 }
