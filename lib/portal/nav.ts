@@ -18,7 +18,6 @@ export type PortalNavItem = {
 
 /** Primary sidebar navigation - see plan.md §9 */
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
-  { id: "shop", label: "Shop", href: "/customer/shop", icon: IconShoppingBag },
   { id: "home", label: "Logistics", href: "/customer", icon: IconTruckDelivery },
   {
     id: "packages",

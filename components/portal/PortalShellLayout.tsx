@@ -63,36 +63,15 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
   }, [])
 
   const sidebarLinks = useMemo(() => {
-    const base = PORTAL_NAV_ITEMS.map((item) => ({
+    return PORTAL_NAV_ITEMS.map((item) => ({
       key: item.id,
       href: item.href,
       label: item.label,
       icon: item.icon,
-      isActive:
-        item.id === activeId &&
-        !(item.id === "shop" && pathname.startsWith("/customer/orders")),
+      isActive: item.id === activeId,
       badgeCount: undefined as number | undefined,
     }))
-
-    const shopOrders = {
-      key: "shop-orders",
-      href: "/customer/orders",
-      label: "Shop orders",
-      icon: IconShoppingCart,
-      isActive:
-        pathname === "/customer/orders" || pathname.startsWith("/customer/orders/"),
-      badgeCount: badges["/customer/orders"],
-    }
-
-    const shopIndex = base.findIndex((item) => item.key === "shop")
-    if (shopIndex === -1) return [...base, shopOrders]
-
-    return [
-      ...base.slice(0, shopIndex + 1),
-      shopOrders,
-      ...base.slice(shopIndex + 1),
-    ]
-  }, [activeId, badges, pathname])
+  }, [activeId])
 
   useEffect(() => {
     if (!mobileOpen) return

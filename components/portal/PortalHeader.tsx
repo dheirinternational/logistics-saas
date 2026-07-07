@@ -124,7 +124,7 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
         </form>
 
         <div className="portal-header__end">
-          <PortalHeaderCart />
+          {/* <PortalHeaderCart /> */}
 
           <button
             type="button"

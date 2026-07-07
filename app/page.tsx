@@ -39,7 +39,7 @@ export default async function Home() {
         <HowItWorksSection />
         <ServicesSection />
         <TrustSection />
-        <ShopTeaserSection isAuthenticated={!!session} />
+        {/* <ShopTeaserSection isAuthenticated={!!session} /> */}
         <FAQSection />
       </main>
       <MarketingFooter />

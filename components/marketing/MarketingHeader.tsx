@@ -125,11 +125,11 @@ export function MarketingHeader({ user = null }: MarketingHeaderProps) {
             onHero ? "marketing-header-glass marketing-header-actions" : ""
           }`}
         >
-          <MarketingCartButton
+          {/* <MarketingCartButton
             onHero={onHero}
             onNavigate={closeMenu}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full"
-          />
+          /> */}
           {user ? (
             <>
               <MarketingHeaderUserMenu
@@ -243,7 +243,7 @@ export function MarketingHeader({ user = null }: MarketingHeaderProps) {
                 onHero ? "border-white/15" : "border-[var(--color-dheir-border)]"
               }`}
             >
-              <Link
+              {/* <Link
                 href="/customer/marketplace/cart"
                 className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-semibold no-underline ${
                   onHero
@@ -259,7 +259,7 @@ export function MarketingHeader({ user = null }: MarketingHeaderProps) {
                     {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
-              </Link>
+              </Link> */}
               {user ? (
                 <MarketingHeaderUserMenu
                   user={user}

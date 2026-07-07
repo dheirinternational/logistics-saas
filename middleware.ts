@@ -21,6 +21,19 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  const isShopPath = [
+    "/customer/shop",
+    "/customer/marketplace",
+    "/customer/orders",
+    "/customer/verify_order_payment"
+  ].some((prefix) => pathname.startsWith(prefix))
+
+  if (isShopPath) {
+    const customerUrl = request.nextUrl.clone()
+    customerUrl.pathname = "/customer"
+    return NextResponse.redirect(customerUrl)
+  }
+
   return NextResponse.next()
 }
 
