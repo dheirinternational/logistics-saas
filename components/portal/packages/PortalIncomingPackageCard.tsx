@@ -7,10 +7,12 @@ import type { IncomingPackage } from "@/types/entityTypeDef"
 
 type PortalIncomingPackageCardProps = {
   packag: IncomingPackage
+  warehousesMap?: Record<number, string>
 }
 
 export function PortalIncomingPackageCard({
   packag,
+  warehousesMap,
 }: PortalIncomingPackageCardProps) {
   return (
     <article className="portal-packages__card">
@@ -19,25 +21,43 @@ export function PortalIncomingPackageCard({
           <h3 className="portal-packages__card-title">
             {packag.declared_item_name}
           </h3>
-          <p className="portal-packages__card-meta">
-            Tracking: {packag.incoming_tracking_number}
-          </p>
         </div>
         <PortalPackageStatusBadge
           label={getIncomingStatusLabel(packag.status)}
           variant={getIncomingStatusVariant(packag.status)}
         />
       </div>
-      <div className="portal-packages__card-foot portal-packages__card-foot--split">
-        <span className="portal-packages__card-meta">
-          Qty: {packag.declared_item_quantity}
-        </span>
-        <time className="portal-packages__card-date" dateTime={packag.created_at}>
-          {new Date(packag.created_at).toLocaleDateString()}
-        </time>
+
+      <div className="portal-packages__card-body">
+        <ul className="portal-packages__details-list">
+          <li><strong>Tracking:</strong> {packag.incoming_tracking_number}</li>
+          <li>
+            <strong>Declared Weight:</strong>{" "}
+            {packag.declared_item_weight
+              ? `${packag.declared_item_weight} ${packag.declared_item_weight_unit || "kg"}`
+              : "Not weighed yet"}
+          </li>
+          <li>
+            <strong>Quantity:</strong> {packag.declared_item_quantity}{" "}
+            {Number(packag.declared_item_quantity) === 1 ? "item" : "items"}
+          </li>
+          {packag.warehouse_id && warehousesMap?.[Number(packag.warehouse_id)] && (
+            <li>
+              <strong>Warehouse:</strong> {warehousesMap[Number(packag.warehouse_id)]}
+            </li>
+          )}
+          <li>
+            <strong>Registered At:</strong>{" "}
+            {new Date(packag.created_at).toLocaleDateString()}
+          </li>
+        </ul>
       </div>
+
       {packag.customer_note ? (
-        <p className="portal-packages__card-note">{packag.customer_note}</p>
+        <div className="portal-packages__card-note-wrapper">
+          <strong>Customer Note:</strong>
+          <p className="portal-packages__card-note">{packag.customer_note}</p>
+        </div>
       ) : null}
     </article>
   )

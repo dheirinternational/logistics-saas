@@ -12,9 +12,10 @@ import { DheirLoader } from "@/components/ui/DheirLoader"
 
 type PortalPackageCardProps = {
   packag: Package
+  warehousesMap?: Record<number, string>
 }
 
-export function PortalPackageCard({ packag }: PortalPackageCardProps) {
+export function PortalPackageCard({ packag, warehousesMap }: PortalPackageCardProps) {
   const [images, setImages] = useState<PackageImage[]>([])
   const [loadingImages, setLoadingImages] = useState(true)
 
@@ -45,14 +46,29 @@ export function PortalPackageCard({ packag }: PortalPackageCardProps) {
       <div className="portal-packages__card-head">
         <div className="portal-packages__card-title-block">
           <h3 className="portal-packages__card-title">{packag.package_name}</h3>
-          <p className="portal-packages__card-meta">
-            Tracking: {packag.incoming_package_id}
-          </p>
         </div>
         <PortalPackageStatusBadge
           label={getPackageStatusLabel(packag.status)}
           variant={getPackageStatusVariant(packag.status)}
         />
+      </div>
+
+      <div className="portal-packages__card-body">
+        <ul className="portal-packages__details-list">
+          <li><strong>Tracking:</strong> {packag.incoming_package_id}</li>
+          <li><strong>Weight:</strong> {packag.weight} {packag.weight_unit || "kg"}</li>
+          <li><strong>Quantity:</strong> {packag.amount} {Number(packag.amount) === 1 ? "item" : "items"}</li>
+          <li><strong>Condition:</strong> <span className={`condition-${packag.condition}`}>{packag.condition}</span></li>
+          {packag.warehouse_id && warehousesMap?.[packag.warehouse_id] && (
+            <li><strong>Warehouse:</strong> {warehousesMap[packag.warehouse_id]}</li>
+          )}
+          {packag.received_at && (
+            <li><strong>Received:</strong> {new Date(packag.received_at).toLocaleDateString()}</li>
+          )}
+          {packag.stored_at && (
+            <li><strong>Stored:</strong> {new Date(packag.stored_at).toLocaleDateString()}</li>
+          )}
+        </ul>
       </div>
 
       <div className="portal-packages__card-foot">

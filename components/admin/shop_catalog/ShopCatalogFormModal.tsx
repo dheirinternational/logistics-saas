@@ -1,6 +1,7 @@
 "use client"
 
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
+import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
@@ -45,6 +46,7 @@ export function ShopCatalogFormModal({
   })
   const [selectedMedia, setSelectedMedia] = useState<AdminMediaItem[]>([])
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [uploadOpen, setUploadOpen] = useState(false)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -221,25 +223,47 @@ export function ShopCatalogFormModal({
                         className="shop-catalog-modal__image"
                       />
                     </div>
-                    <button
-                      type="button"
-                      className="portal-home__btn portal-home__btn--secondary shop-catalog-modal__image-btn"
-                      onClick={() => setPickerOpen(true)}
-                      disabled={saving}
-                    >
-                      Change image
-                    </button>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <button
+                        type="button"
+                        className="portal-home__btn portal-home__btn--secondary shop-catalog-modal__image-btn"
+                        onClick={() => setPickerOpen(true)}
+                        disabled={saving}
+                      >
+                        Change image
+                      </button>
+                      <button
+                        type="button"
+                        className="portal-home__btn portal-home__btn--primary shop-catalog-modal__image-btn"
+                        onClick={() => setUploadOpen(true)}
+                        disabled={saving}
+                      >
+                        Upload
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    className="shop-catalog-modal__picker"
-                    onClick={() => setPickerOpen(true)}
-                    disabled={saving}
-                  >
-                    <IconPhoto size={20} stroke={1.5} aria-hidden />
-                    Choose from media library
-                  </button>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button
+                      type="button"
+                      className="shop-catalog-modal__picker"
+                      onClick={() => setPickerOpen(true)}
+                      disabled={saving}
+                      style={{ flex: 1 }}
+                    >
+                      <IconPhoto size={20} stroke={1.5} aria-hidden />
+                      <span>Choose cover image</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="portal-home__btn portal-home__btn--primary"
+                      onClick={() => setUploadOpen(true)}
+                      disabled={saving}
+                      style={{ height: "48px" }}
+                    >
+                      Upload
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -336,6 +360,18 @@ export function ShopCatalogFormModal({
           }
           setSelectedMedia([photo])
           setPickerOpen(false)
+        }}
+      />
+
+      <MediaUploadModal
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onFinished={(assets) => {
+          const photo = assets.find((entry) => entry.mediaType === "photo")
+          if (photo) {
+            setSelectedMedia([photo])
+          }
+          setUploadOpen(false)
         }}
       />
     </>

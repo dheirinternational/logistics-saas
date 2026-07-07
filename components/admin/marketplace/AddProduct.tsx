@@ -5,6 +5,7 @@ import { DheirSelect } from "@/components/ui/DheirSelect"
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
 import { AdminMediaVideoLightbox } from "@/components/admin/media/AdminMediaVideoLightbox"
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
+import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
@@ -46,6 +47,7 @@ const AddProduct = () => {
     const [categories, setCategories] = useState<ProductCategory[]>([])
     const [selectedMedia, setSelectedMedia] = useState<AdminMediaItem[]>([])
     const [pickerOpen, setPickerOpen] = useState(false)
+    const [uploadOpen, setUploadOpen] = useState(false)
     const [isAddingProduct, setIsAddingProduct] = useState(false)
     const isSubmittingRef = useRef(false)
     const [fullscreenVideoSrc, setFullscreenVideoSrc] = useState<string | null>(null)
@@ -356,13 +358,22 @@ const AddProduct = () => {
                             Up to {MAX_PRODUCT_MEDIA_COUNT} per product.
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        className="portal-home__btn portal-home__btn--secondary"
-                        onClick={() => setPickerOpen(true)}
-                    >
-                        {selectedMedia.length > 0 ? "Change selection" : "Choose from library"}
-                    </button>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button
+                            type="button"
+                            className="portal-home__btn portal-home__btn--secondary"
+                            onClick={() => setPickerOpen(true)}
+                        >
+                            {selectedMedia.length > 0 ? "Change selection" : "Choose from library"}
+                        </button>
+                        <button
+                            type="button"
+                            className="portal-home__btn portal-home__btn--primary"
+                            onClick={() => setUploadOpen(true)}
+                        >
+                            Upload
+                        </button>
+                    </div>
                 </div>
 
                 {selectedMedia.length > 0 ? (
@@ -425,6 +436,15 @@ const AddProduct = () => {
                 title="Product media"
                 onClose={() => setPickerOpen(false)}
                 onConfirm={setSelectedMedia}
+            />
+
+            <MediaUploadModal
+                open={uploadOpen}
+                onClose={() => setUploadOpen(false)}
+                onFinished={(assets) => {
+                    setSelectedMedia((prev) => [...prev, ...assets])
+                    setUploadOpen(false)
+                }}
             />
 
             {fullscreenVideoSrc ? (

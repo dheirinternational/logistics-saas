@@ -3,6 +3,7 @@ import {
   MAX_PRODUCT_MEDIA_FILE_BYTES,
   MAX_PRODUCT_MEDIA_FILE_LABEL,
 } from "@/lib/products/productMediaLimits"
+import type { AdminMediaItem } from "./adminMedia"
 
 /** Pause between sequential uploads to avoid storage rate limits. */
 export const MEDIA_UPLOAD_DELAY_MS = 800
@@ -57,7 +58,7 @@ export function sleep(ms: number): Promise<void> {
  */
 export async function uploadAdminMediaFile(
   file: File,
-): Promise<{ ok: boolean; message: string }> {
+): Promise<{ ok: boolean; message: string; asset?: AdminMediaItem }> {
   const contentType = resolveContentType(file)
 
   // Step 1 — ask our API for a signed upload URL (tiny JSON request)
@@ -139,5 +140,16 @@ export async function uploadAdminMediaFile(
     }
   }
 
-  return { ok: true, message: String(regResult.message ?? "Uploaded") }
+  const assetData = regResult.data as { id: number; path: string; publicUrl: string; mediaType: "photo" | "video" }
+  const asset: AdminMediaItem = {
+    id: assetData.id,
+    name: file.name,
+    path: assetData.path,
+    publicUrl: assetData.publicUrl,
+    mediaType: assetData.mediaType,
+    sizeBytes: file.size,
+    updatedAt: new Date().toISOString(),
+  }
+
+  return { ok: true, message: String(regResult.message ?? "Uploaded"), asset }
 }

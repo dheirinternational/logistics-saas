@@ -1,6 +1,7 @@
 "use client"
 
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
+import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { DheirSelect } from "@/components/ui/DheirSelect"
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
@@ -60,6 +61,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [uploadingMedia, setUploadingMedia] = useState(false)
     const [pickerOpen, setPickerOpen] = useState(false)
+    const [uploadOpen, setUploadOpen] = useState(false)
 
     useEffect(() => {
         setDraft(toDraft(product))
@@ -455,6 +457,14 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                     >
                                         Add from library
                                     </button>
+                                    <button
+                                        type="button"
+                                        className="portal-home__btn portal-home__btn--primary"
+                                        onClick={() => setUploadOpen(true)}
+                                        disabled={uploadingMedia || images.length >= MAX_PRODUCT_MEDIA_COUNT}
+                                    >
+                                        Upload
+                                    </button>
                                 </div>
                             </div>
 
@@ -465,6 +475,17 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                 title="Add product media"
                                 onClose={() => setPickerOpen(false)}
                                 onConfirm={(items) => linkMediaFromLibrary(items.map((m) => m.id))}
+                            />
+
+                            <MediaUploadModal
+                                open={uploadOpen}
+                                onClose={() => setUploadOpen(false)}
+                                onFinished={async (assets) => {
+                                    setUploadOpen(false)
+                                    if (assets.length > 0) {
+                                        await linkMediaFromLibrary(assets.map((m) => m.id))
+                                    }
+                                }}
                             />
 
                             {images.length > 0 ? (

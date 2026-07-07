@@ -12,6 +12,7 @@ import { MAX_PRODUCT_MEDIA_FILE_LABEL } from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
 import { IconCheck, IconCloudUpload, IconX } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
+import type { AdminMediaItem } from "@/lib/media/adminMedia"
 
 type QueueStatus = "pending" | "uploading" | "done" | "error" | "skipped"
 
@@ -25,7 +26,7 @@ type QueueItem = {
 type MediaUploadModalProps = {
   open: boolean
   onClose: () => void
-  onFinished: () => void | Promise<void>
+  onFinished: (uploadedAssets: AdminMediaItem[]) => void | Promise<void>
 }
 
 function formatBytes(bytes: number) {
@@ -114,6 +115,7 @@ export function MediaUploadModal({ open, onClose, onFinished }: MediaUploadModal
 
     let succeeded = 0
     let failed = 0
+    const uploadedAssets: AdminMediaItem[] = []
 
     for (let i = 0; i < toUpload.length; i++) {
       if (abortRef.current) break
@@ -127,6 +129,9 @@ export function MediaUploadModal({ open, onClose, onFinished }: MediaUploadModal
         const result = await uploadAdminMediaFile(item.file)
         if (result.ok) {
           succeeded += 1
+          if (result.asset) {
+            uploadedAssets.push(result.asset)
+          }
           setQueue((prev) =>
             prev.map((q) =>
               q.id === item.id ? { ...q, status: "done" as const, message: result.message } : q,
@@ -157,7 +162,7 @@ export function MediaUploadModal({ open, onClose, onFinished }: MediaUploadModal
     setRunning(false)
 
     if (succeeded > 0) {
-      await onFinished()
+      await onFinished(uploadedAssets)
     }
 
     if (failed === 0 && succeeded > 0) {

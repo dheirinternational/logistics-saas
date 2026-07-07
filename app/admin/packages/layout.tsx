@@ -7,6 +7,7 @@ import Image from "next/image";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { toast } from "@/lib/ui/toast";
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal";
+import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal";
 import type { AdminMediaItem } from "@/lib/media/adminMedia";
 import { DheirLoader } from "@/components/ui/DheirLoader";
 import { IconX } from "@tabler/icons-react";
@@ -79,6 +80,7 @@ const PackageEditComponent = () => {
     const [images, setImages] = useState<PackageImage[]>([])
     const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
     const [pickerOpen, setPickerOpen] = useState(false)
+    const [uploadOpen, setUploadOpen] = useState(false)
 
     // Selected Objects
     const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
@@ -373,13 +375,22 @@ const PackageEditComponent = () => {
                                 : "Optional — choose photos or videos from the media library."}
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        className="portal-home__btn portal-home__btn--secondary"
-                        onClick={() => setPickerOpen(true)}
-                    >
-                        Choose from library
-                    </button>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button
+                            type="button"
+                            className="portal-home__btn portal-home__btn--secondary"
+                            onClick={() => setPickerOpen(true)}
+                        >
+                            Choose from library
+                        </button>
+                        <button
+                            type="button"
+                            className="portal-home__btn portal-home__btn--primary"
+                            onClick={() => setUploadOpen(true)}
+                        >
+                            Upload
+                        </button>
+                    </div>
                     {isEditing && isFetchingImages ? (
                         <DheirLoader color="var(--color-dheir-blue)" size={10} />
                     ) : null}
@@ -427,6 +438,15 @@ const PackageEditComponent = () => {
                 title="Package media"
                 onClose={() => setPickerOpen(false)}
                 onConfirm={setLibraryMedia}
+            />
+
+            <MediaUploadModal
+                open={uploadOpen}
+                onClose={() => setUploadOpen(false)}
+                onFinished={(assets) => {
+                    setLibraryMedia((prev) => [...prev, ...assets])
+                    setUploadOpen(false)
+                }}
             />
 
             <div className="admin-modal__actions">

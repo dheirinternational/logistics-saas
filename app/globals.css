@@ -5007,6 +5007,57 @@ button.portal-home__table-link {
     color: var(--color-dheir-ink);
 }
 
+.portal-packages__card-body {
+    margin-top: 12px;
+}
+
+.portal-packages__details-list {
+    margin: 0;
+    padding: 0;
+    list-style-type: disc;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--color-dheir-ink);
+}
+
+.portal-packages__details-list li {
+    line-height: 1.5;
+}
+
+.portal-packages__details-list li strong {
+    color: var(--color-dheir-ink);
+    font-weight: 600;
+}
+
+.portal-packages__card-note-wrapper {
+    margin-top: 12px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+}
+
+.portal-packages__card-note-wrapper strong {
+    color: var(--color-dheir-ink);
+    font-weight: 600;
+}
+
+.portal-packages__card-note-wrapper .portal-packages__card-note {
+    margin-top: 4px;
+}
+
+.condition-good {
+    color: #15803d;
+    font-weight: 600;
+}
+
+.condition-damaged {
+    color: var(--color-dheir-red);
+    font-weight: 600;
+}
+
 .portal-packages__empty,
 .portal-packages__loading {
     padding: 40px 20px;

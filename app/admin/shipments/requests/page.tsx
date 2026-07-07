@@ -1,6 +1,7 @@
 "use client"
 
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
+import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import SearchComponent from '@/components/admin/shipments/requests/SearchComponent'
 import { Table } from '@/components/admin/table/Table'
@@ -41,6 +42,7 @@ const Page: NextPage = () => {
     const [weightUnit, setWeightUnit] = useState<"kg" | "cbm">("kg")
     const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
     const [pickerOpen, setPickerOpen] = useState(false)
+    const [uploadOpen, setUploadOpen] = useState(false)
 
 
 
@@ -442,16 +444,26 @@ const Page: NextPage = () => {
                           Choose photos or videos from the media library (required).
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        className="portal-home__btn portal-home__btn--secondary"
-                        disabled={isCreatingShipmentData}
-                        onClick={() => setPickerOpen(true)}
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          Choose from library <FaImage />
-                        </span>
-                      </button>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button
+                          type="button"
+                          className="portal-home__btn portal-home__btn--secondary"
+                          disabled={isCreatingShipmentData}
+                          onClick={() => setPickerOpen(true)}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            Choose from library <FaImage />
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          className="portal-home__btn portal-home__btn--primary"
+                          disabled={isCreatingShipmentData}
+                          onClick={() => setUploadOpen(true)}
+                        >
+                          Upload
+                        </button>
+                      </div>
                     </div>
 
                     {libraryMedia.length > 0 ? (
@@ -486,6 +498,15 @@ const Page: NextPage = () => {
                     title="Shipment media"
                     onClose={() => setPickerOpen(false)}
                     onConfirm={setLibraryMedia}
+                  />
+
+                  <MediaUploadModal
+                    open={uploadOpen}
+                    onClose={() => setUploadOpen(false)}
+                    onFinished={(assets) => {
+                      setLibraryMedia((prev) => [...prev, ...assets])
+                      setUploadOpen(false)
+                    }}
                   />
 
                   <div className="admin-modal__actions">

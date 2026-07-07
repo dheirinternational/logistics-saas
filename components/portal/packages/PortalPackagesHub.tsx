@@ -23,6 +23,7 @@ export function PortalPackagesHub() {
   const [tab, setTab] = useState<TabId>(initialTab)
   const [packages, setPackages] = useState<Package[]>([])
   const [incoming, setIncoming] = useState<IncomingPackage[]>([])
+  const [warehousesMap, setWarehousesMap] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("")
@@ -43,8 +44,11 @@ export function PortalPackagesHub() {
       fetch("/api/incoming-packages/user", { credentials: "include" }).then(
         (r) => r.json().then((d) => ({ ok: r.ok, ...d })),
       ),
+      fetch("/api/warehouses", { credentials: "include" }).then((r) =>
+        r.json().then((d) => ({ ok: r.ok, ...d })),
+      ),
     ])
-      .then(([pkgRes, incRes]) => {
+      .then(([pkgRes, incRes, whRes]) => {
         if (cancelled) return
         if (!pkgRes.ok) toast.error(pkgRes.message ?? "Could not load packages")
         else setPackages(pkgRes.data ?? [])
@@ -55,6 +59,13 @@ export function PortalPackagesHub() {
               (x: IncomingPackage) => x.status === "expected",
             ),
           )
+        if (whRes.ok) {
+          const mapping: Record<number, string> = {}
+          for (const w of (whRes.data ?? [])) {
+            mapping[w.id] = w.name
+          }
+          setWarehousesMap(mapping)
+        }
       })
       .catch(() => {
         if (!cancelled) toast.error("Could not load packages")
@@ -196,7 +207,13 @@ export function PortalPackagesHub() {
               </Link>
             </div>
           ) : (
-            filteredPackages.map((p) => <PortalPackageCard key={p.id} packag={p} />)
+            filteredPackages.map((p) => (
+              <PortalPackageCard
+                key={p.id}
+                packag={p}
+                warehousesMap={warehousesMap}
+              />
+            ))
           )
         ) : filteredIncoming.length === 0 ? (
           <div className="portal-packages__empty">
@@ -207,7 +224,11 @@ export function PortalPackagesHub() {
           </div>
         ) : (
           filteredIncoming.map((p) => (
-            <PortalIncomingPackageCard key={p.id} packag={p} />
+            <PortalIncomingPackageCard
+              key={p.id}
+              packag={p}
+              warehousesMap={warehousesMap}
+            />
           ))
         )}
       </div>
