@@ -15,6 +15,8 @@ import { useEffect, useMemo, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 import { toast } from "@/lib/ui/toast"
 
+import { IconCopy } from "@tabler/icons-react"
+
 export default function WarehouseAddressPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [memberCode, setMemberCode] = useState("")
@@ -50,6 +52,11 @@ export default function WarehouseAddressPage() {
     if (!selected || !memberCode) return ""
     return formatWarehouseCopyText(selected, memberCode)
   }, [selected, memberCode])
+
+  const handleCopyField = (label: string, val: string) => {
+    navigator.clipboard.writeText(val)
+    toast.success(`${label} copied`)
+  }
 
   if (loading) {
     return (
@@ -102,9 +109,35 @@ export default function WarehouseAddressPage() {
             Address breakdown
           </h2>
           {getWarehouseAddressDetails(selected, memberCode).map((row) => (
-            <div key={row.label} className="portal-packages__detail-row">
-              <span className="portal-packages__detail-label">{row.label}</span>
-              <span>{row.value}</span>
+            <div
+              key={row.label}
+              className="portal-packages__detail-row"
+              style={{ alignItems: "center", minHeight: 40, flexWrap: "nowrap", gap: 16 }}
+            >
+              <span className="portal-packages__detail-label" style={{ flexShrink: 0 }}>{row.label}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 8, overflow: "hidden" }}>
+                <span className="font-mono text-sm select-all" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {row.value}
+                </span>
+                <button
+                  type="button"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 4,
+                    color: "var(--color-dheir-blue)",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                  onClick={() => handleCopyField(row.label, row.value)}
+                  title={`Copy ${row.label}`}
+                >
+                  <IconCopy size={16} stroke={1.5} />
+                </button>
+              </span>
             </div>
           ))}
         </section>

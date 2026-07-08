@@ -8,7 +8,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { DheirConfirmDialog } from "@/components/ui/DheirConfirmDialog"
 
 type TableProps<T> = {
@@ -75,6 +75,10 @@ export function Table <T,>({
       pageIndex: 0,
       pageSize,
     })
+
+    useEffect(() => {
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+    }, [globalFilter])
 
     const [rowSelection, setRowSelection] = useState({})
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
