@@ -9087,3 +9087,21 @@ a.portal-packages__card--link:focus-visible {
     justify-content: center;
     padding: 2rem;
 }
+
+@media (max-width: 1023px) {
+    html, body {
+        width: 100vw;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    .portal-shell {
+        width: 100vw;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    .portal-shell__content {
+        width: 100vw;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+}

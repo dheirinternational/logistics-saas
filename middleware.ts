@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
     "/customer/marketplace",
     "/customer/orders",
     "/customer/verify_order_payment"
-  ].some((prefix) => pathname.startsWith(prefix))
+  ].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
 
   if (isShopPath) {
     const customerUrl = request.nextUrl.clone()

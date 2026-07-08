@@ -37,13 +37,32 @@ function formatNaira(amount: number) {
   }).format(amount)
 }
 
+import { PortalMediaGalleryModal } from "@/components/portal/PortalMediaGalleryModal"
+
 export function PortalHomeOngoingSection({
   shipments,
 }: PortalHomeOngoingSectionProps) {
   const [selected, setSelected] = useState(shipments[0]?.trackingNumber ?? "")
+  const [galleryOpen, setGalleryOpen] = useState(false)
+  const [galleryIndex, setGalleryIndex] = useState(0)
 
   const active =
     shipments.find((s) => s.trackingNumber === selected) ?? shipments[0] ?? null
+
+  const handleSelect = (trackingNumber: string) => {
+    setSelected(trackingNumber)
+    setTimeout(() => {
+      const detailEl = document.getElementById("ongoing-detail-aside")
+      if (detailEl) {
+        detailEl.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+    }, 50)
+  }
+
+  const openGallery = (idx: number) => {
+    setGalleryIndex(idx)
+    setGalleryOpen(true)
+  }
 
   return (
     <section className="portal-home__panel" aria-labelledby="ongoing-heading">
@@ -56,9 +75,9 @@ export function PortalHomeOngoingSection({
             Shipments currently on the way to you
           </p>
         </div>
-        <Link href="/customer/orders_shipped" className="portal-home__text-link">
+        <a href="/customer/orders_shipped" className="portal-home__text-link">
           View all
-        </Link>
+        </a>
       </div>
 
       {shipments.length === 0 ? (
@@ -78,7 +97,7 @@ export function PortalHomeOngoingSection({
                   <button
                     type="button"
                     className={`portal-home__ongoing-item${isSelected ? " is-selected" : ""}`}
-                    onClick={() => setSelected(item.trackingNumber)}
+                    onClick={() => handleSelect(item.trackingNumber)}
                   >
                     <span className="portal-home__ongoing-item-icon" aria-hidden>
                       <IconTruck size={20} stroke={1.5} />
@@ -103,7 +122,7 @@ export function PortalHomeOngoingSection({
           </ul>
 
           {active ? (
-            <aside className="portal-home__ongoing-detail">
+            <aside id="ongoing-detail-aside" className="portal-home__ongoing-detail">
               <p className="portal-home__ongoing-detail-label">On the way</p>
               <h3 className="portal-home__ongoing-detail-title">
                 {active.trackingNumber}
@@ -163,7 +182,11 @@ export function PortalHomeOngoingSection({
                             preload="metadata"
                           />
                         ) : (
-                          <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="relative block w-full h-full">
+                          <button
+                            type="button"
+                            onClick={() => openGallery(idx)}
+                            className="relative block w-full h-full border-0 p-0 m-0 background-none cursor-pointer"
+                          >
                             <Image
                               src={img.imageUrl}
                               alt="Shipment media"
@@ -172,7 +195,7 @@ export function PortalHomeOngoingSection({
                               sizes="64px"
                               unoptimized
                             />
-                          </a>
+                          </button>
                         )}
                       </figure>
                     ))}
@@ -182,6 +205,15 @@ export function PortalHomeOngoingSection({
             </aside>
           ) : null}
         </div>
+      )}
+
+      {active && active.images && (
+        <PortalMediaGalleryModal
+          isOpen={galleryOpen}
+          onClose={() => setGalleryOpen(false)}
+          images={active.images}
+          initialIndex={galleryIndex}
+        />
       )}
     </section>
   )
