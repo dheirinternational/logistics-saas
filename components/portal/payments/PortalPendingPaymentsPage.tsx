@@ -92,7 +92,9 @@ export function PortalPendingPaymentsPage() {
   return (
     <div className="portal-account portal-payments portal-payments--pending">
       <header className="portal-account__header">
-        <PortalPageBack href="/customer" label="Home" />
+        <div style={{ display: "block", marginBottom: 12 }}>
+          <PortalPageBack href="/customer" label="Home" />
+        </div>
         <h1 className="portal-account__title">
           Pending payments
           <PortalPolicyInfoButton
@@ -200,6 +202,38 @@ export function PortalPendingPaymentsPage() {
                     </div>
                   ) : null}
                 </dl>
+
+                {((payment as any).origin_warehouse_name || (payment as any).shipment_weight) && (
+                  <div className="mt-3 pt-3 border-t border-[var(--color-dheir-border)]">
+                    <p className="text-xs font-semibold text-dheir-ink mb-1.5">Shipment Details</p>
+                    <ul className="space-y-1 text-xs text-dheir-muted list-none p-0 m-0">
+                      {(payment as any).origin_warehouse_name && (
+                        <li className="flex items-start gap-1.5">
+                          <span className="font-semibold text-dheir-ink">Route:</span>
+                          <span>{(payment as any).origin_warehouse_name} → {(payment as any).destination_warehouse_name}</span>
+                        </li>
+                      )}
+                      {((payment as any).shipment_weight || (payment as any).shipment_weight === 0) && (
+                        <li className="flex items-center gap-1.5">
+                          <span className="font-semibold text-dheir-ink">Weight / Volume:</span>
+                          <span>{Number((payment as any).shipment_weight).toFixed(2)} {(payment as any).shipment_weight_unit || "kg"}</span>
+                        </li>
+                      )}
+                      {(payment as any).shipment_channel && (
+                        <li className="flex items-center gap-1.5">
+                          <span className="font-semibold text-dheir-ink">Channel:</span>
+                          <span className="capitalize">{(payment as any).shipment_channel}</span>
+                        </li>
+                      )}
+                      {(payment as any).shipment_note && (
+                        <li className="flex items-start gap-1.5">
+                          <span className="font-semibold text-dheir-ink">Note:</span>
+                          <span>{(payment as any).shipment_note}</span>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
 
                 <div className="portal-payments__card-actions">
                   {payment.status === "awaiting_confirmation" ? (

@@ -140,6 +140,10 @@ export function PortalHomeOngoingSection({
               </div>
               <dl className="portal-home__ongoing-meta">
                 <div>
+                  <dt>Tracking ID</dt>
+                  <dd style={{ fontFamily: "monospace", userSelect: "all" }}>{active.trackingNumber}</dd>
+                </div>
+                <div>
                   <dt>Channel</dt>
                   <dd>{active.channel?.toUpperCase() || "-"}</dd>
                 </div>

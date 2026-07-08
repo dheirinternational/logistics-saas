@@ -94,6 +94,10 @@ export default function TrackShipmentsPage() {
 
               <div className="portal-packages__card-details mt-4 pt-4 border-t border-[var(--color-dheir-border)]">
                 <ul className="space-y-2 text-sm text-dheir-muted list-none p-0 m-0">
+                  <li className="flex items-center gap-2">
+                    <span className="font-semibold text-dheir-ink">Tracking ID:</span>
+                    <span className="font-mono bg-[var(--color-dheir-border)] px-1.5 py-0.5 rounded text-xs select-all text-dheir-ink">{s.tracking_number}</span>
+                  </li>
                   {s.origin_warehouse_name && s.destination_warehouse_name && (
                     <li className="flex items-start gap-2">
                       <span className="font-semibold text-dheir-ink">Route:</span>
