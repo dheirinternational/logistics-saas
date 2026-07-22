@@ -10,6 +10,8 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { DheirLoader } from "@/components/ui/DheirLoader"
 
+import { PortalPackageTimeline } from "@/components/portal/packages/PortalPackageTimeline"
+
 type PortalPackageCardProps = {
   packag: Package
   warehousesMap?: Record<number, string>
@@ -41,6 +43,8 @@ export function PortalPackageCard({ packag, warehousesMap }: PortalPackageCardPr
     }
   }, [packag.id])
 
+  const whName = packag.warehouse_id && warehousesMap?.[packag.warehouse_id] ? warehousesMap[packag.warehouse_id] : ""
+
   return (
     <article className="portal-packages__card">
       <div className="portal-packages__card-head">
@@ -59,16 +63,22 @@ export function PortalPackageCard({ packag, warehousesMap }: PortalPackageCardPr
           <li><strong>Weight:</strong> {packag.weight} {packag.weight_unit || "kg"}</li>
           <li><strong>Quantity:</strong> {packag.amount} {Number(packag.amount) === 1 ? "item" : "items"}</li>
           <li><strong>Condition:</strong> <span className={`condition-${packag.condition}`}>{packag.condition}</span></li>
-          {packag.warehouse_id && warehousesMap?.[packag.warehouse_id] && (
-            <li><strong>Warehouse:</strong> {warehousesMap[packag.warehouse_id]}</li>
-          )}
-          {packag.received_at && (
-            <li><strong>Received:</strong> {new Date(packag.received_at).toLocaleDateString()}</li>
-          )}
-          {packag.stored_at && (
-            <li><strong>Stored:</strong> {new Date(packag.stored_at).toLocaleDateString()}</li>
+          {whName && (
+            <li><strong>Warehouse:</strong> {whName}</li>
           )}
         </ul>
+
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-dheir-border)" }}>
+          <PortalPackageTimeline
+            packag={{
+              status: packag.status,
+              created_at: packag.created_at,
+              stored_at: packag.stored_at,
+              received_at: packag.received_at,
+              warehouse_name: whName,
+            }}
+          />
+        </div>
       </div>
 
       <div className="portal-packages__card-foot">

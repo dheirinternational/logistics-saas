@@ -15,12 +15,11 @@ import { toast } from "@/lib/ui/toast"
 
 type TabId = "warehouse" | "incoming"
 
+import { IconChevronRight } from "@tabler/icons-react"
+
 export function PortalPackagesHub() {
   const searchParams = useSearchParams()
-  const initialTab =
-    searchParams.get("tab") === "incoming" ? "incoming" : "warehouse"
 
-  const [tab, setTab] = useState<TabId>(initialTab)
   const [packages, setPackages] = useState<Package[]>([])
   const [incoming, setIncoming] = useState<IncomingPackage[]>([])
   const [warehousesMap, setWarehousesMap] = useState<Record<number, string>>({})
@@ -79,32 +78,47 @@ export function PortalPackagesHub() {
     }
   }, [])
 
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { "": packages.length }
-    for (const p of packages) {
-      counts[p.status] = (counts[p.status] ?? 0) + 1
-    }
-    return counts
-  }, [packages])
+  const filterOptions = useMemo(() => {
+    return [
+      { value: "", label: "All packages", count: packages.length + incoming.length },
+      { value: "expected", label: "Not in warehouse yet", count: incoming.length },
+      { value: "stored", label: "At warehouse", count: packages.filter((p) => p.status === "stored").length },
+      { value: "requested_for", label: "Ready to ship", count: packages.filter((p) => p.status === "requested_for").length },
+      { value: "assigned_to_shipment", label: "In shipment", count: packages.filter((p) => p.status === "assigned_to_shipment").length },
+      { value: "delivered", label: "Delivered", count: packages.filter((p) => p.status === "delivered").length },
+    ]
+  }, [packages, incoming])
 
-  const filteredPackages = packages.filter((p) => {
-    const q = search.toLowerCase()
-    const matchesSearch =
-      !q ||
-      p.incoming_package_id.toLowerCase().includes(q) ||
-      p.package_name.toLowerCase().includes(q)
-    const matchesStatus = !status || p.status === status
-    return matchesSearch && matchesStatus
-  })
+  const filteredPackages = useMemo(() => {
+    return packages.filter((p) => {
+      const q = search.toLowerCase()
+      const matchesSearch =
+        !q ||
+        p.incoming_package_id.toLowerCase().includes(q) ||
+        p.package_name.toLowerCase().includes(q)
+      const matchesStatus = !status || p.status === status
+      return matchesSearch && matchesStatus
+    })
+  }, [packages, search, status])
 
-  const filteredIncoming = incoming.filter((p) => {
-    const q = search.toLowerCase()
-    return (
-      !q ||
-      p.incoming_tracking_number.toLowerCase().includes(q) ||
-      p.declared_item_name.toLowerCase().includes(q)
-    )
-  })
+  const filteredIncoming = useMemo(() => {
+    return incoming.filter((p) => {
+      const q = search.toLowerCase()
+      const matchesSearch =
+        !q ||
+        p.incoming_tracking_number.toLowerCase().includes(q) ||
+        p.declared_item_name.toLowerCase().includes(q)
+      const matchesStatus = !status || status === "expected"
+      return matchesSearch && matchesStatus
+    })
+  }, [incoming, search, status])
+
+  const showIncoming = status === "" || status === "expected"
+  const showStored = status !== "expected"
+
+  const totalResultsCount =
+    (showIncoming ? filteredIncoming.length : 0) +
+    (showStored ? filteredPackages.length : 0)
 
   return (
     <div className="portal-packages">
@@ -125,72 +139,33 @@ export function PortalPackagesHub() {
             <Link key={link.id} href={link.href} className="portal-packages__quick-link">
               <Icon size={18} stroke={1.5} aria-hidden />
               <span>{link.label}</span>
+              <IconChevronRight size={14} stroke={1.5} style={{ opacity: 0.7 }} />
             </Link>
           )
         })}
       </div>
 
-      <div className="portal-packages__tabs" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === "warehouse"}
-          className={`portal-packages__tab${tab === "warehouse" ? " is-active" : ""}`}
-          onClick={() => setTab("warehouse")}
-        >
-          At warehouse
-          <span className="portal-packages__tab-count">{packages.length}</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === "incoming"}
-          className={`portal-packages__tab${tab === "incoming" ? " is-active" : ""}`}
-          onClick={() => setTab("incoming")}
-        >
-          On the way
-          <span className="portal-packages__tab-count">{incoming.length}</span>
-        </button>
+      <div className="portal-packages__capsule-container" role="tablist">
+        {filterOptions.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            role="tab"
+            aria-selected={status === opt.value}
+            className={`portal-packages__capsule-pill${status === opt.value ? " is-active" : ""}`}
+            onClick={() => setStatus(opt.value)}
+          >
+            <span>{opt.label}</span>
+            <span className="portal-packages__capsule-count">{opt.count}</span>
+          </button>
+        ))}
       </div>
-
-      {tab === "warehouse" ? (
-        <div className="portal-packages__pipeline" role="list">
-          {PACKAGE_FILTER_OPTIONS.map((opt) => {
-            const count =
-              opt.value === ""
-                ? packages.length
-                : (statusCounts[opt.value] ?? 0)
-            return (
-              <button
-                key={opt.value || "all"}
-                type="button"
-                role="listitem"
-                className={`portal-packages__pipeline-chip${status === opt.value ? " is-active" : ""}`}
-                onClick={() => setStatus(opt.value)}
-              >
-                <span className="portal-packages__pipeline-value">{count}</span>
-                <span className="portal-packages__pipeline-label">{opt.label}</span>
-              </button>
-            )
-          })}
-        </div>
-      ) : null}
 
       <PortalPackagesToolbar
         search={search}
         onSearchChange={setSearch}
-        status={tab === "warehouse" ? status : ""}
-        onStatusChange={setStatus}
-        statusOptions={
-          tab === "warehouse"
-            ? PACKAGE_FILTER_OPTIONS
-            : [{ value: "", label: "On the way" }]
-        }
-        searchPlaceholder={
-          tab === "warehouse"
-            ? "Search tracking or package name…"
-            : "Search tracking or item name…"
-        }
+        hideStatusFilter={true}
+        searchPlaceholder="Search by tracking number or package name…"
       />
 
       <div className="portal-packages__list">
@@ -198,38 +173,32 @@ export function PortalPackagesHub() {
           <div className="portal-packages__loading">
             <DheirLoader color="var(--color-dheir-blue)" size={12} />
           </div>
-        ) : tab === "warehouse" ? (
-          filteredPackages.length === 0 ? (
-            <div className="portal-packages__empty">
-              <p>No packages match your filters.</p>
-              <Link href="/customer/add_package" className="portal-packages__text-link">
-                Add your first incoming package
-              </Link>
-            </div>
-          ) : (
-            filteredPackages.map((p) => (
-              <PortalPackageCard
-                key={p.id}
-                packag={p}
-                warehousesMap={warehousesMap}
-              />
-            ))
-          )
-        ) : filteredIncoming.length === 0 ? (
+        ) : totalResultsCount === 0 ? (
           <div className="portal-packages__empty">
-            <p>No packages on the way right now.</p>
+            <p>No packages found matching your criteria.</p>
             <Link href="/customer/add_package" className="portal-packages__text-link">
-              Register expected tracking
+              Add your first package
             </Link>
           </div>
         ) : (
-          filteredIncoming.map((p) => (
-            <PortalIncomingPackageCard
-              key={p.id}
-              packag={p}
-              warehousesMap={warehousesMap}
-            />
-          ))
+          <>
+            {showIncoming &&
+              filteredIncoming.map((p) => (
+                <PortalIncomingPackageCard
+                  key={p.id}
+                  packag={p}
+                  warehousesMap={warehousesMap}
+                />
+              ))}
+            {showStored &&
+              filteredPackages.map((p) => (
+                <PortalPackageCard
+                  key={p.id}
+                  packag={p}
+                  warehousesMap={warehousesMap}
+                />
+              ))}
+          </>
         )}
       </div>
     </div>

@@ -17,12 +17,6 @@ export type PackagesQuickLink = {
 
 export const PACKAGES_QUICK_LINKS: PackagesQuickLink[] = [
   {
-    id: "add",
-    label: "Add package",
-    href: "/customer/add_package",
-    icon: IconPackageImport,
-  },
-  {
     id: "ship",
     label: "Ship my packages",
     href: "/customer/request_mail",

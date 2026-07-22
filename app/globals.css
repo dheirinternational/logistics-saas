@@ -9105,3 +9105,58 @@ a.portal-packages__card--link:focus-visible {
         overflow-x: hidden;
     }
 }
+
+.portal-packages__capsule-container {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+    overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+}
+
+.portal-packages__capsule-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-dheir-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 200ms var(--ease-dheir-out);
+}
+
+.portal-packages__capsule-pill:hover {
+    color: var(--color-dheir-ink);
+}
+
+.portal-packages__capsule-pill.is-active {
+    background: #ffffff;
+    color: var(--color-dheir-ink);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.portal-packages__capsule-count {
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--color-dheir-muted);
+    padding: 1px 6px;
+    border-radius: 999px;
+}
+
+.portal-packages__capsule-pill.is-active .portal-packages__capsule-count {
+    background: var(--color-dheir-blue-muted);
+    color: var(--color-dheir-blue);
+}

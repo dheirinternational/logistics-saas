@@ -36,8 +36,8 @@ const pages = [
 export default function ShipmentsLayouts({children}: {children:ReactNode}){
 
     const pathName = usePathname()
-    const { isModalActive, setIsModalActive, closeModal } = useEditModalStore()
-    const { setSelectedPackage, setReadOnly } = usePackageStore()
+        const { isModalActive, setIsModalActive, closeModal } = useEditModalStore()
+    const { selectedPackage, setSelectedPackage, setReadOnly, resetSelectedPackage } = usePackageStore()
     const { resetSelectedShipment } = useShipmentStore()
 
 
@@ -68,6 +68,9 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
 
     // Set Selected Edit component based on page
     const EditComponent = () => {
+        if (selectedPackage) {
+            return <IncomingPackageEditComponent/>
+        }
         switch(currentPage){
             case "expected_shipments" :
                 return <IncomingPackageEditComponent/>
@@ -80,15 +83,18 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
 
     const closeShipmentsModal = () => {
         closeModal()
+        resetSelectedPackage()
         if (currentPage === "accepted_requests") {
             resetSelectedShipment()
         }
     }
 
+    const isPackageModal = selectedPackage !== null || currentPage === "expected_shipments"
+
     const modalTitle =
-        currentPage === "accepted_requests" ? "View shipment" : "Add packages"
+        !isPackageModal && currentPage === "accepted_requests" ? "View shipment" : "Add packages"
     const modalSubtitle =
-        currentPage === "accepted_requests"
+        !isPackageModal && currentPage === "accepted_requests"
             ? "View shipment details and update status."
             : "Add packages to warehouse with photos and details."
 
@@ -123,7 +129,7 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
                         })}
                     </div>
 
-                    {currentPage === "expected_shipments" ? (
+                    {currentPage === "expected_shipments" || currentPage === "shipment_requests" || currentPage === "accepted_requests" ? (
                         <button
                             type="button"
                             className="portal-home__btn portal-home__btn--primary"

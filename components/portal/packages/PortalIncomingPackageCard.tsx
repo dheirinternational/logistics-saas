@@ -5,6 +5,8 @@ import {
 } from "@/lib/portal/packageStatus"
 import type { IncomingPackage } from "@/types/entityTypeDef"
 
+import { PortalPackageTimeline } from "@/components/portal/packages/PortalPackageTimeline"
+
 type PortalIncomingPackageCardProps = {
   packag: IncomingPackage
   warehousesMap?: Record<number, string>
@@ -14,6 +16,8 @@ export function PortalIncomingPackageCard({
   packag,
   warehousesMap,
 }: PortalIncomingPackageCardProps) {
+  const whName = packag.warehouse_id && warehousesMap?.[Number(packag.warehouse_id)] ? warehousesMap[Number(packag.warehouse_id)] : ""
+
   return (
     <article className="portal-packages__card">
       <div className="portal-packages__card-head">
@@ -41,16 +45,22 @@ export function PortalIncomingPackageCard({
             <strong>Quantity:</strong> {packag.declared_item_quantity}{" "}
             {Number(packag.declared_item_quantity) === 1 ? "item" : "items"}
           </li>
-          {packag.warehouse_id && warehousesMap?.[Number(packag.warehouse_id)] && (
+          {whName && (
             <li>
-              <strong>Warehouse:</strong> {warehousesMap[Number(packag.warehouse_id)]}
+              <strong>Warehouse:</strong> {whName}
             </li>
           )}
-          <li>
-            <strong>Registered At:</strong>{" "}
-            {new Date(packag.created_at).toLocaleDateString()}
-          </li>
         </ul>
+
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-dheir-border)" }}>
+          <PortalPackageTimeline
+            packag={{
+              status: packag.status,
+              created_at: packag.created_at,
+              warehouse_name: whName,
+            }}
+          />
+        </div>
       </div>
 
       {packag.customer_note ? (
