@@ -9160,3 +9160,14 @@ a.portal-packages__card--link:focus-visible {
     background: var(--color-dheir-blue-muted);
     color: var(--color-dheir-blue);
 }
+
+/* Hide number input spinners globally */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
