@@ -2,8 +2,8 @@
 
 export const SITE_CONTACT = {
   email: "support@dheirinternational.com",
-  phone: "+234 705 913 6729",
-  phoneHref: "tel:+2347059136729",
+  phone: "+18813405374",
+  phoneHref: "tel:+18813405374",
 } as const
 
 export const SITE_SOCIAL = {
