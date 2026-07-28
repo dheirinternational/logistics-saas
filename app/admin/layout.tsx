@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
+import { PortalOcrScannerFloatingButton } from "@/components/admin/ocr/PortalOcrScannerFloatingButton"
 
 export const metadata: Metadata = {
   robots: {
@@ -49,14 +50,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (!session || session.role !== "admin") {
     redirect("/auth/login")
   }
-    
-    return (
-        <div className="admin-shell">
-            <SideBar />
-            <div className="admin-shell__content">
-                <Header />
-                <main className="admin-shell__main">{children}</main>
-            </div>
-        </div>
-    )
+
+  return (
+    <div className="admin-shell">
+      <SideBar />
+      <div className="admin-shell__content">
+        <Header />
+        <main className="admin-shell__main">{children}</main>
+      </div>
+      <PortalOcrScannerFloatingButton />
+    </div>
+  )
 }
