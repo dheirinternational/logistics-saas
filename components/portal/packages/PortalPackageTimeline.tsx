@@ -43,17 +43,32 @@ export function PortalPackageTimeline({ packag }: PortalPackageTimelineProps) {
     },
     {
       label: "Release requested",
-      description: "Prepared for shipment consolidation",
+      description: "Consolidation complete & shipment registered",
       status: isRequested ? (isShipped ? "completed" : "current") : "pending",
     },
     {
-      label: "In transit",
-      description: "On the way to Lagos, Nigeria",
+      label: "Shipment departed warehouse",
+      description: "Shipment departed from warehouse to airport",
+      status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
+    },
+    {
+      label: "Airport transit",
+      description: "Shipment departed from international airport",
+      status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
+    },
+    {
+      label: "Customs clearance",
+      description: "Shipment arrived destination port and under customs process",
+      status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
+    },
+    {
+      label: "Arrived Nigeria warehouse",
+      description: "Shipment arrived at Nigeria warehouse",
       status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
     },
     {
       label: "Delivered",
-      description: "Package received & verified",
+      description: "Package signed & verified",
       status: isDelivered ? "completed" : "pending",
     },
   ]

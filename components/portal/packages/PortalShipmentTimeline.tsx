@@ -41,13 +41,13 @@ export function PortalShipmentTimeline({ shipment }: PortalShipmentTimelineProps
   const currentRank = statusRank[status] ?? 0
 
   const milestones = [
-    { offsetMs: 4 * 60 * 60 * 1000, text: "[shipment leave warehouse to airport ]", minRank: 2 },
-    { offsetMs: 9 * 60 * 60 * 1000, text: "发往机场", minRank: 2 },
+    { offsetMs: 4 * 60 * 60 * 1000, text: "[Shipment departed from warehouse to airport]", minRank: 2 },
+    { offsetMs: 9 * 60 * 60 * 1000, text: "[Shipment in transit to international airport]", minRank: 2 },
     { offsetMs: 20 * 60 * 60 * 1000, text: "[Shipment arrived at international airport]", minRank: 3 },
     { offsetMs: 21 * 60 * 60 * 1000, text: "[Shipment departed from international airport]", minRank: 3 },
     { offsetMs: (3 * 24 + 4) * 60 * 60 * 1000, text: "[Goods arrived at Lagos warehouse]", minRank: 4 },
-    { offsetMs: (3 * 24 + 5) * 60 * 60 * 1000, text: "货物已到达目的地清关中 [shipment arrived destination port and under custom process]", minRank: 4 },
-    { offsetMs: (3 * 24 + 7) * 60 * 60 * 1000, text: "货物已经到达目的地仓库 [shipment arrived at Nigeria warehouse ]", minRank: 5 },
+    { offsetMs: (3 * 24 + 5) * 60 * 60 * 1000, text: "[Shipment arrived destination port and under customs process]", minRank: 4 },
+    { offsetMs: (3 * 24 + 7) * 60 * 60 * 1000, text: "[Shipment arrived at Nigeria warehouse]", minRank: 5 },
     { offsetMs: (3 * 24 + 9) * 60 * 60 * 1000, text: "Signed", minRank: 6, isSigned: true }
   ]
 
