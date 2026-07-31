@@ -239,6 +239,7 @@ const Page: NextPage = () => {
                 importedData={data}
                 columnDef={incomingPackageColumnDef}
                 globalFilter={filterValues.search}
+                pageSize={15}
                 enableRowSelection
                 getRowId={(row) => String(row.id)}
                 onDeleteSelected={deleteIncomingPackages}

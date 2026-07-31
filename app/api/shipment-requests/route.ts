@@ -175,7 +175,7 @@ export async function GET(){
         }
 
         const res = await pool.query(`
-            SELECT * FROM shipment_requests
+            SELECT * FROM shipment_requests ORDER BY id DESC
         `)
 
         return NextResponse.json({

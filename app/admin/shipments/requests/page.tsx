@@ -384,11 +384,7 @@ const Page: NextPage = () => {
                         name="total_price"
                         className="dheir-input"
                         value={totalPrice}
-                        onChange={(e) => {
-                          let { value } = e.currentTarget
-                          value = value.replace(/^0+(?=\\d)/, "")
-                          setTotalPrice(String(Number(value).toFixed(2)))
-                        }}
+                        onChange={(e) => setTotalPrice(e.target.value)}
                         min={0}
                         step="0.01"
                         required
@@ -404,11 +400,7 @@ const Page: NextPage = () => {
                         name="total_weight"
                         className="dheir-input"
                         value={totalWeight}
-                        onChange={(e) => {
-                          let { value } = e.currentTarget
-                          value = value.replace(/^0+(?=\\d)/, "")
-                          setTotalWeight(String(Number(value).toFixed(2)))
-                        }}
+                        onChange={(e) => setTotalWeight(e.target.value)}
                         min={0}
                         step="0.01"
                         required

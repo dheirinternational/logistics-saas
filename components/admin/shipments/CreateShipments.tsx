@@ -5,7 +5,7 @@ import InputComponent from "./InputComponent"
 import { IoCreate } from "react-icons/io5"
 import { Shipment } from "@/types/entityTypeDef"
 
-type ShipmentValues = Omit<Shipment, "id" | "status" | "created_at" | "tracking_number" | "payment_time" | "user_id" | "paid_for">
+type ShipmentValues = Omit<Shipment, "id" | "status" | "created_at" | "tracking_number" | "payment_time" | "user_id" | "paid_for" | "images">
 
 const CreateShipments = () => {
 

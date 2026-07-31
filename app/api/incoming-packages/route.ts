@@ -179,7 +179,7 @@ export async function GET(){
         }
 
         const res = await pool.query(`
-            SELECT * FROM incoming_packages   
+            SELECT * FROM incoming_packages ORDER BY id DESC
         `)
 
         return NextResponse.json({

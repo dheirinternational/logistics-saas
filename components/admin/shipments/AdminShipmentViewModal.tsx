@@ -168,12 +168,44 @@ export function AdminShipmentViewModal() {
         </div>
       </div>
 
-      {selectedShipment.shipping_note ? (
+      {(selectedShipment.shipment_note || selectedShipment.shipping_note) ? (
         <div className="portal-packages__field">
           <span className="portal-packages__field-label">Customer note</span>
           <p className="admin-shipment-view__note">
-            {selectedShipment.shipping_note}
+            {selectedShipment.shipment_note || selectedShipment.shipping_note}
           </p>
+        </div>
+      ) : null}
+
+      {selectedShipment.images && selectedShipment.images.length > 0 ? (
+        <div className="portal-packages__field">
+          <span className="portal-packages__field-label">Attached media</span>
+          <div className="admin-uploader__previews" style={{ marginTop: "0.5rem" }}>
+            {selectedShipment.images.map((img, idx) => {
+              const url = (img as any).image_url || (img as any).imageUrl || ""
+              const type = (img as any).media_type || (img as any).mediaType || ""
+              const isVideo = type === "video" || /\.(mp4|webm|mov)$/i.test(url)
+
+              return (
+                <div key={idx} className="admin-uploader__preview" style={{ position: "relative", width: 80, height: 80, borderRadius: 8, overflow: "hidden", border: "1px solid var(--color-dheir-border, #e5e7eb)" }}>
+                  {isVideo ? (
+                    <video
+                      src={url}
+                      muted
+                      controls
+                      playsInline
+                      className="object-cover"
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  ) : (
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      <img src={url} alt={`Shipment media ${idx + 1}`} className="object-cover" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </a>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
       ) : null}
 

@@ -40,13 +40,16 @@ export type Shipment = {
     destination_warehouse_id: string  // FK -> Warehouse(id) 
     status: ShipmentStatus
     channel: ShippingType
-    shipping_note: string
+    shipping_note?: string
+    shipment_note?: string
     total_cost: number
     total_weight?: number
+    total_weight_unit?: "kg" | "cbm"
     payment_time: "before" | "after"
     paid_for: boolean
     created_at: string
     user_id: number // FK -> Users(id)
+    images?: ShipmentImage[]
 }
 
 export type Warehouse = {

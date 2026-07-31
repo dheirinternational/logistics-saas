@@ -60,10 +60,10 @@ export async function POST(req: NextRequest) {
 
         const package_ids = data.package_ids?.toString().split(",")
 
-        if(Number(data.price) < 1){
+        if (Number(data.price) < 1 || Number(data.total_weight) < 0.01) {
             return NextResponse.json({
                 success: false,
-                message: "Invalid price input"
+                message: "Invalid price or weight input",
             }, { status: 400 })
         }
 
@@ -186,30 +186,57 @@ export async function GET(){
         if(!session){
             return NextResponse.json({
                 success: false,
-                messgae: "Unauthorized"
+                message: "Unauthorized"
             }, {status: 401})
         }
 
         if(session.role !== "admin"){
             return NextResponse.json({
                 success: false,
-                messgae: "Forbidden"
+                message: "Forbidden"
             }, {status: 403})
         } 
 
         const res = await pool.query(`
-            SELECT * FROM shipments
+            SELECT * FROM shipments ORDER BY id DESC
         `)
+
+        const shipmentIds = res.rows.map(r => Number(r.id))
+        const imagesMap: Record<number, { image_url: string; media_type?: string }[]> = {}
+        
+        if (shipmentIds.length > 0) {
+            const imagesRes = await pool.query(
+                `SELECT shipment_id, image_url, media_type 
+                 FROM shipment_images 
+                 WHERE shipment_id = ANY($1)`,
+                [shipmentIds]
+            )
+            for (const r of imagesRes.rows) {
+                const sid = Number(r.shipment_id)
+                if (!imagesMap[sid]) {
+                    imagesMap[sid] = []
+                }
+                imagesMap[sid].push({
+                    image_url: r.image_url,
+                    media_type: r.media_type || "photo"
+                })
+            }
+        }
+
+        const data = res.rows.map(row => ({
+            ...row,
+            images: imagesMap[Number(row.id)] ?? []
+        }))
 
         return NextResponse.json({
             success: true,
-            data: res.rows
+            data
         })
 
     }
 
     catch(err){
-        console.error("Error Creating Shipment Requests", err)
+        console.error("Error Fetching Shipments", err)
         return NextResponse.json({
             success: false,
             message: "Something went wrong"
