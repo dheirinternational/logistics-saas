@@ -27,6 +27,36 @@ const ORIGINAL_REVIEWS: MarketingReview[] = [
     review: "It was fast and they are reliable,customers service is top notch",
     rating: 5,
   },
+  {
+    id: 5,
+    name: "Oluwatoyin",
+    review: "D_HAIR International... No scam zone here, tested and trusted and I must commend their swift customer service",
+    rating: 5,
+  },
+  {
+    id: 6,
+    name: "owoyemi oluwaseun",
+    review: "I had an amazing experience with them and I'm definitely returning again and again",
+    rating: 5,
+  },
+  {
+    id: 7,
+    name: "Rukayat Adio",
+    review: "D_HEIR International has a strong reputation for delivering goods safely, protects valuable goods, they operates legally and reduces financial risk.",
+    rating: 5,
+  },
+  {
+    id: 8,
+    name: "Lilyyy Emily",
+    review: "Very good customer service",
+    rating: 5,
+  },
+  {
+    id: 9,
+    name: "GLORIA NWOSU",
+    review: "I recommend",
+    rating: 5,
+  },
 ]
 
 export async function getMarketingReviews(
