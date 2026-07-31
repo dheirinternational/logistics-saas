@@ -22,6 +22,7 @@ export async function GET(req: Request){
               s.total_weight as shipment_weight,
               s.total_weight_unit as shipment_weight_unit,
               s.shipment_note as shipment_note,
+              s.package_ids as shipment_package_ids,
               w_origin.name as origin_warehouse_name,
               w_dest.name as destination_warehouse_name
             FROM payments p

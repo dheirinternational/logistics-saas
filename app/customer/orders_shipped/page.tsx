@@ -10,6 +10,7 @@ import { toast } from "@/lib/ui/toast"
 import Image from "next/image"
 
 import { PortalMediaGalleryModal } from "@/components/portal/PortalMediaGalleryModal"
+import { PortalShipmentTimeline } from "@/components/portal/packages/PortalShipmentTimeline"
 
 export default function TrackShipmentsPage() {
   const [search, setSearch] = useState("")
@@ -77,58 +78,118 @@ export default function TrackShipmentsPage() {
         ) : (
           filtered.map((s: any) => (
             <article key={s.tracking_number} className="portal-packages__card">
-              <div className="portal-packages__card-head">
-                <div className="portal-packages__card-title-block">
-                  <h3 className="portal-packages__card-title">
-                    {s.tracking_number}
-                  </h3>
-                  <p className="portal-packages__card-meta">
-                    {s.channel?.toUpperCase()} · {s.payment_time} payment
-                  </p>
+              <div className="portal-packages__card-head" style={{ flexDirection: "column", alignItems: "flex-start", gap: "0.75rem", width: "100%" }}>
+                <div className="flex w-full justify-between items-center" style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+                  <span className="text-xs font-semibold text-dheir-muted">
+                    Pay in Nigeria DHEIR receipt NO.: <span className="font-mono text-dheir-blue select-all" style={{ color: "var(--color-dheir-blue)" }}>{s.tracking_number}</span>
+                  </span>
+                  <PortalPackageStatusBadge
+                    label={s.status.replaceAll("_", " ")}
+                    variant="blue"
+                  />
                 </div>
-                <PortalPackageStatusBadge
-                  label={s.status.replaceAll("_", " ")}
-                  variant="blue"
-                />
               </div>
 
               <div className="portal-packages__card-details mt-4 pt-4 border-t border-[var(--color-dheir-border)]">
-                <ul className="space-y-2 text-sm text-dheir-muted list-none p-0 m-0">
-                  <li className="flex items-center gap-2">
-                    <span className="font-semibold text-dheir-ink">Tracking ID:</span>
-                    <span className="font-mono bg-[var(--color-dheir-border)] px-1.5 py-0.5 rounded text-xs select-all text-dheir-ink">{s.tracking_number}</span>
-                  </li>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", fontSize: "0.875rem" }}>
+                  {/* Left Column */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <div>
+                      <span className="text-dheir-muted">tracking: </span>
+                      <span className="font-semibold text-dheir-ink capitalize">{s.channel || "skyjet"}</span>
+                    </div>
+                    <div>
+                      <span className="text-dheir-muted">Weight: </span>
+                      <span className="font-semibold text-dheir-ink">
+                        {s.total_weight_unit === "cbm" ? "0.00" : Number(s.total_weight || 0).toFixed(2)}KG
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-dheir-muted">Unit price: </span>
+                      <span className="font-semibold text-dheir-ink">
+                        {s.total_weight_unit === "cbm" 
+                          ? "₦0.00" 
+                          : s.total_weight && Number(s.total_weight) > 0
+                            ? new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 2 }).format(Number(s.total_cost) / Number(s.total_weight))
+                            : "₦0.00"
+                        }
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-dheir-muted">Additional: </span>
+                      <span className="font-semibold text-dheir-ink">₦0.00</span>
+                    </div>
+                    <div>
+                      <span className="text-dheir-muted">Time: </span>
+                      <span className="font-semibold text-dheir-ink">{new Date(s.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <div>
+                      <span className="text-dheir-muted">Total: </span>
+                      <span className="font-semibold text-dheir-ink">{s.package_ids?.length || 1}</span>
+                    </div>
+                    {s.total_weight_unit === "cbm" ? (
+                      <>
+                        <div>
+                          <span className="text-dheir-muted">Cube: </span>
+                          <span className="font-semibold text-dheir-ink">{Number(s.total_weight || 0).toFixed(3)}m3</span>
+                        </div>
+                        <div>
+                          <span className="text-dheir-muted">Unit price: </span>
+                          <span className="font-semibold text-dheir-ink">
+                            {s.total_weight && Number(s.total_weight) > 0
+                              ? new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 2 }).format(Number(s.total_cost) / Number(s.total_weight))
+                              : "₦0.00"
+                            }
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div>
+                        <span className="text-dheir-muted">Fuel: </span>
+                        <span className="font-semibold text-dheir-ink">0.00%</span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-dheir-muted">Total: </span>
+                      <span className="font-semibold text-dheir-ink text-dheir-blue" style={{ fontSize: "1rem" }}>
+                        {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(s.total_cost || 0)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-dheir-muted">outbound: </span>
+                      <span className="font-semibold text-dheir-ink">{new Date(s.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed var(--color-dheir-border)", display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8rem" }}>
                   {s.origin_warehouse_name && s.destination_warehouse_name && (
-                    <li className="flex items-start gap-2">
-                      <span className="font-semibold text-dheir-ink">Route:</span>
-                      <span>{s.origin_warehouse_name} → {s.destination_warehouse_name}</span>
-                    </li>
+                    <div>
+                      <span className="font-semibold text-dheir-ink">Route: </span>
+                      <span className="text-dheir-muted">{s.origin_warehouse_name} → {s.destination_warehouse_name}</span>
+                    </div>
                   )}
-                  {(s.total_weight || s.total_weight === 0) && (
-                    <li className="flex items-center gap-2">
-                      <span className="font-semibold text-dheir-ink">Weight / Volume:</span>
-                      <span>{Number(s.total_weight).toFixed(2)} {s.total_weight_unit || "kg"}</span>
-                    </li>
-                  )}
-                  {s.total_cost && (
-                    <li className="flex items-center gap-2">
-                      <span className="font-semibold text-dheir-ink">Fee:</span>
-                      <span>{new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(s.total_cost)}</span>
-                    </li>
-                  )}
-                  <li className="flex items-center gap-2">
-                    <span className="font-semibold text-dheir-ink">Payment Status:</span>
+                  <div>
+                    <span className="font-semibold text-dheir-ink">Payment Status: </span>
                     <span className={s.paid_for ? "text-green-600 font-medium" : "text-amber-600 font-medium"}>
                       {s.paid_for ? "Paid" : "Unpaid / Pending"}
                     </span>
-                  </li>
+                  </div>
                   {s.shipment_note && (
-                    <li className="flex items-start gap-2">
-                      <span className="font-semibold text-dheir-ink">Note:</span>
-                      <span>{s.shipment_note}</span>
-                    </li>
+                    <div>
+                      <span className="font-semibold text-dheir-ink">Note: </span>
+                      <span className="text-dheir-muted">{s.shipment_note}</span>
+                    </div>
                   )}
-                </ul>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-dheir-border)" }}>
+                <PortalShipmentTimeline shipment={s} />
               </div>
 
               {s.images && s.images.length > 0 && (

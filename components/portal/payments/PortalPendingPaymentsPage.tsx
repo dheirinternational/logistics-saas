@@ -165,75 +165,120 @@ export function PortalPendingPaymentsPage() {
           {filtered.map((payment) => (
             <li key={payment.id}>
               <article className="portal-payments__card portal-payments__card--pending">
-                <div className="portal-payments__card-head">
-                  <p className="portal-payments__tracking portal-payments__tracking--title">
-                    {payment.shipment_tracking_number}
-                  </p>
-                  <span
-                    className={`portal-payments__status portal-payments__status--${payment.status === "awaiting_confirmation" ? "awaiting" : "pending"}`}
-                  >
-                    {paymentStatusLabel(payment.status)}
-                  </span>
+                <div className="portal-payments__card-head" style={{ flexDirection: "column", alignItems: "flex-start", gap: "0.75rem", width: "100%" }}>
+                  <div className="flex w-full justify-between items-center" style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+                    <span className="text-xs font-semibold text-dheir-muted">
+                      Pay in Nigeria DHEIR receipt NO.: <span className="font-mono text-dheir-blue select-all" style={{ color: "var(--color-dheir-blue)" }}>{payment.shipment_tracking_number}</span>
+                    </span>
+                    <span
+                      className={`portal-payments__status portal-payments__status--${payment.status === "awaiting_confirmation" ? "awaiting" : "pending"}`}
+                    >
+                      {paymentStatusLabel(payment.status)}
+                    </span>
+                  </div>
                 </div>
 
                 <p className="portal-payments__ref portal-payments__ref--sub">
                   Ref {payment.transaction_ref}
                 </p>
 
-                <dl className="portal-payments__meta">
-                  <div>
-                    <dt>Amount due</dt>
-                    <dd className="portal-payments__amount tabular-nums">
-                      {formatPaymentAmount(payment.amount)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Created</dt>
-                    <dd>
-                      <time dateTime={payment.created_at}>
-                        {formatPaymentDate(payment.created_at)}
-                      </time>
-                    </dd>
-                  </div>
-                  {payment.channel ? (
-                    <div>
-                      <dt>Method</dt>
-                      <dd>{payment.channel}</dd>
+                <div className="portal-packages__card-details mt-4 pt-4 border-t border-[var(--color-dheir-border)]">
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", fontSize: "0.875rem" }}>
+                    {/* Left Column */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                      <div>
+                        <span className="text-dheir-muted">tracking: </span>
+                        <span className="font-semibold text-dheir-ink capitalize">{(payment as any).shipment_channel || "skyjet"}</span>
+                      </div>
+                      <div>
+                        <span className="text-dheir-muted">Weight: </span>
+                        <span className="font-semibold text-dheir-ink">
+                          {(payment as any).shipment_weight_unit === "cbm" ? "0.00" : Number((payment as any).shipment_weight || 0).toFixed(2)}KG
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-dheir-muted">Unit price: </span>
+                        <span className="font-semibold text-dheir-ink">
+                          {(payment as any).shipment_weight_unit === "cbm" 
+                            ? "₦0.00" 
+                            : (payment as any).shipment_weight && Number((payment as any).shipment_weight) > 0
+                              ? formatPaymentAmount(Number(payment.amount) / Number((payment as any).shipment_weight))
+                              : "₦0.00"
+                          }
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-dheir-muted">Additional: </span>
+                        <span className="font-semibold text-dheir-ink">₦0.00</span>
+                      </div>
+                      <div>
+                        <span className="text-dheir-muted">Time: </span>
+                        <span className="font-semibold text-dheir-ink">{new Date(payment.created_at).toLocaleDateString()}</span>
+                      </div>
                     </div>
-                  ) : null}
-                </dl>
 
-                {((payment as any).origin_warehouse_name || (payment as any).shipment_weight) && (
-                  <div className="mt-3 pt-3 border-t border-[var(--color-dheir-border)]">
-                    <p className="text-xs font-semibold text-dheir-ink mb-1.5">Shipment Details</p>
-                    <ul className="space-y-1 text-xs text-dheir-muted list-none p-0 m-0">
-                      {(payment as any).origin_warehouse_name && (
-                        <li className="flex items-start gap-1.5">
-                          <span className="font-semibold text-dheir-ink">Route:</span>
-                          <span>{(payment as any).origin_warehouse_name} → {(payment as any).destination_warehouse_name}</span>
-                        </li>
+                    {/* Right Column */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                      <div>
+                        <span className="text-dheir-muted">Total: </span>
+                        <span className="font-semibold text-dheir-ink">{((payment as any).shipment_package_ids ?? []).length || 1}</span>
+                      </div>
+                      {(payment as any).shipment_weight_unit === "cbm" ? (
+                        <>
+                          <div>
+                            <span className="text-dheir-muted">Cube: </span>
+                            <span className="font-semibold text-dheir-ink">{Number((payment as any).shipment_weight || 0).toFixed(3)}m3</span>
+                          </div>
+                          <div>
+                            <span className="text-dheir-muted">Unit price: </span>
+                            <span className="font-semibold text-dheir-ink">
+                              {(payment as any).shipment_weight && Number((payment as any).shipment_weight) > 0
+                                ? formatPaymentAmount(Number(payment.amount) / Number((payment as any).shipment_weight))
+                                : "₦0.00"
+                              }
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <span className="text-dheir-muted">Fuel: </span>
+                          <span className="font-semibold text-dheir-ink">0.00%</span>
+                        </div>
                       )}
-                      {((payment as any).shipment_weight || (payment as any).shipment_weight === 0) && (
-                        <li className="flex items-center gap-1.5">
-                          <span className="font-semibold text-dheir-ink">Weight / Volume:</span>
-                          <span>{Number((payment as any).shipment_weight).toFixed(2)} {(payment as any).shipment_weight_unit || "kg"}</span>
-                        </li>
-                      )}
-                      {(payment as any).shipment_channel && (
-                        <li className="flex items-center gap-1.5">
-                          <span className="font-semibold text-dheir-ink">Channel:</span>
-                          <span className="capitalize">{(payment as any).shipment_channel}</span>
-                        </li>
-                      )}
-                      {(payment as any).shipment_note && (
-                        <li className="flex items-start gap-1.5">
-                          <span className="font-semibold text-dheir-ink">Note:</span>
-                          <span>{(payment as any).shipment_note}</span>
-                        </li>
-                      )}
-                    </ul>
+                      <div>
+                        <span className="text-dheir-muted">Total: </span>
+                        <span className="font-semibold text-dheir-ink text-dheir-blue" style={{ fontSize: "1rem" }}>
+                          {formatPaymentAmount(payment.amount)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-dheir-muted">outbound: </span>
+                        <span className="font-semibold text-dheir-ink">{new Date(payment.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
                   </div>
-                )}
+
+                  <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed var(--color-dheir-border)", display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8rem" }}>
+                    {(payment as any).origin_warehouse_name && (
+                      <div>
+                        <span className="font-semibold text-dheir-ink">Route: </span>
+                        <span className="text-dheir-muted">{(payment as any).origin_warehouse_name} → {(payment as any).destination_warehouse_name}</span>
+                      </div>
+                    )}
+                    {payment.channel && (
+                      <div>
+                        <span className="font-semibold text-dheir-ink">Method: </span>
+                        <span className="text-dheir-muted">{payment.channel}</span>
+                      </div>
+                    )}
+                    {(payment as any).shipment_note && (
+                      <div>
+                        <span className="font-semibold text-dheir-ink">Note: </span>
+                        <span className="text-dheir-muted">{(payment as any).shipment_note}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 <div className="portal-payments__card-actions">
                   {payment.status === "awaiting_confirmation" ? (
