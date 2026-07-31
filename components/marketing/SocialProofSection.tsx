@@ -4,15 +4,9 @@ import { BlurReveal } from "@/components/auth/BlurReveal"
 
 const REVIEW_IMAGES = [
   "/reviews/kehinde.png",
-  "/reviews/oluwatoyin.png",
-  "/reviews/pearl.png",
   "/reviews/dikeh.png",
   "/reviews/goldie.png",
   "/reviews/david.png",
-  "/reviews/owoyemi.png",
-  "/reviews/rukayat.png",
-  "/reviews/lily.png",
-  "/reviews/gloria.png",
 ]
 
 function ImageReviewCard({ src }: { src: string }) {
@@ -29,7 +23,7 @@ function ImageReviewCard({ src }: { src: string }) {
 
 export function SocialProofSection({ reviews }: { reviews?: any }) {
   // Loop the 10 images 2 times for a total of 20 items in the marquee
-  const loop = [...REVIEW_IMAGES, ...REVIEW_IMAGES]
+  const loop = [...REVIEW_IMAGES, ...REVIEW_IMAGES, ...REVIEW_IMAGES, ...REVIEW_IMAGES, ...REVIEW_IMAGES]
 
   return (
     <section
