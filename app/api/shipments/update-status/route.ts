@@ -92,7 +92,7 @@ export async function PUT(req: NextRequest){
         }
 
         return NextResponse.json({
-            success: false,
+            success: true,
             message: `Shipment status successfully updated`
         })
     }
