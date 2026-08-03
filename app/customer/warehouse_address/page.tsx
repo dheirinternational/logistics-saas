@@ -92,7 +92,8 @@ export default function WarehouseAddressPage() {
         </div>
       ) : null}
 
-      {selected && copyText ? (
+      {/* Hidden per request, but preserved for future toggle */}
+      {/* {selected && copyText ? (
         <PortalHomeWarehouseCard
           warehouseName={selected.name}
           copyText={copyText}
@@ -101,7 +102,7 @@ export default function WarehouseAddressPage() {
         <div className="portal-packages__empty">
           <p>No warehouse configured yet. Contact support.</p>
         </div>
-      )}
+      )} */}
 
       {selected && memberCode ? (
         <section className="portal-packages__detail-grid" aria-labelledby="warehouse-breakdown-heading">
