@@ -2,12 +2,12 @@ import type { TablerIcon } from "@tabler/icons-react"
 import {
   IconCalculator,
   IconPackage,
-  IconShoppingBag,
+  IconClipboardList,
   IconTruckDelivery,
   IconUser,
 } from "@tabler/icons-react"
 
-export type PortalNavId = "home" | "packages" | "quote" | "shop" | "account"
+export type PortalNavId = "home" | "packages" | "quote" | "shop" | "account" | "procurement"
 
 export type PortalNavItem = {
   id: PortalNavId
@@ -25,6 +25,7 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
     href: "/customer/packages",
     icon: IconPackage,
   },
+  { id: "procurement", label: "Procurement", href: "/customer/procurement", icon: IconClipboardList },
   { id: "quote", label: "Quote", href: "/customer/estimate", icon: IconCalculator },
   { id: "account", label: "Account", href: "/customer/profile", icon: IconUser },
 ]
@@ -89,6 +90,10 @@ export function resolvePortalNavId(pathname: string): PortalNavId {
 
   if (pathname.startsWith("/customer/estimate")) {
     return "quote"
+  }
+
+  if (pathname.startsWith("/customer/procurement")) {
+    return "procurement"
   }
 
   if (matchesAnyPrefix(pathname, SHOP_PREFIXES)) {
