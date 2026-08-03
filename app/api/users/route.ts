@@ -26,7 +26,8 @@ export async function GET(){
             SELECT u.id, u.email, u.first_name, u.last_name, u.phone, u.role, u.created_at, c.code 
             FROM users u
             JOIN customers c ON u.id = c.user_id
-        `)
+            WHERE u.id != $1
+        `, [session.user_id])
         
         return NextResponse.json({
             success: true,
