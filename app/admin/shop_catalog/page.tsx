@@ -2,8 +2,8 @@
 
 import { ShopCatalogFormModal } from "@/components/admin/shop_catalog/ShopCatalogFormModal"
 import { Table } from "@/components/admin/table/Table"
-import { DheirConfirmDialog } from "@/components/ui/DheirConfirmDialog"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRConfirmDialog } from "@/components/ui/DHEIRConfirmDialog"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import type { ShopCatalogItem } from "@/lib/shop/shopCatalog"
 import { toast } from "@/lib/ui/toast"
 import type { ProductCategory } from "@/types/entityTypeDef"
@@ -163,7 +163,7 @@ export default function ShopCatalogAdminPage() {
 
         {loading ? (
           <div className="portal-home__panel portal-home__loader">
-            <DheirLoader color="var(--color-dheir-blue)" size={12} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : (
           <>
@@ -216,7 +216,7 @@ export default function ShopCatalogAdminPage() {
         />
       ) : null}
 
-      <DheirConfirmDialog
+      <DHEIRConfirmDialog
         open={Boolean(itemToDelete)}
         onClose={() => {
           if (!deleting) setItemToDelete(null)

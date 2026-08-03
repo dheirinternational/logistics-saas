@@ -2,7 +2,7 @@
 
 import { Table } from "@/components/admin/table/Table"
 import SearchComponent from "@/components/admin/users/SearchComponent"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { User } from "@/types/entityTypeDef"
 import { createColumnHelper } from "@tanstack/react-table"
 import { IconUser, IconUserShield, IconUsers, IconUsersGroup } from "@tabler/icons-react"
@@ -151,7 +151,7 @@ const Page: NextPage = () => {
 
             {isDataLoading ? (
                 <div className="portal-home__panel portal-home__loader">
-                    <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                    <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
                 </div>
             ) : (
                 <>

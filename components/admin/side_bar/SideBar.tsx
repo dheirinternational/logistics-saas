@@ -25,10 +25,11 @@ export const SideBar = () => {
 
     const fetchBadges = async () => {
       try {
-        const [ordersRes, shipmentsRes, manualPaymentsRes] = await Promise.all([
+        const [ordersRes, shipmentsRes, manualPaymentsRes, inboxRes] = await Promise.all([
           fetch("/api/orders/count", { credentials: "include" }),
           fetch("/api/shipments/count", { credentials: "include" }),
           fetch("/api/manual-payments/admin/count", { credentials: "include" }),
+          fetch("/api/inbox/unread-count", { credentials: "include" }),
         ])
 
         const nextBadges: Record<string, number> = {}
@@ -49,6 +50,12 @@ export const SideBar = () => {
           const manualJson = await manualPaymentsRes.json()
           const awaiting = Number(manualJson?.data?.count ?? 0)
           nextBadges["/admin/payments/confirmations"] = awaiting
+        }
+
+        if (inboxRes.ok) {
+          const inboxJson = await inboxRes.json()
+          const count = Number(inboxJson?.data?.count ?? 0)
+          nextBadges["/admin/inbox"] = count
         }
 
         if (isMounted) setBadges(nextBadges)
@@ -104,7 +111,7 @@ export const SideBar = () => {
         <div className="admin-sidebar__head">
           <Link href="/admin" className="admin-sidebar__brand">
             <Image
-              src="/Dheir colored.png"
+              src="/DHEIR colored.png"
               alt=""
               width={36}
               height={36}

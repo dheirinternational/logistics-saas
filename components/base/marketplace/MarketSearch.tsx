@@ -8,7 +8,7 @@ import { useCartStore } from "@/store/cartStore"
 import Image from "next/image"
 import { toast } from "@/lib/ui/toast"
 import { Product } from "@/types/entityTypeDef"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 
 const MarketSearch = () => {
 
@@ -80,7 +80,7 @@ const MarketSearch = () => {
         {/* Logo */}
         <figure className="h-13 w-13 bg-amber-50 relative rounded-full z-100">
             <Image 
-            src={`/Dheir-logo.png`}
+            src={`/DHEIR-logo.png`}
             alt="company logo"
             fill
             className="object-cover dheir-logo-img dheir-logo-img--invert"
@@ -112,7 +112,7 @@ const MarketSearch = () => {
                 {
                     isFetchingSearchResult ? 
                         <div className="center-items py-5">
-                            <DheirLoader color="orange" size={8}/>
+                            <DHEIRLoader color="orange" size={8}/>
                         </div>
                     : (!searchQuery.trim() ? ( 
                         <p className="text-dark/50 mt-4 italic">Search products...</p> 

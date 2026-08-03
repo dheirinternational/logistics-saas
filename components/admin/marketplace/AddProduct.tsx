@@ -1,7 +1,7 @@
 "use client"
 
-import { DheirLoader } from "@/components/ui/DheirLoader"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
 import { AdminMediaVideoLightbox } from "@/components/admin/media/AdminMediaVideoLightbox"
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
@@ -217,7 +217,7 @@ const AddProduct = () => {
 
                 <label className="portal-packages__field">
                     <span className="portal-packages__field-label">Category</span>
-                    <DheirSelect
+                    <DHEIRSelect
                         name="category_id"
                         value={String(productValues.category_id || "")}
                         onChange={(e) =>
@@ -231,7 +231,7 @@ const AddProduct = () => {
                                 {cat.name}
                             </option>
                         ))}
-                    </DheirSelect>
+                    </DHEIRSelect>
                 </label>
 
                 <label className="portal-packages__field">
@@ -304,7 +304,7 @@ const AddProduct = () => {
 
                 <label className="portal-packages__field">
                     <span className="portal-packages__field-label">Unit</span>
-                    <DheirSelect
+                    <DHEIRSelect
                         name="weight_unit"
                         value={productValues.weight_unit}
                         onChange={(e) =>
@@ -317,12 +317,12 @@ const AddProduct = () => {
                     >
                         <option value="kg">KG</option>
                         <option value="cbm">CBM</option>
-                    </DheirSelect>
+                    </DHEIRSelect>
                 </label>
 
                 <label className="portal-packages__field">
                     <span className="portal-packages__field-label">Featured</span>
-                    <DheirSelect
+                    <DHEIRSelect
                         name="is_featured"
                         value={String(productValues.is_featured)}
                         onChange={(e) =>
@@ -331,7 +331,7 @@ const AddProduct = () => {
                     >
                         <option value="false">No</option>
                         <option value="true">Yes</option>
-                    </DheirSelect>
+                    </DHEIRSelect>
                 </label>
 
                 <label className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
@@ -459,7 +459,7 @@ const AddProduct = () => {
                 <button type="submit" className="portal-home__btn portal-home__btn--primary" disabled={isAddingProduct}>
                     {isAddingProduct ? (
                         <>
-                            <DheirLoader color="#fff" size={10} />
+                            <DHEIRLoader color="#fff" size={10} />
                             Saving…
                         </>
                     ) : (

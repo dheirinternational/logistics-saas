@@ -12,10 +12,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { FaGlobe, FaImage, FaPlus } from "react-icons/fa";
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast";
 import { IconX } from "@tabler/icons-react"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { AdminShipmentViewModal } from "@/components/admin/shipments/AdminShipmentViewModal"
 
 const pages = [
@@ -335,7 +335,7 @@ const IncomingPackageEditComponent = () => {
 
                         <label className="portal-packages__field">
                             <span className="portal-packages__field-label">Warehouse</span>
-                            <DheirSelect
+                            <DHEIRSelect
                                 name="warehouse_id"
                                 value={String(selectedPackage.warehouse_id ?? "")}
                                 onChange={(e) => setPackageWarehouse(Number(e.target.value))}
@@ -347,7 +347,7 @@ const IncomingPackageEditComponent = () => {
                                         {w.name}
                                     </option>
                                 ))}
-                            </DheirSelect>
+                            </DHEIRSelect>
                         </label>
 
                         <label className="portal-packages__field">
@@ -394,7 +394,7 @@ const IncomingPackageEditComponent = () => {
 
                         <label className="portal-packages__field">
                             <span className="portal-packages__field-label">Unit</span>
-                            <DheirSelect
+                            <DHEIRSelect
                                 name="weight_unit"
                                 value={selectedPackage.weight_unit ?? "kg"}
                                 onChange={handleSelectedPackageSelect}
@@ -402,7 +402,7 @@ const IncomingPackageEditComponent = () => {
                             >
                                 <option value="kg">KG</option>
                                 <option value="cbm">CBM</option>
-                            </DheirSelect>
+                            </DHEIRSelect>
                         </label>
 
                         <label className="portal-packages__field">
@@ -533,7 +533,7 @@ const IncomingPackageEditComponent = () => {
                                 disabled={isUploadingPackage}
                             >
                                 {isUploadingPackage ? (
-                                    <DheirLoader color="#fff" size={10} />
+                                    <DHEIRLoader color="#fff" size={10} />
                                 ) : (
                                     "Add package"
                                 )}

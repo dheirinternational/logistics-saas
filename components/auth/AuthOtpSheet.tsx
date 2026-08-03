@@ -4,7 +4,7 @@ import { dheirEase } from "@/lib/motion/dheir"
 import { AnimatePresence, motion } from "framer-motion"
 import { IconX } from "@tabler/icons-react"
 import { useCallback, useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 type AuthOtpSheetProps = {
@@ -224,7 +224,7 @@ export function AuthOtpSheet({
               onClick={verifyOtp}
             >
               {isVerifyingEmail ? (
-                <DheirLoader color="#fff" size={20} />
+                <DHEIRLoader color="#fff" size={20} />
               ) : (
                 "Verify and continue"
               )}

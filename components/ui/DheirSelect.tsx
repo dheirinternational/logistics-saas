@@ -3,16 +3,16 @@
 import { IconChevronDown } from "@tabler/icons-react"
 import type { SelectHTMLAttributes } from "react"
 
-export type DheirSelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
+export type DHEIRSelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
   /** Toolbar / filter height (44px); default matches text inputs (52px). */
   compact?: boolean
 }
 
-export function DheirSelect({
+export function DHEIRSelect({
   className = "",
   compact = false,
   ...props
-}: DheirSelectProps) {
+}: DHEIRSelectProps) {
   return (
     <div
       className={`dheir-select-wrap${compact ? " dheir-select-wrap--compact" : ""}`}

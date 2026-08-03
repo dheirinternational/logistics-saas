@@ -19,7 +19,7 @@ import Link from "next/link"
 import { resolvePostAuthEntry } from "@/lib/auth/postAuthRedirect"
 import { useRouter } from "next/navigation"
 import { ChangeEvent, FormEvent, useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 type AuthView = "login" | "forgot-password"
@@ -229,7 +229,7 @@ export default function LoginPage() {
                   className="dheir-btn-primary"
                 >
                   {isLoading ? (
-                    <DheirLoader color="#fff" size={20} />
+                    <DHEIRLoader color="#fff" size={20} />
                   ) : (
                     "Log in"
                   )}
@@ -297,7 +297,7 @@ export default function LoginPage() {
                   onClick={handlePasswordChangeLink}
                 >
                   {isSendingPasswordEmail ? (
-                    <DheirLoader color="#fff" size={20} />
+                    <DHEIRLoader color="#fff" size={20} />
                   ) : (
                     "Send reset link"
                   )}

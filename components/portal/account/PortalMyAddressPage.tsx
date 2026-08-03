@@ -9,7 +9,7 @@ import {
 import type { Address } from "@/types/entityTypeDef"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 type AddressState = Omit<Address, "id" | "created_at" | "user_id">
@@ -162,7 +162,7 @@ export function PortalMyAddressPage() {
   if (loading) {
     return (
       <div className="portal-account portal-account--centered">
-        <DheirLoader color="var(--color-dheir-blue)" size={12} />
+        <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
       </div>
     )
   }
@@ -259,7 +259,7 @@ export function PortalMyAddressPage() {
             disabled={isUploadingAddress}
           >
             {isUploadingAddress ? (
-              <DheirLoader color="#fff" size={8} />
+              <DHEIRLoader color="#fff" size={8} />
             ) : isAddressExisting ? (
               "Update address"
             ) : (

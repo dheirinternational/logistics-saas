@@ -3,7 +3,7 @@
 import MonnifyPaymentButton from "@/components/base/MonnifyPaymentBtn"
 import { PortalPageBack } from "@/components/portal/PortalPageBack"
 import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import {
   formatPaymentAmount,
@@ -143,7 +143,7 @@ export function PortalPendingPaymentsPage() {
 
       {loading ? (
         <div className="portal-packages__loading flex justify-center py-16">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : filtered.length === 0 ? (
         <div className="portal-packages__empty portal-payments__empty">

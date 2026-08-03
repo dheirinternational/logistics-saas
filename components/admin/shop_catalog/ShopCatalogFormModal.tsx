@@ -2,8 +2,8 @@
 
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
 import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
-import { DheirLoader } from "@/components/ui/DheirLoader"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import type { ShopCatalogItem } from "@/lib/shop/shopCatalog"
 import { toast } from "@/lib/ui/toast"
@@ -191,7 +191,7 @@ export function ShopCatalogFormModal({
                 <span className="portal-packages__field-label">
                   Link to product category (optional)
                 </span>
-                <DheirSelect
+                <DHEIRSelect
                   value={values.category_id === "" ? "" : String(values.category_id)}
                   disabled={saving}
                   onChange={(e) =>
@@ -207,7 +207,7 @@ export function ShopCatalogFormModal({
                       {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
                     </option>
                   ))}
-                </DheirSelect>
+                </DHEIRSelect>
               </label>
 
               <div className="portal-packages__field">
@@ -333,7 +333,7 @@ export function ShopCatalogFormModal({
                 disabled={saving}
               >
                 {saving ? (
-                  <DheirLoader color="#fff" size={10} />
+                  <DHEIRLoader color="#fff" size={10} />
                 ) : isEditing ? (
                   "Save changes"
                 ) : (

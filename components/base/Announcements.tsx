@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { HiSpeakerWave } from "react-icons/hi2";
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast";
 
 
@@ -53,7 +53,7 @@ export const Announcements = () => {
                 <div className={`flex gap-2 whitespace-nowrap ${!isDataFeching && "announcements-scrollbar"}`}>
                     {
                         isDataFeching &&
-                        <DheirLoader size={10} color="white"/>
+                        <DHEIRLoader size={10} color="white"/>
                     }
                     {
                         announcements.map((announcement) => 

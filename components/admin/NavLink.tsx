@@ -23,6 +23,9 @@ export default function NavLink({ name, path, icon: Icon, badgeCount }: NavLinkP
     >
       <Icon size={22} stroke={1.5} aria-hidden />
       <span>{name}</span>
+      {name === "Inbox" && (
+        <span className="sidebar-beta-badge">Beta</span>
+      )}
       {badgeCount !== undefined ? (
         <span className="admin-sidebar__badge" aria-label={`${badgeCount} pending`}>
           {badgeCount > 99 ? "99+" : badgeCount}

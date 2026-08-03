@@ -1,10 +1,10 @@
 "use client"
 
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { IconX } from "@tabler/icons-react"
 import { useEffect, type MouseEvent, type ReactNode } from "react"
 
-export type DheirConfirmDialogProps = {
+export type DHEIRConfirmDialogProps = {
   open: boolean
   onClose: () => void
   onConfirm: () => void | Promise<void>
@@ -16,7 +16,7 @@ export type DheirConfirmDialogProps = {
   loading?: boolean
 }
 
-export function DheirConfirmDialog({
+export function DHEIRConfirmDialog({
   open,
   onClose,
   onConfirm,
@@ -26,7 +26,7 @@ export function DheirConfirmDialog({
   cancelLabel = "Cancel",
   variant = "default",
   loading = false,
-}: DheirConfirmDialogProps) {
+}: DHEIRConfirmDialogProps) {
   useEffect(() => {
     if (!open) return
     const onEscape = (e: KeyboardEvent) => {
@@ -99,7 +99,7 @@ export function DheirConfirmDialog({
             onClick={() => void onConfirm()}
             disabled={loading}
           >
-            {loading ? <DheirLoader size="sm" variant="white" /> : confirmLabel}
+            {loading ? <DHEIRLoader size="sm" variant="white" /> : confirmLabel}
           </button>
         </div>
       </div>

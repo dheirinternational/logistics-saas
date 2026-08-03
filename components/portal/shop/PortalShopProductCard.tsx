@@ -1,7 +1,7 @@
 "use client"
 
 import { ShopProductCartControls } from "@/components/shop/ShopProductCartControls"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { useCartStore } from "@/store/cartStore"
 import type { Product } from "@/types/entityTypeDef"
 import { slugify } from "@/lib/portal/slug"
@@ -133,7 +133,7 @@ export function PortalShopProductCard({
       <Link href={detailHref} className="shop-product-card__media block">
         {loadingImage ? (
           <span className="flex h-full w-full items-center justify-center">
-            <DheirLoader size={8} color="var(--color-dheir-blue)" />
+            <DHEIRLoader size={8} color="var(--color-dheir-blue)" />
           </span>
         ) : imageUrl ? (
           mediaType === "video" ? (

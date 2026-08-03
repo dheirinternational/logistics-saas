@@ -10,7 +10,7 @@ import type { Package } from "@/types/entityTypeDef"
 import { IconPlane, IconShip, IconTruck } from "@tabler/icons-react"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import {
   formatShippingQuantity,
@@ -212,7 +212,7 @@ export function PortalRequestMailPage() {
       <section className="portal-request-mail__list" aria-label="Stored packages">
         {loading ? (
           <div className="portal-packages__empty portal-request-mail__loading">
-            <DheirLoader color="var(--color-dheir-blue)" size={10} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
           </div>
         ) : storedPackages.length === 0 ? (
           <div className="portal-packages__empty">

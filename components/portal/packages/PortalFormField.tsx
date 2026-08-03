@@ -1,4 +1,4 @@
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import type {
   InputHTMLAttributes,
   ReactNode,
@@ -35,7 +35,7 @@ export function PortalFormInput(props: InputHTMLAttributes<HTMLInputElement>) {
 export function PortalFormSelect(
   props: SelectHTMLAttributes<HTMLSelectElement>,
 ) {
-  return <DheirSelect {...props} />
+  return <DHEIRSelect {...props} />
 }
 
 export function PortalFormTextarea(

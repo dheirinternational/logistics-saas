@@ -6,7 +6,7 @@ import {
 } from "@/components/admin/delivery_zones/EditDeliveryZoneModal"
 import SearchComponent from "@/components/admin/delivery_zones/SearchComponent"
 import { Table } from "@/components/admin/table/Table"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { createColumnHelper } from "@tanstack/react-table"
 import { IconArrowDown, IconArrowUp, IconCalculator, IconMapPin } from "@tabler/icons-react"
@@ -133,7 +133,7 @@ export default function Page() {
 
       {isDataLoading ? (
         <div className="portal-home__panel portal-home__loader">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : (
         <>

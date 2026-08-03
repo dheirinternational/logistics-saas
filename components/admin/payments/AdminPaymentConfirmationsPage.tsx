@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { formatPaymentAmount, formatPaymentDate } from "@/lib/portal/paymentDisplay"
 import type { ManualPaymentSubmissionWithCustomer } from "@/lib/manualPayments/types"
 import {
@@ -145,7 +145,7 @@ export function AdminPaymentConfirmationsPage() {
 
         {loading ? (
           <div className="portal-home__panel portal-home__loader">
-            <DheirLoader color="var(--color-dheir-blue)" size={12} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : (
           <>
@@ -386,7 +386,7 @@ export function AdminPaymentConfirmationsPage() {
                   <p className="portal-packages__field-label">Receipt</p>
                   {loadingReceipt ? (
                     <div className="portal-home__loader">
-                      <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                      <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
                     </div>
                   ) : receiptUrl ? (
                     selected.receipt_mime_type === "application/pdf" ? (
@@ -441,7 +441,7 @@ export function AdminPaymentConfirmationsPage() {
                     onClick={() => reviewSubmission("confirm")}
                   >
                     {reviewing ? (
-                      <DheirLoader color="#fff" size={8} />
+                      <DHEIRLoader color="#fff" size={8} />
                     ) : (
                       "Confirm received"
                     )}

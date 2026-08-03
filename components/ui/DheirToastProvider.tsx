@@ -3,8 +3,8 @@
 import {
   dismissToast,
   subscribeToasts,
-  type DheirToastItem,
-  type DheirToastType,
+  type DHEIRToastItem,
+  type DHEIRToastType,
 } from "@/lib/ui/toast"
 import {
   IconAlertCircle,
@@ -14,20 +14,20 @@ import {
 } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
 
-const ICONS: Record<DheirToastType, typeof IconCircleCheck> = {
+const ICONS: Record<DHEIRToastType, typeof IconCircleCheck> = {
   success: IconCircleCheck,
   error: IconAlertCircle,
   info: IconInfoCircle,
 }
 
-const LABELS: Record<DheirToastType, string> = {
+const LABELS: Record<DHEIRToastType, string> = {
   success: "Success",
   error: "Error",
   info: "Notice",
 }
 
-export function DheirToastProvider() {
-  const [items, setItems] = useState<DheirToastItem[]>([])
+export function DHEIRToastProvider() {
+  const [items, setItems] = useState<DHEIRToastItem[]>([])
 
   useEffect(() => subscribeToasts(setItems), [])
 

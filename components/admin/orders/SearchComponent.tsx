@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { ORDER_ADMIN_STATUS_OPTIONS } from "@/lib/portal/orderStatus"
 import { Dispatch, SetStateAction } from "react"
 
@@ -28,7 +28,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({ state, setState
 
             <label className="portal-packages__field">
                 <span className="portal-packages__field-label">Status</span>
-                <DheirSelect
+                <DHEIRSelect
                     name="status"
                     value={String(state.status ?? "")}
                     onChange={(e) => setState((prev) => ({ ...prev, status: e.target.value }))}
@@ -39,7 +39,7 @@ const SearchComponent = <T extends Record<string, InputSafe>,>({ state, setState
                             {opt.label}
                         </option>
                     ))}
-                </DheirSelect>
+                </DHEIRSelect>
             </label>
         </div>
     )

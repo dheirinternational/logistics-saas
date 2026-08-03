@@ -61,7 +61,7 @@ export function AuthBrandPanel({
           >
             <figure className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg">
               <Image
-                src="/Dheir-logo.png"
+                src="/DHEIR-logo.png"
                 alt=""
                 fill
                 className="object-contain p-0.5"

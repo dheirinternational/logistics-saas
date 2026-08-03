@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import { DheirToastProvider } from "@/components/ui/DheirToastProvider";
+import { DHEIRToastProvider } from "@/components/ui/DHEIRToastProvider";
 import { buildRootMetadata } from "@/lib/marketing/siteMetadata";
 
 export const metadata: Metadata = buildRootMetadata();
@@ -28,7 +28,7 @@ export default function RootLayout({
           `}
         </Script>
         {children}
-        <DheirToastProvider />
+        <DHEIRToastProvider />
       </body>
     </html>
   );

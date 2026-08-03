@@ -6,7 +6,7 @@ import { IncomingPackage, Package } from "@/types/entityTypeDef"
 import InputComponent from "../shipments/InputComponent"
 import Image from "next/image"
 import { toast } from "@/lib/ui/toast"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { useRouter } from "next/navigation"
 
 
@@ -183,7 +183,7 @@ const AddPackage = ({props} : {props: IncomingPackage}) => {
 //             >
 //                 {
 //                     isSubmitting ? 
-//                     <DheirLoader color="#FFF" size={15}/> :
+//                     <DHEIRLoader color="#FFF" size={15}/> :
 //                     <>
 //                         <IoCreate/>
 //                         <p className="text-xs font-bold">

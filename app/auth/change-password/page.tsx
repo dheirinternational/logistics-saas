@@ -8,7 +8,7 @@ import { IconEye, IconEyeOff, IconLock } from "@tabler/icons-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 export default function ChangePasswordPage() {
@@ -165,7 +165,7 @@ function ChangePasswordForm() {
             onClick={changePassword}
           >
             {isChangingPassword ? (
-              <DheirLoader color="#fff" size={20} />
+              <DHEIRLoader color="#fff" size={20} />
             ) : (
               "Update password"
             )}

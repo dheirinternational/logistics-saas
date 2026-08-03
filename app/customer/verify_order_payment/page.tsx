@@ -3,7 +3,7 @@
 import { useCartStore } from "@/store/cartStore"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 export default function VerifyOrderPayment() {
@@ -58,7 +58,7 @@ export default function VerifyOrderPayment() {
 
   return (
     <div className="p-body flex min-h-[40vh] flex-col items-center justify-center gap-4">
-      <DheirLoader color="#1A5FFF" size={12} />
+      <DHEIRLoader color="#1A5FFF" size={12} />
       <h1 className="text-sm font-semibold">Verifying payment...</h1>
     </div>
   )

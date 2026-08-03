@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import {
   MEDIA_UPLOAD_DELAY_MS,
   MEDIA_UPLOAD_MAX_BATCH,
@@ -251,7 +251,7 @@ export function MediaUploadModal({ open, onClose, onFinished }: MediaUploadModal
                     </p>
                   </div>
                   {item.status === "uploading" ? (
-                    <DheirLoader color="var(--color-dheir-blue)" size={8} />
+                    <DHEIRLoader color="var(--color-dheir-blue)" size={8} />
                   ) : item.status === "done" ? (
                     <IconCheck size={18} stroke={2} className="media-vault-upload-queue__ok" />
                   ) : !running && item.status === "pending" ? (
@@ -278,7 +278,7 @@ export function MediaUploadModal({ open, onClose, onFinished }: MediaUploadModal
               <span />
             </div>
             <p className="media-vault-upload-state__label">
-              <DheirLoader color="var(--color-dheir-blue)" size={9} />
+              <DHEIRLoader color="var(--color-dheir-blue)" size={9} />
               Uploading one file at a time… please wait.
             </p>
           </div>

@@ -1,10 +1,10 @@
 import type { CSSProperties } from "react"
 
-type DheirLoaderSize = "xs" | "sm" | "md" | "lg"
+type DHEIRLoaderSize = "xs" | "sm" | "md" | "lg"
 
-export type DheirLoaderProps = {
+export type DHEIRLoaderProps = {
   /** Pixel diameter, or a preset size token. */
-  size?: number | DheirLoaderSize
+  size?: number | DHEIRLoaderSize
   /** Preset color when `color` is not set. */
   variant?: "brand" | "white" | "accent" | "muted"
   /** Legacy prop from react-spinners - still supported for gradual migration. */
@@ -15,21 +15,21 @@ export type DheirLoaderProps = {
   className?: string
 }
 
-const SIZE_PX: Record<DheirLoaderSize, number> = {
+const SIZE_PX: Record<DHEIRLoaderSize, number> = {
   xs: 14,
   sm: 18,
   md: 24,
   lg: 32,
 }
 
-const VARIANT_COLOR: Record<NonNullable<DheirLoaderProps["variant"]>, string> = {
+const VARIANT_COLOR: Record<NonNullable<DHEIRLoaderProps["variant"]>, string> = {
   brand: "var(--color-dheir-blue)",
   white: "#ffffff",
   accent: "var(--color-dheir-red)",
   muted: "var(--color-dheir-muted)",
 }
 
-function resolveSize(size: DheirLoaderProps["size"]): number {
+function resolveSize(size: DHEIRLoaderProps["size"]): number {
   if (size === undefined) return SIZE_PX.md
   if (typeof size === "number") return size
   return SIZE_PX[size]
@@ -37,7 +37,7 @@ function resolveSize(size: DheirLoaderProps["size"]): number {
 
 function resolveColor(
   color: string | undefined,
-  variant: DheirLoaderProps["variant"],
+  variant: DHEIRLoaderProps["variant"],
 ): string {
   if (color) {
     const normalized = color.toLowerCase().replace(/\s/g, "")
@@ -75,14 +75,14 @@ function resolveColor(
   return VARIANT_COLOR[variant ?? "brand"]
 }
 
-export function DheirLoader({
+export function DHEIRLoader({
   size,
   variant = "brand",
   color,
   label,
   block = false,
   className = "",
-}: DheirLoaderProps) {
+}: DHEIRLoaderProps) {
   const px = resolveSize(size)
   const strokeColor = resolveColor(color, variant)
   const spinner = (

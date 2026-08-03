@@ -4,7 +4,7 @@ import { AdminMediaVideoLightbox } from "@/components/admin/media/AdminMediaVide
 import { AdminMediaVideoPlayButton } from "@/components/admin/media/AdminMediaVideoPlayButton"
 import { MediaDeleteConfirmModal } from "@/components/admin/media/MediaDeleteConfirmModal"
 import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { IconPhoto, IconPlayerPlay, IconUpload, IconVideo } from "@tabler/icons-react"
 import { MediaVaultThumbnail } from "@/components/admin/media/MediaVaultThumbnail"
@@ -183,7 +183,7 @@ const Page: NextPage = () => {
 
       {loading ? (
         <div className="portal-home__panel portal-home__loader">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : (
         <>
@@ -197,7 +197,7 @@ const Page: NextPage = () => {
               </div>
               {refreshing ? (
                 <span className="media-vault-refreshing">
-                  <DheirLoader color="var(--color-dheir-blue)" size={9} />
+                  <DHEIRLoader color="var(--color-dheir-blue)" size={9} />
                   Updating...
                 </span>
               ) : null}

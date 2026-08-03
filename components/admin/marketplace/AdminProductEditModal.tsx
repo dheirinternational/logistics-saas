@@ -2,8 +2,8 @@
 
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
 import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
-import { DheirLoader } from "@/components/ui/DheirLoader"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
 import { MAX_PRODUCT_MEDIA_COUNT } from "@/lib/products/productMediaLimits"
 import { toast } from "@/lib/ui/toast"
@@ -293,7 +293,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
 
                             <label className="portal-packages__field">
                                 <span className="portal-packages__field-label">Category</span>
-                                <DheirSelect
+                                <DHEIRSelect
                                     name="category_id"
                                     value={String(draft.category_id ?? "")}
                                     onChange={(e) =>
@@ -307,7 +307,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                             {cat.name}
                                         </option>
                                     ))}
-                                </DheirSelect>
+                                </DHEIRSelect>
                             </label>
 
                             <label className="portal-packages__field">
@@ -380,7 +380,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
 
                             <label className="portal-packages__field">
                                 <span className="portal-packages__field-label">Unit</span>
-                                <DheirSelect
+                                <DHEIRSelect
                                     name="weight_unit"
                                     value={draft.weight_unit}
                                     onChange={(e) =>
@@ -393,12 +393,12 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                 >
                                     <option value="kg">KG</option>
                                     <option value="cbm">CBM</option>
-                                </DheirSelect>
+                                </DHEIRSelect>
                             </label>
 
                             <label className="portal-packages__field">
                                 <span className="portal-packages__field-label">Featured</span>
-                                <DheirSelect
+                                <DHEIRSelect
                                     name="is_featured"
                                     value={String(draft.is_featured)}
                                     onChange={(e) =>
@@ -407,7 +407,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                 >
                                     <option value="false">No</option>
                                     <option value="true">Yes</option>
-                                </DheirSelect>
+                                </DHEIRSelect>
                             </label>
 
                             <label className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
@@ -447,7 +447,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                                     {(isFetchingImages || uploadingMedia) ? (
-                                        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                                        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
                                     ) : null}
                                     <button
                                         type="button"
@@ -549,7 +549,7 @@ export default function AdminProductEditModal({ product, categories, onClose, on
                                 className="portal-home__btn portal-home__btn--primary"
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? <DheirLoader color="#fff" size={10} /> : "Save changes"}
+                                {isSubmitting ? <DHEIRLoader color="#fff" size={10} /> : "Save changes"}
                             </button>
                         </div>
                     </form>

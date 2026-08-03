@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirConfirmDialog } from "@/components/ui/DheirConfirmDialog"
+import { DHEIRConfirmDialog } from "@/components/ui/DHEIRConfirmDialog"
 import { logoutAction } from "@/lib/db/actions"
 import { toast } from "@/lib/ui/toast"
 import { useState } from "react"
@@ -44,7 +44,7 @@ const LogoutButton = () => {
         />
       </button>
 
-      <DheirConfirmDialog
+      <DHEIRConfirmDialog
         open={confirmOpen}
         onClose={() => {
           if (!loading) setConfirmOpen(false)

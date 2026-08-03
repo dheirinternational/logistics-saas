@@ -2,8 +2,8 @@
 
 import { AirPricingTemplate, SeaPricingTemplate } from "@/types/entityTypeDef"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { toast } from "@/lib/ui/toast"
 import { IconX } from "@tabler/icons-react"
 
@@ -94,7 +94,7 @@ export default function Page(){
 
             {isFetchingMoneyExchangeRates ? (
                 <div className="portal-home__panel portal-home__loader">
-                    <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                    <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
                 </div>
             ) : (
                 <>
@@ -299,13 +299,13 @@ function PricingTemplateEditModal({
                         <div className="admin-modal__fields" style={{ gridTemplateColumns: "1fr 1fr" }}>
                             <label className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
                                 <span className="portal-packages__field-label">Rate unit</span>
-                                <DheirSelect
+                                <DHEIRSelect
                                     value={rateUnit}
                                     onChange={(e) => setRateUnit(e.target.value as "kg" | "cbm")}
                                 >
                                     <option value="kg">KG</option>
                                     <option value="cbm">CBM</option>
-                                </DheirSelect>
+                                </DHEIRSelect>
                             </label>
                             <label className="portal-packages__field">
                                 <span className="portal-packages__field-label">{priceLabel}</span>
@@ -357,14 +357,14 @@ function PricingTemplateEditModal({
 
                             <label className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
                                 <span className="portal-packages__field-label">Delivery duration unit</span>
-                                <DheirSelect
+                                <DHEIRSelect
                                     value={durationType}
                                     onChange={(e) => setDurationType(e.target.value as DurationType)}
                                 >
                                     <option value="days">Days</option>
                                     <option value="weeks">Weeks</option>
                                     <option value="months">Months</option>
-                                </DheirSelect>
+                                </DHEIRSelect>
                             </label>
                 </div>
                 
@@ -375,7 +375,7 @@ function PricingTemplateEditModal({
                                 onClick={submit}
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? <DheirLoader color="#fff" size={10} /> : "Save changes"}
+                                {isSubmitting ? <DHEIRLoader color="#fff" size={10} /> : "Save changes"}
                             </button>
                         </div>
                     </div>
@@ -441,7 +441,7 @@ const AirTemplateComponent = ({ currencyValue }: { currencyValue: number }) => {
             <div style={{ display: "grid", gap: 12 }}>
                 {isFetchingAirTemplate ? (
                     <div className="portal-home__loader" style={{ minHeight: 120 }}>
-                        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
                     </div>
                 ) : (
                     airTemplate?.map((template, i) => (
@@ -573,7 +573,7 @@ const SeaTemplateComponent = () => {
             <div style={{ display: "grid", gap: 12 }}>
                 {isFetchingSeaTemplate ? (
                     <div className="portal-home__loader" style={{ minHeight: 120 }}>
-                        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
                     </div>
                 ) : (
                     seaTemplate?.map((template, i) => (
@@ -691,7 +691,7 @@ const ExpressTemplateComponent = ({currencyValue} : {currencyValue : number}) =>
             <div style={{ display: "grid", gap: 12 }}>
                 {isFetchingExpressTemplate ? (
                     <div className="portal-home__loader" style={{ minHeight: 120 }}>
-                        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
                     </div>
                 ) : (
                     expressTemplate?.map((template) => (

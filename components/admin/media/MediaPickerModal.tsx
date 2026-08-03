@@ -2,7 +2,7 @@
 
 import { AdminMediaVideoLightbox } from "@/components/admin/media/AdminMediaVideoLightbox"
 import { AdminMediaVideoPlayButton } from "@/components/admin/media/AdminMediaVideoPlayButton"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import { toast } from "@/lib/ui/toast"
@@ -194,7 +194,7 @@ export function MediaPickerModal({
 
         {loading ? (
           <div className="media-picker-loading">
-            <DheirLoader color="var(--color-dheir-blue)" size={12} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : filtered.length === 0 ? (
           <p className="media-vault-modal__sub">No media in the library yet. Upload files on Admin → Media.</p>

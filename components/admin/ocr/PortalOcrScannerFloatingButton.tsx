@@ -206,7 +206,7 @@ export function PortalOcrScannerFloatingButton() {
             role="dialog"
             aria-modal="true"
             aria-label="Receipt OCR Scanner"
-            style={{ maxWidth: "520px" }}
+            style={{ maxWidth: "680px", width: "95%" }}
           >
             <div className="dheir-dialog__head">
               <div>
@@ -227,111 +227,154 @@ export function PortalOcrScannerFloatingButton() {
 
             <div className="admin-modal__body" style={{ padding: "20px" }}>
               
-              {/* Live Camera Viewfinder */}
-              {cameraActive && !previewUrl && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "100%",
-                      height: "440px",
-                      borderRadius: "12px",
-                      overflow: "hidden",
-                      border: "2px solid var(--color-dheir-border)",
-                      backgroundColor: "#000",
-                    }}
-                  >
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                    
-                    {/* Targeting scanning guides - tall portrait layout */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "5%",
-                        left: "15%",
-                        right: "15%",
-                        bottom: "5%",
-                        border: "2px dashed rgba(255, 255, 255, 0.5)",
-                        borderRadius: "8px",
-                        pointerEvents: "none",
-                        boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.4)",
-                      }}
-                    />
-                  </div>
-                  
-                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                    <button
-                      type="button"
-                      onClick={handleCapture}
-                      style={{
-                        flex: 1,
-                        padding: "12px 16px",
-                        borderRadius: "8px",
-                        backgroundColor: "var(--color-dheir-blue)",
-                        color: "#fff",
-                        border: "none",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <IconCamera size={20} />
-                      Capture Receipt
-                    </button>
-                    
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      style={{
-                        padding: "12px",
-                        borderRadius: "8px",
-                        border: "1px solid var(--color-dheir-border)",
-                        backgroundColor: "transparent",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                      title="Upload file instead"
-                    >
-                      <IconUpload size={20} stroke={1.5} />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* File Uploader Fallback (if camera not active/failed) */}
-              {!cameraActive && !previewUrl && (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    border: "2px dashed var(--color-dheir-border)",
-                    borderRadius: "12px",
-                    padding: "40px 20px",
-                    textAlign: "center",
-                    cursor: "pointer",
-                    background: "rgba(0, 0, 0, 0.01)",
+              {/* Side-by-Side: Camera Scan vs. Upload File */}
+              {!previewUrl && !isScanning && !result && (
+                <div 
+                  style={{ 
+                    display: "grid", 
+                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
+                    gap: "24px",
+                    alignItems: "stretch"
                   }}
                 >
-                  <IconUpload
-                    size={36}
-                    stroke={1.5}
-                    style={{ color: "var(--color-dheir-muted)", marginBottom: "12px" }}
-                  />
-                  <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>
-                    Click to upload receipt image
-                  </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--color-dheir-muted)" }}>
-                    No camera detected. Supports JPG, PNG, WEBP.
-                  </p>
+                  {/* Left Column: Device Camera Viewfinder */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
+                      Scan with Device Camera
+                    </h3>
+                    
+                    {cameraActive ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        <div
+                          style={{
+                            position: "relative",
+                            width: "100%",
+                            height: "280px",
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            border: "1.5px solid var(--color-dheir-border)",
+                            backgroundColor: "#000",
+                          }}
+                        >
+                          <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                          
+                          {/* Targeting scanning guides */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "10%",
+                              left: "10%",
+                              right: "10%",
+                              bottom: "10%",
+                              border: "2px dashed rgba(255, 255, 255, 0.5)",
+                              borderRadius: "8px",
+                              pointerEvents: "none",
+                              boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.4)",
+                            }}
+                          />
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={handleCapture}
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            backgroundColor: "var(--color-dheir-blue)",
+                            color: "#fff",
+                            border: "none",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <IconCamera size={20} />
+                          Capture Receipt
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          height: "340px",
+                          border: "1.5px dashed var(--color-dheir-border)",
+                          borderRadius: "12px",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: "20px",
+                          backgroundColor: "rgba(0, 0, 0, 0.02)",
+                          color: "var(--color-dheir-muted)",
+                          textAlign: "center"
+                        }}
+                      >
+                        <IconCamera size={36} stroke={1.5} style={{ marginBottom: "12px" }} />
+                        <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>No camera active or allowed</p>
+                        <button 
+                          type="button" 
+                          onClick={startCamera}
+                          style={{
+                            marginTop: "16px",
+                            padding: "8px 16px",
+                            borderRadius: "6px",
+                            border: "1px solid var(--color-dheir-border)",
+                            backgroundColor: "#fff",
+                            cursor: "pointer",
+                            fontSize: "12px",
+                            fontWeight: 600
+                          }}
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Column: File Uploader */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
+                      Upload Receipt Image
+                    </h3>
+                    
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        height: "340px",
+                        border: "1.5px dashed var(--color-dheir-border)",
+                        borderRadius: "12px",
+                        padding: "30px 20px",
+                        textAlign: "center",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "rgba(0, 0, 0, 0.01)",
+                      }}
+                    >
+                      <IconUpload
+                        size={36}
+                        stroke={1.5}
+                        style={{ color: "var(--color-dheir-muted)", marginBottom: "12px" }}
+                      />
+                      <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>
+                        Click to upload receipt image
+                      </p>
+                      <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--color-dheir-muted)" }}>
+                        Supports JPG, PNG, WEBP.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 

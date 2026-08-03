@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react"
 import InputComponent from "../shipments/InputComponent"
 import { LuHousePlus } from "react-icons/lu"
 import { toast } from "@/lib/ui/toast"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 
 type WarehouseValues = {
     name: string
@@ -132,7 +132,7 @@ const AddWarehouse = () => {
                 className="flex items-center justify-center gap-1 bg-accent-blue px-4 py-3 rounded-lg mt-4 float-right text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isSubmitting ? (
-                    <DheirLoader color="#fff" size={15} />
+                    <DHEIRLoader color="#fff" size={15} />
                 ) : (
                     <>
                         <LuHousePlus/>

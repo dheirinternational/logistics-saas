@@ -18,7 +18,7 @@ import { generateExpressShippingQuotation } from "@/lib/calculators/generateExpr
 import { generateSeaShippingQuotation } from "@/lib/calculators/generateSeaShippingQuotation"
 import { IconPlane, IconShip, IconTruck } from "@tabler/icons-react"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 const CHANNELS: {
@@ -137,7 +137,7 @@ export function PortalQuotePage() {
 
       <div className="portal-quote__rates-card">
         {loadingRates ? (
-          <DheirLoader size={8} color="var(--color-dheir-blue)" />
+          <DHEIRLoader size={8} color="var(--color-dheir-blue)" />
         ) : (
           <>
             <p className="portal-quote__rates-line">
@@ -231,7 +231,7 @@ export function PortalQuotePage() {
             <div className="portal-quote__receipt-head">
               <span className="portal-quote__brand">DHEIR International</span>
               {loadingQuote ? (
-                <DheirLoader size={8} color="var(--color-dheir-blue)" />
+                <DHEIRLoader size={8} color="var(--color-dheir-blue)" />
               ) : null}
             </div>
             <p className="portal-quote__receipt-channel">

@@ -1,7 +1,7 @@
 "use client"
 
-import { DheirLoader } from "@/components/ui/DheirLoader"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { toast } from "@/lib/ui/toast"
 import { IconX } from "@tabler/icons-react"
 import { FormEvent, useState } from "react"
@@ -163,7 +163,7 @@ export function AddWarehouseModal({ onClose, onSaved }: AddWarehouseModalProps) 
 
             <label className="portal-packages__field">
               <span className="portal-packages__field-label">Type</span>
-              <DheirSelect
+              <DHEIRSelect
                 name="type"
                 value={values.type}
                 onChange={(e) =>
@@ -174,7 +174,7 @@ export function AddWarehouseModal({ onClose, onSaved }: AddWarehouseModalProps) 
               >
                 <option value="air">Air</option>
                 <option value="sea">Sea</option>
-              </DheirSelect>
+              </DHEIRSelect>
             </label>
 
             <label className="portal-packages__field">
@@ -205,7 +205,7 @@ export function AddWarehouseModal({ onClose, onSaved }: AddWarehouseModalProps) 
 
             <label className="portal-packages__field">
               <span className="portal-packages__field-label">Country</span>
-              <DheirSelect
+              <DHEIRSelect
                 name="country"
                 value={values.country}
                 onChange={(e) =>
@@ -219,7 +219,7 @@ export function AddWarehouseModal({ onClose, onSaved }: AddWarehouseModalProps) 
               >
                 <option value="NG">Nigeria</option>
                 <option value="CN">China</option>
-              </DheirSelect>
+              </DHEIRSelect>
             </label>
 
             <label className="portal-packages__field">
@@ -313,7 +313,7 @@ export function AddWarehouseModal({ onClose, onSaved }: AddWarehouseModalProps) 
               className="portal-home__btn portal-home__btn--primary"
               disabled={isSaving}
             >
-              {isSaving ? <DheirLoader color="#fff" size={10} /> : "Add warehouse"}
+              {isSaving ? <DHEIRLoader color="#fff" size={10} /> : "Add warehouse"}
             </button>
           </footer>
         </form>

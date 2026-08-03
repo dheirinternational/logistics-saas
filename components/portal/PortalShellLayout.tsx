@@ -36,9 +36,10 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
 
     const fetchBadges = async () => {
       try {
-        const ordersRes = await fetch("/api/orders/user/count", {
-          credentials: "include",
-        })
+        const [ordersRes, inboxRes] = await Promise.all([
+          fetch("/api/orders/user/count", { credentials: "include" }),
+          fetch("/api/inbox/unread-count", { credentials: "include" }),
+        ])
 
         const nextBadges: Record<string, number> = {}
 
@@ -48,6 +49,12 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
           nextBadges["/customer/orders"] = open
         }
 
+        if (inboxRes.ok) {
+          const inboxJson = await inboxRes.json()
+          const count = Number(inboxJson?.data?.count ?? 0)
+          if (count > 0) nextBadges["/customer/inbox"] = count
+        }
+
         if (isMounted) setBadges(nextBadges)
       } catch {
         // best-effort
@@ -55,10 +62,16 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
     }
 
     fetchBadges()
-    const interval = window.setInterval(fetchBadges, 30_000)
+
+    // Re-fetch when user returns to tab (no polling while idle)
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchBadges()
+    }
+    document.addEventListener("visibilitychange", onVisible)
+
     return () => {
       isMounted = false
-      window.clearInterval(interval)
+      document.removeEventListener("visibilitychange", onVisible)
     }
   }, [])
 
@@ -69,9 +82,9 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
       label: item.label,
       icon: item.icon,
       isActive: item.id === activeId,
-      badgeCount: undefined as number | undefined,
+      badgeCount: badges[item.href] as number | undefined,
     }))
-  }, [activeId])
+  }, [activeId, badges])
 
   useEffect(() => {
     if (!mobileOpen) return
@@ -105,7 +118,7 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
         <div className="portal-sidebar__head">
           <Link href="/customer" className="portal-sidebar__brand">
             <Image
-              src="/Dheir colored.png"
+              src="/DHEIR colored.png"
               alt=""
               width={36}
               height={36}
@@ -139,6 +152,9 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
               >
                 <Icon size={22} stroke={1.5} aria-hidden />
                 <span>{item.label}</span>
+                {item.key === "inbox" && (
+                  <span className="sidebar-beta-badge">Beta</span>
+                )}
                 {item.badgeCount !== undefined ? (
                   <span
                     className="portal-sidebar__badge"

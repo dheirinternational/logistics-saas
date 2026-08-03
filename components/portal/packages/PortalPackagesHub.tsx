@@ -10,7 +10,7 @@ import type { IncomingPackage, Package } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 type TabId = "warehouse" | "incoming"
@@ -171,7 +171,7 @@ export function PortalPackagesHub() {
       <div className="portal-packages__list">
         {loading ? (
           <div className="portal-packages__loading">
-            <DheirLoader color="var(--color-dheir-blue)" size={12} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : totalResultsCount === 0 ? (
           <div className="portal-packages__empty">

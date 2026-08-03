@@ -12,7 +12,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaX } from 'react-icons/fa6'
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { deleteSelectedRows, formatDeleteFailures } from "@/lib/admin/deleteSelected"
 import { matchesStatusFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
@@ -203,7 +203,7 @@ const Page: NextPage = () => {
     <div className="portal-home">
       {isDataLoading ? (
         <div className="portal-home__panel portal-home__loader">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : (
         <>

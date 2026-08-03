@@ -77,7 +77,7 @@ export function MarketingHeader({ user = null }: MarketingHeaderProps) {
         >
           <figure className="relative h-10 w-10 shrink-0 overflow-hidden md:h-11 md:w-11">
             <Image
-              src="/Dheir colored.png"
+              src="/DHEIR colored.png"
               alt=""
               width={44}
               height={44}

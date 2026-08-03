@@ -10,7 +10,7 @@ import { IconSearch } from "@tabler/icons-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { slugify } from "@/lib/portal/slug"
 
@@ -181,7 +181,7 @@ export function PortalShopPage() {
           <div className="shop-teaser__grid mt-6 md:mt-8">
             {loading ? (
               <div className="col-span-full flex justify-center py-12">
-                <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
               </div>
             ) : featured.length === 0 ? (
               <p className="col-span-full text-center text-sm text-dheir-muted py-8">
@@ -209,7 +209,7 @@ export function PortalShopPage() {
           <div className="shop-category-grid mt-6 md:mt-8">
             {loading ? (
               <div className="col-span-full flex justify-center py-12">
-                <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
               </div>
             ) : catalog.length === 0 ? (
               <p className="col-span-full text-center text-sm text-dheir-muted py-8">
@@ -274,7 +274,7 @@ export function PortalShopPage() {
           <div className="shop-teaser__grid mt-6 md:mt-8">
             {loadingPage ? (
               <div className="col-span-full flex justify-center py-12">
-                <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
               </div>
             ) : products.length === 0 ? (
               <p className="col-span-full text-center text-sm text-dheir-muted py-8">

@@ -12,7 +12,7 @@ import type {
   SeaPricingTemplate,
 } from "@/types/entityTypeDef"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 type AddToCart = (value: QuoteItemCart) => void
@@ -65,7 +65,7 @@ export function PortalQuoteAirForm({ addToCart }: { addToCart: AddToCart }) {
   if (loading) {
     return (
       <div className="portal-quote__form-loading">
-        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
       </div>
     )
   }
@@ -134,7 +134,7 @@ export function PortalQuoteSeaForm({ addToCart }: { addToCart: AddToCart }) {
   if (loading) {
     return (
       <div className="portal-quote__form-loading">
-        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
       </div>
     )
   }
@@ -201,7 +201,7 @@ export function PortalQuoteExpressForm({ addToCart }: { addToCart: AddToCart }) 
   if (loading) {
     return (
       <div className="portal-quote__form-loading">
-        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
       </div>
     )
   }

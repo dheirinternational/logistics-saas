@@ -5,7 +5,7 @@ import { PortalPackagesToolbar } from "@/components/portal/packages/PortalPackag
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
 import type { Shipment } from "@/types/entityTypeDef"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import Image from "next/image"
 
@@ -69,7 +69,7 @@ export default function TrackShipmentsPage() {
       <div className="portal-packages__list">
         {loading ? (
           <div className="portal-packages__loading">
-            <DheirLoader color="var(--color-dheir-blue)" size={12} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : filtered.length === 0 ? (
           <div className="portal-packages__empty">

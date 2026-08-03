@@ -7,7 +7,7 @@ export default function NotFound() {
       <div className="mx-auto flex w-full max-w-xl flex-col items-center text-center">
         <div className="flex items-center gap-3">
           <Image
-            src="/Dheir colored.png"
+            src="/DHEIR colored.png"
             alt=""
             width={44}
             height={44}

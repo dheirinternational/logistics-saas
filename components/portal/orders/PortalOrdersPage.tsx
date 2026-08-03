@@ -12,7 +12,7 @@ import { formatPaymentAmount, paymentStatusLabel } from "@/lib/portal/paymentDis
 import type { Order } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { useSearchParams } from "next/navigation"
 
@@ -101,7 +101,7 @@ export function PortalOrdersPage() {
       <div className="portal-packages__list">
         {loading ? (
           <div className="portal-packages__loading">
-            <DheirLoader color="var(--color-dheir-blue)" size={12} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : filtered.length === 0 ? (
           <div className="portal-packages__empty">

@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { useState } from "react"
 import { toast } from "@/lib/ui/toast"
 
@@ -70,7 +70,7 @@ export default function MonnifyPaymentButton({
       onClick={handlePayment}
     >
       {isLoading ? (
-        <DheirLoader color="white" size={6} />
+        <DHEIRLoader color="white" size={6} />
       ) : (
         <>Pay ₦{Number(amount).toLocaleString()}</>
       )}

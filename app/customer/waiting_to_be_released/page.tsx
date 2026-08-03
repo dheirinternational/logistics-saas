@@ -6,7 +6,7 @@ import { formatShippingQuantity } from "@/lib/shipping/channelUnits"
 import type { ShippingRequest } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 export default function ShipmentRequestsPage() {
@@ -46,7 +46,7 @@ export default function ShipmentRequestsPage() {
       <div className="portal-packages__list">
         {loading ? (
           <div className="portal-packages__loading">
-            <DheirLoader color="var(--color-dheir-blue)" size={12} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : requests.length === 0 ? (
           <div className="portal-packages__empty">

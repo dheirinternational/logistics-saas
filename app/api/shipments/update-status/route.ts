@@ -62,7 +62,7 @@ export async function PUT(req: NextRequest){
 
         if (shipment?.email) {
             await resend.emails.send({
-                from: "DheirLogistics <no-reply@dheirinternational.com>",
+                from: "DHEIRLogistics <no-reply@dheirinternational.com>",
                 to: shipment.email,
                 subject: `Shipment Status Updated`,
                 html: `

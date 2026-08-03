@@ -2,7 +2,7 @@
 
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
 import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import { getShipmentStatusVariant } from "@/lib/portal/packageStatus"
 import {
@@ -200,7 +200,7 @@ export function PortalHomeTrackingView() {
 
         {loading ? (
           <div className="portal-packages__loading portal-home__panel-empty">
-            <DheirLoader color="var(--color-dheir-blue)" size={12} />
+            <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
           </div>
         ) : filtered.length === 0 ? (
           <div className="portal-packages__empty portal-home__panel-empty">

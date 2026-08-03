@@ -1,7 +1,7 @@
 "use client"
 
 import { PortalPageBack } from "@/components/portal/PortalPageBack"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { fetchShopDeliveryQuote } from "@/lib/shop/fetchShopDeliveryQuote"
 import type { ShopDeliveryFeeQuote } from "@/lib/shop/deliveryFee"
 import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
@@ -236,7 +236,7 @@ export function PortalOrderBankTransferPage() {
 
       {loading ? (
         <div className="portal-packages__loading flex justify-center py-16">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : !bank || !reference ? (
         <div className="portal-payments__empty portal-home__panel">
@@ -366,7 +366,7 @@ export function PortalOrderBankTransferPage() {
               onClick={handleSubmit}
             >
               {submitting ? (
-                <DheirLoader color="#fff" size={8} />
+                <DHEIRLoader color="#fff" size={8} />
               ) : (
                 "Submit transfer proof"
               )}

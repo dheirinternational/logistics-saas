@@ -17,7 +17,7 @@ import Link from "next/link"
 import { CUSTOMER_PORTAL_ENTRY } from "@/lib/portal/customerEntry"
 import { useRouter } from "next/navigation"
 import { ChangeEvent, FormEvent, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 export default function SignupPage() {
@@ -263,7 +263,7 @@ export default function SignupPage() {
             className="dheir-btn-primary mt-2"
           >
             {isCreatingAccount ? (
-              <DheirLoader color="#fff" size={20} />
+              <DHEIRLoader color="#fff" size={20} />
             ) : isEmailVerified &&
               verifiedEmail === credentials.email.trim().toLowerCase() ? (
               "Create account"

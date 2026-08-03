@@ -25,7 +25,7 @@ async function loadFont(relativePath: string) {
 }
 
 async function loadLogoDataUri() {
-  const logoPath = path.join(process.cwd(), "public", "Dheir colored.png")
+  const logoPath = path.join(process.cwd(), "public", "DHEIR colored.png")
   const logo = await readFile(logoPath)
   return `data:image/png;base64,${logo.toString("base64")}`
 }

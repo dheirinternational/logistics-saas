@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { FaCheckCircle, FaUser } from 'react-icons/fa'
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { IconCamera, IconMail, IconShieldLock, IconUserCircle } from "@tabler/icons-react"
 
@@ -255,7 +255,7 @@ const Page: NextPage = () => {
 
       {isLoading ? (
         <div className="portal-home__panel portal-home__loader">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : (
         <>
@@ -322,7 +322,7 @@ const Page: NextPage = () => {
                         background: "color-mix(in srgb, #fff 65%, transparent)",
                       }}
                     >
-                      <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                      <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
                     </div>
                   ) : null}
                 </div>
@@ -397,7 +397,7 @@ const Page: NextPage = () => {
                   disabled={!isEditButtonActive || isEditLoading}
                   type="submit"
                 >
-                  {isEditLoading ? <DheirLoader color="#fff" size={10} /> : "Save changes"}
+                  {isEditLoading ? <DHEIRLoader color="#fff" size={10} /> : "Save changes"}
                 </button>
               </div>
             </form>
@@ -431,7 +431,7 @@ const Page: NextPage = () => {
                   onClick={initializeEmailChangeConfirmation}
                   style={{ justifySelf: "start" }}
                 >
-                  {isSendingEmailChangeVerification ? <DheirLoader color="var(--color-dheir-blue)" size={10} /> : (
+                  {isSendingEmailChangeVerification ? <DHEIRLoader color="var(--color-dheir-blue)" size={10} /> : (
                     <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
                       <IconMail size={16} stroke={1.5} />
                       Change email
@@ -447,7 +447,7 @@ const Page: NextPage = () => {
                     onClick={initializeEmailVerification}
                     style={{ justifySelf: "start" }}
                   >
-                    {isSendingEmailVerification ? <DheirLoader color="var(--color-dheir-blue)" size={10} /> : "Verify email"}
+                    {isSendingEmailVerification ? <DHEIRLoader color="var(--color-dheir-blue)" size={10} /> : "Verify email"}
                   </button>
                 ) : (
                   <p className="portal-home__section-sub" style={{ margin: 0, display: "flex", gap: 8, alignItems: "center" }}>
@@ -473,7 +473,7 @@ const Page: NextPage = () => {
                   onClick={initializePasswordChangeConfirmation}
                   style={{ justifySelf: "start" }}
                 >
-                  {isSendingPasswordChangeVerification ? <DheirLoader color="var(--color-dheir-blue)" size={10} /> : (
+                  {isSendingPasswordChangeVerification ? <DHEIRLoader color="var(--color-dheir-blue)" size={10} /> : (
                     <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
                       <IconShieldLock size={16} stroke={1.5} />
                       Change password

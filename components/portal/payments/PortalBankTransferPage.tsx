@@ -2,7 +2,7 @@
 
 import { PortalPageBack } from "@/components/portal/PortalPageBack"
 import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
 import { useCartStore } from "@/store/cartStore"
@@ -176,7 +176,7 @@ export function PortalBankTransferPage({
 
       {loading ? (
         <div className="portal-packages__loading flex justify-center py-16">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : !bank || !context ? (
         <div className="portal-payments__empty portal-home__panel">
@@ -339,7 +339,7 @@ export function PortalBankTransferPage({
                   onClick={handleSubmit}
                 >
                   {submitting ? (
-                    <DheirLoader color="#fff" size={8} />
+                    <DHEIRLoader color="#fff" size={8} />
                   ) : (
                     "Submit transfer proof"
                   )}

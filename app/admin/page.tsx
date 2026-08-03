@@ -2,7 +2,7 @@
 
 // import PendingAlerts from '@/components/admin/PendingAlerts'
 import { AdminAnnouncementModal } from "@/components/admin/AdminAnnouncementModal"
-import { DheirConfirmDialog } from "@/components/ui/DheirConfirmDialog"
+import { DHEIRConfirmDialog } from "@/components/ui/DHEIRConfirmDialog"
 import Link from "next/link"
 // import RecentActivity from '@/components/admin/RecentActivity'
 // import RecentShipmentCard from '@/components/admin/RecentShipmentCard'
@@ -282,7 +282,7 @@ const Page: NextPage = () => {
           }}
         />
 
-        <DheirConfirmDialog
+        <DHEIRConfirmDialog
           open={Boolean(deleteTarget)}
           onClose={() => {
             if (!isDeletingAnnouncement) setDeleteTarget(null)

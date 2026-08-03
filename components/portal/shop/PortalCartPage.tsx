@@ -12,7 +12,7 @@ import { useCartStore } from "@/store/cartStore"
 import type { Address } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 type UserCheckout = {
@@ -274,7 +274,7 @@ export function PortalCartPage() {
                   onClick={initializeBankTransfer}
                 >
                   {isBankPaying ? (
-                    <DheirLoader color="#fff" size={8} />
+                    <DHEIRLoader color="#fff" size={8} />
                   ) : (
                     "Pay by bank transfer"
                   )}
@@ -302,7 +302,7 @@ export function PortalCartPage() {
                   onClick={initializePayment}
                 >
                   {isPaying ? (
-                    <DheirLoader color="#fff" size={8} />
+                    <DHEIRLoader color="#fff" size={8} />
                   ) : MONNIFY_ENABLED ? (
                     "Pay with card (Monnify)"
                   ) : (

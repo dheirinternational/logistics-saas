@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { IconSearch } from "@tabler/icons-react"
 
 type PortalPackagesToolbarProps = {
@@ -37,7 +37,7 @@ export function PortalPackagesToolbar({
       {!hideStatusFilter && onStatusChange && statusOptions.length > 0 ? (
         <label className="portal-packages__filter-select">
           <span className="sr-only">Filter by status</span>
-          <DheirSelect
+          <DHEIRSelect
             compact
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
@@ -47,7 +47,7 @@ export function PortalPackagesToolbar({
                 {opt.label}
               </option>
             ))}
-          </DheirSelect>
+          </DHEIRSelect>
         </label>
       ) : null}
     </div>

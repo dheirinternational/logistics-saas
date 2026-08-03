@@ -37,7 +37,7 @@ export function MarketingFooter() {
             <Link href="/" className="inline-flex items-center gap-2.5 no-underline">
               <figure className="relative h-10 w-10 shrink-0 overflow-hidden bg-transparent md:h-11 md:w-11">
                 <Image
-                  src="/Dheir colored.png"
+                  src="/DHEIR colored.png"
                   alt=""
                   width={44}
                   height={44}
@@ -71,15 +71,17 @@ export function MarketingFooter() {
                   {SITE_CONTACT.email}
                 </a>
               </li>
-              <li>
-                <a
-                  href={SITE_CONTACT.phoneHref}
-                  className="marketing-footer__link inline-flex items-center gap-2.5"
-                >
-                  <IconPhone size={18} stroke={1.5} aria-hidden />
-                  {SITE_CONTACT.phone}
-                </a>
-              </li>
+              {SITE_CONTACT.phones.map((phone) => (
+                <li key={phone.label}>
+                  <a
+                    href={phone.href}
+                    className="marketing-footer__link inline-flex items-center gap-2.5"
+                  >
+                    <IconPhone size={18} stroke={1.5} aria-hidden />
+                    {phone.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 

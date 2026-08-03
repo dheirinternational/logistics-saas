@@ -6,6 +6,7 @@ import {
   IconCurrencyNaira,
   IconLayoutDashboard,
   IconLayoutGrid,
+  IconMail,
   IconMapPin,
   IconPackage,
   IconPhotoVideo,
@@ -81,6 +82,11 @@ export const navLinks: NavLink[] = [
     name: "Pricing List",
     path: "/admin/pricing_list",
     icon: IconCurrencyNaira,
+  },
+  {
+    name: "Inbox",
+    path: "/admin/inbox",
+    icon: IconMail,
   },
   {
     name: "Profile",

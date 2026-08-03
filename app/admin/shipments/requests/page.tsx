@@ -13,8 +13,8 @@ import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
 import { FaImage } from 'react-icons/fa'
-import { DheirLoader } from "@/components/ui/DheirLoader"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { matchesStatusFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
 import { IconChecks, IconClock } from "@tabler/icons-react"
@@ -239,7 +239,7 @@ const Page: NextPage = () => {
     <div className="portal-home">
       {isDataLoading ? (
         <div className="portal-home__panel portal-home__loader">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : (
         <>
@@ -409,13 +409,13 @@ const Page: NextPage = () => {
 
                     <label className="portal-packages__field">
                       <span className="portal-packages__field-label">Unit</span>
-                      <DheirSelect
+                      <DHEIRSelect
                         value={weightUnit}
                         onChange={(e) => setWeightUnit(e.target.value as "kg" | "cbm")}
                       >
                         <option value="kg">KG</option>
                         <option value="cbm">CBM</option>
-                      </DheirSelect>
+                      </DHEIRSelect>
                     </label>
 
                     <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
@@ -516,7 +516,7 @@ const Page: NextPage = () => {
                       disabled={isCreatingShipmentData}
                     >
                       {isCreatingShipmentData ? (
-                        <DheirLoader color="#fff" size={10} />
+                        <DHEIRLoader color="#fff" size={10} />
                       ) : (
                         <span className="inline-flex items-center gap-2">
                           <BiCheck className="text-lg" />

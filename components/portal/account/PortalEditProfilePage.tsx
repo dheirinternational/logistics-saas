@@ -19,7 +19,7 @@ import {
   useEffect,
   useState,
 } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 type BasicDetails = Omit<
@@ -222,7 +222,7 @@ export function PortalEditProfilePage() {
   if (isLoading) {
     return (
       <div className="portal-account portal-account--centered">
-        <DheirLoader color="var(--color-dheir-blue)" size={12} />
+        <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
       </div>
     )
   }
@@ -250,7 +250,7 @@ export function PortalEditProfilePage() {
             )}
             {isImageUploading ? (
               <span className="portal-account__photo-overlay">
-                <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
               </span>
             ) : null}
           </div>
@@ -319,7 +319,7 @@ export function PortalEditProfilePage() {
             disabled={!isEditButtonActive || isEditLoading}
           >
             {isEditLoading ? (
-              <DheirLoader color="#fff" size={8} />
+              <DHEIRLoader color="#fff" size={8} />
             ) : (
               "Save changes"
             )}
@@ -351,7 +351,7 @@ export function PortalEditProfilePage() {
               onClick={initializeEmailVerification}
             >
               {isSendingEmailVerification ? (
-                <DheirLoader color="var(--color-dheir-blue)" size={8} />
+                <DHEIRLoader color="var(--color-dheir-blue)" size={8} />
               ) : (
                 "Verify email"
               )}
@@ -364,7 +364,7 @@ export function PortalEditProfilePage() {
             onClick={initializeEmailChangeConfirmation}
           >
             {isSendingEmailChangeVerification ? (
-              <DheirLoader color="var(--color-dheir-blue)" size={8} />
+              <DHEIRLoader color="var(--color-dheir-blue)" size={8} />
             ) : (
               "Change email"
             )}
@@ -390,7 +390,7 @@ export function PortalEditProfilePage() {
             onClick={initializePasswordChangeConfirmation}
           >
             {isSendingPasswordChangeVerification ? (
-              <DheirLoader color="var(--color-dheir-blue)" size={8} />
+              <DHEIRLoader color="var(--color-dheir-blue)" size={8} />
             ) : (
               "Change password"
             )}

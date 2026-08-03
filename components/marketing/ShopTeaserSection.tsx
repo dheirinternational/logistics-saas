@@ -1,7 +1,7 @@
 "use client"
 
 import { BlurReveal } from "@/components/auth/BlurReveal"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { NetLift } from "@/components/marketing/NetLift"
 import { ShopProductCard } from "@/components/marketing/ShopProductCard"
 import { ShopCatalogCard, getShopCatalogHref } from "@/components/shop/ShopCatalogCard"
@@ -107,7 +107,7 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
           <div className="shop-teaser__grid mt-6 md:mt-8">
             {loading ? (
               <div className="col-span-full flex justify-center py-12">
-                <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
               </div>
             ) : featured.length === 0 ? (
               <p className="col-span-full py-8 text-center text-sm text-dheir-muted">
@@ -136,7 +136,7 @@ export function ShopTeaserSection({ isAuthenticated = false }: ShopTeaserSection
           <div className="shop-category-grid mt-6 md:mt-8">
             {loading ? (
               <div className="col-span-full flex justify-center py-12">
-                <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
               </div>
             ) : catalog.length === 0 ? (
               <p className="col-span-full py-8 text-center text-sm text-dheir-muted">

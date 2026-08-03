@@ -19,7 +19,7 @@ import type { Order } from "@/types/entityTypeDef"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 export function PortalOrderDetailPage() {
@@ -120,7 +120,7 @@ export function PortalOrderDetailPage() {
 
       {loading ? (
         <div className="portal-packages__loading">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : !order ? (
         <div className="portal-packages__empty">

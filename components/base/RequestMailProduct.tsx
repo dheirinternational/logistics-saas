@@ -1,7 +1,7 @@
 import { Package, PackageImage } from "@/types/entityTypeDef"
 import Image from "next/image"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 interface Props {
@@ -98,7 +98,7 @@ const RequestMailProduct = ({prop, handlePackage}: Props) => {
             <div className='flex-1 flex gap-2 p-2 border border-dark/8 rounded shadow-sm bg-gray-100'>
                 {
                     isFetchingImages && <div className='p-3'>
-                        <DheirLoader color='orange' size={8} />
+                        <DHEIRLoader color='orange' size={8} />
                     </div>
                 }
                 {packageImages.map( image => 

@@ -8,7 +8,7 @@ import {
 import type { Package, PackageImage } from "@/types/entityTypeDef"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 
 import { PortalPackageTimeline } from "@/components/portal/packages/PortalPackageTimeline"
 
@@ -84,7 +84,7 @@ export function PortalPackageCard({ packag, warehousesMap }: PortalPackageCardPr
       <div className="portal-packages__card-foot">
         <div className="portal-packages__card-images">
           {loadingImages ? (
-            <DheirLoader size={6} color="var(--color-dheir-blue)" />
+            <DHEIRLoader size={6} color="var(--color-dheir-blue)" />
           ) : images.length === 0 ? (
             <span className="portal-packages__card-no-img">No photos yet</span>
           ) : (

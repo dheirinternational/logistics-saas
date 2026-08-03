@@ -7,7 +7,7 @@ import { IconMail } from "@tabler/icons-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { FormEvent, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 export default function ChangeEmail() {
@@ -91,7 +91,7 @@ export default function ChangeEmail() {
             className="dheir-btn-primary"
           >
             {isChangingEmail ? (
-              <DheirLoader color="#fff" size={20} />
+              <DHEIRLoader color="#fff" size={20} />
             ) : (
               "Save email"
             )}

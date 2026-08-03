@@ -2,8 +2,8 @@
 
 import SearchComponent from "@/components/admin/orders/SearchComponent"
 import { Table } from "@/components/admin/table/Table"
-import { DheirLoader } from "@/components/ui/DheirLoader"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
 import { ORDER_ADMIN_STATUS_OPTIONS } from "@/lib/portal/orderStatus"
 import { toast } from "@/lib/ui/toast"
@@ -175,7 +175,7 @@ const Page: NextPage = () => {
 
                 {isDataLoading ? (
                     <div className="portal-home__panel portal-home__loader">
-                        <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                        <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
                     </div>
                 ) : (
                     <>
@@ -561,7 +561,7 @@ const OrderModal = ({
 
                             <label className="portal-packages__field">
                                 <span className="portal-packages__field-label">Status</span>
-                                <DheirSelect
+                                <DHEIRSelect
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value as Order["status"])}
                                 >
@@ -570,7 +570,7 @@ const OrderModal = ({
                                             {opt.label}
                                         </option>
                                     ))}
-                                </DheirSelect>
+                                </DHEIRSelect>
                             </label>
 
                             <div className="admin-modal__actions" style={{ marginTop: 12 }}>
@@ -580,7 +580,7 @@ const OrderModal = ({
                                     disabled={isUpdating}
                                     className="portal-home__btn portal-home__btn--primary"
                                 >
-                                    {isUpdating ? <DheirLoader color="#fff" size={10} /> : "Update status"}
+                                    {isUpdating ? <DHEIRLoader color="#fff" size={10} /> : "Update status"}
                                 </button>
                             </div>
                         </div>

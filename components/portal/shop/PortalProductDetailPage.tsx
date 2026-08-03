@@ -21,7 +21,7 @@ import {
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { extractTrailingNumericId } from "@/lib/portal/slug"
 import {
@@ -241,7 +241,7 @@ export function PortalProductDetailPage() {
   if (loadingProduct) {
     return (
       <div className="portal-account portal-account--centered">
-        <DheirLoader color="var(--color-dheir-blue)" size={12} />
+        <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
       </div>
     )
   }

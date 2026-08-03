@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import type { ChangeEvent, Dispatch, HTMLInputTypeAttribute, SetStateAction } from "react"
 
 type InputSafe = string | number | readonly string[] | undefined | null
@@ -60,7 +60,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
           disabled={readonly}
         />
       ) : select ? (
-        <DheirSelect
+        <DHEIRSelect
           name={name}
           value={(state[key] ?? "") as any} // eslint-disable-line @typescript-eslint/no-explicit-any
           onChange={(e) =>
@@ -72,7 +72,7 @@ const InputComponent = <T extends Record<string, InputSafe>,> ({title, name, typ
               {opt.name}
             </option>
           ))}
-        </DheirSelect>
+        </DHEIRSelect>
       ) : (
         <input
           type={type}

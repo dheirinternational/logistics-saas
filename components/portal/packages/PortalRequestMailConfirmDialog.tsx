@@ -3,7 +3,7 @@
 import { PortalFormField, PortalFormTextarea } from "@/components/portal/packages/PortalFormField"
 import { IconX } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 const PACKAGING_OPTIONS = [
@@ -203,7 +203,7 @@ export function PortalRequestMailConfirmDialog({
                 disabled={submitting}
               >
                 {submitting ? (
-                  <DheirLoader color="#fff" size={8} />
+                  <DHEIRLoader color="#fff" size={8} />
                 ) : (
                   "Submit request"
                 )}

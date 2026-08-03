@@ -9,9 +9,9 @@ import { toast } from "@/lib/ui/toast";
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal";
 import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal";
 import type { AdminMediaItem } from "@/lib/media/adminMedia";
-import { DheirLoader } from "@/components/ui/DheirLoader";
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader";
 import { IconX } from "@tabler/icons-react";
-import { DheirSelect } from "@/components/ui/DheirSelect";
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect";
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse";
 import { toDateInputValue } from "@/lib/dates/toDateInputValue";
 
@@ -242,7 +242,7 @@ const PackageEditComponent = () => {
 
                 <label className="portal-packages__field">
                     <span className="portal-packages__field-label">Warehouse</span>
-                    <DheirSelect
+                    <DHEIRSelect
                         name="warehouse_id"
                         value={String(selectedPackage.warehouse_id ?? "")}
                         onChange={(e) => setPackageWarehouse(Number(e.target.value))}
@@ -254,7 +254,7 @@ const PackageEditComponent = () => {
                                 {w.name}
                             </option>
                         ))}
-                    </DheirSelect>
+                    </DHEIRSelect>
                 </label>
 
                 <label className="portal-packages__field">
@@ -301,7 +301,7 @@ const PackageEditComponent = () => {
 
                 <label className="portal-packages__field">
                     <span className="portal-packages__field-label">Unit</span>
-                    <DheirSelect
+                    <DHEIRSelect
                         name="weight_unit"
                         value={selectedPackage.weight_unit ?? "kg"}
                         onChange={handleSelectedPackageSelect}
@@ -309,7 +309,7 @@ const PackageEditComponent = () => {
                     >
                         <option value="kg">KG</option>
                         <option value="cbm">CBM</option>
-                    </DheirSelect>
+                    </DHEIRSelect>
                 </label>
 
                 <label className="portal-packages__field">
@@ -392,7 +392,7 @@ const PackageEditComponent = () => {
                         </button>
                     </div>
                     {isEditing && isFetchingImages ? (
-                        <DheirLoader color="var(--color-dheir-blue)" size={10} />
+                        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
                     ) : null}
                 </div>
 
@@ -456,7 +456,7 @@ const PackageEditComponent = () => {
                     disabled={isUploadingPackage}
                 >
                     {isUploadingPackage ? (
-                        <DheirLoader color="#fff" size={10} />
+                        <DHEIRLoader color="#fff" size={10} />
                     ) : isEditing ? (
                         "Save changes"
                     ) : (

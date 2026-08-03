@@ -8,7 +8,7 @@ import { IncomingPackage } from '@/types/entityTypeDef'
 import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import { useEffect, useState } from 'react'
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { matchesStatusFilter, matchesWarehouseFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
 import { IconBox, IconTruck } from "@tabler/icons-react"
@@ -179,7 +179,7 @@ const Page: NextPage = () => {
     <div className="portal-home">
       {isDataLoading ? (
         <div className="portal-home__panel portal-home__loader">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : (
         <>

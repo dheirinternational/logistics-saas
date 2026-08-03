@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirConfirmDialog } from "@/components/ui/DheirConfirmDialog"
+import { DHEIRConfirmDialog } from "@/components/ui/DHEIRConfirmDialog"
 import { logoutAction } from "@/lib/db/actions"
 import { IconLogout } from "@tabler/icons-react"
 import { useState } from "react"
@@ -37,7 +37,7 @@ export function AdminSidebarLogout() {
         <span>Log out</span>
       </button>
 
-      <DheirConfirmDialog
+      <DHEIRConfirmDialog
         open={confirmOpen}
         onClose={() => {
           if (!loading) setConfirmOpen(false)

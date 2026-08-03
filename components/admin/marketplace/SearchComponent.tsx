@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { Dispatch, SetStateAction } from "react"
 
 export type MarketplaceFilterValue = {
@@ -37,7 +37,7 @@ const SearchComponent = ({ filter, setFilter, categories }: Props) => {
 
             <label className="portal-packages__field">
                 <span className="portal-packages__field-label">Status</span>
-                <DheirSelect
+                <DHEIRSelect
                     name="status"
                     value={filter.status}
                     onChange={(e) => setFilter((prev) => ({ ...prev, status: e.target.value }))}
@@ -46,12 +46,12 @@ const SearchComponent = ({ filter, setFilter, categories }: Props) => {
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                     <option value="out_of_stock">Out of stock</option>
-                </DheirSelect>
+                </DHEIRSelect>
             </label>
 
             <label className="portal-packages__field">
                 <span className="portal-packages__field-label">Category</span>
-                <DheirSelect
+                <DHEIRSelect
                     name="category"
                     value={filter.category}
                     onChange={(e) => setFilter((prev) => ({ ...prev, category: e.target.value }))}
@@ -62,7 +62,7 @@ const SearchComponent = ({ filter, setFilter, categories }: Props) => {
                             {cat.name}
                         </option>
                     ))}
-                </DheirSelect>
+                </DHEIRSelect>
             </label>
         </div>
     )

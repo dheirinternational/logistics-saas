@@ -9,7 +9,7 @@ import {
 import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPackagesPageHeader"
 import type { Warehouse } from "@/types/entityTypeDef"
 import { FormEvent, useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 export default function AddPackagePage() {
@@ -172,7 +172,7 @@ export default function AddPackagePage() {
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <DheirLoader color="#fff" size={8} />
+            <DHEIRLoader color="#fff" size={8} />
           ) : (
             "Register package"
           )}

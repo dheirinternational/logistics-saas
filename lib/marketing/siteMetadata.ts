@@ -121,8 +121,8 @@ export function buildRootMetadata(overrides?: Partial<Metadata>): Metadata {
       images: [ogImage.url],
     },
     icons: {
-      icon: "/Dheir colored.png",
-      apple: "/Dheir colored.png",
+      icon: "/DHEIR colored.png",
+      apple: "/DHEIR colored.png",
     },
     ...overrides,
   }
@@ -189,9 +189,9 @@ export function buildOrganizationJsonLd() {
         "@id": `${siteUrl}/#organization`,
         name: SITE_NAME,
         url: siteUrl,
-        logo: `${siteUrl}/Dheir%20colored.png`,
+        logo: `${siteUrl}/DHEIR%20colored.png`,
         email: SITE_CONTACT.email,
-        telephone: SITE_CONTACT.phone,
+        telephone: SITE_CONTACT.phones[0].label,
         areaServed: ["NG", "CN"],
         description: DEFAULT_DESCRIPTION,
       },

@@ -1,17 +1,17 @@
-export type DheirToastType = "success" | "error" | "info"
+export type DHEIRToastType = "success" | "error" | "info"
 
-export type DheirToastItem = {
+export type DHEIRToastItem = {
   id: string
-  type: DheirToastType
+  type: DHEIRToastType
   message: string
   exiting?: boolean
 }
 
-type ToastListener = (toasts: DheirToastItem[]) => void
+type ToastListener = (toasts: DHEIRToastItem[]) => void
 
 const DEFAULT_DURATION_MS = 4500
 
-let toasts: DheirToastItem[] = []
+let toasts: DHEIRToastItem[] = []
 const listeners = new Set<ToastListener>()
 
 function emit() {
@@ -28,7 +28,7 @@ function dismiss(id: string) {
   }, 220)
 }
 
-function show(type: DheirToastType, message: string, durationMs = DEFAULT_DURATION_MS) {
+function show(type: DHEIRToastType, message: string, durationMs = DEFAULT_DURATION_MS) {
   const trimmed = message?.trim()
   if (!trimmed) return
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { IconX } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
@@ -170,7 +170,7 @@ export function AdminAnnouncementModal({
             onClick={() => void handleSubmit()}
             disabled={!canSubmit || submitting}
           >
-            {submitting ? <DheirLoader size="sm" variant="white" /> : "Save"}
+            {submitting ? <DHEIRLoader size="sm" variant="white" /> : "Save"}
           </button>
         </div>
       </div>

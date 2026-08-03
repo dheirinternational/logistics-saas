@@ -1,6 +1,6 @@
 "use client"
 
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { IconX } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
@@ -133,7 +133,7 @@ export function EditDeliveryZoneModal({ zone, onClose, onSaved }: EditDeliveryZo
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? <DheirLoader color="#fff" size={10} /> : "Save changes"}
+            {isSaving ? <DHEIRLoader color="#fff" size={10} /> : "Save changes"}
           </button>
         </footer>
       </div>

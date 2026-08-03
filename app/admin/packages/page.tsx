@@ -1,8 +1,8 @@
 "use client"
 
 import { Table } from "@/components/admin/table/Table"
-import { DheirLoader } from "@/components/ui/DheirLoader"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { toast } from "@/lib/ui/toast"
 import { usePackageStore } from "@/store/incomingPackagesStore"
 import { useEditModalStore } from "@/types/editModalStore"
@@ -212,7 +212,7 @@ const Page: NextPage = () => {
 
       {isDataLoading ? (
         <div className="portal-home__panel portal-home__loader">
-          <DheirLoader color="var(--color-dheir-blue)" size={12} />
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
       ) : (
         <>
@@ -287,7 +287,7 @@ const Page: NextPage = () => {
 
               <label className="portal-packages__field">
                 <span className="portal-packages__field-label">Warehouse</span>
-                <DheirSelect
+                <DHEIRSelect
                   name="warehouse_id"
                   value={filterValues.warehouse_id}
                   onChange={(e) => setFilterValues((prev) => ({ ...prev, warehouse_id: e.target.value }))}
@@ -298,12 +298,12 @@ const Page: NextPage = () => {
                       {w.name}
                     </option>
                   ))}
-                </DheirSelect>
+                </DHEIRSelect>
               </label>
 
               <label className="portal-packages__field">
                 <span className="portal-packages__field-label">Status</span>
-                <DheirSelect
+                <DHEIRSelect
                   name="status"
                   value={filterValues.status}
                   onChange={(e) => setFilterValues((prev) => ({ ...prev, status: (e.target.value as PackageStatus) || "" }))}
@@ -313,7 +313,7 @@ const Page: NextPage = () => {
                   <option value="requested_for">requested_for</option>
                   <option value="assigned_to_shipment">assigned_to_shipment</option>
                   <option value="delivered">delivered</option>
-                </DheirSelect>
+                </DHEIRSelect>
               </label>
             </div>
           </section>

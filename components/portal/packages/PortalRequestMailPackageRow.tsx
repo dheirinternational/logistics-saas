@@ -10,7 +10,7 @@ import type { Package, PackageImage } from "@/types/entityTypeDef"
 import { IconCheck } from "@tabler/icons-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 
 type PortalRequestMailPackageRowProps = {
   packag: Package
@@ -130,7 +130,7 @@ export function PortalRequestMailPackageRow({
         <div className="portal-request-mail__package-foot">
           <div className="portal-request-mail__package-images">
             {loadingImages ? (
-              <DheirLoader size={6} color="var(--color-dheir-blue)" />
+              <DHEIRLoader size={6} color="var(--color-dheir-blue)" />
             ) : images.length === 0 ? (
               <span className="portal-request-mail__package-no-img">No photos</span>
             ) : (

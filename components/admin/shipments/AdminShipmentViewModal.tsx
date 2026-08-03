@@ -12,9 +12,9 @@ import { useShipmentStore } from "@/store/shipmentsStore"
 import { useEditModalStore } from "@/types/editModalStore"
 import type { ShipmentStatus } from "@/types/statusTypes"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
-import { DheirSelect } from "@/components/ui/DheirSelect"
+import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 
 const SHIPMENT_STATUSES: ShipmentStatus[] = [
   "processing",
@@ -213,7 +213,7 @@ export function AdminShipmentViewModal() {
         <label className="portal-packages__field-label" htmlFor="shipment-status">
           Update status
         </label>
-        <DheirSelect
+        <DHEIRSelect
           id="shipment-status"
           value={status}
           onChange={(e) => setStatus(e.target.value as ShipmentStatus)}
@@ -224,7 +224,7 @@ export function AdminShipmentViewModal() {
               {getShipmentStatusLabel(s)}
             </option>
           ))}
-        </DheirSelect>
+        </DHEIRSelect>
       </div>
 
       <div className="admin-modal__actions">
@@ -250,7 +250,7 @@ export function AdminShipmentViewModal() {
           }
         >
           {isUpdating ? (
-            <DheirLoader color="#fff" size={8} />
+            <DHEIRLoader color="#fff" size={8} />
           ) : (
             "Save status"
           )}

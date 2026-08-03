@@ -9,7 +9,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { useEffect, useMemo, useState } from "react"
-import { DheirConfirmDialog } from "@/components/ui/DheirConfirmDialog"
+import { DHEIRConfirmDialog } from "@/components/ui/DHEIRConfirmDialog"
 
 type TableProps<T> = {
     importedData: T[],
@@ -195,7 +195,7 @@ export function Table <T,>({
             </div>
           </div>
 
-          <DheirConfirmDialog
+          <DHEIRConfirmDialog
             open={isDeleteConfirmOpen}
             onClose={() => {
               if (!isDeletingSelected) setIsDeleteConfirmOpen(false)

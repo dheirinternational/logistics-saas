@@ -12,7 +12,7 @@ import {
 } from "@/lib/portal/warehouseAddress"
 import type { Warehouse } from "@/types/entityTypeDef"
 import { useEffect, useMemo, useState } from "react"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
 import { IconCopy } from "@tabler/icons-react"
@@ -34,11 +34,20 @@ export default function WarehouseAddressPage() {
     ])
       .then(([whRes, userRes]) => {
         if (whRes.data?.length) {
-          const list = whRes.data as Warehouse[]
+          const list = (whRes.data as Warehouse[]).filter(
+            (w) => !w.name.toLowerCase().includes("foshan")
+          )
+          list.sort((a, b) => {
+            const aIsGz = a.name.toLowerCase().includes("guangzhou")
+            const bIsGz = b.name.toLowerCase().includes("guangzhou")
+            if (aIsGz && !bIsGz) return -1
+            if (!aIsGz && bIsGz) return 1
+            return 0
+          })
           setWarehouses(list)
-          const cn =
-            list.find((w) => w.country === "CN") ?? list[0]
-          setSelectedId(String(cn.id))
+          if (list.length > 0) {
+            setSelectedId(String(list[0].id))
+          }
         }
         if (userRes.data?.code) setMemberCode(userRes.data.code)
       })
@@ -61,7 +70,7 @@ export default function WarehouseAddressPage() {
   if (loading) {
     return (
       <div className="portal-packages portal-packages__loading">
-        <DheirLoader color="var(--color-dheir-blue)" size={12} />
+        <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
       </div>
     )
   }
@@ -92,8 +101,7 @@ export default function WarehouseAddressPage() {
         </div>
       ) : null}
 
-      {/* Hidden per request, but preserved for future toggle */}
-      {/* {selected && copyText ? (
+      {selected && copyText ? (
         <PortalHomeWarehouseCard
           warehouseName={selected.name}
           copyText={copyText}
@@ -102,7 +110,7 @@ export default function WarehouseAddressPage() {
         <div className="portal-packages__empty">
           <p>No warehouse configured yet. Contact support.</p>
         </div>
-      )} */}
+      )}
 
       {selected && memberCode ? (
         <section className="portal-packages__detail-grid" aria-labelledby="warehouse-breakdown-heading">

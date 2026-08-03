@@ -4,7 +4,7 @@ import AdminProductEditModal from "@/components/admin/marketplace/AdminProductEd
 import { ProductCoverThumb } from "@/components/admin/marketplace/ProductCoverThumb"
 import SearchComponent, { MarketplaceFilterValue } from "@/components/admin/marketplace/SearchComponent"
 import { Table } from "@/components/admin/table/Table"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { Product, ProductCategory } from "@/types/entityTypeDef"
 import { createColumnHelper } from "@tanstack/react-table"
 import {
@@ -270,7 +270,7 @@ const Page: NextPage = () => {
 
                 {isDataLoading ? (
                     <div className="portal-home__panel portal-home__loader">
-                        <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                        <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
                     </div>
                 ) : (
                     <>

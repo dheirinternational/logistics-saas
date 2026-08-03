@@ -3,7 +3,7 @@
 import { Table } from "@/components/admin/table/Table"
 import { AddWarehouseModal } from "@/components/admin/warehouse/AddWarehouseModal"
 import SearchComponent from "@/components/admin/warehouse/SearchComponent"
-import { DheirLoader } from "@/components/ui/DheirLoader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { Warehouse } from "@/types/entityTypeDef"
 import { createColumnHelper } from "@tanstack/react-table"
 import { IconBuildingWarehouse, IconPlane, IconShip, IconWorld } from "@tabler/icons-react"
@@ -137,7 +137,7 @@ const Page: NextPage = () => {
 
             {isDataLoading ? (
                 <div className="portal-home__panel portal-home__loader">
-                    <DheirLoader color="var(--color-dheir-blue)" size={12} />
+                    <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
                 </div>
             ) : (
                 <>
