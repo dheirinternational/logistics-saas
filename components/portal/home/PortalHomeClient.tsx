@@ -50,6 +50,18 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
         memberCode={data.memberCode}
       />
 
+      <div 
+        className="my-6 p-5 rounded-xl border text-sm" 
+        style={{ 
+          backgroundColor: "#fef2f2", 
+          borderColor: "#fca5a5", 
+          color: "#991b1b",
+          lineHeight: "1.6"
+        }}
+      >
+        Please use your full name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{data.firstName} {data.lastName}/{data.memberCode}</strong>). Goods without name and unique code will be rejected!!!.
+      </div>
+
       <PortalHomeToolbar activeTab={tab} onTabChange={onTabChange} />
 
       {tab === "overview" ? (
