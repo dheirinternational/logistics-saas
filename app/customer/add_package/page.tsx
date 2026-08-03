@@ -41,6 +41,42 @@ export default function AddPackagePage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    const tracking = packageInformation.incoming_tracking_number.trim()
+    const itemName = packageInformation.declared_item_name.trim()
+
+    // 1. Basic empty check
+    if (!tracking || !itemName) {
+      toast.error("Please fill in all required fields")
+      return
+    }
+
+    // 2. Alert/error if tracking number contains spaces or is suspiciously formatted
+    if (tracking.includes(" ")) {
+      toast.error("Tracking number should not contain spaces. Check that you didn't paste an item name or address.")
+      return
+    }
+
+    // 3. Check if tracking number is too short (usually tracking codes are at least 5 characters)
+    if (tracking.length < 5) {
+      toast.error("Tracking number is too short. Please double-check.")
+      return
+    }
+
+    // 4. Check if tracking number contains no numeric digits at all (typical tracking numbers have numbers)
+    const hasDigits = /\d/.test(tracking)
+    if (!hasDigits) {
+      toast.error(`"${tracking}" doesn't look like a tracking number. It has no digits. Please verify you didn't put the product name here by mistake.`)
+      return
+    }
+
+    // 5. Check if tracking number looks exactly like common items/words (simple letters only)
+    const onlyLetters = /^[a-zA-Z]+$/.test(tracking)
+    if (onlyLetters) {
+      toast.error(`"${tracking}" appears to be a description/word instead of a supplier tracking number.`)
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const res = await fetch("/api/incoming-packages", {
