@@ -33,10 +33,10 @@ const pages = [
     }
 ]
 
-export default function ShipmentsLayouts({children}: {children:ReactNode}){
+export default function ShipmentsLayouts({ children }: { children: ReactNode }) {
 
     const pathName = usePathname()
-        const { isModalActive, setIsModalActive, closeModal } = useEditModalStore()
+    const { isModalActive, setIsModalActive, closeModal } = useEditModalStore()
     const { selectedPackage, setSelectedPackage, setReadOnly, resetSelectedPackage } = usePackageStore()
     const { resetSelectedShipment } = useShipmentStore()
 
@@ -47,20 +47,20 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
     // console.log(pathName)
 
     useEffect(() => {
-        function setPageTitle(){
-            switch(pathName) {
-                case "/admin/shipments/requests" :
+        function setPageTitle() {
+            switch (pathName) {
+                case "/admin/shipments/requests":
                     setCurrentPage("shipment_requests")
                     break
-                case "/admin/shipments" :
+                case "/admin/shipments":
                     setCurrentPage("expected_shipments")
                     break
-                case "/admin/shipments/accepted_shipments" :
+                case "/admin/shipments/accepted_shipments":
                     setCurrentPage("accepted_requests")
                     break
             }
 
-        }   
+        }
 
         setPageTitle()
     }, [pathName])
@@ -69,14 +69,14 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
     // Set Selected Edit component based on page
     const EditComponent = () => {
         if (selectedPackage) {
-            return <IncomingPackageEditComponent/>
+            return <IncomingPackageEditComponent />
         }
-        switch(currentPage){
-            case "expected_shipments" :
-                return <IncomingPackageEditComponent/>
-            case "accepted_requests" :
+        switch (currentPage) {
+            case "expected_shipments":
+                return <IncomingPackageEditComponent />
+            case "accepted_requests":
                 return <AdminShipmentViewModal />
-            default :
+            default:
                 return <div></div>
         }
     }
@@ -98,7 +98,7 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
             ? "View shipment details and update status."
             : "Add packages to warehouse with photos and details."
 
-    return(
+    return (
         <div className='max-h-full h-full overflow-hidden relative flex'>
             <div className="portal-home overflow-y-auto max-h-full h-full flex-1">
                 <header className="portal-home__greeting">
@@ -136,12 +136,12 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
                             onClick={() => {
                                 setReadOnly()
                                 setSelectedPackage({
-                                    id: 0, 
-                                    incoming_package_id: "", 
+                                    id: 0,
+                                    incoming_package_id: "",
                                     package_name: "",
-                                    user_id: 0,  
-                                    customer_code: "", 
-                                    warehouse_id: 0, 
+                                    user_id: 0,
+                                    customer_code: "",
+                                    warehouse_id: 0,
                                     weight: 0,
                                     amount: 0,
                                     condition: "good",
@@ -208,8 +208,8 @@ export default function ShipmentsLayouts({children}: {children:ReactNode}){
 
 const IncomingPackageEditComponent = () => {
 
-    const {setIsModalActive} = useEditModalStore()
-    const {selectedPackage, handleSelectedPackageInput, handleSelectedPackageSelect, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly} = usePackageStore()
+    const { setIsModalActive } = useEditModalStore()
+    const { selectedPackage, handleSelectedPackageInput, handleSelectedPackageSelect, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly } = usePackageStore()
 
     // Arrays
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
@@ -219,7 +219,7 @@ const IncomingPackageEditComponent = () => {
 
     // Selected Objects
     const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
-        
+
 
     // Fetching Data indicators 
     const [isFetchingWarehouse, setIsFetchingWarehouse] = useState(true)
@@ -231,11 +231,11 @@ const IncomingPackageEditComponent = () => {
     // Fetch Warehouses
     const fetchWarehouses = async () => {
         setIsFetchingWarehouse(true)
-        try{
+        try {
             const res = await fetch(`/api/warehouses`)
             const result = await res.json()
 
-            if(!res.ok){
+            if (!res.ok) {
                 toast.error(result.message)
                 return
             }
@@ -243,11 +243,11 @@ const IncomingPackageEditComponent = () => {
             setWarehouses(result.data)
 
         }
-        catch(err){
+        catch (err) {
             console.error("Network Error", err)
             toast.error("Network Error")
         }
-        finally{
+        finally {
             setIsFetchingWarehouse(false)
         }
     }
@@ -264,7 +264,7 @@ const IncomingPackageEditComponent = () => {
         formData.append("inp_status", "stored")
         formData.append("user_id", String(selectedPackage?.user_id))
 
-        try{
+        try {
             const res = await fetch("/api/packages", {
                 method: "POST",
                 body: formData
@@ -272,7 +272,7 @@ const IncomingPackageEditComponent = () => {
 
             const result = await res.json()
 
-            if(!res.ok){
+            if (!res.ok) {
                 toast.error(result.message)
                 return
             }
@@ -282,17 +282,17 @@ const IncomingPackageEditComponent = () => {
             resetSelectedPackage()
             setIsModalActive()
         }
-        catch(err){
+        catch (err) {
             toast.error("Network Error")
-            console.error("Network Error",err)
+            console.error("Network Error", err)
         }
-        finally{
+        finally {
             setIsUploadingPackage(false)
-            
+
         }
     }
 
-    
+
     // Fetch Data upon initial load 
     useEffect(() => {
         fetchWarehouses()
@@ -303,12 +303,12 @@ const IncomingPackageEditComponent = () => {
     useEffect(() => {
         if (!selectedPackage) return
 
-        const warehouse = warehouses.find( warehouse => 
+        const warehouse = warehouses.find(warehouse =>
             selectedPackage.warehouse_id === warehouse.id
         )
 
         setSelectedWarehouse(warehouse || null)
-        
+
 
     }, [selectedPackage])
 
@@ -456,88 +456,88 @@ const IncomingPackageEditComponent = () => {
                     </div>
 
                     <div className="admin-uploader">
-                            <div className="admin-uploader__row">
-                                <div>
-                                    <p className="portal-packages__field-label" style={{ margin: 0 }}>
-                                        Photos
-                                    </p>
-                                    <p className="admin-uploader__help">
-                                        Optional — choose photos or videos from the media library.
-                                    </p>
-                                </div>
-                                <div style={{ display: "flex", gap: "0.5rem" }}>
-                                    <button
-                                        type="button"
-                                        className="portal-home__btn portal-home__btn--secondary"
-                                        onClick={() => setPickerOpen(true)}
-                                    >
-                                        Choose from library
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="portal-home__btn portal-home__btn--primary"
-                                        onClick={() => setUploadOpen(true)}
-                                    >
-                                        Upload
-                                    </button>
-                                </div>
+                        <div className="admin-uploader__row">
+                            <div>
+                                <p className="portal-packages__field-label" style={{ margin: 0 }}>
+                                    Photos
+                                </p>
+                                <p className="admin-uploader__help">
+                                    Optional, hoose photos or videos from the media library.
+                                </p>
                             </div>
-
-                            {libraryMedia.length > 0 ? (
-                                <div className="admin-uploader__previews">
-                                    {libraryMedia.map((item) => (
-                                        <div key={item.id} className="admin-uploader__preview">
-                                            {item.mediaType === "video" ? (
-                                                <video
-                                                    src={item.publicUrl}
-                                                    muted
-                                                    playsInline
-                                                    preload="metadata"
-                                                    className="object-cover"
-                                                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-                                                />
-                                            ) : (
-                                                <Image src={item.publicUrl} alt="" fill className="object-cover" unoptimized />
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="admin-uploader__help">No media selected yet.</p>
-                            )}
+                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                                <button
+                                    type="button"
+                                    className="portal-home__btn portal-home__btn--secondary"
+                                    onClick={() => setPickerOpen(true)}
+                                >
+                                    Choose from library
+                                </button>
+                                <button
+                                    type="button"
+                                    className="portal-home__btn portal-home__btn--primary"
+                                    onClick={() => setUploadOpen(true)}
+                                >
+                                    Upload
+                                </button>
+                            </div>
                         </div>
 
-                        <MediaPickerModal
-                            open={pickerOpen}
-                            maxCount={8}
-                            minCount={0}
-                            initialSelected={libraryMedia}
-                            title="Package media"
-                            onClose={() => setPickerOpen(false)}
-                            onConfirm={setLibraryMedia}
-                        />
+                        {libraryMedia.length > 0 ? (
+                            <div className="admin-uploader__previews">
+                                {libraryMedia.map((item) => (
+                                    <div key={item.id} className="admin-uploader__preview">
+                                        {item.mediaType === "video" ? (
+                                            <video
+                                                src={item.publicUrl}
+                                                muted
+                                                playsInline
+                                                preload="metadata"
+                                                className="object-cover"
+                                                style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                                            />
+                                        ) : (
+                                            <Image src={item.publicUrl} alt="" fill className="object-cover" unoptimized />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="admin-uploader__help">No media selected yet.</p>
+                        )}
+                    </div>
 
-                        <MediaUploadModal
-                            open={uploadOpen}
-                            onClose={() => setUploadOpen(false)}
-                            onFinished={(assets) => {
-                                setLibraryMedia((prev) => [...prev, ...assets])
-                                setUploadOpen(false)
-                            }}
-                        />
+                    <MediaPickerModal
+                        open={pickerOpen}
+                        maxCount={8}
+                        minCount={0}
+                        initialSelected={libraryMedia}
+                        title="Package media"
+                        onClose={() => setPickerOpen(false)}
+                        onConfirm={setLibraryMedia}
+                    />
+
+                    <MediaUploadModal
+                        open={uploadOpen}
+                        onClose={() => setUploadOpen(false)}
+                        onFinished={(assets) => {
+                            setLibraryMedia((prev) => [...prev, ...assets])
+                            setUploadOpen(false)
+                        }}
+                    />
 
                     <div className="admin-modal__actions">
-                            <button
-                                type="submit"
-                                className="portal-home__btn portal-home__btn--primary"
-                                disabled={isUploadingPackage}
-                            >
-                                {isUploadingPackage ? (
-                                    <DHEIRLoader color="#fff" size={10} />
-                                ) : (
-                                    "Add package"
-                                )}
-                            </button>
+                        <button
+                            type="submit"
+                            className="portal-home__btn portal-home__btn--primary"
+                            disabled={isUploadingPackage}
+                        >
+                            {isUploadingPackage ? (
+                                <DHEIRLoader color="#fff" size={10} />
+                            ) : (
+                                "Add package"
+                            )}
+                        </button>
                     </div>
                 </>
             ) : (

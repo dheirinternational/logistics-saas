@@ -15,7 +15,7 @@ import { DHEIRSelect } from "@/components/ui/DHEIRSelect";
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse";
 import { toDateInputValue } from "@/lib/dates/toDateInputValue";
 
-export default function PageLayout({children}: {children: ReactNode}){
+export default function PageLayout({ children }: { children: ReactNode }) {
     const { isModalActive, setIsModalActive } = useEditModalStore()
     const selectedPackage = usePackageStore((s) => s.selectedPackage)
     const isEditing = Number(selectedPackage?.id ?? 0) > 0
@@ -72,8 +72,8 @@ export default function PageLayout({children}: {children: ReactNode}){
 
 const PackageEditComponent = () => {
 
-    const {setIsModalActive} = useEditModalStore()
-    const {selectedPackage, handleSelectedPackageInput, handleSelectedPackageSelect, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly} = usePackageStore()
+    const { setIsModalActive } = useEditModalStore()
+    const { selectedPackage, handleSelectedPackageInput, handleSelectedPackageSelect, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly } = usePackageStore()
 
     // Arrays
     const [warehouses, setWarehouses] = useState<Warehouse[]>([])
@@ -84,7 +84,7 @@ const PackageEditComponent = () => {
 
     // Selected Objects
     const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
-        
+
 
     // Fetching Data indicators 
     const [isFetchingWarehouse, setIsFetchingWarehouse] = useState(true)
@@ -98,11 +98,11 @@ const PackageEditComponent = () => {
     // Fetch Warehouses
     const fetchWarehouses = async () => {
         setIsFetchingWarehouse(true)
-        try{
+        try {
             const res = await fetch(`/api/warehouses`)
             const result = await res.json()
 
-            if(!res.ok){
+            if (!res.ok) {
                 toast.error(result.message)
                 return
             }
@@ -110,11 +110,11 @@ const PackageEditComponent = () => {
             setWarehouses(result.data)
 
         }
-        catch(err){
+        catch (err) {
             console.error("Network Error", err)
             toast.error("Network Error")
         }
-        finally{
+        finally {
             setIsFetchingWarehouse(false)
         }
     }
@@ -122,11 +122,11 @@ const PackageEditComponent = () => {
     // Fetch Images 
     const fetchImages = async () => {
         setIsFetchingImages(true)
-        try{
+        try {
             const res = await fetch(`/api/packages/images/${Number(selectedPackage?.id)}`)
             const result = await res.json()
 
-            if(!res.ok){
+            if (!res.ok) {
                 toast.error(result.message)
                 return
             }
@@ -134,11 +134,11 @@ const PackageEditComponent = () => {
             setImages(result.data ?? [])
 
         }
-        catch(err){
+        catch (err) {
             console.error("Network Error", err)
             toast.error("Network Error")
         }
-        finally{
+        finally {
             setIsFetchingImages(false)
         }
     }
@@ -153,7 +153,7 @@ const PackageEditComponent = () => {
             formData.append("media_asset_ids", String(item.id))
         })
 
-        try{
+        try {
             const res = await fetch(
                 isEditing ? `/api/packages/${packageId}` : "/api/packages",
                 {
@@ -165,7 +165,7 @@ const PackageEditComponent = () => {
 
             const result = await parseJsonResponse(res)
 
-            if(!res.ok){
+            if (!res.ok) {
                 toast.error(apiErrorMessage(result, "Could not save package"))
                 return
             }
@@ -177,18 +177,18 @@ const PackageEditComponent = () => {
             setImages([])
             setLibraryMedia([])
         }
-        catch(err){
+        catch (err) {
             const message = err instanceof Error ? err.message : "Network error"
             toast.error(message)
             console.error("Package save failed", err)
         }
-        finally{
+        finally {
             setIsUploadingPackage(false)
-            
+
         }
     }
 
-    
+
     // Fetch Data upon initial load 
     useEffect(() => {
         if (!selectedPackage) return
@@ -206,12 +206,12 @@ const PackageEditComponent = () => {
     useEffect(() => {
         if (!selectedPackage) return
 
-        const warehouse = warehouses.find( warehouse =>
+        const warehouse = warehouses.find(warehouse =>
             Number(selectedPackage.warehouse_id) === Number(warehouse.id)
         )
 
         setSelectedWarehouse(warehouse || null)
-        
+
 
     }, [selectedPackage])
 
@@ -370,9 +370,9 @@ const PackageEditComponent = () => {
                             Photos
                         </p>
                         <p className="admin-uploader__help">
-                                    {isEditing
+                            {isEditing
                                 ? "Existing photos plus any new items you pick from the media library."
-                                : "Optional — choose photos or videos from the media library."}
+                                : "Optional, choose photos or videos from the media library."}
                         </p>
                     </div>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
