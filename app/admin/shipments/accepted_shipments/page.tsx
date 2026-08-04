@@ -81,10 +81,26 @@ const Page: NextPage = () => {
             }
         }),
         columnHelper.accessor("payment_time", {
-            header: "Payment Time"
+            header: "Payment Time",
+            cell: ({ getValue }) => {
+                const val = getValue()
+                if (!val) return "-"
+                // Handle raw "before" / "after" or "pay_before_shipment" / "pay_after_shipment"
+                if (val === "before" || val === "pay_before_shipment") return "Pay before shipment"
+                if (val === "after" || val === "pay_after_shipment") return "Pay after shipment"
+                return val.replaceAll("_", " ")
+            }
         }),
         columnHelper.accessor("paid_for", {
             header: "Paid For",
+            cell: ({ getValue }) => {
+                const paid = getValue()
+                return (
+                    <span className={`portal-packages__badge ${paid ? "portal-packages__badge--green" : "portal-packages__badge--muted"}`}>
+                        {paid ? "Yes" : "No"}
+                    </span>
+                )
+            }
         }),
         columnHelper.accessor("created_at", {
             header: "Accepted at",

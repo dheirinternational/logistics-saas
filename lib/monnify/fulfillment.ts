@@ -38,8 +38,7 @@ export async function fulfillShipmentPayment(
     `
     UPDATE shipments
     SET paid_for = true,
-        status = 'processing',
-        payment_time = NOW()::text
+        status = 'processing'
     WHERE tracking_number = $1
     `,
     [payment.shipment_tracking_number]

@@ -80,7 +80,7 @@ export default function ShipmentRequestsPage() {
                     </h3>
                     <p className="portal-packages__card-meta">
                       {req.package_ids?.length ?? 0} package(s) · Pay{" "}
-                      {req.payment_time}
+                      {req.payment_time?.replaceAll("_", " ")}
                     </p>
                   </div>
                   <PortalPackageStatusBadge label={badgeLabel} variant={badgeVariant} />
