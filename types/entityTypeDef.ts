@@ -144,7 +144,7 @@ export type ShippingRequest = {
     customer_code: string //  Fk -> Customers(code)
     package_ids: string[]
     channel: ShippingType
-    status: "pending" | "accepted"
+    status: "pending" | "vetted" | "rejected" | "accepted"
     wrapping: "bubble" | "normal"
     created_at: string
     payment_time: "before" | "after"
@@ -153,6 +153,7 @@ export type ShippingRequest = {
     total_weight_unit?: "kg" | "cbm"
     customer_note: string
     packaging: string
+    rejection_note?: string
 }
 
 

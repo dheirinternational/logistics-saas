@@ -74,6 +74,19 @@ export async function POST(req: NextRequest) {
         try {
         await client.query("BEGIN");
 
+        const reqCheck = await client.query(
+            `SELECT status FROM shipment_requests WHERE id = $1`,
+            [data.shipment_request_id]
+        );
+        if (reqCheck.rows.length === 0) {
+            await client.query("ROLLBACK");
+            return NextResponse.json({ success: false, message: "Shipment request not found" }, { status: 404 });
+        }
+        if (reqCheck.rows[0].status !== 'vetted') {
+            await client.query("ROLLBACK");
+            return NextResponse.json({ success: false, message: "Shipment request must be accepted/vetted first" }, { status: 400 });
+        }
+
         const shipmentRes = await client.query(`
             INSERT INTO shipments
             (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit)

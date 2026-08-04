@@ -39,6 +39,8 @@ const SearchComponent = <T extends Record<string, InputSafe>>({
         selectValues={[
           { name: "All statuses", value: "" },
           { name: "Pending", value: "pending" },
+          { name: "Vetted", value: "vetted" },
+          { name: "Rejected", value: "rejected" },
           { name: "Accepted", value: "accepted" },
         ]}
       />

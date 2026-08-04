@@ -23,7 +23,10 @@ export default function ShipmentRequestsPage() {
         }
         setRequests(
           (result.data ?? []).filter(
-            (x: ShippingRequest) => x.status === "pending",
+            (x: ShippingRequest) =>
+              x.status === "pending" ||
+              x.status === "vetted" ||
+              x.status === "rejected",
           ),
         )
       })
@@ -50,36 +53,58 @@ export default function ShipmentRequestsPage() {
           </div>
         ) : requests.length === 0 ? (
           <div className="portal-packages__empty">
-            <p>No pending shipment requests.</p>
+            <p>No active shipment requests.</p>
             <Link href="/customer/request_mail" className="portal-packages__text-link">
               Ship my packages
             </Link>
           </div>
         ) : (
-          requests.map((req) => (
-            <article key={req.id} className="portal-packages__card">
-              <div className="portal-packages__card-head">
-                <div className="portal-packages__card-title-block">
-                  <h3 className="portal-packages__card-title">
-                    {req.channel.toUpperCase()} shipment
-                  </h3>
-                  <p className="portal-packages__card-meta">
-                    {req.package_ids?.length ?? 0} package(s) · Pay{" "}
-                    {req.payment_time}
-                  </p>
+          requests.map((req) => {
+            let badgeLabel = "Pending Review"
+            let badgeVariant: any = "orange"
+
+            if (req.status === "vetted") {
+              badgeLabel = "Vetted (Processing)"
+              badgeVariant = "blue"
+            } else if (req.status === "rejected") {
+              badgeLabel = "Rejected"
+              badgeVariant = "muted"
+            }
+
+            return (
+              <article key={req.id} className="portal-packages__card">
+                <div className="portal-packages__card-head">
+                  <div className="portal-packages__card-title-block">
+                    <h3 className="portal-packages__card-title">
+                      {req.channel.toUpperCase()} shipment
+                    </h3>
+                    <p className="portal-packages__card-meta">
+                      {req.package_ids?.length ?? 0} package(s) · Pay{" "}
+                      {req.payment_time}
+                    </p>
+                  </div>
+                  <PortalPackageStatusBadge label={badgeLabel} variant={badgeVariant} />
                 </div>
-                <PortalPackageStatusBadge label="Pending" variant="orange" />
-              </div>
-              <div className="portal-packages__card-foot portal-packages__card-foot--split">
-                <span className="portal-packages__card-meta">
-                  {formatShippingQuantity(req.total_weight, req.channel)}
-                </span>
-                <time dateTime={req.created_at}>
-                  {new Date(req.created_at).toLocaleDateString()}
-                </time>
-              </div>
-            </article>
-          ))
+
+                {req.status === "rejected" && req.rejection_note && (
+                  <div style={{ marginTop: 12, padding: 12, borderRadius: 6, backgroundColor: "#fef2f2", border: "1px solid #fee2e2" }}>
+                    <p style={{ fontSize: "12px", color: "#b91c1c", fontWeight: 500, margin: 0 }}>
+                      <strong>Rejection reason:</strong> {req.rejection_note}
+                    </p>
+                  </div>
+                )}
+
+                <div className="portal-packages__card-foot portal-packages__card-foot--split" style={{ marginTop: 12 }}>
+                  <span className="portal-packages__card-meta">
+                    {formatShippingQuantity(req.total_weight, req.channel)}
+                  </span>
+                  <time dateTime={req.created_at}>
+                    {new Date(req.created_at).toLocaleDateString()}
+                  </time>
+                </div>
+              </article>
+            )
+          })
         )}
       </div>
     </div>

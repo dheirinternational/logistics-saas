@@ -17,7 +17,7 @@ import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { matchesStatusFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
-import { IconChecks, IconClock } from "@tabler/icons-react"
+import { IconChecks, IconClock, IconFileSearch, IconCircleX } from "@tabler/icons-react"
 import { getProductWeightFieldLabel } from "@/lib/shop/productWeight"
 import { IconX } from "@tabler/icons-react"
 
@@ -44,7 +44,9 @@ const Page: NextPage = () => {
     const [pickerOpen, setPickerOpen] = useState(false)
     const [uploadOpen, setUploadOpen] = useState(false)
 
-
+    // Two-step vetting states
+    const [rejectionNote, setRejectionNote] = useState("")
+    const [isRejecting, setIsRejecting] = useState(false)
 
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [isCreatingShipmentData, setIsCreatingShipmentData] = useState(false)
@@ -119,6 +121,40 @@ const Page: NextPage = () => {
         }
     }
 
+    const handleVetRequest = async (action: 'accept' | 'reject') => {
+        if (action === 'reject' && !rejectionNote.trim()) {
+            toast.error("Rejection note is required")
+            return
+        }
+
+        setIsCreatingShipmentData(true)
+        try {
+            const res = await fetch(`/api/shipment-requests/${modalSelectedRequest?.id}/vet`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action,
+                    rejection_note: action === 'reject' ? rejectionNote.trim() : undefined
+                })
+            })
+            const result = await res.json()
+            if (!res.ok) {
+                toast.error(result.message)
+                return
+            }
+            toast.success(`Request successfully ${action === 'accept' ? 'accepted/vetted' : 'rejected'}`)
+            setIsModalActive(false)
+            setModalSelectedRequest(null)
+            setRejectionNote("")
+            setIsRejecting(false)
+            fetchShipmentData()
+        } catch (err: any) {
+            toast.error("Failed to vet request")
+            console.error(err)
+        } finally {
+            setIsCreatingShipmentData(false)
+        }
+    }
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -140,22 +176,17 @@ const Page: NextPage = () => {
         formData.append("destination_warehouse_id", "2")
         formData.append("channel", modalSelectedRequest?.channel || "")
         formData.append("shipment_request_id", modalSelectedRequest?.id || "")
-        formData.append("shipment_request_id", modalSelectedRequest?.id || "")
         formData.append("shipment_note", modalSelectedRequest?.customer_note || "")
         formData.append("user_id", `${modalSelectedRequest?.user_id}` || "")
         formData.append("payment_time", `${modalSelectedRequest?.payment_time}` || "")
         formData.append("package_ids", `${modalSelectedRequest?.package_ids}` || "")
         formData.append("total_weight_unit", weightUnit)
 
-        console.log(Object.fromEntries(formData))
-
         if(Number(formData.get("total_price") || 0) < 1 || Number(formData.get("total_weight") || 0.01) < 0.01){
             toast.error("Input Price and Weight")
             setIsCreatingShipmentData(false)
             return 
         }
-
-
 
         try{
             const res = await fetch(`/api/shipments`, {
@@ -200,7 +231,16 @@ const Page: NextPage = () => {
             cell: ({row}) => <p>{row.original.package_ids.length}</p>
         }),
         columnHelper.accessor("status", {
-            header: "Status"
+            header: "Status",
+            cell: ({ getValue }) => {
+                const status = getValue()
+                let className = "portal-packages__badge"
+                if (status === "pending") className = "portal-packages__badge portal-packages__badge--orange"
+                else if (status === "vetted") className = "portal-packages__badge portal-packages__badge--blue"
+                else if (status === "accepted") className = "portal-packages__badge portal-packages__badge--green"
+                else if (status === "rejected") className = "portal-packages__badge portal-packages__badge--muted"
+                return <span className={className}>{status}</span>
+            }
         }),
         columnHelper.accessor("packaging", {
             header: "Packaging type"
@@ -217,6 +257,8 @@ const Page: NextPage = () => {
             onClick={() => {
                 setModalSelectedRequest(row.original)
                 setIsModalActive(true)
+                setRejectionNote(row.original.rejection_note || "")
+                setIsRejecting(false)
             }}>
                 View Request
             </button>
@@ -252,6 +294,28 @@ const Page: NextPage = () => {
                 <span className="portal-home__stat-card-label">Pending</span>
                 <span className="portal-home__stat-card-value">
                   {shipmentRequests.filter((x) => x.status === "pending").length}
+                </span>
+              </span>
+            </div>
+            <div className="portal-home__stat-card" role="listitem">
+              <span className="portal-home__stat-card-icon" aria-hidden>
+                <IconFileSearch size={22} stroke={1.5} />
+              </span>
+              <span className="portal-home__stat-card-body">
+                <span className="portal-home__stat-card-label">Vetted</span>
+                <span className="portal-home__stat-card-value">
+                  {shipmentRequests.filter((x) => x.status === "vetted").length}
+                </span>
+              </span>
+            </div>
+            <div className="portal-home__stat-card" role="listitem">
+              <span className="portal-home__stat-card-icon" aria-hidden>
+                <IconCircleX size={22} stroke={1.5} />
+              </span>
+              <span className="portal-home__stat-card-body">
+                <span className="portal-home__stat-card-label">Rejected</span>
+                <span className="portal-home__stat-card-value">
+                  {shipmentRequests.filter((x) => x.status === "rejected").length}
                 </span>
               </span>
             </div>
@@ -314,9 +378,15 @@ const Page: NextPage = () => {
             <div className="dheir-dialog admin-modal" role="dialog" aria-modal="true" aria-label="Request details">
               <div className="dheir-dialog__head">
                 <div>
-                  <h2 className="dheir-dialog__title">Request details</h2>
+                  <h2 className="dheir-dialog__title">Request details ({modalSelectedRequest?.status})</h2>
                   <p className="admin-modal__subtitle">
-                    Review the request, set price + {getProductWeightFieldLabel(weightUnit).toLowerCase()}, then accept.
+                    {modalSelectedRequest?.status === "pending"
+                      ? "Vet the consolidation request. Decide to accept or reject."
+                      : modalSelectedRequest?.status === "vetted"
+                      ? "Set final price and weight details to generate the active shipment."
+                      : modalSelectedRequest?.status === "rejected"
+                      ? "Review the rejected request details."
+                      : "Review the details of this completed shipment request."}
                   </p>
                 </div>
                 <button
@@ -377,110 +447,140 @@ const Page: NextPage = () => {
                       </p>
                     </div>
 
-                    <label className="portal-packages__field">
-                      <span className="portal-packages__field-label">Total price (₦)</span>
-                      <input
-                        type="number"
-                        name="total_price"
-                        className="dheir-input"
-                        value={totalPrice}
-                        onChange={(e) => setTotalPrice(e.target.value)}
-                        min={0}
-                        step="0.01"
-                        required
-                      />
-                    </label>
-
-                    <label className="portal-packages__field">
-                      <span className="portal-packages__field-label">
-                        {getProductWeightFieldLabel(weightUnit)}
-                      </span>
-                      <input
-                        type="number"
-                        name="total_weight"
-                        className="dheir-input"
-                        value={totalWeight}
-                        onChange={(e) => setTotalWeight(e.target.value)}
-                        min={0}
-                        step="0.01"
-                        required
-                      />
-                    </label>
-
-                    <label className="portal-packages__field">
-                      <span className="portal-packages__field-label">Unit</span>
-                      <DHEIRSelect
-                        value={weightUnit}
-                        onChange={(e) => setWeightUnit(e.target.value as "kg" | "cbm")}
-                      >
-                        <option value="kg">KG</option>
-                        <option value="cbm">CBM</option>
-                      </DHEIRSelect>
-                    </label>
-
                     <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
                       <span className="portal-packages__field-label">Customer note</span>
                       <p className="admin-shipment-view__note" style={{ marginTop: 8 }}>
                         {modalSelectedRequest?.customer_note || "-"}
                       </p>
                     </div>
-                  </div>
 
-                  <div className="admin-uploader">
-                    <div className="admin-uploader__row">
-                      <div>
-                        <p className="portal-packages__field-label" style={{ margin: 0 }}>
-                          Images
-                        </p>
-                        <p className="admin-uploader__help">
-                          Choose photos or videos from the media library (required).
+                    {modalSelectedRequest?.status === "rejected" && (
+                      <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
+                        <span className="portal-packages__field-label" style={{ color: "var(--color-dheir-orange)" }}>Rejection Note</span>
+                        <p className="admin-shipment-view__note" style={{ marginTop: 8, color: "var(--color-dheir-orange)", fontWeight: 500 }}>
+                          {modalSelectedRequest?.rejection_note || "No feedback provided."}
                         </p>
                       </div>
-                      <div style={{ display: "flex", gap: "0.5rem" }}>
-                        <button
-                          type="button"
-                          className="portal-home__btn portal-home__btn--secondary"
-                          disabled={isCreatingShipmentData}
-                          onClick={() => setPickerOpen(true)}
-                        >
-                          <span className="inline-flex items-center gap-2">
-                            Choose from library <FaImage />
+                    )}
+
+                    {modalSelectedRequest?.status === "vetted" && (
+                      <>
+                        <label className="portal-packages__field">
+                          <span className="portal-packages__field-label">Total price (₦)</span>
+                          <input
+                            type="number"
+                            name="total_price"
+                            className="dheir-input"
+                            value={totalPrice}
+                            onChange={(e) => setTotalPrice(e.target.value)}
+                            min={0}
+                            step="0.01"
+                            required
+                          />
+                        </label>
+
+                        <label className="portal-packages__field">
+                          <span className="portal-packages__field-label">
+                            {getProductWeightFieldLabel(weightUnit)}
                           </span>
-                        </button>
-                        <button
-                          type="button"
-                          className="portal-home__btn portal-home__btn--primary"
-                          disabled={isCreatingShipmentData}
-                          onClick={() => setUploadOpen(true)}
-                        >
-                          Upload
-                        </button>
-                      </div>
-                    </div>
+                          <input
+                            type="number"
+                            name="total_weight"
+                            className="dheir-input"
+                            value={totalWeight}
+                            onChange={(e) => setTotalWeight(e.target.value)}
+                            min={0}
+                            step="0.01"
+                            required
+                          />
+                        </label>
 
-                    {libraryMedia.length > 0 ? (
-                      <div className="admin-uploader__previews">
-                        {libraryMedia.map((item) => (
-                          <div key={item.id} className="admin-uploader__preview">
-                            {item.mediaType === "video" ? (
-                              <video
-                                src={item.publicUrl}
-                                muted
-                                playsInline
-                                preload="metadata"
-                                className="object-cover"
-                                style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-                              />
-                            ) : (
-                              <Image src={item.publicUrl} alt="" fill className="object-cover" unoptimized />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="admin-uploader__help">No media selected yet.</p>
+                        <label className="portal-packages__field">
+                          <span className="portal-packages__field-label">Unit</span>
+                          <DHEIRSelect
+                            value={weightUnit}
+                            onChange={(e) => setWeightUnit(e.target.value as "kg" | "cbm")}
+                          >
+                            <option value="kg">KG</option>
+                            <option value="cbm">CBM</option>
+                          </DHEIRSelect>
+                        </label>
+                      </>
                     )}
                   </div>
+
+                  {modalSelectedRequest?.status === "vetted" && (
+                    <div className="admin-uploader">
+                      <div className="admin-uploader__row">
+                        <div>
+                          <p className="portal-packages__field-label" style={{ margin: 0 }}>
+                            Images
+                          </p>
+                          <p className="admin-uploader__help">
+                            Choose photos or videos from the media library (required).
+                          </p>
+                        </div>
+                        <div style={{ display: "flex", gap: "0.5rem" }}>
+                          <button
+                            type="button"
+                            className="portal-home__btn portal-home__btn--secondary"
+                            disabled={isCreatingShipmentData}
+                            onClick={() => setPickerOpen(true)}
+                          >
+                            <span className="inline-flex items-center gap-2">
+                              Choose from library <FaImage />
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            className="portal-home__btn portal-home__btn--primary"
+                            disabled={isCreatingShipmentData}
+                            onClick={() => setUploadOpen(true)}
+                          >
+                            Upload
+                          </button>
+                        </div>
+                      </div>
+
+                      {libraryMedia.length > 0 ? (
+                        <div className="admin-uploader__previews">
+                          {libraryMedia.map((item) => (
+                            <div key={item.id} className="admin-uploader__preview">
+                              {item.mediaType === "video" ? (
+                                <video
+                                  src={item.publicUrl}
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                  className="object-cover"
+                                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                                />
+                              ) : (
+                                <Image src={item.publicUrl} alt="" fill className="object-cover" unoptimized />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="admin-uploader__help">No media selected yet.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {modalSelectedRequest?.status === "pending" && isRejecting && (
+                    <div className="portal-packages__field" style={{ gridColumn: "1 / -1", marginTop: "1rem" }}>
+                      <span className="portal-packages__field-label">Rejection Reason / Note</span>
+                      <textarea
+                        className="dheir-input"
+                        rows={3}
+                        value={rejectionNote}
+                        onChange={(e) => setRejectionNote(e.target.value)}
+                        placeholder="Provide details on why this request is being rejected..."
+                        required
+                        style={{ width: "100%", marginTop: 8 }}
+                      />
+                    </div>
+                  )}
 
                   <MediaPickerModal
                     open={pickerOpen}
@@ -508,22 +608,82 @@ const Page: NextPage = () => {
                       onClick={() => setIsModalActive(false)}
                       disabled={isCreatingShipmentData}
                     >
-                      Cancel
+                      Close
                     </button>
-                    <button
-                      type="submit"
-                      className="portal-home__btn portal-home__btn--primary"
-                      disabled={isCreatingShipmentData}
-                    >
-                      {isCreatingShipmentData ? (
-                        <DHEIRLoader color="#fff" size={10} />
-                      ) : (
-                        <span className="inline-flex items-center gap-2">
-                          <BiCheck className="text-lg" />
-                          Accept
-                        </span>
-                      )}
-                    </button>
+
+                    {modalSelectedRequest?.status === "pending" && (
+                      <>
+                        {!isRejecting ? (
+                          <>
+                            <button
+                              type="button"
+                              className="portal-home__btn portal-home__btn--secondary"
+                              style={{ borderColor: "var(--color-dheir-orange)", color: "var(--color-dheir-orange)" }}
+                              disabled={isCreatingShipmentData}
+                              onClick={() => setIsRejecting(true)}
+                            >
+                              Reject Request
+                            </button>
+                            <button
+                              type="button"
+                              className="portal-home__btn portal-home__btn--primary"
+                              disabled={isCreatingShipmentData}
+                              onClick={() => handleVetRequest("accept")}
+                            >
+                              {isCreatingShipmentData ? (
+                                <DHEIRLoader color="#fff" size={10} />
+                              ) : (
+                                <span className="inline-flex items-center gap-2">
+                                  <BiCheck className="text-lg" />
+                                  Accept Request
+                                </span>
+                              )}
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className="portal-home__btn portal-home__btn--secondary"
+                              onClick={() => setIsRejecting(false)}
+                              disabled={isCreatingShipmentData}
+                            >
+                              Back
+                            </button>
+                            <button
+                              type="button"
+                              className="portal-home__btn portal-home__btn--primary"
+                              style={{ backgroundColor: "var(--color-dheir-orange)", borderColor: "var(--color-dheir-orange)" }}
+                              disabled={isCreatingShipmentData}
+                              onClick={() => handleVetRequest("reject")}
+                            >
+                              {isCreatingShipmentData ? (
+                                <DHEIRLoader color="#fff" size={10} />
+                              ) : (
+                                <span>Submit Rejection</span>
+                              )}
+                            </button>
+                          </>
+                        )}
+                      </>
+                    )}
+
+                    {modalSelectedRequest?.status === "vetted" && (
+                      <button
+                        type="submit"
+                        className="portal-home__btn portal-home__btn--primary"
+                        disabled={isCreatingShipmentData}
+                      >
+                        {isCreatingShipmentData ? (
+                          <DHEIRLoader color="#fff" size={10} />
+                        ) : (
+                          <span className="inline-flex items-center gap-2">
+                            <BiCheck className="text-lg" />
+                            Generate Shipment
+                          </span>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </form>
               </div>
