@@ -83,7 +83,7 @@ const Page: NextPage = () => {
         columnHelper.accessor("payment_time", {
             header: "Payment Time",
             cell: ({ getValue }) => {
-                const val = getValue()
+                const val = getValue() as unknown as string
                 if (!val) return "-"
                 // Handle raw "before" / "after" or "pay_before_shipment" / "pay_after_shipment"
                 if (val === "before" || val === "pay_before_shipment") return "Pay before shipment"
