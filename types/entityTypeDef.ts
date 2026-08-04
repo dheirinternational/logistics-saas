@@ -67,7 +67,7 @@ export type Warehouse = {
     created_at: string
     capacity: string
     manager_id: number  // (FK -> staff)
-    type: ShippingType | "local"
+    type: "air" | "sea" | "local"
 }
 
 export type Address = {

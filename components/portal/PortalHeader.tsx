@@ -28,11 +28,20 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
   const notificationsId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
 
+  type UnifiedNotification = {
+    id: string
+    title: string
+    message: string
+    createdAt: string
+    isRead: boolean
+    isInbox: boolean
+  }
+
   const [query, setQuery] = useState("")
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [reviewOpen, setReviewOpen] = useState(false)
-  const [announcements, setAnnouncements] = useState<Announcement[]>([])
-  const [announcementsLoaded, setAnnouncementsLoaded] = useState(false)
+  const [notifications, setNotifications] = useState<UnifiedNotification[]>([])
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false)
 
   useEffect(() => {
     const next = (searchParams.get("search") ?? "").trim()
@@ -42,18 +51,53 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
   useEffect(() => {
     let cancelled = false
 
-    fetch("/api/announcements", { credentials: "include" })
-      .then(async (res) => {
-        const result = await res.json()
-        if (!res.ok || cancelled) return
-        setAnnouncements(Array.isArray(result.data) ? result.data : [])
-      })
-      .catch(() => {
-        if (!cancelled) setAnnouncements([])
-      })
-      .finally(() => {
-        if (!cancelled) setAnnouncementsLoaded(true)
-      })
+    const fetchNotifications = async () => {
+      try {
+        const [annRes, inboxRes] = await Promise.all([
+          fetch("/api/announcements", { credentials: "include" }),
+          fetch("/api/inbox/messages", { credentials: "include" }),
+        ])
+
+        const annResult = await annRes.json()
+        const inboxResult = await inboxRes.json()
+
+        if (cancelled) return
+
+        const mappedAnnouncements: UnifiedNotification[] = (Array.isArray(annResult.data) ? annResult.data : []).map(
+          (ann: any) => ({
+            id: ann.id,
+            title: ann.title,
+            message: ann.message || "",
+            createdAt: ann.created_at || new Date().toISOString(),
+            isRead: true, // announcements are general and don't have personal read receipts
+            isInbox: false,
+          })
+        )
+
+        const mappedInbox: UnifiedNotification[] = (Array.isArray(inboxResult.data) ? inboxResult.data : []).map(
+          (msg: any) => ({
+            id: msg.id,
+            title: msg.title,
+            message: msg.body || "",
+            createdAt: msg.createdAt || new Date().toISOString(),
+            isRead: Boolean(msg.isRead),
+            isInbox: true,
+          })
+        )
+
+        const combined = [...mappedAnnouncements, ...mappedInbox].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+
+        setNotifications(combined)
+      } catch (err) {
+        console.error("Error fetching notifications", err)
+      } finally {
+        if (!cancelled) setNotificationsLoaded(true)
+      }
+    }
+
+    fetchNotifications()
 
     return () => {
       cancelled = true
@@ -86,7 +130,7 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
     router.push(getPortalSearchHref(query, pathname))
   }
 
-  const hasAnnouncements = announcements.length > 0
+  const hasUnread = notifications.some((n) => n.isInbox && !n.isRead)
 
   return (
     <>
@@ -142,10 +186,10 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
               onClick={() => setNotificationsOpen((open) => !open)}
               aria-expanded={notificationsOpen}
               aria-controls={notificationsId}
-              aria-label="Announcements"
+              aria-label="Notifications"
             >
               <IconBell size={22} stroke={1.5} aria-hidden />
-              {hasAnnouncements ? (
+              {hasUnread ? (
                 <span className="portal-header__badge" aria-hidden />
               ) : null}
             </button>
@@ -155,25 +199,31 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
                 id={notificationsId}
                 className="portal-header__notifications"
                 role="dialog"
-                aria-label="Announcements"
+                aria-label="Notifications"
               >
-                <p className="portal-header__notifications-title">Announcements</p>
-                {!announcementsLoaded ? (
+                <p className="portal-header__notifications-title">Notifications</p>
+                {!notificationsLoaded ? (
                   <p className="portal-header__notifications-empty">Loading…</p>
-                ) : announcements.length === 0 ? (
+                ) : notifications.length === 0 ? (
                   <p className="portal-header__notifications-empty">
-                    No announcements right now.
+                    No notifications right now.
                   </p>
                 ) : (
                   <ul className="portal-header__notifications-list">
-                    {announcements.slice(0, 5).map((item) => (
+                    {notifications.slice(0, 5).map((item) => (
                       <li key={item.id}>
                         <Link
-                          href={`/customer/announcements/${item.id}`}
+                          href={item.isInbox ? "/customer/inbox" : `/customer/announcements/${item.id}`}
                           className="portal-header__notification-link"
                           onClick={() => setNotificationsOpen(false)}
+                          style={{
+                            backgroundColor: item.isInbox && !item.isRead ? "rgba(var(--color-dheir-blue-rgb), 0.05)" : "transparent"
+                          }}
                         >
-                          <span className="portal-header__notification-title">
+                          <span className="portal-header__notification-title" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            {item.isInbox && !item.isRead && (
+                              <span style={{ width: "6px", height: "6px", backgroundColor: "var(--color-dheir-blue)", borderRadius: "50%", display: "inline-block" }} />
+                            )}
                             {item.title}
                           </span>
                           {item.message ? (
@@ -188,11 +238,11 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
                 )}
                 <div className="portal-header__notifications-foot">
                   <Link
-                    href="/customer/announcements"
+                    href="/customer/inbox"
                     className="portal-header__notifications-view-all"
                     onClick={() => setNotificationsOpen(false)}
                   >
-                    View all
+                    View Inbox
                   </Link>
                 </div>
               </div>

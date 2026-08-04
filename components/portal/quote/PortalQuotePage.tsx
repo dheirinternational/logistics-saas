@@ -26,13 +26,14 @@ const CHANNELS: {
   label: string
   icon: typeof IconPlane
 }[] = [
-  { id: "air", label: "Air", icon: IconPlane },
+  { id: "air_gz", label: "Air Gz", icon: IconPlane },
+  { id: "air_hk", label: "Air HK", icon: IconPlane },
   { id: "sea", label: "Sea", icon: IconShip },
   { id: "express", label: "Express", icon: IconTruck },
 ]
 
 export function PortalQuotePage() {
-  const [channel, setChannel] = useState<QuoteChannel>("air")
+  const [channel, setChannel] = useState<QuoteChannel>("air_gz")
   const [itemCart, setItemCart] = useState<QuoteItemCart[]>([])
   const [quotation, setQuotation] = useState<QuoteResult | null>(null)
   const [rates, setRates] = useState<MoneyExchangeRate[]>([])

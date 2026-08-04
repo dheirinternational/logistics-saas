@@ -13,7 +13,7 @@ const CreateShipments = () => {
         customer_code: "",
         origin_warehouse_id: "",
         destination_warehouse_id: "",
-        channel: "air",
+        channel: "air_gz",
         total_cost: 50000, 
         shipping_note: "",
     })

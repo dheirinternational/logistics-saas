@@ -18,7 +18,7 @@ export async function POST(req: NextRequest){
 
         const body = await req.json()
 
-        const {customer_code, package_ids, channel, wrapping, payment_time, customer_note, packaging, total_weight, total_weight_unit} = body
+        const {customer_code, package_ids, channel, wrapping, payment_time, customer_note, packaging, total_weight, total_weight_unit, admin_created_for_user_id} = body
 
         const inferredUnit = channel === "sea" ? "cbm" : "kg"
         const unit = (total_weight_unit ?? inferredUnit) as string
@@ -26,7 +26,10 @@ export async function POST(req: NextRequest){
             return NextResponse.json({ success: false, message: "Invalid weight unit" }, { status: 400 })
         }
 
-        const {user_id} = session
+        let user_id = session.user_id
+        if (session.role === "admin" && admin_created_for_user_id) {
+            user_id = Number(admin_created_for_user_id)
+        }
 
         const res = await pool.query(`
             INSERT INTO shipment_requests (

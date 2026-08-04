@@ -2,13 +2,15 @@ import type { ShippingType } from "@/types/miscallaneous"
 
 export type ShippingMeasureUnit = "kg" | "CBM"
 
-/** Normalize channel strings from API/DB (e.g. "Air", "SEA"). */
 export function normalizeShippingChannel(
   channel: string | null | undefined,
 ): ShippingType | null {
   if (!channel) return null
   const key = channel.trim().toLowerCase()
-  if (key === "air" || key === "sea" || key === "express") return key
+  if (key === "air" || key === "air_gz" || key === "air gz") return "air_gz"
+  if (key === "air_hk" || key === "air hk") return "air_hk"
+  if (key === "sea") return "sea"
+  if (key === "express") return "express"
   return null
 }
 
@@ -46,7 +48,11 @@ export function getShippingQuantityShortLabel(
 export function formatShippingChannel(channel: string | null | undefined): string {
   const normalized = normalizeShippingChannel(channel)
   if (!normalized) return channel?.trim() || "-"
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1)
+  if (normalized === "air_gz") return "Air Gz"
+  if (normalized === "air_hk") return "Air HK"
+  if (normalized === "sea") return "Sea"
+  if (normalized === "express") return "Express"
+  return normalized
 }
 
 export function formatShippingQuantity(

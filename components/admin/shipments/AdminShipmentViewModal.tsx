@@ -51,6 +51,7 @@ export function AdminShipmentViewModal() {
   const [paymentTime, setPaymentTime] = useState<"before" | "after">("before")
   const [paidFor, setPaidFor] = useState(false)
   const [status, setStatus] = useState<ShipmentStatus | "">("")
+  const [shipmentNote, setShipmentNote] = useState("")
 
   // Media states
   const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
@@ -91,6 +92,7 @@ export function AdminShipmentViewModal() {
       setPaymentTime(selectedShipment.payment_time || "before")
       setPaidFor(Boolean(selectedShipment.paid_for))
       setStatus(selectedShipment.status as ShipmentStatus)
+      setShipmentNote(selectedShipment.shipment_note || "")
 
       // Map incoming media
       if (selectedShipment.images) {
@@ -143,6 +145,7 @@ export function AdminShipmentViewModal() {
           payment_time: paymentTime,
           paid_for: paidFor,
           status,
+          shipment_note: shipmentNote,
           media_asset_ids: libraryMedia.map((m) => m.id),
         }),
       })
@@ -227,7 +230,8 @@ export function AdminShipmentViewModal() {
                 onChange={(e) => setChannel(e.target.value)}
                 required
               >
-                <option value="air">Air</option>
+                <option value="air_gz">Air Gz</option>
+                <option value="air_hk">Air HK</option>
                 <option value="sea">Sea</option>
                 <option value="express">Express</option>
               </DHEIRSelect>
@@ -352,14 +356,27 @@ export function AdminShipmentViewModal() {
           </div>
 
           {/* Customer Note (readonly) */}
-          {(selectedShipment.shipment_note || selectedShipment.shipping_note) ? (
+          {selectedShipment.shipping_note ? (
             <div className="portal-packages__field">
               <span className="portal-packages__field-label">Customer note</span>
               <p className="admin-shipment-view__note">
-                {selectedShipment.shipment_note || selectedShipment.shipping_note}
+                {selectedShipment.shipping_note}
               </p>
             </div>
           ) : null}
+
+          {/* Admin Note / Reply (editable) */}
+          <label className="portal-packages__field">
+            <span className="portal-packages__field-label">Admin note / Reply</span>
+            <textarea
+              className="dheir-input"
+              style={{ minHeight: "80px", resize: "vertical", padding: "10px" }}
+              value={shipmentNote}
+              onChange={(e) => setShipmentNote(e.target.value)}
+              placeholder="Add status updates or reply to customer note..."
+              disabled={isUpdating}
+            />
+          </label>
         </div>
 
         {/* Right Column: Photos & Attached Media */}

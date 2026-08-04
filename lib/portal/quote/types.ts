@@ -25,6 +25,6 @@ export type MoneyExchangeRate = {
   currency_two: number
 }
 
-export type QuoteChannel = "air" | "sea" | "express"
+export type QuoteChannel = "air_gz" | "air_hk" | "sea" | "express"
 
 export type QuoteCurrency = "Naira" | "Dollar"

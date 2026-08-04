@@ -91,12 +91,22 @@ export async function PUT(
       payment_time,
       paid_for,
       status,
+      shipment_note,
       media_asset_ids,
     } = body
 
     const client = await pool.connect()
     try {
       await client.query("BEGIN")
+
+      // Fetch existing shipment note & user_id for notification logic
+      const existing = await client.query(
+        "SELECT shipment_note, tracking_number, user_id FROM shipments WHERE id = $1",
+        [shipmentId]
+      )
+      const oldNote = existing.rows[0]?.shipment_note || ""
+      const trackingNo = existing.rows[0]?.tracking_number
+      const customerUserId = existing.rows[0]?.user_id
 
       // Update basic fields
       await client.query(
@@ -113,8 +123,9 @@ export async function PUT(
           total_weight_unit = COALESCE($8, total_weight_unit),
           payment_time = COALESCE($9, payment_time),
           paid_for = COALESCE($10, paid_for),
-          status = COALESCE($11, status)
-        WHERE id = $12
+          status = COALESCE($11, status),
+          shipment_note = COALESCE($12, shipment_note)
+        WHERE id = $13
         `,
         [
           tracking_number || null,
@@ -128,15 +139,32 @@ export async function PUT(
           payment_time || null,
           paid_for !== undefined ? Boolean(paid_for) : null,
           status || null,
+          shipment_note !== undefined ? shipment_note : null,
           shipmentId,
         ]
       )
+
+      // Notify customer if shipment note changed
+      if (shipment_note !== undefined && shipment_note.trim() !== oldNote.trim() && customerUserId) {
+        await client.query(
+          `
+          INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
+          VALUES ($1, $2, $3, $4, false)
+          `,
+          [
+            session.user_id,
+            customerUserId,
+            `Shipment Note Update (${trackingNo || tracking_number})`,
+            shipment_note.trim(),
+          ]
+        )
+      }
 
       // Also update media links if array is provided
       if (Array.isArray(media_asset_ids)) {
         // Clear previous associations first to support replacing
         await client.query(
-          `DELETE FROM media_asset_links WHERE shipment_id = $1`,
+          `DELETE FROM shipment_images WHERE shipment_id = $1`,
           [shipmentId]
         )
         const validIds = media_asset_ids.map(Number).filter((x) => x > 0)

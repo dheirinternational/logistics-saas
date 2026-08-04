@@ -17,6 +17,8 @@ import { toast } from "@/lib/ui/toast";
 import { IconX } from "@tabler/icons-react"
 import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { AdminShipmentViewModal } from "@/components/admin/shipments/AdminShipmentViewModal"
+import CreateShipmentRequestModal from "@/components/admin/shipments/forms/CreateShipmentRequestModal"
+import CreateManualShipmentModal from "@/components/admin/shipments/forms/CreateManualShipmentModal"
 
 const pages = [
     {
@@ -38,13 +40,41 @@ export default function ShipmentsLayouts({ children }: { children: ReactNode }) 
     const pathName = usePathname()
     const { isModalActive, setIsModalActive, closeModal } = useEditModalStore()
     const { selectedPackage, setSelectedPackage, setReadOnly, resetSelectedPackage } = usePackageStore()
-    const { resetSelectedShipment } = useShipmentStore()
+    const { selectedShipment, resetSelectedShipment, setShipmentrigger } = useShipmentStore()
 
 
     const [currentPage, setCurrentPage] = useState<"expected_shipments" | "shipment_requests" | "accepted_requests" | "">("")
     const [isPageSelectorActive, setIsPageSelectorActive] = useState(false)
 
-    // console.log(pathName)
+    // Cached states
+    const [cachedCustomers, setCachedCustomers] = useState<any[]>([])
+    const [cachedPackages, setCachedPackages] = useState<any[]>([])
+    const [cachedWarehouses, setCachedWarehouses] = useState<Warehouse[]>([])
+    const [cacheLoaded, setCacheLoaded] = useState(false)
+
+    useEffect(() => {
+        async function prefetchData() {
+            try {
+                const [usersRes, pkgsRes, whsRes] = await Promise.all([
+                    fetch("/api/users"),
+                    fetch("/api/packages"),
+                    fetch("/api/warehouses")
+                ])
+                const usersData = await usersRes.json()
+                const pkgsData = await pkgsRes.json()
+                const whsData = await whsRes.json()
+
+                if (usersData.success) setCachedCustomers(usersData.data || [])
+                if (pkgsData.success) setCachedPackages(pkgsData.data || [])
+                if (whsData.success) setCachedWarehouses(whsData.data || [])
+            } catch (err) {
+                console.error("Error prefetching layout data", err)
+            } finally {
+                setCacheLoaded(true)
+            }
+        }
+        prefetchData()
+    }, [])
 
     useEffect(() => {
         function setPageTitle() {
@@ -69,13 +99,40 @@ export default function ShipmentsLayouts({ children }: { children: ReactNode }) 
     // Set Selected Edit component based on page
     const EditComponent = () => {
         if (selectedPackage) {
-            return <IncomingPackageEditComponent />
+            return <IncomingPackageEditComponent preloadedWarehouses={cachedWarehouses} />
         }
         switch (currentPage) {
             case "expected_shipments":
-                return <IncomingPackageEditComponent />
+                return <IncomingPackageEditComponent preloadedWarehouses={cachedWarehouses} />
+            case "shipment_requests":
+                return (
+                    <CreateShipmentRequestModal
+                        onClose={closeShipmentsModal}
+                        onSuccess={() => {
+                            closeShipmentsModal()
+                            window.location.reload()
+                        }}
+                        preloadedCustomers={cachedCustomers}
+                        preloadedPackages={cachedPackages}
+                    />
+                )
             case "accepted_requests":
-                return <AdminShipmentViewModal />
+                if (selectedShipment) {
+                    return <AdminShipmentViewModal />
+                } else {
+                    return (
+                        <CreateManualShipmentModal
+                            onClose={closeShipmentsModal}
+                            onSuccess={() => {
+                                closeShipmentsModal()
+                                setShipmentrigger()
+                            }}
+                            preloadedCustomers={cachedCustomers}
+                            preloadedPackages={cachedPackages}
+                            preloadedWarehouses={cachedWarehouses}
+                        />
+                    )
+                }
             default:
                 return <div></div>
         }
@@ -89,14 +146,27 @@ export default function ShipmentsLayouts({ children }: { children: ReactNode }) 
         }
     }
 
-    const isPackageModal = selectedPackage !== null || currentPage === "expected_shipments"
+    let modalTitle = "Add package"
+    let modalSubtitle = "Add packages to warehouse with photos and details."
 
-    const modalTitle =
-        !isPackageModal && currentPage === "accepted_requests" ? "View shipment" : "Add packages"
-    const modalSubtitle =
-        !isPackageModal && currentPage === "accepted_requests"
-            ? "View shipment details and update status."
-            : "Add packages to warehouse with photos and details."
+    if (selectedPackage) {
+        modalTitle = "Edit package details"
+        modalSubtitle = "Update stored package weight, dimensions, and photos."
+    } else if (currentPage === "expected_shipments") {
+        modalTitle = "Add package"
+        modalSubtitle = "Add expected package to warehouse with photos and details."
+    } else if (currentPage === "shipment_requests") {
+        modalTitle = "Add shipment request"
+        modalSubtitle = "Submit a consolidation shipment request on behalf of a customer."
+    } else if (currentPage === "accepted_requests") {
+        if (selectedShipment) {
+            modalTitle = "View shipment"
+            modalSubtitle = "View shipment details and update status."
+        } else {
+            modalTitle = "Add shipment"
+            modalSubtitle = "Manually generate a new shipment with price, weight, and photos."
+        }
+    }
 
     return (
         <div className='max-h-full h-full overflow-hidden relative flex'>
@@ -135,25 +205,32 @@ export default function ShipmentsLayouts({ children }: { children: ReactNode }) 
                             className="portal-home__btn portal-home__btn--primary"
                             onClick={() => {
                                 setReadOnly()
-                                setSelectedPackage({
-                                    id: 0,
-                                    incoming_package_id: "",
-                                    package_name: "",
-                                    user_id: 0,
-                                    customer_code: "",
-                                    warehouse_id: 0,
-                                    weight: 0,
-                                    amount: 0,
-                                    condition: "good",
-                                    status: "stored",
-                                    received_at: "",
-                                    stored_at: "",
-                                    created_at: "",
-                                })
+                                resetSelectedPackage() // Make sure selectedPackage is reset so it triggers creation modal components
+                                if (currentPage === "expected_shipments") {
+                                    setSelectedPackage({
+                                        id: 0,
+                                        incoming_package_id: "",
+                                        package_name: "",
+                                        user_id: 0,
+                                        customer_code: "",
+                                        warehouse_id: 0,
+                                        weight: 0,
+                                        amount: 0,
+                                        condition: "good",
+                                        status: "stored",
+                                        received_at: "",
+                                        stored_at: "",
+                                        created_at: "",
+                                    })
+                                }
                                 setIsModalActive()
                             }}
                         >
-                            Add package
+                            {currentPage === "expected_shipments"
+                                ? "Add package"
+                                : currentPage === "shipment_requests"
+                                ? "Add request"
+                                : "Add shipment"}
                         </button>
                     ) : null}
                 </div>
@@ -206,13 +283,13 @@ export default function ShipmentsLayouts({ children }: { children: ReactNode }) 
 
 
 
-const IncomingPackageEditComponent = () => {
+const IncomingPackageEditComponent = ({ preloadedWarehouses }: { preloadedWarehouses?: Warehouse[] }) => {
 
     const { setIsModalActive } = useEditModalStore()
     const { selectedPackage, handleSelectedPackageInput, handleSelectedPackageSelect, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly } = usePackageStore()
 
     // Arrays
-    const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+    const [warehouses, setWarehouses] = useState<Warehouse[]>(preloadedWarehouses || [])
     const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
     const [pickerOpen, setPickerOpen] = useState(false)
     const [uploadOpen, setUploadOpen] = useState(false)
@@ -222,7 +299,7 @@ const IncomingPackageEditComponent = () => {
 
 
     // Fetching Data indicators 
-    const [isFetchingWarehouse, setIsFetchingWarehouse] = useState(true)
+    const [isFetchingWarehouse, setIsFetchingWarehouse] = useState(!preloadedWarehouses)
     const [isUploadingPackage, setIsUploadingPackage] = useState(false)
 
 
@@ -295,8 +372,13 @@ const IncomingPackageEditComponent = () => {
 
     // Fetch Data upon initial load 
     useEffect(() => {
+        if (preloadedWarehouses && preloadedWarehouses.length > 0) {
+            setWarehouses(preloadedWarehouses)
+            setIsFetchingWarehouse(false)
+            return
+        }
         fetchWarehouses()
-    }, [])
+    }, [preloadedWarehouses])
 
 
     // Set Selected Warehouse
