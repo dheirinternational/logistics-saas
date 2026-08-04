@@ -229,6 +229,7 @@ export function AdminShipmentViewModal() {
               >
                 <option value="air">Air</option>
                 <option value="sea">Sea</option>
+                <option value="express">Express</option>
               </DHEIRSelect>
             </label>
 
