@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       VALUES ($1, $2, $3, $4, $5)
       `,
       [
-        session.id,
+        session.user_id,
         is_broadcast ? null : recipient_id,
         title.trim(),
         body.trim(),
