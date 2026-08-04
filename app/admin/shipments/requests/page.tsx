@@ -253,7 +253,7 @@ const Page: NextPage = () => {
             id: "Details",
             cell: ({row}) => 
             <button 
-            className={`portal-home__table-btn${row.original.status === "accepted" ? " hidden" : ""}`}
+            className="portal-home__table-btn"
             onClick={() => {
                 setModalSelectedRequest(row.original)
                 setIsModalActive(true)
@@ -441,7 +441,9 @@ const Page: NextPage = () => {
                     </div>
 
                     <div className="portal-packages__field">
-                      <span className="portal-packages__field-label">Package IDs</span>
+                      <span className="portal-packages__field-label">
+                        Package IDs ({modalSelectedRequest?.package_ids?.length ?? 0})
+                      </span>
                       <p className="portal-home__empty tabular-nums" style={{ color: "var(--color-dheir-ink)" }}>
                         {(modalSelectedRequest?.package_ids ?? []).join(", ") || "-"}
                       </p>
@@ -461,6 +463,28 @@ const Page: NextPage = () => {
                           {modalSelectedRequest?.rejection_note || "No feedback provided."}
                         </p>
                       </div>
+                    )}
+
+                    {modalSelectedRequest?.status === "accepted" && (
+                      <>
+                        <label className="portal-packages__field">
+                          <span className="portal-packages__field-label">Total price (N)</span>
+                          <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)", paddingTop: 8 }}>
+                            {modalSelectedRequest.total_price != null
+                              ? `N${Number(modalSelectedRequest.total_price).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`
+                              : "Not recorded"}
+                          </p>
+                        </label>
+
+                        <label className="portal-packages__field">
+                          <span className="portal-packages__field-label">Weight</span>
+                          <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)", paddingTop: 8 }}>
+                            {modalSelectedRequest.total_weight != null
+                              ? `${Number(modalSelectedRequest.total_weight).toFixed(2)} ${(modalSelectedRequest.total_weight_unit ?? "kg").toUpperCase()}`
+                              : "Not recorded"}
+                          </p>
+                        </label>
+                      </>
                     )}
 
                     {modalSelectedRequest?.status === "vetted" && (

@@ -55,7 +55,7 @@ export async function PUT(
 
         const userEmail = userRes.rows[0]?.email;
 
-        // ✅ Send email
+        // Send email
         if (userEmail) {
             resend.emails.send({
                 from: "Logistics <no-reply@dheirinternational.com>",
@@ -63,7 +63,7 @@ export async function PUT(
                 subject: `Shipment Status Updated: ${body.status}`,
                 html: `
                     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                        <h2>📦 Shipment Status Updated</h2>
+                        <h2>Shipment Status Updated</h2>
 
                         <p>Hello,</p>
 
@@ -84,7 +84,7 @@ export async function PUT(
                         <br />
 
                         <p>
-                            Thank you for choosing our logistics service 🚚
+                            Thank you for choosing our logistics service.
                         </p>
                     </div>
                 `

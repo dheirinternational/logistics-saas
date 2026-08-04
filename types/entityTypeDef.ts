@@ -151,6 +151,7 @@ export type ShippingRequest = {
     shipping_note: string
     total_weight: number
     total_weight_unit?: "kg" | "cbm"
+    total_price?: number
     customer_note: string
     packaging: string
     rejection_note?: string

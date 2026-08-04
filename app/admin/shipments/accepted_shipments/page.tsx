@@ -67,7 +67,18 @@ const Page: NextPage = () => {
             header: "Channel"
         }),
         columnHelper.accessor("status", {
-            header: "Status"
+            header: "Status",
+            cell: ({ getValue }) => {
+                const status = getValue()
+                let className = "portal-packages__badge"
+                if (status === "processing") className = "portal-packages__badge portal-packages__badge--orange"
+                else if (status === "shipped") className = "portal-packages__badge portal-packages__badge--blue"
+                else if (status === "in_transit") className = "portal-packages__badge portal-packages__badge--blue"
+                else if (status === "arrived") className = "portal-packages__badge portal-packages__badge--green"
+                else if (status === "out_for_delivery") className = "portal-packages__badge portal-packages__badge--green"
+                else if (status === "delivered") className = "portal-packages__badge portal-packages__badge--green"
+                return <span className={className}>{status.replaceAll("_", " ")}</span>
+            }
         }),
         columnHelper.accessor("payment_time", {
             header: "Payment Time"

@@ -119,7 +119,13 @@ const Page: NextPage = () => {
         }),
         columnHelper.accessor("status", {
             header: "Status",
-            cell: ({getValue}) => getValue(),
+            cell: ({getValue}) => {
+                const status = getValue()
+                let className = "portal-packages__badge"
+                if (status === "expected") className = "portal-packages__badge portal-packages__badge--orange"
+                else if (status === "stored") className = "portal-packages__badge portal-packages__badge--green"
+                return <span className={className}>{status}</span>
+            },
             enableColumnFilter: false
         }),
         columnHelper.accessor("created_at", {

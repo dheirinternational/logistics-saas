@@ -123,12 +123,12 @@ export async function POST(req: NextRequest){
                 await resend.emails.send({
                     from: "Logistics <no-reply@dheirinternational.com>",
                     to: [userEmail],
-                    subject: "📦 Your Package Has Been Received!",
+                    subject: "Your Package Has Been Received",
                     html: `
                         <div style="font-family: Arial, sans-serif; background:#f9fafb; padding:20px;">
                             <div style="max-width:600px;margin:auto;background:white;padding:24px;border-radius:10px;">
                                 
-                                <h2 style="color:#111827;">📦 Package Received</h2>
+                                <h2 style="color:#111827;">Package Received</h2>
 
                                 <p>Hello,</p>
 
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest){
                                 </p>
 
                                 <p style="font-weight:bold;">
-                                    - Your Logistics Team 🚚
+                                    Your Logistics Team
                                 </p>
 
                             </div>

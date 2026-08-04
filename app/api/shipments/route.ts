@@ -114,9 +114,12 @@ export async function POST(req: NextRequest) {
 
         await client.query(`
             UPDATE shipment_requests
-            SET status = 'accepted'
+            SET status = 'accepted',
+                total_price = $2,
+                total_weight = $3,
+                total_weight_unit = $4
             WHERE id = $1
-        `, [data.shipment_request_id]);
+        `, [data.shipment_request_id, data.price, data.total_weight, data.total_weight_unit]);
 
         await client.query(`
             UPDATE packages
@@ -129,7 +132,7 @@ export async function POST(req: NextRequest) {
             VALUES ($1, $2, $3, $4, $5, NOW(), $6)
         `, [data.user_id, data.customer_code, tracking_number, data.price, 'pending', tracking_number]);
 
-        // 📧 Get user email BEFORE commit (still inside transaction)
+        // Get user email BEFORE commit (still inside transaction)
         const userRes = await client.query(
             `SELECT email FROM users WHERE id = $1`,
             [data.user_id]
@@ -137,18 +140,18 @@ export async function POST(req: NextRequest) {
 
         const userEmail = userRes.rows[0]?.email;
 
-        // ✅ Commit if everything works
+        // Commit if everything works
         await client.query("COMMIT");
 
-        // 📧 Send email AFTER commit
+        // Send email AFTER commit
         if (userEmail) {
             resend.emails.send({
                 from: "Logistics <no-reply@dheirinternational.com>", // change after domain verification
                 to: [userEmail],
-                subject: "Shipment Created Successfully 🚚",
+                subject: "Shipment Created Successfully",
                 html: `
                     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                        <h2>🎉 Shipment Created Successfully</h2>
+                        <h2>Shipment Created Successfully</h2>
                         <p>Hello,</p>
                         <p>Your shipment has been created and is now being processed.</p>
 
@@ -158,7 +161,7 @@ export async function POST(req: NextRequest) {
                         <p>You can use your tracking number to monitor delivery progress.</p>
 
                         <br/>
-                        <p>Thanks for choosing us 🚀</p>
+                        <p>Thanks for choosing us.</p>
                     </div>
                 `
             }).catch(err => {
