@@ -86,7 +86,7 @@ export function PortalOcrScannerFloatingButton() {
       // Match high resolution of video feed
       canvas.width = video.videoWidth || 640
       canvas.height = video.videoHeight || 480
-      
+
       const ctx = canvas.getContext("2d")
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
@@ -133,7 +133,7 @@ export function PortalOcrScannerFloatingButton() {
 
       setResult(data.data)
       toast.success("Receipt scanned successfully!")
-      
+
       // Auto-fill logic when on the admin packages page
       if (pathname === "/admin/packages" && data.data) {
         window.dispatchEvent(
@@ -221,12 +221,40 @@ export function PortalOcrScannerFloatingButton() {
           }}
           style={{ zIndex: 1000 }}
         >
+          <style>{`
+            @media (max-width: 768px) {
+              .ocr-dialog-responsive {
+                width: 100% !important;
+                height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+              }
+              .ocr-video-responsive, .ocr-fallback-responsive {
+                height: 50vh !important;
+                height: 50dvh !important;
+              }
+              .ocr-preview-responsive {
+                height: 45vh !important;
+                height: 45dvh !important;
+              }
+              .admin-modal__body {
+                flex: 1 !important;
+                overflow: hidden !important;
+                padding: 10px !important;
+              }
+            }
+          `}</style>
           <div
-            className="dheir-dialog admin-modal"
+            className="dheir-dialog admin-modal ocr-dialog-responsive"
             role="dialog"
             aria-modal="true"
             aria-label="Receipt OCR Scanner"
-            style={{ maxWidth: "680px", width: "95%" }}
+            style={{ maxWidth: "960px", width: "95%" }}
           >
             <div className="dheir-dialog__head">
               <div>
@@ -246,30 +274,34 @@ export function PortalOcrScannerFloatingButton() {
             </div>
 
             <div className="admin-modal__body" style={{ padding: "20px" }}>
-              
-              {/* Side-by-Side: Camera Scan vs. Upload File */}
+
+              {/* Main Camera Scan Interface */}
               {!previewUrl && !isScanning && !result && (
-                <div 
-                  style={{ 
-                    display: "grid", 
-                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
-                    gap: "24px",
-                    alignItems: "stretch"
-                  }}
-                >
-                  {/* Left Column: Device Camera Viewfinder */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
-                      Scan with Device Camera
+                      Scan Package
                     </h3>
-                    
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="portal-home__btn portal-home__btn--secondary"
+                      style={{ padding: "6px 12px", fontSize: "12px", display: "flex", alignItems: "center", gap: "6px" }}
+                    >
+                      <IconUpload size={14} />
+                      Upload Image File
+                    </button>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     {cameraActive ? (
                       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         <div
+                          className="ocr-video-responsive"
                           style={{
                             position: "relative",
                             width: "100%",
-                            height: "280px",
+                            height: "540px",
                             borderRadius: "12px",
                             overflow: "hidden",
                             border: "1.5px solid var(--color-dheir-border)",
@@ -283,7 +315,7 @@ export function PortalOcrScannerFloatingButton() {
                             muted
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           />
-                          
+
                           {/* Targeting scanning guides */}
                           <div
                             style={{
@@ -299,7 +331,7 @@ export function PortalOcrScannerFloatingButton() {
                             }}
                           />
                         </div>
-                        
+
                         <button
                           type="button"
                           onClick={handleCapture}
@@ -319,13 +351,14 @@ export function PortalOcrScannerFloatingButton() {
                           }}
                         >
                           <IconCamera size={20} />
-                          Capture Receipt
+                          Capture Label / Receipt
                         </button>
                       </div>
                     ) : (
                       <div
+                        className="ocr-fallback-responsive"
                         style={{
-                          height: "340px",
+                          height: "540px",
                           border: "1.5px dashed var(--color-dheir-border)",
                           borderRadius: "12px",
                           display: "flex",
@@ -338,10 +371,10 @@ export function PortalOcrScannerFloatingButton() {
                           textAlign: "center"
                         }}
                       >
-                        <IconCamera size={36} stroke={1.5} style={{ marginBottom: "12px" }} />
+                        <IconCamera size={48} stroke={1.5} style={{ marginBottom: "12px" }} />
                         <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>No camera active or allowed</p>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={startCamera}
                           style={{
                             marginTop: "16px",
@@ -359,42 +392,6 @@ export function PortalOcrScannerFloatingButton() {
                       </div>
                     )}
                   </div>
-
-                  {/* Right Column: File Uploader */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
-                      Upload Receipt Image
-                    </h3>
-                    
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      style={{
-                        height: "340px",
-                        border: "1.5px dashed var(--color-dheir-border)",
-                        borderRadius: "12px",
-                        padding: "30px 20px",
-                        textAlign: "center",
-                        cursor: "pointer",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: "rgba(0, 0, 0, 0.01)",
-                      }}
-                    >
-                      <IconUpload
-                        size={36}
-                        stroke={1.5}
-                        style={{ color: "var(--color-dheir-muted)", marginBottom: "12px" }}
-                      />
-                      <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>
-                        Click to upload receipt image
-                      </p>
-                      <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--color-dheir-muted)" }}>
-                        Supports JPG, PNG, WEBP.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -411,6 +408,7 @@ export function PortalOcrScannerFloatingButton() {
               {previewUrl && !isScanning && !result && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   <div
+                    className="ocr-preview-responsive"
                     style={{
                       position: "relative",
                       width: "100%",
