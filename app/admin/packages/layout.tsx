@@ -529,8 +529,8 @@ const PackageEditComponent = () => {
                 </label>
             </div>
 
-            <div className="admin-uploader">
-                <div className="admin-uploader__row">
+            <div className="admin-uploader" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                     <div>
                         <p className="portal-packages__field-label" style={{ margin: 0 }}>
                             Photos
@@ -541,12 +541,12 @@ const PackageEditComponent = () => {
                                 : "Optional, choose photos or videos from the media library."}
                         </p>
                     </div>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
                         <button
                             type="button"
                             className="portal-home__btn portal-home__btn--secondary"
                             onClick={() => startCamera()}
-                            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                            style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap", fontSize: "13px" }}
                         >
                             <IconCamera size={16} />
                             Take Photo
@@ -555,6 +555,7 @@ const PackageEditComponent = () => {
                             type="button"
                             className="portal-home__btn portal-home__btn--secondary"
                             onClick={() => setPickerOpen(true)}
+                            style={{ whiteSpace: "nowrap", fontSize: "13px" }}
                         >
                             Choose from library
                         </button>
@@ -562,6 +563,7 @@ const PackageEditComponent = () => {
                             type="button"
                             className="portal-home__btn portal-home__btn--primary"
                             onClick={() => setUploadOpen(true)}
+                            style={{ whiteSpace: "nowrap", fontSize: "13px" }}
                         >
                             Upload
                         </button>
