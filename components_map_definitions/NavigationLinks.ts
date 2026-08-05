@@ -74,6 +74,11 @@ export const navLinks: NavLink[] = [
     icon: IconCash,
   },
   {
+    name: "Payment Summary",
+    path: "/admin/payments/summary",
+    icon: IconCurrencyNaira,
+  },
+  {
     name: "Delivery Zones",
     path: "/admin/delivery_zones",
     icon: IconMapPin,
