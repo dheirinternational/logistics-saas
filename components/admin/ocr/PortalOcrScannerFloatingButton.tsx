@@ -174,6 +174,10 @@ export function PortalOcrScannerFloatingButton() {
     stopCamera()
   }
 
+  if (pathname !== "/admin/packages") {
+    return null
+  }
+
   return (
     <>
       {/* Floating Action Button */}
@@ -235,17 +239,20 @@ export function PortalOcrScannerFloatingButton() {
                 overflow: hidden !important;
               }
               .ocr-video-responsive, .ocr-fallback-responsive {
-                height: 50vh !important;
-                height: 50dvh !important;
+                height: calc(100vh - 220px) !important;
+                height: calc(100dvh - 220px) !important;
               }
               .ocr-preview-responsive {
-                height: 45vh !important;
-                height: 45dvh !important;
+                height: calc(100vh - 220px) !important;
+                height: calc(100dvh - 220px) !important;
               }
               .admin-modal__body {
                 flex: 1 !important;
                 overflow: hidden !important;
                 padding: 10px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
               }
             }
           `}</style>
@@ -278,21 +285,6 @@ export function PortalOcrScannerFloatingButton() {
               {/* Main Camera Scan Interface */}
               {!previewUrl && !isScanning && !result && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
-                      Scan Package
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="portal-home__btn portal-home__btn--secondary"
-                      style={{ padding: "6px 12px", fontSize: "12px", display: "flex", alignItems: "center", gap: "6px" }}
-                    >
-                      <IconUpload size={14} />
-                      Upload Image File
-                    </button>
-                  </div>
-
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     {cameraActive ? (
                       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -394,15 +386,6 @@ export function PortalOcrScannerFloatingButton() {
                   </div>
                 </div>
               )}
-
-              {/* File selector input */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*"
-                style={{ display: "none" }}
-              />
 
               {/* Preview and Scan trigger */}
               {previewUrl && !isScanning && !result && (
