@@ -17,8 +17,75 @@ import { toDateInputValue } from "@/lib/dates/toDateInputValue";
 
 export default function PageLayout({ children }: { children: ReactNode }) {
     const { isModalActive, setIsModalActive } = useEditModalStore()
-    const selectedPackage = usePackageStore((s) => s.selectedPackage)
+    const { selectedPackage, setSelectedPackage, setReadOnly } = usePackageStore()
     const isEditing = Number(selectedPackage?.id ?? 0) > 0
+
+    // Fetch warehouses for matching names from OCR scanner
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+    useEffect(() => {
+        const fetchWarehouses = async () => {
+            try {
+                const res = await fetch("/api/warehouses")
+                const result = await res.json()
+                if (res.ok) {
+                    setWarehouses(result.data || [])
+                }
+            } catch (err) {
+                console.error("Failed to load warehouses in layout", err)
+            }
+        }
+        fetchWarehouses()
+    }, [])
+
+    useEffect(() => {
+        const handlePackageScanned = (e: Event) => {
+            const customEvent = e as CustomEvent<{
+                customerCode: string | null
+                warehouseName: string | null
+                shippingId: string | null
+            }>
+            const { customerCode, warehouseName, shippingId } = customEvent.detail
+
+            // Match warehouse name case-insensitively
+            let matchedWarehouseId = 0
+            if (warehouseName) {
+                const matched = warehouses.find(
+                    (w) =>
+                        w.name.toLowerCase().includes(warehouseName.toLowerCase()) ||
+                        warehouseName.toLowerCase().includes(w.name.toLowerCase())
+                )
+                if (matched) {
+                    matchedWarehouseId = matched.id
+                }
+            }
+
+            // Open modal and set state
+            setReadOnly()
+            setSelectedPackage({
+                id: 0,
+                incoming_package_id: shippingId || "",
+                package_name: "",
+                user_id: 0,
+                customer_code: customerCode || "",
+                warehouse_id: matchedWarehouseId,
+                weight: 0,
+                weight_unit: "kg",
+                amount: 0,
+                condition: "good",
+                status: "stored",
+                received_at: new Date().toISOString().split("T")[0],
+                stored_at: new Date().toISOString().split("T")[0],
+                created_at: "",
+            })
+            setIsModalActive()
+            toast.success("Autofilled scanned details!")
+        }
+
+        window.addEventListener("admin-package-scanned", handlePackageScanned)
+        return () => {
+            window.removeEventListener("admin-package-scanned", handlePackageScanned)
+        }
+    }, [warehouses])
 
     return (
         <div className="h-full max-h-full w-full overflow-y-auto">

@@ -13,13 +13,18 @@ import {
 } from "@tabler/icons-react"
 import { toast } from "@/lib/ui/toast"
 
+import { usePathname } from "next/navigation"
+
 type ExtractedData = {
   customerName: string | null
   cost: number | null
   shippingId: string | null
+  customerCode: string | null
+  warehouseName: string | null
 }
 
 export function PortalOcrScannerFloatingButton() {
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -128,6 +133,21 @@ export function PortalOcrScannerFloatingButton() {
 
       setResult(data.data)
       toast.success("Receipt scanned successfully!")
+      
+      // Auto-fill logic when on the admin packages page
+      if (pathname === "/admin/packages" && data.data) {
+        window.dispatchEvent(
+          new CustomEvent("admin-package-scanned", {
+            detail: {
+              customerCode: data.data.customerCode,
+              warehouseName: data.data.warehouseName,
+              shippingId: data.data.shippingId,
+            },
+          })
+        )
+        // Automatically close the scanner
+        handleClose()
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to scan receipt")
       console.error(err)

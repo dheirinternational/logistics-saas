@@ -33,11 +33,13 @@ export async function POST(req: Request) {
       },
     })
 
-    const prompt = `Analyze this receipt image. Extract the following details and return them in a JSON object matching this schema exactly:
+    const prompt = `Analyze this package label/receipt image. Extract the following details and return them in a JSON object matching this schema exactly:
 {
   "customerName": string or null (the name of the buyer/customer),
   "cost": number or null (the total purchase price, grand total, or total cost as a number. Remove currency symbols like ₦, $, etc.),
-  "shippingId": string or null (any tracking reference, shipment number, or order reference starting with DH-SHIP or similar prefix, or other reference number)
+  "shippingId": string or null (any tracking reference, shipment number, package identifier, or order reference starting with DH-SHIP, KRC, CX, or similar package/tracking numbers),
+  "customerCode": string or null (the customer/member code, e.g. matching patterns like Dheir-DHI0056, Ronke-DHI0040, M-DHI0265, Osakue-DHI0061, or general name-DHIxxxx format),
+  "warehouseName": string or null (the name of the warehouse/recipient, e.g. matching names like 'D_HEIR CARGO Guangzhou Warehouse', 'D_HEIR Sea Cargo Warehouse Lagos', or general D_HEIR warehouses mentioned)
 }
 
 Do not include any formatting other than valid JSON.`
