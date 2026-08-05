@@ -50,6 +50,7 @@ export type Shipment = {
     created_at: string
     user_id: number // FK -> Users(id)
     images?: ShipmentImage[]
+    admin_reply?: string
 }
 
 export type Warehouse = {

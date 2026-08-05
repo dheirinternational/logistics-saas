@@ -52,6 +52,7 @@ export function AdminShipmentViewModal() {
   const [paidFor, setPaidFor] = useState(false)
   const [status, setStatus] = useState<ShipmentStatus | "">("")
   const [shipmentNote, setShipmentNote] = useState("")
+  const [adminReply, setAdminReply] = useState("")
 
   // Media states
   const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
@@ -93,6 +94,7 @@ export function AdminShipmentViewModal() {
       setPaidFor(Boolean(selectedShipment.paid_for))
       setStatus(selectedShipment.status as ShipmentStatus)
       setShipmentNote(selectedShipment.shipment_note || "")
+      setAdminReply(selectedShipment.admin_reply || "")
 
       // Map incoming media
       if (selectedShipment.images) {
@@ -146,6 +148,7 @@ export function AdminShipmentViewModal() {
           paid_for: paidFor,
           status,
           shipment_note: shipmentNote,
+          admin_reply: adminReply,
           media_asset_ids: libraryMedia.map((m) => m.id),
         }),
       })
@@ -356,24 +359,24 @@ export function AdminShipmentViewModal() {
           </div>
 
           {/* Customer Note (readonly) */}
-          {selectedShipment.shipping_note ? (
+          {selectedShipment.shipment_note ? (
             <div className="portal-packages__field">
               <span className="portal-packages__field-label">Customer note</span>
               <p className="admin-shipment-view__note">
-                {selectedShipment.shipping_note}
+                {selectedShipment.shipment_note}
               </p>
             </div>
           ) : null}
 
           {/* Admin Note / Reply (editable) */}
           <label className="portal-packages__field">
-            <span className="portal-packages__field-label">Admin note / Reply</span>
+            <span className="portal-packages__field-label">Admin Reply</span>
             <textarea
               className="dheir-input"
               style={{ minHeight: "80px", resize: "vertical", padding: "10px" }}
-              value={shipmentNote}
-              onChange={(e) => setShipmentNote(e.target.value)}
-              placeholder="Add status updates or reply to customer note..."
+              value={adminReply}
+              onChange={(e) => setAdminReply(e.target.value)}
+              placeholder="Reply to customer note..."
               disabled={isUpdating}
             />
           </label>

@@ -92,6 +92,7 @@ export async function PUT(
       paid_for,
       status,
       shipment_note,
+      admin_reply,
       media_asset_ids,
     } = body
 
@@ -99,12 +100,12 @@ export async function PUT(
     try {
       await client.query("BEGIN")
 
-      // Fetch existing shipment note & user_id for notification logic
+      // Fetch existing admin reply & user_id for notification logic
       const existing = await client.query(
-        "SELECT shipment_note, tracking_number, user_id FROM shipments WHERE id = $1",
+        "SELECT admin_reply, tracking_number, user_id FROM shipments WHERE id = $1",
         [shipmentId]
       )
-      const oldNote = existing.rows[0]?.shipment_note || ""
+      const oldReply = existing.rows[0]?.admin_reply || ""
       const trackingNo = existing.rows[0]?.tracking_number
       const customerUserId = existing.rows[0]?.user_id
 
@@ -124,8 +125,9 @@ export async function PUT(
           payment_time = COALESCE($9, payment_time),
           paid_for = COALESCE($10, paid_for),
           status = COALESCE($11, status),
-          shipment_note = COALESCE($12, shipment_note)
-        WHERE id = $13
+          shipment_note = COALESCE($12, shipment_note),
+          admin_reply = COALESCE($13, admin_reply)
+        WHERE id = $14
         `,
         [
           tracking_number || null,
@@ -140,12 +142,13 @@ export async function PUT(
           paid_for !== undefined ? Boolean(paid_for) : null,
           status || null,
           shipment_note !== undefined ? shipment_note : null,
+          admin_reply !== undefined ? admin_reply : null,
           shipmentId,
         ]
       )
 
-      // Notify customer if shipment note changed
-      if (shipment_note !== undefined && shipment_note.trim() !== oldNote.trim() && customerUserId) {
+      // Notify customer if admin reply changed
+      if (admin_reply !== undefined && admin_reply.trim() !== oldReply.trim() && customerUserId) {
         await client.query(
           `
           INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
@@ -155,7 +158,7 @@ export async function PUT(
             session.user_id,
             customerUserId,
             `Shipment Note Update (${trackingNo || tracking_number})`,
-            shipment_note.trim(),
+            admin_reply.trim(),
           ]
         )
       }
