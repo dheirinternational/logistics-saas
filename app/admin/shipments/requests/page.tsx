@@ -60,6 +60,7 @@ const Page: NextPage = () => {
     })
 
     const [modalSelectedRequest, setModalSelectedRequest] = useState<null | ShippingRequest>(null)
+    const [adminReply, setAdminReply] = useState("")
     
     useEffect(() => {
         const inferred = modalSelectedRequest?.channel === "sea" ? "cbm" : "kg"
@@ -67,6 +68,7 @@ const Page: NextPage = () => {
         if (modalSelectedRequest?.total_weight != null) {
             setTotalWeight(String(Number(modalSelectedRequest.total_weight).toFixed(2)))
         }
+        setAdminReply(modalSelectedRequest?.admin_reply || "")
     }, [modalSelectedRequest])
 
     const fetchShipmentData = async () => {
@@ -134,7 +136,8 @@ const Page: NextPage = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     action,
-                    rejection_note: action === 'reject' ? rejectionNote.trim() : undefined
+                    rejection_note: action === 'reject' ? rejectionNote.trim() : undefined,
+                    admin_reply: adminReply.trim() || undefined,
                 })
             })
             const result = await res.json()
@@ -146,6 +149,7 @@ const Page: NextPage = () => {
             setIsModalActive(false)
             setModalSelectedRequest(null)
             setRejectionNote("")
+            setAdminReply("")
             setIsRejecting(false)
             fetchShipmentData()
         } catch (err: any) {
@@ -181,6 +185,7 @@ const Page: NextPage = () => {
         formData.append("payment_time", `${modalSelectedRequest?.payment_time}` || "")
         formData.append("package_ids", `${modalSelectedRequest?.package_ids}` || "")
         formData.append("total_weight_unit", weightUnit)
+        formData.append("admin_reply", adminReply.trim())
 
         if(Number(formData.get("total_price") || 0) < 1 || Number(formData.get("total_weight") || 0.01) < 0.01){
             toast.error("Input Price and Weight")
@@ -590,6 +595,30 @@ const Page: NextPage = () => {
                       )}
                     </div>
                   )}
+
+                   {/* Admin Reply - Read-only for completed status, editable for vetting/pending */}
+                   {(modalSelectedRequest?.status === "accepted" || modalSelectedRequest?.status === "rejected") ? (
+                     modalSelectedRequest?.admin_reply ? (
+                       <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
+                         <span className="portal-packages__field-label">Admin Reply</span>
+                         <p className="admin-shipment-view__note" style={{ marginTop: 8 }}>
+                           {modalSelectedRequest.admin_reply}
+                         </p>
+                       </div>
+                     ) : null
+                   ) : (
+                     <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
+                       <span className="portal-packages__field-label">Admin Reply</span>
+                       <textarea
+                         className="dheir-input"
+                         rows={2}
+                         value={adminReply}
+                         onChange={(e) => setAdminReply(e.target.value)}
+                         placeholder="Add reply or internal feedback..."
+                         style={{ width: "100%", marginTop: 8 }}
+                       />
+                     </div>
+                   )}
 
                   {modalSelectedRequest?.status === "pending" && isRejecting && (
                     <div className="portal-packages__field" style={{ gridColumn: "1 / -1", marginTop: "1rem" }}>

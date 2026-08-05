@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
             total_weight: Number(formData.get("total_weight")).toFixed(2),
             total_weight_unit,
             price: Number(formData.get("total_price")).toFixed(2),
-            
+            admin_reply: formData.get("admin_reply") as string || null,
         }
 
         const package_ids = data.package_ids?.toString().split(",")
@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
 
         const shipmentRes = await client.query(`
             INSERT INTO shipments
-            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit, admin_reply)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
             RETURNING *
         `, [
             tracking_number,
@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
             package_ids,
             data.total_weight,
             data.total_weight_unit,
+            data.admin_reply,
         ]);
 
         const { id } = shipmentRes.rows[0]
@@ -117,9 +118,10 @@ export async function POST(req: NextRequest) {
             SET status = 'accepted',
                 total_price = $2,
                 total_weight = $3,
-                total_weight_unit = $4
+                total_weight_unit = $4,
+                admin_reply = $5
             WHERE id = $1
-        `, [data.shipment_request_id, data.price, data.total_weight, data.total_weight_unit]);
+        `, [data.shipment_request_id, data.price, data.total_weight, data.total_weight_unit, data.admin_reply]);
 
         await client.query(`
             UPDATE packages

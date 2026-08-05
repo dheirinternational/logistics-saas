@@ -31,7 +31,7 @@ export async function POST(
 
     const { id } = await params
     const body = await req.json()
-    const { action, rejection_note } = body
+    const { action, rejection_note, admin_reply } = body
 
     if (!["accept", "reject"].includes(action)) {
       return NextResponse.json(
@@ -60,14 +60,14 @@ export async function POST(
 
       if (action === "accept") {
         await client.query(
-          "UPDATE shipment_requests SET status = 'vetted', rejection_note = NULL WHERE id = $1",
-          [id]
+          "UPDATE shipment_requests SET status = 'vetted', rejection_note = NULL, admin_reply = $2 WHERE id = $1",
+          [id, admin_reply || null]
         )
       } else {
         // reject
         await client.query(
-          "UPDATE shipment_requests SET status = 'rejected', rejection_note = $2 WHERE id = $1",
-          [id, rejection_note || "Request rejected by admin."]
+          "UPDATE shipment_requests SET status = 'rejected', rejection_note = $2, admin_reply = $3 WHERE id = $1",
+          [id, rejection_note || "Request rejected by admin.", admin_reply || null]
         )
         // Revert packages back to 'stored'
         if (packageIds && packageIds.length > 0) {

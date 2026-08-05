@@ -156,6 +156,7 @@ export type ShippingRequest = {
     customer_note: string
     packaging: string
     rejection_note?: string
+    admin_reply?: string
 }
 
 
