@@ -3,6 +3,7 @@
 // import PendingAlerts from '@/components/admin/PendingAlerts'
 import { AdminAnnouncementModal } from "@/components/admin/AdminAnnouncementModal"
 import { DHEIRConfirmDialog } from "@/components/ui/DHEIRConfirmDialog"
+import { DashboardAnalytics } from "@/components/admin/analytics/DashboardAnalytics"
 import Link from "next/link"
 // import RecentActivity from '@/components/admin/RecentActivity'
 // import RecentShipmentCard from '@/components/admin/RecentShipmentCard'
@@ -191,6 +192,8 @@ const Page: NextPage = () => {
           </span>
         </Link>
       </div>
+
+      <DashboardAnalytics />
 
       <div className="portal-home__split portal-home__split--actions">
         {/* Announcements */}
