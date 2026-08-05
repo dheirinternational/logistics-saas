@@ -31,6 +31,16 @@ export async function POST(req: NextRequest){
         const formData = await req.formData()
         const mediaAssetIds = parsePackageMediaAssetIds(formData.getAll("media_asset_ids"))
 
+        const rawReceivedAt = String(formData.get("received_at") ?? "").trim()
+        const rawStoredAt = String(formData.get("stored_at") ?? "").trim()
+
+        if (!rawReceivedAt || !rawStoredAt) {
+            return NextResponse.json(
+                { success: false, message: "Received date and stored date are required." },
+                { status: 400 }
+            )
+        }
+
         const data = {
             package_name: formData.get("package_name"),
             incoming_package_id: formData.get("incoming_package_id"),
@@ -41,8 +51,8 @@ export async function POST(req: NextRequest){
             weight_unit: String(formData.get("weight_unit") ?? "kg"),
             condition: formData.get("condition"),
             status: "stored",
-            received_at: formData.get("received_at"),
-            stored_at: formData.get("stored_at"),
+            received_at: rawReceivedAt,
+            stored_at: rawStoredAt,
             inp_status: formData.get("inp_status"),
             amount: Number(formData.get("amount"))
         }

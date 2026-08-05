@@ -38,8 +38,10 @@ export async function PUT(
     const weight_unit = String(formData.get("weight_unit") ?? "kg")
     const amount = Number(formData.get("amount"))
     const condition = String(formData.get("condition") ?? "good")
-    const received_at = String(formData.get("received_at") ?? "")
-    const stored_at = String(formData.get("stored_at") ?? "")
+    const rawReceivedAt = String(formData.get("received_at") ?? "").trim()
+    const rawStoredAt = String(formData.get("stored_at") ?? "").trim()
+    const received_at = rawReceivedAt || null
+    const stored_at = rawStoredAt || null
 
     if (!package_name || !incoming_package_id || !customer_code) {
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 })
@@ -85,8 +87,8 @@ export async function PUT(
              weight = $6,
              weight_unit = $7,
              condition = $8,
-             received_at = $9,
-             stored_at = $10,
+             received_at = COALESCE($9, received_at),
+             stored_at = COALESCE($10, stored_at),
              amount = $11
        WHERE id = $12`,
       [

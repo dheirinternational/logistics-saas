@@ -19,6 +19,7 @@ import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { AdminShipmentViewModal } from "@/components/admin/shipments/AdminShipmentViewModal"
 import CreateShipmentRequestModal from "@/components/admin/shipments/forms/CreateShipmentRequestModal"
 import CreateManualShipmentModal from "@/components/admin/shipments/forms/CreateManualShipmentModal"
+import { toDateInputValue } from "@/lib/dates/toDateInputValue"
 
 const pages = [
     {
@@ -518,7 +519,7 @@ const IncomingPackageEditComponent = ({ preloadedWarehouses }: { preloadedWareho
                                 type="date"
                                 name="received_at"
                                 className="dheir-input"
-                                value={selectedPackage.received_at}
+                                value={toDateInputValue(selectedPackage.received_at)}
                                 onChange={handleSelectedPackageInput}
                                 required
                             />
@@ -530,7 +531,7 @@ const IncomingPackageEditComponent = ({ preloadedWarehouses }: { preloadedWareho
                                 type="date"
                                 name="stored_at"
                                 className="dheir-input"
-                                value={selectedPackage.stored_at}
+                                value={toDateInputValue(selectedPackage.stored_at)}
                                 onChange={handleSelectedPackageInput}
                                 required
                             />
