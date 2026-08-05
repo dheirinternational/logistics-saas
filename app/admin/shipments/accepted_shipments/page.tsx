@@ -18,6 +18,8 @@ import { matchesStatusFilter } from "@/lib/admin/tableFilters"
 import { toast } from "@/lib/ui/toast"
 import { IconChecks, IconInbox, IconPackage, IconPlane, IconTruck } from "@tabler/icons-react"
 
+import { ShipmentBarcodeCell } from '@/components/admin/shipments/ShipmentBarcodeCell'
+
 export type SearchProps = {
     search: string,
     status: string,
@@ -58,7 +60,8 @@ const Page: NextPage = () => {
 
     const shipmentRequestColumnDef = [
         columnHelper.accessor("tracking_number", {
-            header: "Tracking Number"
+            header: "Tracking Number",
+            cell: ({ getValue }) => <ShipmentBarcodeCell trackingNumber={getValue()} />
         }),
         columnHelper.accessor("customer_code", {
             header: "Customer Code"
