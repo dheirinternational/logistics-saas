@@ -42,10 +42,20 @@ export async function POST(req: NextRequest) {
         const totalWeightUnitRaw = String(formData.get("total_weight_unit") ?? "kg").toLowerCase()
         const total_weight_unit = totalWeightUnitRaw === "cbm" ? "cbm" : "kg"
 
+        let originWarehouseId = Number(formData.get("origin_warehouse_id"))
+        let destinationWarehouseId = Number(formData.get("destination_warehouse_id"))
+
+        if (!originWarehouseId || !Number.isFinite(originWarehouseId) || originWarehouseId < 8) {
+            originWarehouseId = 8 // Default Guangzhou Consolidation Warehouse
+        }
+        if (!destinationWarehouseId || !Number.isFinite(destinationWarehouseId) || destinationWarehouseId < 8) {
+            destinationWarehouseId = String(formData.get("channel")) === "sea" ? 11 : 10 // Default Lagos Sea/Air Warehouse
+        }
+
         const data = {
             customer_code: formData.get("customer_code") as string,
-            origin_warehouse_id: Number(formData.get("origin_warehouse_id")),
-            destination_warehouse_id: Number(formData.get("destination_warehouse_id")),
+            origin_warehouse_id: originWarehouseId,
+            destination_warehouse_id: destinationWarehouseId,
             channel: formData.get("channel"),
             shipment_request_id: Number(formData.get("shipment_request_id")),
             shipment_note: formData.get("shipment_note"),

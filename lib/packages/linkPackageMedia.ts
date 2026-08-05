@@ -26,16 +26,13 @@ export async function linkPackageMediaAssets(
   if (uniqueIds.length === 0) return
 
   const assets = await getMediaAssetsByIds(uniqueIds)
-  if (assets.length !== uniqueIds.length) {
-    throw new Error("One or more selected media items were not found.")
-  }
-
   const order = uniqueIds
     .map((id) => assets.find((a) => Number(a.id) === id))
     .filter((a): a is NonNullable<typeof a> => Boolean(a))
 
   if (order.length === 0) {
-    throw new Error("One or more selected media items were not found.")
+    console.warn(`[linkPackageMediaAssets] No valid matching media assets found for IDs: ${uniqueIds.join(", ")}`)
+    return
   }
 
   const statsRes = await dbQuery<{ has_primary: boolean }>(

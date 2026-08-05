@@ -84,8 +84,10 @@ export function AdminShipmentViewModal() {
     if (selectedShipment) {
       setTrackingNumber(selectedShipment.tracking_number || "")
       setCustomerCode(selectedShipment.customer_code || "")
-      setOriginWarehouseId(String(selectedShipment.origin_warehouse_id || ""))
-      setDestinationWarehouseId(String(selectedShipment.destination_warehouse_id || ""))
+      const origId = Number(selectedShipment.origin_warehouse_id)
+      const destId = Number(selectedShipment.destination_warehouse_id)
+      setOriginWarehouseId(origId && origId >= 8 ? String(origId) : "8")
+      setDestinationWarehouseId(destId && destId >= 8 ? String(destId) : (selectedShipment.channel === "sea" ? "11" : "10"))
       setChannel(selectedShipment.channel || "")
       setTotalCost(String(selectedShipment.total_cost || ""))
       setTotalWeight(String(selectedShipment.total_weight || ""))

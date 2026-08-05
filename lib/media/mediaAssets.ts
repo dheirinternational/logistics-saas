@@ -200,18 +200,17 @@ async function linkAssetsToTable(
   assetIds: number[],
   opts?: { maxCount?: number }
 ) {
-  const uniqueIds = [...new Set(assetIds.map((id) => Number(id)).filter((id) => id > 0))]
-  const assets = await getMediaAssetsByIdsWithClient(client, uniqueIds)
-  if (assets.length !== uniqueIds.length) {
-    throw new Error("One or more selected media items were not found.")
-  }
+  const uniqueIds = [...new Set(assetIds.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0))]
+  if (uniqueIds.length === 0) return
 
+  const assets = await getMediaAssetsByIdsWithClient(client, uniqueIds)
   const order = uniqueIds
     .map((id) => assets.find((a) => Number(a.id) === id))
     .filter((a): a is MediaAssetRow => Boolean(a))
 
   if (order.length === 0) {
-    throw new Error("One or more selected media items were not found.")
+    console.warn(`[linkAssetsToTable] No valid matching media assets found for IDs: ${uniqueIds.join(", ")}`)
+    return
   }
 
   const statsRes = await client.query(

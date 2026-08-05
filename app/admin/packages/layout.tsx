@@ -357,8 +357,11 @@ const PackageEditComponent = () => {
 
     // Fetch Data upon initial load 
     useEffect(() => {
-        if (!selectedPackage) return
         fetchWarehouses()
+    }, [])
+
+    useEffect(() => {
+        if (!selectedPackage) return
         if (isEditing) {
             fetchImages()
         } else {
@@ -367,19 +370,18 @@ const PackageEditComponent = () => {
         setLibraryMedia([])
     }, [selectedPackage?.id])
 
-
-    // Set Selected Warehouse
+    // Set Selected Warehouse with fallback if current warehouse_id is invalid
     useEffect(() => {
-        if (!selectedPackage) return
+        if (!selectedPackage || warehouses.length === 0) return
 
-        const warehouse = warehouses.find(warehouse =>
-            Number(selectedPackage.warehouse_id) === Number(warehouse.id)
-        )
-
-        setSelectedWarehouse(warehouse || null)
-
-
-    }, [selectedPackage])
+        const warehouse = warehouses.find(w => Number(selectedPackage.warehouse_id) === Number(w.id))
+        if (warehouse) {
+            setSelectedWarehouse(warehouse)
+        } else if (warehouses[0]) {
+            setPackageWarehouse(Number(warehouses[0].id))
+            setSelectedWarehouse(warehouses[0])
+        }
+    }, [selectedPackage?.id, warehouses])
 
 
     if (!selectedPackage) {

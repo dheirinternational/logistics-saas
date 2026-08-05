@@ -47,6 +47,10 @@ export async function PUT(
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 })
     }
 
+    if (!warehouse_id || !Number.isFinite(warehouse_id) || warehouse_id <= 0) {
+      return NextResponse.json({ success: false, message: "Please select a valid warehouse" }, { status: 400 })
+    }
+
     if (!["kg", "cbm"].includes(weight_unit)) {
       return NextResponse.json({ success: false, message: "Invalid weight unit" }, { status: 400 })
     }

@@ -109,6 +109,11 @@ export async function PUT(
       const trackingNo = existing.rows[0]?.tracking_number
       const customerUserId = existing.rows[0]?.user_id
 
+      const parsedOrigin = origin_warehouse_id ? Number(origin_warehouse_id) : null
+      const parsedDest = destination_warehouse_id ? Number(destination_warehouse_id) : null
+      const validOrigin = (parsedOrigin && Number.isFinite(parsedOrigin) && parsedOrigin >= 8) ? parsedOrigin : null
+      const validDest = (parsedDest && Number.isFinite(parsedDest) && parsedDest >= 8) ? parsedDest : null
+
       // Update basic fields
       await client.query(
         `
@@ -132,11 +137,11 @@ export async function PUT(
         [
           tracking_number || null,
           customer_code || null,
-          origin_warehouse_id ? Number(origin_warehouse_id) : null,
-          destination_warehouse_id ? Number(destination_warehouse_id) : null,
+          validOrigin,
+          validDest,
           channel || null,
-          total_cost !== undefined ? Number(total_cost) : null,
-          total_weight !== undefined ? Number(total_weight) : null,
+          total_cost !== undefined && !isNaN(Number(total_cost)) ? Number(total_cost) : null,
+          total_weight !== undefined && !isNaN(Number(total_weight)) ? Number(total_weight) : null,
           total_weight_unit || null,
           payment_time || null,
           paid_for !== undefined ? Boolean(paid_for) : null,
