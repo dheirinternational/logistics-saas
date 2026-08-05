@@ -163,7 +163,7 @@ export function DashboardAnalytics() {
         ) : (
           <div style={{ width: "100%", height: 350 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorShipments" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--color-dheir-blue, #0056cc)" stopOpacity={0.2} />
@@ -172,7 +172,8 @@ export function DashboardAnalytics() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                 <XAxis dataKey="name" stroke="#888" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#888" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis yAxisId="left" stroke="var(--color-dheir-blue, #0056cc)" fontSize={11} tickLine={false} axisLine={false} label={{ value: 'Shipments', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: '10px', fill: 'var(--color-dheir-blue)' } }} />
+                <YAxis yAxisId="right" orientation="right" stroke="#10b981" fontSize={11} tickLine={false} axisLine={false} label={{ value: 'CBM / KG', angle: 90, position: 'insideRight', style: { textAnchor: 'middle', fontSize: '10px', fill: '#10b981' } }} />
                 <Tooltip
                   contentStyle={{
                     background: "#ffffff",
@@ -183,6 +184,7 @@ export function DashboardAnalytics() {
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
                 <Area
+                  yAxisId="left"
                   type="monotone"
                   dataKey="Shipments"
                   stroke="var(--color-dheir-blue, #0056cc)"
@@ -190,8 +192,8 @@ export function DashboardAnalytics() {
                   fill="url(#colorShipments)"
                   strokeWidth={2}
                 />
-                <Bar dataKey="CBM" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={30} />
-                <Bar dataKey="KG" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={30} />
+                <Bar yAxisId="right" dataKey="CBM" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={20} />
+                <Bar yAxisId="right" dataKey="KG" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={20} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
