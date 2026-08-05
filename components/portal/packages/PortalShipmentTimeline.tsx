@@ -15,6 +15,8 @@ type PortalShipmentTimelineProps = {
   shipment: {
     status: string
     created_at: string
+    updated_at?: string
+    channel?: string
   }
 }
 
@@ -27,7 +29,7 @@ export function PortalShipmentTimeline({ shipment }: PortalShipmentTimelineProps
   const base = new Date(createdAtStr)
   const now = new Date()
 
-  // Status rank
+  // Status rank mapping
   const statusRank: Record<string, number> = {
     "pending": 0,
     "processing": 1,
@@ -39,51 +41,74 @@ export function PortalShipmentTimeline({ shipment }: PortalShipmentTimelineProps
   }
 
   const currentRank = statusRank[status] ?? 0
+  const isSea = shipment.channel?.toLowerCase().includes("sea")
 
+  // Clean milestones matching status progression 1-to-1
   const milestones = [
-    { offsetMs: 4 * 60 * 60 * 1000, text: "[Shipment departed from warehouse to airport]", minRank: 2 },
-    { offsetMs: 9 * 60 * 60 * 1000, text: "[Shipment in transit to international airport]", minRank: 2 },
-    { offsetMs: 20 * 60 * 60 * 1000, text: "[Shipment arrived at international airport]", minRank: 3 },
-    { offsetMs: 21 * 60 * 60 * 1000, text: "[Shipment departed from international airport]", minRank: 3 },
-    { offsetMs: (3 * 24 + 4) * 60 * 60 * 1000, text: "[Goods arrived at Lagos warehouse]", minRank: 4 },
-    { offsetMs: (3 * 24 + 5) * 60 * 60 * 1000, text: "[Shipment arrived destination port and under customs process]", minRank: 4 },
-    { offsetMs: (3 * 24 + 7) * 60 * 60 * 1000, text: "[Shipment arrived at Nigeria warehouse]", minRank: 5 },
-    { offsetMs: (3 * 24 + 9) * 60 * 60 * 1000, text: "Signed", minRank: 6, isSigned: true }
+    {
+      minRank: 1,
+      text: "Consolidation complete & shipment registered",
+      subtext: "Package processed & prepared for dispatch at origin warehouse",
+      offsetMs: 0,
+    },
+    {
+      minRank: 2,
+      text: "Shipment departed origin warehouse",
+      subtext: isSea ? "Cargo dispatched to origin port" : "Cargo dispatched to origin airport",
+      offsetMs: 4 * 60 * 60 * 1000,
+    },
+    {
+      minRank: 3,
+      text: "In transit to destination",
+      subtext: isSea ? "Shipment in maritime transit to Nigeria" : "Shipment in air transit to Nigeria",
+      offsetMs: 24 * 60 * 60 * 1000,
+    },
+    {
+      minRank: 4,
+      text: "Arrived destination port & under customs process",
+      subtext: "Cargo arrived in Nigeria and undergoing customs clearance",
+      offsetMs: 3 * 24 * 60 * 60 * 1000,
+    },
+    {
+      minRank: 5,
+      text: "Arrived at Nigeria warehouse",
+      subtext: "Shipment received at Lagos warehouse & prepared for final delivery",
+      offsetMs: (3 * 24 + 12) * 60 * 60 * 1000,
+    },
+    {
+      minRank: 6,
+      text: "Delivered & verified",
+      subtext: "Shipment signed & received by customer",
+      offsetMs: 4 * 24 * 60 * 60 * 1000,
+      isSigned: true,
+    },
   ]
 
-  const events: TimelineEvent[] = []
+  const events: TimelineEvent[] = milestones.map((m) => {
+    const isCompleted = currentRank >= m.minRank
 
-  // Add base registration event
-  events.push({
-    dateLabel: base.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\//g, "-"),
-    timeLabel: base.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-    text: "Consolidation complete & shipment registered",
-    isCompleted: true
-  })
-
-  for (const m of milestones) {
-    if (currentRank >= m.minRank) {
+    if (isCompleted) {
       let mTime = new Date(base.getTime() + m.offsetMs)
       if (mTime > now) {
-        mTime = new Date(now.getTime() - 10 * 60 * 1000)
+        mTime = new Date(now.getTime() - 5 * 60 * 1000)
       }
-      events.push({
-        dateLabel: mTime.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\//g, "-"),
-        timeLabel: mTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      return {
+        dateLabel: mTime.toLocaleDateString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\//g, "-"),
+        timeLabel: mTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
         text: m.text,
         isCompleted: true,
-        isSigned: m.isSigned
-      })
-    } else {
-      events.push({
-        dateLabel: "",
-        timeLabel: "",
-        text: m.text,
-        isCompleted: false,
-        isSigned: m.isSigned
-      })
+        isSigned: m.isSigned,
+      }
     }
-  }
+
+    return {
+      dateLabel: "",
+      timeLabel: "",
+      text: m.text,
+      isCompleted: false,
+      isSigned: m.isSigned,
+    }
+  })
 
   return (
     <div style={{ padding: "8px 0 8px 8px" }}>

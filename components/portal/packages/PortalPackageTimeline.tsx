@@ -37,7 +37,7 @@ export function PortalPackageTimeline({ packag }: PortalPackageTimelineProps) {
     },
     {
       label: "Arrived at warehouse",
-      description: packag.warehouse_name ? `Received at ${packag.warehouse_name}` : "Stored at warehouse",
+      description: packag.warehouse_name ? `Received at ${packag.warehouse_name}` : "Stored at origin warehouse",
       date: packag.stored_at || packag.received_at,
       status: isStored ? (isRequested ? "completed" : "current") : "pending",
     },
@@ -47,23 +47,8 @@ export function PortalPackageTimeline({ packag }: PortalPackageTimelineProps) {
       status: isRequested ? (isShipped ? "completed" : "current") : "pending",
     },
     {
-      label: "Shipment departed warehouse",
-      description: "Shipment departed from warehouse to airport",
-      status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
-    },
-    {
-      label: "Airport transit",
-      description: "Shipment departed from international airport",
-      status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
-    },
-    {
-      label: "Customs clearance",
-      description: "Shipment arrived destination port and under customs process",
-      status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
-    },
-    {
-      label: "Arrived Nigeria warehouse",
-      description: "Shipment arrived at Nigeria warehouse",
+      label: "Outbound shipment active",
+      description: "Dispatched & in transit to destination",
       status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
     },
     {
