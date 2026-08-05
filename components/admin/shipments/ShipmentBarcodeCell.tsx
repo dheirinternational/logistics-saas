@@ -67,9 +67,14 @@ export function ShipmentBarcodeCell({ trackingNumber }: { trackingNumber: string
   }
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <div style={{ background: "#ffffff", padding: "4px", borderRadius: "4px", border: "1px solid #eee", display: "inline-flex" }}>
-        <svg ref={svgRef} style={{ maxHeight: "30px", maxWidth: "120px" }} />
+    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-start" }}>
+        <div style={{ background: "#ffffff", padding: "4px", borderRadius: "4px", border: "1px solid #eee", display: "inline-flex" }}>
+          <svg ref={svgRef} style={{ maxHeight: "30px", maxWidth: "120px" }} />
+        </div>
+        <span style={{ fontSize: "12px", fontFamily: "monospace", color: "var(--color-dheir-ink, #111)", fontWeight: 500 }}>
+          {trackingNumber}
+        </span>
       </div>
       <button
         type="button"
