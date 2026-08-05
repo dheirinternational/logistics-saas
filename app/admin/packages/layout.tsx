@@ -541,21 +541,21 @@ const PackageEditComponent = () => {
                                 : "Optional, choose photos or videos from the media library."}
                         </p>
                     </div>
-                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%" }}>
                         <button
                             type="button"
                             className="portal-home__btn portal-home__btn--secondary"
                             onClick={() => startCamera()}
-                            style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap", fontSize: "13px" }}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", width: "100%", height: "42px", fontSize: "14px" }}
                         >
-                            <IconCamera size={16} />
+                            <IconCamera size={18} />
                             Take Photo
                         </button>
                         <button
                             type="button"
                             className="portal-home__btn portal-home__btn--secondary"
                             onClick={() => setPickerOpen(true)}
-                            style={{ whiteSpace: "nowrap", fontSize: "13px" }}
+                            style={{ width: "100%", height: "42px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px" }}
                         >
                             Choose from library
                         </button>
@@ -563,7 +563,7 @@ const PackageEditComponent = () => {
                             type="button"
                             className="portal-home__btn portal-home__btn--primary"
                             onClick={() => setUploadOpen(true)}
-                            style={{ whiteSpace: "nowrap", fontSize: "13px" }}
+                            style={{ width: "100%", height: "42px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px" }}
                         >
                             Upload
                         </button>
