@@ -7,6 +7,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { PortalOcrScannerFloatingButton } from "@/components/admin/ocr/PortalOcrScannerFloatingButton"
+import { PortalBarcodeScannerButton } from "@/components/admin/ocr/PortalBarcodeScannerButton"
 
 export const metadata: Metadata = {
   robots: {
@@ -59,6 +60,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <main className="admin-shell__main">{children}</main>
       </div>
       <PortalOcrScannerFloatingButton />
+      <PortalBarcodeScannerButton />
     </div>
   )
 }

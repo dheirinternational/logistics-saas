@@ -41,7 +41,7 @@ export default function ShipmentsLayouts({ children }: { children: ReactNode }) 
     const pathName = usePathname()
     const { isModalActive, setIsModalActive, closeModal } = useEditModalStore()
     const { selectedPackage, setSelectedPackage, setReadOnly, resetSelectedPackage } = usePackageStore()
-    const { selectedShipment, resetSelectedShipment, setShipmentrigger } = useShipmentStore()
+    const { selectedShipment, setSelectedShipment, resetSelectedShipment, setShipmentrigger } = useShipmentStore()
 
 
     const [currentPage, setCurrentPage] = useState<"expected_shipments" | "shipment_requests" | "accepted_requests" | "">("")
@@ -95,6 +95,44 @@ export default function ShipmentsLayouts({ children }: { children: ReactNode }) 
 
         setPageTitle()
     }, [pathName])
+
+    useEffect(() => {
+        const handleShipmentScanned = async (e: Event) => {
+            const customEvent = e as CustomEvent<{ trackingNumber: string }>
+            const { trackingNumber } = customEvent.detail
+
+            try {
+                const res = await fetch("/api/shipments")
+                const result = await res.json()
+                if (!res.ok) {
+                    toast.error(result.message || "Failed to load shipments")
+                    return
+                }
+
+                const shipmentsList = result.data || []
+                const matched = shipmentsList.find(
+                    (s: any) => s.tracking_number?.toLowerCase() === trackingNumber?.toLowerCase()
+                )
+
+                if (matched) {
+                    setSelectedShipment(matched)
+                    setReadOnly() // Set readOnly to true or false depending on how it's handled. Wait, let's open modal:
+                    setIsModalActive()
+                    toast.success(`Found shipment: ${trackingNumber}`)
+                } else {
+                    toast.error(`Shipment not found: ${trackingNumber}`)
+                }
+            } catch (err) {
+                console.error("Error matching scanned shipment", err)
+                toast.error("Error looking up shipment record")
+            }
+        }
+
+        window.addEventListener("admin-shipment-scanned", handleShipmentScanned)
+        return () => {
+            window.removeEventListener("admin-shipment-scanned", handleShipmentScanned)
+        }
+    }, [setIsModalActive, setSelectedShipment, setReadOnly])
 
 
     // Set Selected Edit component based on page
