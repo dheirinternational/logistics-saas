@@ -14,6 +14,10 @@ import { IconX } from "@tabler/icons-react";
 import { DHEIRSelect } from "@/components/ui/DHEIRSelect";
 import { apiErrorMessage, parseJsonResponse } from "@/lib/api/parseJsonResponse";
 import { toDateInputValue } from "@/lib/dates/toDateInputValue";
+import { compressImage } from "@/lib/media/compressImage";
+import { uploadAdminMediaFile } from "@/lib/media/uploadAdminMediaFile";
+import { IconCamera, IconX as IconClose } from "@tabler/icons-react";
+import { useRef } from "react";
 
 export default function PageLayout({ children }: { children: ReactNode }) {
     const { isModalActive, setIsModalActive } = useEditModalStore()
@@ -149,6 +153,12 @@ const PackageEditComponent = () => {
     const [pickerOpen, setPickerOpen] = useState(false)
     const [uploadOpen, setUploadOpen] = useState(false)
 
+    // Camera states
+    const [cameraOpen, setCameraOpen] = useState(false)
+    const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+    const [isCapturing, setIsCapturing] = useState(false)
+    const videoRef = useRef<HTMLVideoElement>(null)
+
     // Selected Objects
     const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
 
@@ -159,6 +169,95 @@ const PackageEditComponent = () => {
     const [isFetchingImages, setIsFetchingImages] = useState(false)
 
     const packageId = Number(selectedPackage?.id ?? 0)
+
+    // Camera Actions
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
+                audio: false
+            })
+            setCameraStream(stream)
+            setCameraOpen(true)
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream
+            }
+        } catch (err) {
+            console.error("Camera error", err)
+            toast.error("Could not access camera device.")
+        }
+    }
+
+    const stopCamera = () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach((track) => track.stop())
+            setCameraStream(null)
+        }
+        setCameraOpen(false)
+    }
+
+    // Capture and Compress Image
+    const handleCapture = async () => {
+        if (!videoRef.current || isCapturing) return
+        setIsCapturing(true)
+
+        try {
+            const video = videoRef.current
+            const canvas = document.createElement("canvas")
+            canvas.width = video.videoWidth || 640
+            canvas.height = video.videoHeight || 480
+            const ctx = canvas.getContext("2d")
+            
+            if (!ctx) {
+                toast.error("Canvas context generation failed")
+                return
+            }
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+            
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    toast.error("Failed to capture image blob")
+                    setIsCapturing(false)
+                    return
+                }
+
+                try {
+                    // Compress client-side
+                    const compressedBlob = await compressImage(blob)
+                    const compressedFile = new File([compressedBlob], `package-photo-${Date.now()}.jpg`, {
+                        type: "image/jpeg"
+                    })
+
+                    // Upload directly bypassing serverless body limits
+                    const uploadResult = await uploadAdminMediaFile(compressedFile)
+                    if (uploadResult.ok && uploadResult.asset) {
+                        setLibraryMedia((prev) => [...prev, uploadResult.asset!])
+                        toast.success("Photo captured and uploaded successfully!")
+                    } else {
+                        toast.error(uploadResult.message || "Failed to upload captured photo")
+                    }
+                } catch (err: any) {
+                    toast.error(err.message || "Compression/Upload failed")
+                } finally {
+                    setIsCapturing(false)
+                    stopCamera()
+                }
+            }, "image/jpeg", 0.95)
+        } catch (err: any) {
+            toast.error("Failed to capture frame")
+            setIsCapturing(false)
+        }
+    }
+
+    // Stop camera if component unmounts
+    useEffect(() => {
+        return () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach((t) => t.stop())
+            }
+        }
+    }, [cameraStream])
     const isEditing = Number.isFinite(packageId) && packageId > 0
 
 
@@ -446,6 +545,15 @@ const PackageEditComponent = () => {
                         <button
                             type="button"
                             className="portal-home__btn portal-home__btn--secondary"
+                            onClick={() => startCamera()}
+                            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                        >
+                            <IconCamera size={16} />
+                            Take Photo
+                        </button>
+                        <button
+                            type="button"
+                            className="portal-home__btn portal-home__btn--secondary"
                             onClick={() => setPickerOpen(true)}
                         >
                             Choose from library
@@ -462,6 +570,176 @@ const PackageEditComponent = () => {
                         <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
                     ) : null}
                 </div>
+
+                {cameraOpen && (
+                    <div
+                        className="dheir-dialog-backdrop"
+                        role="presentation"
+                        onClick={(e) => {
+                            if (e.target === e.currentTarget) stopCamera()
+                        }}
+                        style={{ zIndex: 1100, backgroundColor: "#000000" }}
+                    >
+                        {/* Custom styles for native camera UI look */}
+                        <style>{`
+                            .camera-viewport-container {
+                                position: relative;
+                                width: 100vw;
+                                height: 100vh;
+                                height: 100dvh;
+                                background-color: #000;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: space-between;
+                                overflow: hidden;
+                            }
+                            .camera-video-element {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                object-fit: cover;
+                                z-index: 1;
+                            }
+                            .camera-overlay-grid {
+                                position: absolute;
+                                inset: 0;
+                                display: grid;
+                                grid-template-columns: repeat(3, 1fr);
+                                grid-template-rows: repeat(3, 1fr);
+                                pointer-events: none;
+                                z-index: 2;
+                            }
+                            .camera-grid-line-h {
+                                border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+                                width: 100%;
+                                height: 100%;
+                            }
+                            .camera-grid-line-v {
+                                border-right: 1px dashed rgba(255, 255, 255, 0.25);
+                                width: 100%;
+                                height: 100%;
+                            }
+                            .camera-top-controls {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                height: 70px;
+                                background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                padding: 0 20px;
+                                z-index: 3;
+                            }
+                            .camera-close-btn {
+                                border: none;
+                                background: rgba(0, 0, 0, 0.5);
+                                color: #fff;
+                                width: 44px;
+                                height: 44px;
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                cursor: pointer;
+                            }
+                            .camera-bottom-panel {
+                                position: absolute;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                height: 130px;
+                                background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                z-index: 3;
+                            }
+                            .camera-shutter-btn {
+                                width: 72px;
+                                height: 72px;
+                                border-radius: 50%;
+                                background-color: #ffffff;
+                                border: 6px solid rgba(255, 255, 255, 0.3);
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                transition: transform 0.1s ease;
+                                padding: 0;
+                            }
+                            .camera-shutter-btn:active {
+                                transform: scale(0.9);
+                                background-color: #e0e0e0;
+                            }
+                            .camera-shutter-inner {
+                                width: 100%;
+                                height: 100%;
+                                border-radius: 50%;
+                                background-color: #ffffff;
+                            }
+                        `}</style>
+                        <div className="camera-viewport-container">
+                            {/* Live video */}
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                muted
+                                className="camera-video-element"
+                            />
+
+                            {/* Camera Rule-of-Thirds Grid Overlay */}
+                            <div className="camera-overlay-grid">
+                                <div className="camera-grid-line-v camera-grid-line-h" />
+                                <div className="camera-grid-line-v camera-grid-line-h" />
+                                <div className="camera-grid-line-h" />
+                                <div className="camera-grid-line-v camera-grid-line-h" />
+                                <div className="camera-grid-line-v camera-grid-line-h" />
+                                <div className="camera-grid-line-h" />
+                                <div className="camera-grid-line-v" />
+                                <div className="camera-grid-line-v" />
+                                <div />
+                            </div>
+
+                            {/* Top Bar Controls */}
+                            <div className="camera-top-controls">
+                                <button
+                                    type="button"
+                                    className="camera-close-btn"
+                                    onClick={stopCamera}
+                                    aria-label="Exit Camera"
+                                >
+                                    <IconClose size={24} />
+                                </button>
+                                <span style={{ color: "#fff", fontWeight: 600, fontSize: "14px", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                                    PACKAGE PHOTO
+                                </span>
+                                <div style={{ width: 44 }} /> {/* Spacer */}
+                            </div>
+
+                            {/* Bottom Panel with Shutter Button */}
+                            <div className="camera-bottom-panel">
+                                <button
+                                    type="button"
+                                    onClick={handleCapture}
+                                    className="camera-shutter-btn"
+                                    disabled={isCapturing}
+                                    aria-label="Capture Photo"
+                                >
+                                    {isCapturing ? (
+                                        <DHEIRLoader color="var(--color-dheir-blue)" size={10} />
+                                    ) : (
+                                        <div className="camera-shutter-inner" />
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {images.length > 0 ? (
                     <div className="admin-uploader__previews">
