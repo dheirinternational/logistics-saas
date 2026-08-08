@@ -12,6 +12,12 @@ import { toast } from "@/lib/ui/toast"
 
 interface CustomerDetails extends User {
     code: string
+    street?: string
+    city?: string
+    state?: string
+    country?: string
+    postal_code?: string
+    full_address?: string
 }
 
 type FilterParams = {
@@ -62,7 +68,10 @@ const Page: NextPage = () => {
                 x.email?.toLowerCase().includes(q) ||
                 x.code?.toLowerCase().includes(q) ||
                 x.first_name?.toLowerCase().includes(q) ||
-                x.last_name?.toLowerCase().includes(q)
+                x.last_name?.toLowerCase().includes(q) ||
+                x.full_address?.toLowerCase().includes(q) ||
+                x.city?.toLowerCase().includes(q) ||
+                x.state?.toLowerCase().includes(q)
         )
     }, [users, filterValues.search])
 
@@ -90,6 +99,18 @@ const Page: NextPage = () => {
         columnHelper.accessor("phone", {
             header: "Phone",
             cell: ({ getValue }) => getValue() || "-",
+        }),
+        columnHelper.accessor("full_address", {
+            header: "Delivery Address",
+            cell: ({ row }) => {
+                const item = row.original
+                const addr = item.full_address || [item.street, item.city, item.state, item.country].filter(Boolean).join(", ")
+                return (
+                    <span style={{ fontSize: "13px", color: addr ? "var(--color-dheir-ink)" : "var(--color-dheir-muted)", maxWidth: "260px", display: "inline-block", lineHeight: "1.4" }}>
+                        {addr || "No address provided"}
+                    </span>
+                )
+            },
         }),
         columnHelper.accessor("created_at", {
             header: "Joined at",

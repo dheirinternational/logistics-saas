@@ -48,13 +48,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     throw err
   }
 
-  if (!session || session.role !== "admin") {
+  if (!session || (session.role !== "admin" && !session.staff_role)) {
     redirect("/auth/login")
   }
 
+  const staffRole = (session.staff_role as any) || (session.role === "admin" ? "super_admin" : undefined)
+
   return (
     <div className="admin-shell">
-      <SideBar />
+      <SideBar staffRole={staffRole} />
       <div className="admin-shell__content">
         <Header />
         <main className="admin-shell__main">{children}</main>

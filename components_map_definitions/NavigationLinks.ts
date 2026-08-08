@@ -11,6 +11,7 @@ import {
   IconPackage,
   IconPhotoVideo,
   IconShoppingCart,
+  IconClipboardList,
   IconTruck,
   IconUser,
   IconUsers,
@@ -37,6 +38,11 @@ export const navLinks: NavLink[] = [
     name: "Packages",
     path: "/admin/packages",
     icon: IconPackage,
+  },
+  {
+    name: "Procurement",
+    path: "/admin/procurement",
+    icon: IconClipboardList,
   },
   {
     name: "Users",

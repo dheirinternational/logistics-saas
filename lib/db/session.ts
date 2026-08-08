@@ -53,6 +53,7 @@ export const getSession = cache(async () => {
                 sessions.expires_at,
                 users.email,
                 users.role,
+                users.staff_role,
                 users.first_name,
                 users.last_name,
                 users.profile_img

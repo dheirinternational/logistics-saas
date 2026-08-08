@@ -23,7 +23,7 @@ export default function NavLink({ name, path, icon: Icon, badgeCount }: NavLinkP
     >
       <Icon size={22} stroke={1.5} aria-hidden />
       <span>{name}</span>
-      {name === "Inbox" && (
+      {(name === "Inbox" || name === "Procurement") && (
         <span className="sidebar-beta-badge">Beta</span>
       )}
       {badgeCount !== undefined ? (

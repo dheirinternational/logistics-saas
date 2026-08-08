@@ -23,10 +23,33 @@ export async function GET(){
         }
 
         const res = await pool.query(`
-            SELECT u.id, u.email, u.first_name, u.last_name, u.phone, u.role, u.created_at, c.code 
+            SELECT 
+                u.id, 
+                u.email, 
+                u.first_name, 
+                u.last_name, 
+                u.phone, 
+                u.role, 
+                u.created_at, 
+                c.code,
+                a.street,
+                a.city,
+                a.state,
+                a.country,
+                a.postal_code,
+                TRIM(
+                  CONCAT_WS(', ',
+                    NULLIF(TRIM(a.street), ''),
+                    NULLIF(TRIM(a.city), ''),
+                    NULLIF(TRIM(a.state), ''),
+                    NULLIF(TRIM(a.country), '')
+                  )
+                ) AS full_address
             FROM users u
             JOIN customers c ON u.id = c.user_id
+            LEFT JOIN addresses a ON a.user_id = u.id
             WHERE u.id != $1
+            ORDER BY u.created_at DESC;
         `, [session.user_id])
         
         return NextResponse.json({

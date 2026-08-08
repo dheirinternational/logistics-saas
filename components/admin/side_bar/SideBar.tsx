@@ -3,6 +3,7 @@
 import { AdminSidebarLogout } from "@/components/admin/AdminSidebarLogout"
 import { PortalViewSwitch } from "@/components/PortalViewSwitch"
 import { navLinks } from "@/components_map_definitions/NavigationLinks"
+import { isStaffAllowedRoute, StaffSubRole } from "@/lib/rbac/permissions"
 import { useNavbarStore } from "@/store/navBarStore"
 import { IconX } from "@tabler/icons-react"
 import Image from "next/image"
@@ -11,7 +12,11 @@ import { usePathname } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import NavLink from "../NavLink"
 
-export const SideBar = () => {
+type SideBarProps = {
+  staffRole?: StaffSubRole
+}
+
+export const SideBar = ({ staffRole }: SideBarProps) => {
   const pathname = usePathname()
   const { isSideBarActive, setIsSideBarActive, closeSideBar } = useNavbarStore()
   const [badges, setBadges] = useState<Record<string, number>>({})
@@ -25,11 +30,12 @@ export const SideBar = () => {
 
     const fetchBadges = async () => {
       try {
-        const [ordersRes, shipmentsRes, manualPaymentsRes, inboxRes] = await Promise.all([
+        const [ordersRes, shipmentsRes, manualPaymentsRes, inboxRes, procurementRes] = await Promise.all([
           fetch("/api/orders/count", { credentials: "include" }),
           fetch("/api/shipments/count", { credentials: "include" }),
           fetch("/api/manual-payments/admin/count", { credentials: "include" }),
           fetch("/api/inbox/unread-count", { credentials: "include" }),
+          fetch("/api/admin/procurement/count", { credentials: "include" }),
         ])
 
         const nextBadges: Record<string, number> = {}
@@ -38,6 +44,12 @@ export const SideBar = () => {
           const ordersJson = await ordersRes.json()
           const open = Number(ordersJson?.data?.open ?? 0)
           nextBadges["/admin/orders"] = open
+        }
+
+        if (procurementRes.ok) {
+          const procurementJson = await procurementRes.json()
+          const procCount = Number(procurementJson?.data?.count ?? 0)
+          nextBadges["/admin/procurement"] = procCount
         }
 
         if (shipmentsRes.ok) {
@@ -73,11 +85,13 @@ export const SideBar = () => {
   }, [])
 
   const navLinksWithBadges = useMemo(() => {
-    return navLinks.map((link) => ({
-      ...link,
-      badgeCount: badges[link.path],
-    }))
-  }, [badges])
+    return navLinks
+      .filter((link) => isStaffAllowedRoute(staffRole, link.path))
+      .map((link) => ({
+        ...link,
+        badgeCount: badges[link.path],
+      }))
+  }, [badges, staffRole])
 
   useEffect(() => {
     if (!isSideBarActive) return

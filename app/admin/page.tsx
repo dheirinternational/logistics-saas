@@ -17,11 +17,20 @@ import { toast } from "@/lib/ui/toast"
 
 
 type ShipmentCount = {
-    total_active_count: number,
-    processing: number,
-    shipped: number,
-    in_transit: number,
-    delivered: number 
+    total_active_count: number
+    processing: number
+    shipped: number
+    in_transit: number
+    delivered: number
+    air_gz_count: number
+    air_gz_kg: number
+    air_hk_count: number
+    air_hk_kg: number
+    sea_count: number
+    sea_cbm: number
+    total_packages: number
+    total_parcel_qty: number
+    total_package_weight: number
 }
 
 
@@ -139,7 +148,16 @@ const Page: NextPage = () => {
         </div>
       </header>
 
-      <div className="portal-home__stats" role="list" aria-label="Shipment stats">
+      <div
+        className="portal-home__stats"
+        role="list"
+        aria-label="Shipment stats"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gap: "16px",
+        }}
+      >
         <Link href="/admin/shipments" className="portal-home__stat-card" role="listitem">
           <span className="portal-home__stat-card-icon" aria-hidden>
             <IconLoader2 size={22} stroke={1.5} />
@@ -153,6 +171,51 @@ const Page: NextPage = () => {
           </span>
         </Link>
 
+        <Link href="/admin/shipments" className="portal-home__stat-card" role="listitem">
+          <span className="portal-home__stat-card-icon" aria-hidden>
+            <IconTruck size={22} stroke={1.5} />
+          </span>
+          <span className="portal-home__stat-card-body">
+            <span className="portal-home__stat-card-label">Air Gz Cargo</span>
+            <span className="portal-home__stat-card-value">
+              {shipmentCounts?.air_gz_count || 0}
+            </span>
+            <span className="portal-home__stat-card-hint">
+              {shipmentCounts?.air_gz_kg?.toFixed(1) || 0} KG
+            </span>
+          </span>
+        </Link>
+
+        <Link href="/admin/shipments" className="portal-home__stat-card" role="listitem">
+          <span className="portal-home__stat-card-icon" aria-hidden>
+            <IconTruck size={22} stroke={1.5} />
+          </span>
+          <span className="portal-home__stat-card-body">
+            <span className="portal-home__stat-card-label">Air Hk Cargo</span>
+            <span className="portal-home__stat-card-value">
+              {shipmentCounts?.air_hk_count || 0}
+            </span>
+            <span className="portal-home__stat-card-hint">
+              {shipmentCounts?.air_hk_kg?.toFixed(1) || 0} KG
+            </span>
+          </span>
+        </Link>
+
+        <Link href="/admin/packages" className="portal-home__stat-card" role="listitem">
+          <span className="portal-home__stat-card-icon" aria-hidden>
+            <IconPackage size={22} stroke={1.5} />
+          </span>
+          <span className="portal-home__stat-card-body">
+            <span className="portal-home__stat-card-label">Parcel Items Qty</span>
+            <span className="portal-home__stat-card-value">
+              {shipmentCounts?.total_parcel_qty?.toLocaleString() || 0}
+            </span>
+            <span className="portal-home__stat-card-hint">
+              {shipmentCounts?.total_packages || 0} packages
+            </span>
+          </span>
+        </Link>
+
         <Link href="/admin/orders" className="portal-home__stat-card" role="listitem">
           <span className="portal-home__stat-card-icon" aria-hidden>
             <IconPackage size={22} stroke={1.5} />
@@ -163,19 +226,6 @@ const Page: NextPage = () => {
               {shipmentCounts?.shipped || 0}
             </span>
             <span className="portal-home__stat-card-hint">Outbound</span>
-          </span>
-        </Link>
-
-        <Link href="/admin/shipments" className="portal-home__stat-card" role="listitem">
-          <span className="portal-home__stat-card-icon" aria-hidden>
-            <IconTruck size={22} stroke={1.5} />
-          </span>
-          <span className="portal-home__stat-card-body">
-            <span className="portal-home__stat-card-label">In transit</span>
-            <span className="portal-home__stat-card-value">
-              {shipmentCounts?.in_transit || 0}
-            </span>
-            <span className="portal-home__stat-card-hint">On the way</span>
           </span>
         </Link>
 

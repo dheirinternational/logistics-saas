@@ -6,7 +6,7 @@ import {
 export const ADMIN_PORTAL_ENTRY = "/admin" as const
 
 export function isAdminRole(role: string | null | undefined): boolean {
-  return role === "admin"
+  return role === "admin" || role === "staff"
 }
 
 /** Landing header profile link and default dashboard entry by role. */

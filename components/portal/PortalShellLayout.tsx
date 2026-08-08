@@ -152,7 +152,7 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
               >
                 <Icon size={22} stroke={1.5} aria-hidden />
                 <span>{item.label}</span>
-                {item.key === "inbox" && (
+                {(item.key === "inbox" || item.key === "procurement") && (
                   <span className="sidebar-beta-badge">Beta</span>
                 )}
                 {item.badgeCount !== undefined ? (
