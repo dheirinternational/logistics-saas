@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
       RETURNING *;
     `
 
-    const commitmentFee = request_type === "verification" ? 25000 : request_type === "sourcing" ? 15000 : 5000
+    const commitmentFee = request_type === "verification" ? 25000 : request_type === "sourcing" ? 15000 : 20000
 
     const { rows } = await dbQuery(insertSql, [
       session.user_id,

@@ -33,15 +33,22 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
 
   const [customerNote, setCustomerNote] = useState("")
   const [packagingInstruction, setPackagingInstruction] = useState("Standard export packaging")
-  const [exchangeRate, setExchangeRate] = useState<number>(230) // RMB to NGN default
+  const [exchangeRate, setExchangeRate] = useState<number>(209) // Dynamic RMB to NGN default (approx 209)
   const [submitting, setSubmitting] = useState(false)
+
+  const commitmentFee = 20000 // ₦20,000 commitment fee (refundable after 72 hours of quotation sent)
 
   useEffect(() => {
     fetch("/api/money-exchange-rate")
       .then((r) => r.json())
       .then((result) => {
-        if (result.data && result.data[0]?.currency_two) {
-          setExchangeRate(Number(result.data[0].currency_two))
+        if (Array.isArray(result.data)) {
+          const rmbRate = result.data.find(
+            (item: any) => item.name === "rmb_to_naira" || item.name === "yen_to_naira"
+          )
+          if (rmbRate?.currency_two) {
+            setExchangeRate(Number(rmbRate.currency_two))
+          }
         }
       })
       .catch(() => {})
@@ -78,7 +85,6 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
 
   const totalRmb = items.reduce((acc, curr) => acc + (Number(curr.priceRmb) || 0) * (Number(curr.quantity) || 1), 0)
   const totalNgnMerchandise = totalRmb * exchangeRate
-  const commitmentFee = 5000 // NGN non-refundable commitment fee
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -152,7 +158,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
           </span>
         </div>
         <span style={{ fontSize: "12px", color: "var(--color-dheir-muted)" }}>
-          Commitment fee: ₦{commitmentFee.toLocaleString()} (Non-refundable within 72h)
+          Commitment fee: ₦{commitmentFee.toLocaleString()} (Refundable after 72 hours of Quotation sent)
         </span>
       </div>
 
