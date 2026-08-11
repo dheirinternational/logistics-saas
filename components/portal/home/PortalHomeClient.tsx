@@ -13,6 +13,7 @@ import {
   PORTAL_HOME_PRIORITY_ACTIONS,
   PORTAL_HOME_QUICK_ACTIONS,
 } from "@/lib/portal/homeActions"
+import { ProcurementPolicyModal } from "@/components/portal/procurement/ProcurementPolicyModal"
 import { useCallback, useEffect, useState } from "react"
 
 export type PortalHomeTab = "overview" | "tracking"
@@ -95,6 +96,7 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
       )}
 
       <PortalWhatsAppFab />
+      <ProcurementPolicyModal memberCode={data.memberCode} />
     </div>
   )
 }
