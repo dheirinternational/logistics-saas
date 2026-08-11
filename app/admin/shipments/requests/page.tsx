@@ -39,6 +39,9 @@ const Page: NextPage = () => {
 
     const [totalPrice, setTotalPrice] = useState("") 
     const [totalWeight, setTotalWeight] = useState("")
+    const [totalPieces, setTotalPieces] = useState("1")
+    const [loadingDate, setLoadingDate] = useState("")
+    const [expectedArrivalDate, setExpectedArrivalDate] = useState("")
     const [weightUnit, setWeightUnit] = useState<"kg" | "cbm">("kg")
     const [libraryMedia, setLibraryMedia] = useState<AdminMediaItem[]>([])
     const [pickerOpen, setPickerOpen] = useState(false)
@@ -68,6 +71,9 @@ const Page: NextPage = () => {
         if (modalSelectedRequest?.total_weight != null) {
             setTotalWeight(String(Number(modalSelectedRequest.total_weight).toFixed(2)))
         }
+        setTotalPieces(String(modalSelectedRequest?.total_pieces ?? modalSelectedRequest?.package_ids?.length ?? 1))
+        setLoadingDate(modalSelectedRequest?.loading_date ? modalSelectedRequest.loading_date.split("T")[0] : "")
+        setExpectedArrivalDate(modalSelectedRequest?.expected_arrival_date ? modalSelectedRequest.expected_arrival_date.split("T")[0] : "")
         setAdminReply(modalSelectedRequest?.admin_reply || "")
     }, [modalSelectedRequest])
 
@@ -185,6 +191,9 @@ const Page: NextPage = () => {
         formData.append("payment_time", `${modalSelectedRequest?.payment_time}` || "")
         formData.append("package_ids", `${modalSelectedRequest?.package_ids}` || "")
         formData.append("total_weight_unit", weightUnit)
+        formData.append("total_pieces", totalPieces || "1")
+        formData.append("loading_date", loadingDate)
+        formData.append("expected_arrival_date", expectedArrivalDate)
         formData.append("admin_reply", adminReply.trim())
 
         if(Number(formData.get("total_price") || 0) < 1 || Number(formData.get("total_weight") || 0.01) < 0.01){
@@ -234,6 +243,24 @@ const Page: NextPage = () => {
         columnHelper.display({
             header: "No. Of Packages",
             cell: ({row}) => <p>{row.original.package_ids.length}</p>
+        }),
+        columnHelper.accessor("total_pieces", {
+            header: "PCS",
+            cell: ({ getValue, row }) => <span className="tabular-nums font-semibold">{getValue() ?? row.original.package_ids?.length ?? 1}</span>
+        }),
+        columnHelper.accessor("loading_date", {
+            header: "LD",
+            cell: ({ getValue }) => {
+                const val = getValue()
+                return val ? <span>{new Date(val).toLocaleDateString()}</span> : <span style={{ color: "var(--color-dheir-muted)" }}>-</span>
+            }
+        }),
+        columnHelper.accessor("expected_arrival_date", {
+            header: "EDD",
+            cell: ({ getValue }) => {
+                const val = getValue()
+                return val ? <span>{new Date(val).toLocaleDateString()}</span> : <span style={{ color: "var(--color-dheir-muted)" }}>-</span>
+            }
         }),
         columnHelper.accessor("status", {
             header: "Status",
@@ -525,14 +552,40 @@ const Page: NextPage = () => {
                         </label>
 
                         <label className="portal-packages__field">
-                          <span className="portal-packages__field-label">Unit</span>
-                          <DHEIRSelect
-                            value={weightUnit}
-                            onChange={(e) => setWeightUnit(e.target.value as "kg" | "cbm")}
-                          >
-                            <option value="kg">KG</option>
-                            <option value="cbm">CBM</option>
-                          </DHEIRSelect>
+                          <span className="portal-packages__field-label">Pieces (PCS)</span>
+                          <input
+                            type="number"
+                            name="total_pieces"
+                            className="dheir-input"
+                            value={totalPieces}
+                            onChange={(e) => setTotalPieces(e.target.value)}
+                            min={1}
+                            step="1"
+                            placeholder="e.g. 5"
+                            required
+                          />
+                        </label>
+
+                        <label className="portal-packages__field">
+                          <span className="portal-packages__field-label">Loading Date (LD)</span>
+                          <input
+                            type="date"
+                            name="loading_date"
+                            className="dheir-input"
+                            value={loadingDate}
+                            onChange={(e) => setLoadingDate(e.target.value)}
+                          />
+                        </label>
+
+                        <label className="portal-packages__field">
+                          <span className="portal-packages__field-label">Expected Arrival Date (EDD)</span>
+                          <input
+                            type="date"
+                            name="expected_arrival_date"
+                            className="dheir-input"
+                            value={expectedArrivalDate}
+                            onChange={(e) => setExpectedArrivalDate(e.target.value)}
+                          />
                         </label>
                       </>
                     )}

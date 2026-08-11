@@ -64,6 +64,9 @@ export async function POST(req: NextRequest) {
             package_ids: formData.get("package_ids"),
             total_weight: Number(formData.get("total_weight")).toFixed(2),
             total_weight_unit,
+            total_pieces: Number(formData.get("total_pieces") || 1),
+            loading_date: formData.get("loading_date") ? String(formData.get("loading_date")) : null,
+            expected_arrival_date: formData.get("expected_arrival_date") ? String(formData.get("expected_arrival_date")) : null,
             price: Number(formData.get("total_price")).toFixed(2),
             admin_reply: formData.get("admin_reply") as string || null,
         }
@@ -99,8 +102,8 @@ export async function POST(req: NextRequest) {
 
         const shipmentRes = await client.query(`
             INSERT INTO shipments
-            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit, admin_reply)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit, total_pieces, loading_date, expected_arrival_date, admin_reply)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
             RETURNING *
         `, [
             tracking_number,
@@ -115,6 +118,9 @@ export async function POST(req: NextRequest) {
             package_ids,
             data.total_weight,
             data.total_weight_unit,
+            data.total_pieces,
+            data.loading_date,
+            data.expected_arrival_date,
             data.admin_reply,
         ]);
 
@@ -129,9 +135,12 @@ export async function POST(req: NextRequest) {
                 total_price = $2,
                 total_weight = $3,
                 total_weight_unit = $4,
-                admin_reply = $5
+                total_pieces = $5,
+                loading_date = $6,
+                expected_arrival_date = $7,
+                admin_reply = $8
             WHERE id = $1
-        `, [data.shipment_request_id, data.price, data.total_weight, data.total_weight_unit, data.admin_reply]);
+        `, [data.shipment_request_id, data.price, data.total_weight, data.total_weight_unit, data.total_pieces, data.loading_date, data.expected_arrival_date, data.admin_reply]);
 
         await client.query(`
             UPDATE packages

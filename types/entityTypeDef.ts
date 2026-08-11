@@ -45,6 +45,9 @@ export type Shipment = {
     total_cost: number
     total_weight?: number
     total_weight_unit?: "kg" | "cbm"
+    total_pieces?: number
+    loading_date?: string
+    expected_arrival_date?: string
     payment_time: "before" | "after"
     paid_for: boolean
     created_at: string
@@ -152,6 +155,9 @@ export type ShippingRequest = {
     shipping_note: string
     total_weight: number
     total_weight_unit?: "kg" | "cbm"
+    total_pieces?: number
+    loading_date?: string
+    expected_arrival_date?: string
     total_price?: number
     customer_note: string
     packaging: string
