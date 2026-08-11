@@ -447,7 +447,7 @@ export async function rejectManualPaymentSubmission(
 
   if (submission.payment_type === "shipment") {
     await resetShipmentAfterRejection(client, submission.reference)
-  } else {
+  } else if (submission.payment_type === "order") {
     await resetOrderAfterRejection(client, submission.reference)
   }
 
