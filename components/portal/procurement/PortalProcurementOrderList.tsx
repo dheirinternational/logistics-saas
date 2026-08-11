@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { IconMessageCircle, IconClock, IconFileCheck, IconSend, IconPhoto, IconX } from "@tabler/icons-react"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
@@ -257,19 +258,43 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
                   <div style={{ marginTop: "4px" }}>{getStatusBadge(selectedRequest.status)}</div>
                 </div>
 
-                <div style={{ padding: "12px", borderRadius: "8px", backgroundColor: "var(--color-dheir-surface)", border: "1px solid var(--color-dheir-border)" }}>
-                  <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Commitment Fee</span>
-                  <p style={{ margin: "4px 0 0", fontSize: "14px", fontWeight: 700, color: "var(--color-dheir-ink)" }}>
-                    ₦{Number(selectedRequest.commitment_fee || 0).toLocaleString()}
-                  </p>
+                <div style={{ padding: "12px", borderRadius: "8px", backgroundColor: "var(--color-dheir-surface)", border: "1px solid var(--color-dheir-border)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Commitment Fee</span>
+                    <p style={{ margin: "4px 0 0", fontSize: "14px", fontWeight: 700, color: "var(--color-dheir-ink)" }}>
+                      ₦{Number(selectedRequest.commitment_fee || 0).toLocaleString()}
+                    </p>
+                  </div>
+                  {!selectedRequest.commitment_fee_paid ? (
+                    <Link
+                      href={`/customer/payments/transfer/procurement/${encodeURIComponent(selectedRequest.reference_number)}`}
+                      className="portal-home__btn portal-home__btn--primary"
+                      style={{ marginTop: "8px", fontSize: "11px", padding: "4px 8px", textAlign: "center", textDecoration: "none" }}
+                    >
+                      Upload Transfer Receipt
+                    </Link>
+                  ) : (
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981", marginTop: "6px" }}>Paid</span>
+                  )}
                 </div>
 
                 {selectedRequest.quote_total ? (
-                  <div style={{ padding: "12px", borderRadius: "8px", backgroundColor: "var(--color-dheir-surface)", border: "1px solid var(--color-dheir-border)" }}>
-                    <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Quotation</span>
-                    <p style={{ margin: "4px 0 0", fontSize: "14px", fontWeight: 700, color: "var(--color-dheir-blue)" }}>
-                      ₦{Number(selectedRequest.quote_total).toLocaleString()}
-                    </p>
+                  <div style={{ padding: "12px", borderRadius: "8px", backgroundColor: "var(--color-dheir-surface)", border: "1px solid var(--color-dheir-border)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Quotation Total</span>
+                      <p style={{ margin: "4px 0 0", fontSize: "14px", fontWeight: 700, color: "var(--color-dheir-blue)" }}>
+                        ₦{Number(selectedRequest.quote_total).toLocaleString()}
+                      </p>
+                    </div>
+                    {selectedRequest.status === "quoted" ? (
+                      <Link
+                        href={`/customer/payments/transfer/procurement/${encodeURIComponent(selectedRequest.reference_number)}?type=quote`}
+                        className="portal-home__btn portal-home__btn--primary"
+                        style={{ marginTop: "8px", fontSize: "11px", padding: "4px 8px", textAlign: "center", textDecoration: "none" }}
+                      >
+                        Pay Quote via Transfer
+                      </Link>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

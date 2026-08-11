@@ -19,7 +19,7 @@ type BankDetails = {
 }
 
 type TransferContext = {
-  paymentType: "shipment" | "order"
+  paymentType: "shipment" | "order" | "procurement_commitment" | "procurement_quote"
   reference: string
   amount: number
   label: string
@@ -33,7 +33,7 @@ type TransferContext = {
 }
 
 type PortalBankTransferPageProps = {
-  paymentType: "shipment" | "order"
+  paymentType: "shipment" | "order" | "procurement_commitment" | "procurement_quote"
   reference: string
   backHref: string
   backLabel: string
@@ -62,7 +62,9 @@ export function PortalBankTransferPage({
   const apiBase =
     paymentType === "shipment"
       ? `/api/manual-payments/shipment/${encodeURIComponent(reference)}`
-      : `/api/manual-payments/order/${encodeURIComponent(reference)}`
+      : paymentType === "order"
+      ? `/api/manual-payments/order/${encodeURIComponent(reference)}`
+      : `/api/manual-payments/procurement/${encodeURIComponent(reference)}?type=${paymentType === "procurement_quote" ? "quote" : "commitment"}`
 
   const load = useCallback(async () => {
     setLoading(true)

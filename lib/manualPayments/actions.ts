@@ -123,7 +123,7 @@ export async function createOrderForBankTransfer(params: {
 }
 
 export async function submitManualPaymentProof(params: {
-  paymentType: "shipment" | "order"
+  paymentType: "shipment" | "order" | "procurement_commitment" | "procurement_quote"
   reference: string
   userId: number
   amount: number
@@ -154,7 +154,7 @@ export async function submitManualPaymentProof(params: {
 export async function submitManualPaymentProofTx(
   client: PoolClient,
   params: {
-    paymentType: "shipment" | "order"
+    paymentType: "shipment" | "order" | "procurement_commitment" | "procurement_quote"
     reference: string
     userId: number
     amount: number
@@ -165,7 +165,7 @@ export async function submitManualPaymentProofTx(
 ) {
   if (params.paymentType === "shipment") {
     await assertShipmentPayable(client, params.reference, params.userId)
-  } else {
+  } else if (params.paymentType === "order") {
     await assertOrderPayable(client, params.reference, params.userId)
   }
 
@@ -218,7 +218,7 @@ export async function submitManualPaymentProofTx(
 
   if (params.paymentType === "shipment") {
     await markShipmentAwaitingConfirmation(client, params.reference)
-  } else {
+  } else if (params.paymentType === "order") {
     await markOrderAwaitingConfirmation(client, params.reference)
   }
 

@@ -1,4 +1,4 @@
-export type ManualPaymentType = "shipment" | "order"
+export type ManualPaymentType = "shipment" | "order" | "procurement_commitment" | "procurement_quote"
 
 export type ManualPaymentSubmissionStatus =
   | "awaiting_confirmation"

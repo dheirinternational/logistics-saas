@@ -350,6 +350,31 @@ export async function confirmManualPaymentSubmission(
     }
   }
 
+  if (submission.payment_type === "procurement_commitment") {
+    await client.query(
+      `
+      UPDATE procurement_requests
+      SET commitment_fee_paid = true,
+          updated_at = NOW()
+      WHERE reference_number = $1
+      `,
+      [submission.reference]
+    )
+  }
+
+  if (submission.payment_type === "procurement_quote") {
+    await client.query(
+      `
+      UPDATE procurement_requests
+      SET status = 'committed',
+          commitment_fee_paid = true,
+          updated_at = NOW()
+      WHERE reference_number = $1
+      `,
+      [submission.reference]
+    )
+  }
+
   await client.query(
     `
     UPDATE manual_payment_submissions

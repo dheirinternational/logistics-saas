@@ -214,8 +214,14 @@ export function AdminPaymentConfirmationsPage() {
                         <div className="portal-payments__card-head">
                           <div>
                             <p className="portal-payments__tracking portal-payments__tracking--title">
-                              {item.payment_type === "shipment" ? "Shipment" : "Order"} ·{" "}
-                              {item.reference}
+                              {item.payment_type === "shipment"
+                                ? "Shipment"
+                                : item.payment_type === "order"
+                                ? "Order"
+                                : item.payment_type === "procurement_commitment"
+                                ? "Procurement Commitment Fee"
+                                : "Procurement Quotation"}{" "}
+                              · {item.reference}
                             </p>
                             <p className="portal-payments__ref portal-payments__ref--sub">
                               {customerName(item)} · {item.customer_code || "-"}
