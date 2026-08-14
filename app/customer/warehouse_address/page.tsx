@@ -36,13 +36,13 @@ export default function WarehouseAddressPage() {
       .then(([whRes, userRes]) => {
         if (whRes.data?.length) {
           const list = (whRes.data as Warehouse[]).filter(
-            (w) => !w.name.toLowerCase().includes("foshan")
+            (w) => w.country === "CN" && !w.name.toLowerCase().includes("foshan")
           )
           list.sort((a, b) => {
-            const aIsGz = a.name.toLowerCase().includes("guangzhou")
-            const bIsGz = b.name.toLowerCase().includes("guangzhou")
-            if (aIsGz && !bIsGz) return -1
-            if (!aIsGz && bIsGz) return 1
+            const aIsAir = a.name.toLowerCase().includes("air")
+            const bIsAir = b.name.toLowerCase().includes("air")
+            if (aIsAir && !bIsAir) return -1
+            if (!aIsAir && bIsAir) return 1
             return 0
           })
           setWarehouses(list)
