@@ -14,8 +14,11 @@ type WarehouseRow = {
 export function formatWarehouseCopyText(
   warehouse: WarehouseRow,
   memberCode: string,
+  customerFullName?: string,
 ): string {
-  const recipient = warehouse.name.split("(")[0]?.trim() || warehouse.name
+  const baseName = customerFullName?.trim() || warehouse.name.split("(")[0]?.trim() || "Dheir"
+  const recipient = `${baseName}/${memberCode}`
+
   const addressCore = [
     warehouse.country === "CN" ? "KRC2530" : "Nigeria",
     warehouse.province || "",
@@ -47,8 +50,10 @@ export type WarehouseAddressDetail = {
 export function getWarehouseAddressDetails(
   warehouse: WarehouseRow,
   memberCode: string,
+  customerFullName?: string,
 ): WarehouseAddressDetail[] {
-  const recipient = warehouse.name.split("(")[0]?.trim() || warehouse.name
+  const baseName = customerFullName?.trim() || warehouse.name.split("(")[0]?.trim() || "Dheir"
+  const recipient = `${baseName}/${memberCode}`
   const addressLine = [
     warehouse.country === "CN" ? "KRC2530" : null,
     warehouse.province,
@@ -62,7 +67,7 @@ export function getWarehouseAddressDetails(
     .join(", ")
 
   return [
-    { label: "Recipient", value: recipient },
+    { label: "Recipient / Shipment Name", value: recipient },
     { label: "Member code", value: memberCode || "-" },
     { label: "Phone", value: warehouse.phone || "-" },
     { label: "Country", value: warehouse.country || "-" },

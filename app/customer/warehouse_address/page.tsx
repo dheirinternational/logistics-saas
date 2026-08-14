@@ -20,6 +20,7 @@ import { IconCopy } from "@tabler/icons-react"
 export default function WarehouseAddressPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [memberCode, setMemberCode] = useState("")
+  const [fullName, setFullName] = useState("")
   const [selectedId, setSelectedId] = useState<string>("")
   const [loading, setLoading] = useState(true)
 
@@ -50,6 +51,9 @@ export default function WarehouseAddressPage() {
           }
         }
         if (userRes.data?.code) setMemberCode(userRes.data.code)
+        if (userRes.data?.first_name || userRes.data?.last_name) {
+          setFullName(`${userRes.data.first_name || ""} ${userRes.data.last_name || ""}`.trim())
+        }
       })
       .catch(() => toast.error("Could not load warehouse details"))
       .finally(() => setLoading(false))
@@ -59,8 +63,8 @@ export default function WarehouseAddressPage() {
 
   const copyText = useMemo(() => {
     if (!selected || !memberCode) return ""
-    return formatWarehouseCopyText(selected, memberCode)
-  }, [selected, memberCode])
+    return formatWarehouseCopyText(selected, memberCode, fullName)
+  }, [selected, memberCode, fullName])
 
   const handleCopyField = (label: string, val: string) => {
     navigator.clipboard.writeText(val)
@@ -79,10 +83,27 @@ export default function WarehouseAddressPage() {
     <div className="portal-packages">
       <PortalPackagesPageHeader
         title="Warehouse address"
-        description="Give your supplier this address. Include your member code so we can match your goods."
+        description="Give your supplier this address. Include your name and member code so we can match your goods."
         backHref="/customer"
         backLabel="Home"
       />
+
+      <div 
+        className="my-4 p-4 rounded-xl border text-sm" 
+        style={{ 
+          backgroundColor: "#fef2f2", 
+          borderColor: "#fca5a5", 
+          color: "#991b1b",
+          lineHeight: "1.6"
+        }}
+      >
+        <p style={{ margin: 0, fontWeight: 600 }}>
+          ⚠️ Important Shipment Name Notice:
+        </p>
+        <p style={{ margin: "4px 0 0" }}>
+          Please use your full name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{fullName || "Dheir Dheir"}/{memberCode || "DHI0056"}</strong>). Goods without name and unique code will be rejected!!!
+        </p>
+      </div>
 
       {warehouses.length > 1 ? (
         <div className="portal-packages__form">
@@ -117,7 +138,7 @@ export default function WarehouseAddressPage() {
           <h2 id="warehouse-breakdown-heading" className="portal-packages__detail-heading">
             Address breakdown
           </h2>
-          {getWarehouseAddressDetails(selected, memberCode).map((row) => (
+          {getWarehouseAddressDetails(selected, memberCode, fullName).map((row) => (
             <div
               key={row.label}
               className="portal-packages__detail-row"

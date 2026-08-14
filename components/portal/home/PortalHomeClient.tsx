@@ -60,7 +60,12 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
           lineHeight: "1.6"
         }}
       >
-        Please use your full name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{data.firstName} {data.lastName}/{data.memberCode}</strong>). Goods without name and unique code will be rejected!!!.
+        <p style={{ margin: 0, fontWeight: 600 }}>
+          ⚠️ Important Shipment Notice:
+        </p>
+        <p style={{ margin: "4px 0 0" }}>
+          Please use your full name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{data.firstName} {data.lastName}/{data.memberCode}</strong>). Goods without name and unique code will be rejected!!!
+        </p>
       </div>
 
       <PortalHomeToolbar activeTab={tab} onTabChange={onTabChange} />
