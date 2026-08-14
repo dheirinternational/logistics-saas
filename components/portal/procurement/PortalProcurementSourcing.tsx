@@ -17,7 +17,7 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
 
-  const commitmentFee = 15000 // Sourcing & negotiation fee
+  const commitmentFee = 20000 // Sourcing & negotiation fee
 
   const updatePhotoUrl = (index: number, val: string) => {
     setPhotoUrls((prev) => {
