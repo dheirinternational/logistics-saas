@@ -141,10 +141,6 @@ export default function CreateManualShipmentModal({
       toast.error("Please enter a valid price and weight")
       return
     }
-    if (libraryMedia.length === 0) {
-      toast.error("Select at least one photo or video from the media library")
-      return
-    }
 
     setSubmitting(true)
     try {

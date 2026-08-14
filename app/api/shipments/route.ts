@@ -32,13 +32,6 @@ export async function POST(req: NextRequest) {
             .map((entry) => Number(String(entry)))
             .filter((id) => Number.isFinite(id) && id > 0)
 
-        if (mediaAssetIds.length < 1) {
-            return NextResponse.json({
-                success: false,
-                message: "Select at least one image or video from the media library.",
-            }, { status: 400 })
-        }
-
         const totalWeightUnitRaw = String(formData.get("total_weight_unit") ?? "kg").toLowerCase()
         const total_weight_unit = totalWeightUnitRaw === "cbm" ? "cbm" : "kg"
 

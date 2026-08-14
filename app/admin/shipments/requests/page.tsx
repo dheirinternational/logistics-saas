@@ -169,11 +169,6 @@ const Page: NextPage = () => {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-        if (libraryMedia.length < 1) {
-            toast.error("Select at least one item from the media library")
-            return
-        }
-
         setIsCreatingShipmentData(true)
         const formData = new FormData(e.currentTarget)
 

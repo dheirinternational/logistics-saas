@@ -4,6 +4,7 @@ export type StaffPermission =
   | "announcements:write"
   | "shipments:read"
   | "packages:read"
+  | "procurement:manage"
   | "inbox:write"
   | "users:manage"
   | "pricing:manage"
@@ -15,14 +16,16 @@ export type StaffPermission =
 export const STAFF_PERMISSIONS: Record<StaffSubRole, readonly StaffPermission[]> = {
   super_admin: ["full_admin"],
   customer_service: [
-    "announcements:write", // Dashboard: Access to send announcements
-    "shipments:read",      // Shipment: Access as viewer
-    "packages:read",       // Package: Access as viewer
-    "inbox:write",         // Inbox: Access to send messages
+    "announcements:write",  // Dashboard: Send announcements
+    "shipments:read",       // Shipment: Access as viewer
+    "procurement:manage",   // Procurement: Access & quote
+    "inbox:write",          // Inbox: Send & reply to messages
   ],
   marketing: [
-    "users:manage",        // User: Access
-    "announcements:write",
+    "announcements:write",  // Dashboard: Overview & announcements
+    "users:manage",         // Users: Access customers & addresses
+    "procurement:manage",   // Procurement: Access & review
+    "inbox:write",          // Inbox: Send & reply
   ],
 }
 
@@ -53,10 +56,10 @@ export function getStaffAllowedRoutes(subRole: StaffSubRole): string[] {
 
   if (subRole === "customer_service") {
     return [
-      "/admin",               // Dashboard (send announcements)
-      "/admin/shipments",     // Shipment viewer
-      "/admin/packages",      // Package viewer
-      "/admin/inbox",         // Inbox send messages
+      "/admin",               // Dashboard (overview & announcements)
+      "/admin/shipments",     // Shipments viewer
+      "/admin/procurement",   // Procurement
+      "/admin/inbox",         // Inbox
       "/admin/profile",
     ]
   }
@@ -64,7 +67,9 @@ export function getStaffAllowedRoutes(subRole: StaffSubRole): string[] {
   if (subRole === "marketing") {
     return [
       "/admin",               // Dashboard
-      "/admin/users",         // User access
+      "/admin/users",         // Users
+      "/admin/procurement",   // Procurement
+      "/admin/inbox",         // Inbox
       "/admin/profile",
     ]
   }
