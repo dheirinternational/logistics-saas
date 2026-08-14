@@ -61,10 +61,10 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
         }}
       >
         <p style={{ margin: 0, fontWeight: 600 }}>
-          ⚠️ Important Shipment Notice:
+          Important Shipment Name Notice:
         </p>
         <p style={{ margin: "4px 0 0" }}>
-          Please use your full name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{data.firstName} {data.lastName}/{data.memberCode}</strong>). Goods without name and unique code will be rejected!!!
+          Please use one name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{data.firstName || "Dheir"}/{data.memberCode}</strong>). Goods without name and unique code will be rejected!!!
         </p>
       </div>
 

@@ -298,7 +298,14 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
         </div>
       </div>
       {shipment.shippingNote ? (
-        <p className="portal-home__tracking-note">{shipment.shippingNote}</p>
+        <p className="portal-home__tracking-note" style={{ marginBottom: 4 }}>
+          <strong>Note:</strong> {shipment.shippingNote}
+        </p>
+      ) : null}
+      {shipment.adminReply ? (
+        <div style={{ marginTop: 4, marginBottom: 8, padding: "6px 10px", borderRadius: 6, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: "12px" }}>
+          <strong style={{ color: "#166534" }}>Admin Reply:</strong> <span style={{ color: "#14532d" }}>{shipment.adminReply}</span>
+        </div>
       ) : null}
       <dl className="portal-home__ongoing-meta">
         <div>

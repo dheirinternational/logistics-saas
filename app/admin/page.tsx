@@ -154,8 +154,8 @@ const Page: NextPage = () => {
         aria-label="Shipment stats"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: "16px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: "14px",
         }}
       >
         <Link href="/admin/shipments" className="portal-home__stat-card" role="listitem">

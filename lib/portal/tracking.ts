@@ -18,6 +18,7 @@ export type PortalTrackingShipment = {
   paymentTime: string
   paidFor: boolean
   shippingNote: string
+  adminReply?: string
   createdAt: string
   originLabel: string
   destinationLabel: string
@@ -49,6 +50,7 @@ function mapShipmentRow(
     payment_time: string | null
     paid_for: boolean | null
     shipment_note: string | null
+    admin_reply: string | null
     created_at: Date | string | null
     origin_city: string | null
     origin_country: string | null
@@ -67,6 +69,7 @@ function mapShipmentRow(
     paymentTime: row.payment_time ?? "",
     paidFor: Boolean(row.paid_for),
     shippingNote: row.shipment_note?.trim() ?? "",
+    adminReply: row.admin_reply?.trim() ?? "",
     createdAt: row.created_at
       ? new Date(row.created_at).toISOString()
       : new Date().toISOString(),
@@ -113,6 +116,7 @@ export async function getPortalTrackingData(
         s.payment_time,
         s.paid_for,
         s.shipment_note,
+        s.admin_reply,
         s.created_at,
         ow.city AS origin_city,
         ow.country AS origin_country,

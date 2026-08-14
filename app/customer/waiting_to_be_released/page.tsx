@@ -86,8 +86,22 @@ export default function ShipmentRequestsPage() {
                   <PortalPackageStatusBadge label={badgeLabel} variant={badgeVariant} />
                 </div>
 
+                {req.customer_note && (
+                  <div style={{ marginTop: 8, fontSize: "12px", color: "var(--color-dheir-muted)" }}>
+                    <strong style={{ color: "var(--color-dheir-ink)" }}>Customer Note:</strong> {req.customer_note}
+                  </div>
+                )}
+
+                {req.admin_reply && (
+                  <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 6, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                    <p style={{ fontSize: "12px", color: "#166534", margin: 0 }}>
+                      <strong>Admin Reply:</strong> {req.admin_reply}
+                    </p>
+                  </div>
+                )}
+
                 {req.status === "rejected" && req.rejection_note && (
-                  <div style={{ marginTop: 12, padding: 12, borderRadius: 6, backgroundColor: "#fef2f2", border: "1px solid #fee2e2" }}>
+                  <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 6, backgroundColor: "#fef2f2", border: "1px solid #fee2e2" }}>
                     <p style={{ fontSize: "12px", color: "#b91c1c", fontWeight: 500, margin: 0 }}>
                       <strong>Rejection reason:</strong> {req.rejection_note}
                     </p>

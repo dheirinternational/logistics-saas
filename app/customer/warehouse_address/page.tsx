@@ -20,7 +20,7 @@ import { IconCopy } from "@tabler/icons-react"
 export default function WarehouseAddressPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [memberCode, setMemberCode] = useState("")
-  const [fullName, setFullName] = useState("")
+  const [singleName, setSingleName] = useState("")
   const [selectedId, setSelectedId] = useState<string>("")
   const [loading, setLoading] = useState(true)
 
@@ -51,8 +51,10 @@ export default function WarehouseAddressPage() {
           }
         }
         if (userRes.data?.code) setMemberCode(userRes.data.code)
-        if (userRes.data?.first_name || userRes.data?.last_name) {
-          setFullName(`${userRes.data.first_name || ""} ${userRes.data.last_name || ""}`.trim())
+        if (userRes.data?.first_name) {
+          setSingleName(userRes.data.first_name.trim())
+        } else if (userRes.data?.last_name) {
+          setSingleName(userRes.data.last_name.trim())
         }
       })
       .catch(() => toast.error("Could not load warehouse details"))
@@ -63,8 +65,8 @@ export default function WarehouseAddressPage() {
 
   const copyText = useMemo(() => {
     if (!selected || !memberCode) return ""
-    return formatWarehouseCopyText(selected, memberCode, fullName)
-  }, [selected, memberCode, fullName])
+    return formatWarehouseCopyText(selected, memberCode, singleName)
+  }, [selected, memberCode, singleName])
 
   const handleCopyField = (label: string, val: string) => {
     navigator.clipboard.writeText(val)
@@ -98,10 +100,10 @@ export default function WarehouseAddressPage() {
         }}
       >
         <p style={{ margin: 0, fontWeight: 600 }}>
-          ⚠️ Important Shipment Name Notice:
+          Important Shipment Name Notice:
         </p>
         <p style={{ margin: "4px 0 0" }}>
-          Please use your full name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{fullName || "Dheir Dheir"}/{memberCode || "DHI0056"}</strong>). Goods without name and unique code will be rejected!!!
+          Please use one name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{singleName || "Dheir"}/{memberCode || "DHI0056"}</strong>). Goods without name and unique code will be rejected!!!
         </p>
       </div>
 
@@ -138,7 +140,7 @@ export default function WarehouseAddressPage() {
           <h2 id="warehouse-breakdown-heading" className="portal-packages__detail-heading">
             Address breakdown
           </h2>
-          {getWarehouseAddressDetails(selected, memberCode, fullName).map((row) => (
+          {getWarehouseAddressDetails(selected, memberCode, singleName).map((row) => (
             <div
               key={row.label}
               className="portal-packages__detail-row"

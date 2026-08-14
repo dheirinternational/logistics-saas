@@ -179,16 +179,16 @@ export default function TrackShipmentsPage() {
                       {s.paid_for ? "Paid" : "Unpaid / Pending"}
                     </span>
                   </div>
-                   {s.shipping_note && (
-                    <div>
-                      <span className="font-semibold text-dheir-ink">Instructions: </span>
-                      <span className="text-dheir-muted">{s.shipping_note}</span>
-                    </div>
-                  )}
                   {s.shipment_note && (
                     <div>
-                      <span className="font-semibold text-dheir-ink">Admin Reply: </span>
+                      <span className="font-semibold text-dheir-ink">Customer Note: </span>
                       <span className="text-dheir-muted">{s.shipment_note}</span>
+                    </div>
+                  )}
+                  {s.admin_reply && (
+                    <div style={{ marginTop: 4, padding: "6px 10px", borderRadius: 6, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                      <span className="font-semibold text-emerald-800">Admin Reply: </span>
+                      <span className="text-emerald-900">{s.admin_reply}</span>
                     </div>
                   )}
                 </div>

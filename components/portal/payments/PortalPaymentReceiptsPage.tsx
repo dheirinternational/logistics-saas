@@ -239,8 +239,14 @@ export function PortalPaymentReceiptsPage() {
                     )}
                     {(payment as any).shipment_note && (
                       <div>
-                        <span className="font-semibold text-dheir-ink">Note: </span>
+                        <span className="font-semibold text-dheir-ink">Customer Note: </span>
                         <span className="text-dheir-muted">{(payment as any).shipment_note}</span>
+                      </div>
+                    )}
+                    {(payment as any).admin_reply && (
+                      <div style={{ marginTop: 4, padding: "4px 8px", borderRadius: 4, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                        <span className="font-semibold text-emerald-800">Admin Reply: </span>
+                        <span className="text-emerald-900">{(payment as any).admin_reply}</span>
                       </div>
                     )}
                   </div>
