@@ -37,8 +37,9 @@ type AdminProcurementItem = {
   quote_currency?: string
   quote_notes?: string
   admin_reply?: string
+  customer_note?: string
   china_tracking_number?: string
-  images?: { id: number; image_url: string }[]
+  images?: { id: number; image_url: string; media_type?: string; caption?: string }[]
   message_count?: number
 }
 
@@ -361,46 +362,150 @@ export default function AdminProcurementPage() {
 
             <div className="admin-modal__body" style={{ maxHeight: "78vh", overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px" }}>
               {/* Request Data Overview */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px", padding: "14px", borderRadius: "8px", backgroundColor: "#f8fafc" }}>
-                <div>
-                  <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Quantity</span>
-                  <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600 }}>{selected.quantity} units</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {/* Meta Attributes Grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", padding: "14px", borderRadius: "8px", backgroundColor: "#f8fafc", border: "1px solid var(--color-dheir-border)" }}>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Quantity</span>
+                    <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>{selected.quantity} units</p>
+                  </div>
+                  {selected.target_price_rmb ? (
+                    <div>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Target Price (RMB)</span>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>¥{Number(selected.target_price_rmb).toFixed(2)} RMB</p>
+                    </div>
+                  ) : null}
+                  {selected.target_budget ? (
+                    <div>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Target Budget</span>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
+                        {selected.budget_currency === "USD" ? "$" : selected.budget_currency === "RMB" ? "¥" : "₦"}{Number(selected.target_budget).toLocaleString()} {selected.budget_currency || "NGN"}
+                      </p>
+                    </div>
+                  ) : null}
+                  {selected.quality_grade ? (
+                    <div>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Quality Grade</span>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>{selected.quality_grade}</p>
+                    </div>
+                  ) : null}
+                  {selected.commitment_fee ? (
+                    <div>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Commitment Fee</span>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600, color: selected.commitment_fee_paid ? "#166534" : "#b45309" }}>
+                        ₦{Number(selected.commitment_fee).toLocaleString()} ({selected.commitment_fee_paid ? "Paid" : "Unpaid"})
+                      </p>
+                    </div>
+                  ) : null}
+                  {selected.created_at ? (
+                    <div>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Date Submitted</span>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", color: "var(--color-dheir-ink)" }}>
+                        {new Date(selected.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                  ) : null}
+                  {selected.packaging_instruction ? (
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Packaging Instruction</span>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", color: "var(--color-dheir-ink)" }}>
+                        {selected.packaging_instruction}
+                      </p>
+                    </div>
+                  ) : null}
+                  {selected.verification_scope ? (
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Verification & Audit Scope</span>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", color: "var(--color-dheir-ink)", fontWeight: 500 }}>
+                        {selected.verification_scope}
+                      </p>
+                    </div>
+                  ) : null}
+                  {selected.supplier_name ? (
+                    <div style={{ gridColumn: "1 / -1", paddingTop: "6px", borderTop: "1px dashed var(--color-dheir-border)" }}>
+                      <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", textTransform: "uppercase", fontWeight: 600 }}>Supplier & Factory Info</span>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", color: "var(--color-dheir-ink)" }}>
+                        <strong>Name:</strong> {selected.supplier_name} {selected.supplier_contact ? `· Contact: ${selected.supplier_contact}` : ""} {selected.supplier_address ? `· Address: ${selected.supplier_address}` : ""}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
-                {selected.target_price_rmb ? (
-                  <div>
-                    <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Target Price</span>
-                    <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600 }}>¥{Number(selected.target_price_rmb).toFixed(2)} RMB</p>
+
+                {/* Variant / Item Breakdown */}
+                {selected.variant_details && (
+                  <div style={{ padding: "12px 14px", borderRadius: "8px", backgroundColor: "#ffffff", border: "1px solid var(--color-dheir-border)" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-dheir-blue)", textTransform: "uppercase" }}>
+                      Item Breakdown & Variants:
+                    </span>
+                    <pre style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--color-dheir-ink)", whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: "1.5" }}>
+                      {selected.variant_details}
+                    </pre>
                   </div>
-                ) : null}
-                {selected.quality_grade ? (
-                  <div>
-                    <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Quality Grade</span>
-                    <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600 }}>{selected.quality_grade}</p>
-                  </div>
-                ) : null}
-                {selected.supplier_name ? (
-                  <div style={{ gridColumn: "1 / -1" }}>
-                    <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Supplier & Factory Info</span>
-                    <p style={{ margin: "2px 0 0", fontSize: "13px" }}>
-                      {selected.supplier_name} · {selected.supplier_contact} · {selected.supplier_address}
+                )}
+
+                {/* Customer Note / Instructions */}
+                {selected.customer_note && (
+                  <div style={{ padding: "12px 14px", borderRadius: "8px", backgroundColor: "#fffbeb", border: "1px solid #fef3c7" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "#92400e", textTransform: "uppercase" }}>
+                      Customer Note / Instructions:
+                    </span>
+                    <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#78350f", lineHeight: "1.5" }}>
+                      {selected.customer_note}
                     </p>
                   </div>
-                ) : null}
-              </div>
+                )}
 
-              {selected.product_url && (
-                <div style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--color-dheir-border)" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-dheir-muted)" }}>1688 / Taobao Source Link:</span>
-                  <a
-                    href={selected.product_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ display: "block", fontSize: "13px", color: "var(--color-dheir-blue)", wordBreak: "break-all", marginTop: "2px" }}
-                  >
-                    {selected.product_url}
-                  </a>
-                </div>
-              )}
+                {/* Marketplace Link */}
+                {selected.product_url && (
+                  <div style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--color-dheir-border)", backgroundColor: "#ffffff" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-dheir-muted)", textTransform: "uppercase" }}>1688 / Taobao / Source Link:</span>
+                    <a
+                      href={selected.product_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: "block", fontSize: "13px", color: "var(--color-dheir-blue)", wordBreak: "break-all", marginTop: "2px", fontWeight: 500 }}
+                    >
+                      {selected.product_url} ↗
+                    </a>
+                  </div>
+                )}
+
+                {/* Uploaded Reference Photos */}
+                {selected.images && selected.images.filter((img) => img && img.image_url).length > 0 && (
+                  <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1px solid var(--color-dheir-border)", backgroundColor: "#ffffff" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-dheir-muted)", textTransform: "uppercase" }}>
+                      Customer Reference Photos / Samples ({selected.images.filter((img) => img && img.image_url).length}):
+                    </span>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "8px" }}>
+                      {selected.images
+                        .filter((img) => img && img.image_url)
+                        .map((img, idx) => (
+                          <a
+                            key={idx}
+                            href={img.image_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              position: "relative",
+                              width: "72px",
+                              height: "72px",
+                              borderRadius: "6px",
+                              overflow: "hidden",
+                              border: "1px solid var(--color-dheir-border)",
+                              display: "block",
+                            }}
+                          >
+                            <img
+                              src={img.image_url}
+                              alt={`Sample ${idx + 1}`}
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                          </a>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Admin Quotation Form */}
               <form onSubmit={handleSaveUpdate} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
