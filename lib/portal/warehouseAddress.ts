@@ -1,5 +1,6 @@
 type WarehouseRow = {
   name: string
+  type?: string | null
   country: string
   province?: string | null
   city?: string | null
@@ -10,14 +11,20 @@ type WarehouseRow = {
   postal_code?: string | null
 }
 
+export function getWarehouseShippingChannel(warehouse: WarehouseRow): string {
+  const t = warehouse.type?.toLowerCase() || ""
+  const n = warehouse.name?.toLowerCase() || ""
+  if (t === "sea" || n.includes("sea")) return "Sea"
+  return "Air"
+}
+
 /** Full line for supplier copy - matches warehouse_address page. */
 export function formatWarehouseCopyText(
   warehouse: WarehouseRow,
   memberCode: string,
-  customerFullName?: string,
 ): string {
-  const baseName = customerFullName?.trim() || warehouse.name.split("(")[0]?.trim() || "Dheir"
-  const recipient = `${baseName}/${memberCode}`
+  const channel = getWarehouseShippingChannel(warehouse)
+  const recipient = `${channel}/${memberCode}`
 
   const addressCore = [
     warehouse.country === "CN" ? "KRC2530" : "Nigeria",
@@ -50,10 +57,9 @@ export type WarehouseAddressDetail = {
 export function getWarehouseAddressDetails(
   warehouse: WarehouseRow,
   memberCode: string,
-  customerFullName?: string,
 ): WarehouseAddressDetail[] {
-  const baseName = customerFullName?.trim() || warehouse.name.split("(")[0]?.trim() || "Dheir"
-  const recipient = `${baseName}/${memberCode}`
+  const channel = getWarehouseShippingChannel(warehouse)
+  const recipient = `${channel}/${memberCode}`
   const addressLine = [
     warehouse.country === "CN" ? "KRC2530" : null,
     warehouse.province,

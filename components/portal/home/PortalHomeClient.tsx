@@ -64,7 +64,7 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
           Important Shipment Name Notice:
         </p>
         <p style={{ margin: "4px 0 0" }}>
-          Please use one name followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>{data.firstName || "Dheir"}/{data.memberCode}</strong>). Goods without name and unique code will be rejected!!!
+          Please use the shipping method followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>Air/{data.memberCode || "Ronke-DHI0040"}</strong> or <strong style={{ fontWeight: 700 }}>Sea/{data.memberCode || "Ronke-DHI0040"}</strong>). Goods without shipping method and unique code will be rejected!!!
         </p>
       </div>
 
