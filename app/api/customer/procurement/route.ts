@@ -141,7 +141,44 @@ export async function POST(req: NextRequest) {
       RETURNING *;
     `
 
+function parseAmount(val: any): number | null {
+  if (val == null || val === "") return null
+  if (typeof val === "number") return isNaN(val) ? null : val
+  const cleaned = String(val).replace(/[^0-9.-]/g, "")
+  const parsed = parseFloat(cleaned)
+  return isNaN(parsed) ? null : parsed
+}
+
+function parseQuantity(val: any): number {
+  if (val == null || val === "") return 1
+  if (typeof val === "number") return isNaN(val) || val <= 0 ? 1 : Math.floor(val)
+  const cleaned = String(val).replace(/[^0-9]/g, "")
+  const parsed = parseInt(cleaned, 10)
+  return isNaN(parsed) || parsed <= 0 ? 1 : parsed
+}
+
+function normalizeUrl(raw: any): string | null {
+  if (!raw || typeof raw !== "string") return null
+  let trimmed = raw.trim()
+  if (!trimmed) return null
+
+  // Extract URL pattern if surrounded by text (e.g. from 1688 / Taobao app share text)
+  const urlMatch = trimmed.match(/(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}[^\s]*)/i)
+  if (urlMatch) {
+    trimmed = urlMatch[0]
+  }
+
+  if (trimmed.startsWith("www.")) {
+    trimmed = "https://" + trimmed
+  } else if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://") && trimmed.includes(".")) {
+    trimmed = "https://" + trimmed
+  }
+  return trimmed
+}
+
     const commitmentFee = request_type === "verification" ? 25000 : 20000
+
+    const normalizedProductUrl = normalizeUrl(product_url) || (product_url ? String(product_url).trim() : null)
 
     const { rows } = await dbQuery(insertSql, [
       session.user_id,
@@ -149,13 +186,13 @@ export async function POST(req: NextRequest) {
       request_type,
       refNumber,
       title.trim(),
-      product_url || null,
-      target_price_rmb ? Number(target_price_rmb) : null,
-      quantity ? Number(quantity) : 1,
+      normalizedProductUrl,
+      parseAmount(target_price_rmb),
+      parseQuantity(quantity),
       variant_details || null,
       packaging_instruction || null,
       quality_grade || null,
-      target_budget ? Number(target_budget) : null,
+      parseAmount(target_budget),
       budget_currency || "NGN",
       supplier_name || null,
       supplier_address || null,

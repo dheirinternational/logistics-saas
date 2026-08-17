@@ -11,10 +11,18 @@ type ItemSpec = {
   title: string
   url: string
   variant: string
-  quantity: number
-  priceRmb: number
+  quantity: number | string
+  priceRmb: number | string
   photos: string[]
   note: string
+}
+
+function parsePrice(val: any): number {
+  if (val == null || val === "") return 0
+  if (typeof val === "number") return isNaN(val) ? 0 : val
+  const cleaned = String(val).replace(/[^0-9.-]/g, "")
+  const parsed = parseFloat(cleaned)
+  return isNaN(parsed) ? 0 : parsed
 }
 
 export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void }) {
@@ -25,7 +33,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
       url: "",
       variant: "",
       quantity: 1,
-      priceRmb: 0,
+      priceRmb: "",
       photos: [],
       note: "",
     },
@@ -63,7 +71,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
         url: "",
         variant: "",
         quantity: 1,
-        priceRmb: 0,
+        priceRmb: "",
         photos: [],
         note: "",
       },
@@ -83,7 +91,11 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
     })
   }
 
-  const totalRmb = items.reduce((acc, curr) => acc + (Number(curr.priceRmb) || 0) * (Number(curr.quantity) || 1), 0)
+  const totalRmb = items.reduce((acc, curr) => {
+    const qty = parseInt(String(curr.quantity).replace(/[^0-9]/g, ""), 10) || 1
+    const price = parsePrice(curr.priceRmb)
+    return acc + price * qty
+  }, 0)
   const totalNgnMerchandise = totalRmb * exchangeRate
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,8 +111,10 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
     try {
       const allImageUrls = items.flatMap((i) => i.photos).filter(Boolean)
       const variantSummary = items
-        .map((i, idx) => `Item #${idx + 1}: ${i.title} (${i.variant || "Standard"}) x${i.quantity} @ ¥${i.priceRmb}`)
+        .map((i, idx) => `Item #${idx + 1}: ${i.title} (${i.variant || "Standard"}) x${parseInt(String(i.quantity).replace(/[^0-9]/g, ""), 10) || 1} @ ¥${parsePrice(i.priceRmb)}`)
         .join("\n")
+
+      const totalQuantity = items.reduce((acc, curr) => acc + (parseInt(String(curr.quantity).replace(/[^0-9]/g, ""), 10) || 1), 0)
 
       const res = await fetch("/api/customer/procurement", {
         method: "POST",
@@ -109,9 +123,9 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
         body: JSON.stringify({
           request_type: "procurement",
           title: items.length === 1 ? first.title : `${first.title} (+${items.length - 1} more items)`,
-          product_url: first.url,
+          product_url: first.url.trim(),
           target_price_rmb: totalRmb,
-          quantity: items.reduce((acc, curr) => acc + (Number(curr.quantity) || 1), 0),
+          quantity: totalQuantity,
           variant_details: variantSummary,
           packaging_instruction: packagingInstruction,
           customer_note: customerNote,
@@ -220,9 +234,9 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
                 <span className="portal-packages__field-label">1688 / Taobao / Alibaba Link *</span>
                 <div style={{ position: "relative" }}>
                   <input
-                    type="url"
+                    type="text"
                     required
-                    placeholder="https://detail.1688.com/offer/..."
+                    placeholder="https://detail.1688.com/offer/... or paste link"
                     className="dheir-input"
                     value={item.url}
                     onChange={(e) => updateItem(idx, "url", e.target.value)}
@@ -246,26 +260,25 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
               <label className="portal-packages__field">
                 <span className="portal-packages__field-label">Quantity *</span>
                 <input
-                  type="number"
-                  min={1}
+                  type="text"
+                  inputMode="numeric"
                   required
                   className="dheir-input"
                   value={item.quantity}
-                  onChange={(e) => updateItem(idx, "quantity", Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => updateItem(idx, "quantity", e.target.value)}
                 />
               </label>
 
               <label className="portal-packages__field">
                 <span className="portal-packages__field-label">Price per unit (¥ RMB) *</span>
                 <input
-                  type="number"
-                  step="0.01"
-                  min={0}
+                  type="text"
+                  inputMode="decimal"
                   required
                   placeholder="0.00"
                   className="dheir-input"
-                  value={item.priceRmb || ""}
-                  onChange={(e) => updateItem(idx, "priceRmb", parseFloat(e.target.value) || 0)}
+                  value={item.priceRmb}
+                  onChange={(e) => updateItem(idx, "priceRmb", e.target.value)}
                 />
               </label>
             </div>

@@ -6,10 +6,18 @@ import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { LocalPhotoUploader } from "./LocalPhotoUploader"
 import { toast } from "@/lib/ui/toast"
 
+function parsePrice(val: any): number | null {
+  if (val == null || val === "") return null
+  if (typeof val === "number") return isNaN(val) ? null : val
+  const cleaned = String(val).replace(/[^0-9.-]/g, "")
+  const parsed = parseFloat(cleaned)
+  return isNaN(parsed) ? null : parsed
+}
+
 export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void }) {
   const [title, setTitle] = useState("")
   const [qualityGrade, setQualityGrade] = useState("Premium Grade A")
-  const [quantity, setQuantity] = useState(10)
+  const [quantity, setQuantity] = useState<string | number>(10)
   const [targetBudget, setTargetBudget] = useState("")
   const [budgetCurrency, setBudgetCurrency] = useState("NGN")
   const [variantDetails, setVariantDetails] = useState("")
@@ -38,6 +46,7 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
     setSubmitting(true)
     try {
       const validPhotos = photoUrls.filter((url) => url.trim().length > 0)
+      const parsedQty = parseInt(String(quantity).replace(/[^0-9]/g, ""), 10) || 1
 
       const res = await fetch("/api/customer/procurement", {
         method: "POST",
@@ -47,8 +56,8 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
           request_type: "sourcing",
           title: title.trim(),
           quality_grade: qualityGrade,
-          quantity: Number(quantity) || 1,
-          target_budget: Number(targetBudget) || null,
+          quantity: parsedQty,
+          target_budget: parsePrice(targetBudget),
           budget_currency: budgetCurrency,
           variant_details: variantDetails,
           customer_note: customerNote,
@@ -141,12 +150,12 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
           <label className="portal-packages__field">
             <span className="portal-packages__field-label">Target Quantity *</span>
             <input
-              type="number"
-              min={1}
+              type="text"
+              inputMode="numeric"
               required
               className="dheir-input"
               value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) => setQuantity(e.target.value)}
             />
           </label>
 
@@ -154,8 +163,8 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
             <span className="portal-packages__field-label">Target Budget (Per unit or Total)</span>
             <div style={{ display: "flex", gap: "8px" }}>
               <input
-                type="number"
-                min={0}
+                type="text"
+                inputMode="decimal"
                 placeholder="50,000"
                 className="dheir-input"
                 value={targetBudget}
