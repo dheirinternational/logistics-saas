@@ -65,15 +65,45 @@ const Page: NextPage = () => {
     const [modalSelectedRequest, setModalSelectedRequest] = useState<null | ShippingRequest>(null)
     const [adminReply, setAdminReply] = useState("")
     
+    // Air GZ Cargo States
+    const [airGzWeight, setAirGzWeight] = useState("")
+    const [airGzPrice, setAirGzPrice] = useState("")
+    const [airGzPieces, setAirGzPieces] = useState("")
+    const [airGzLoadingDate, setAirGzLoadingDate] = useState("")
+    const [airGzExpectedArrivalDate, setAirGzExpectedArrivalDate] = useState("")
+
+    // Air HK Cargo States
+    const [airHkWeight, setAirHkWeight] = useState("")
+    const [airHkPrice, setAirHkPrice] = useState("")
+    const [airHkPieces, setAirHkPieces] = useState("")
+    const [airHkLoadingDate, setAirHkLoadingDate] = useState("")
+    const [airHkExpectedArrivalDate, setAirHkExpectedArrivalDate] = useState("")
+
     useEffect(() => {
         const inferred = modalSelectedRequest?.channel === "sea" ? "cbm" : "kg"
         setWeightUnit((modalSelectedRequest?.total_weight_unit as any) ?? inferred)
         if (modalSelectedRequest?.total_weight != null) {
             setTotalWeight(String(Number(modalSelectedRequest.total_weight).toFixed(2)))
+        } else {
+            setTotalWeight("")
         }
+        setTotalPrice(modalSelectedRequest?.total_price ? String(modalSelectedRequest.total_price) : "")
         setTotalPieces(String(modalSelectedRequest?.total_pieces ?? modalSelectedRequest?.package_ids?.length ?? 1))
         setLoadingDate(modalSelectedRequest?.loading_date ? modalSelectedRequest.loading_date.split("T")[0] : "")
         setExpectedArrivalDate(modalSelectedRequest?.expected_arrival_date ? modalSelectedRequest.expected_arrival_date.split("T")[0] : "")
+        
+        setAirGzWeight(modalSelectedRequest?.air_gz_weight != null ? String(modalSelectedRequest.air_gz_weight) : "")
+        setAirGzPrice(modalSelectedRequest?.air_gz_cost != null ? String(modalSelectedRequest.air_gz_cost) : "")
+        setAirGzPieces(modalSelectedRequest?.air_gz_pieces != null ? String(modalSelectedRequest.air_gz_pieces) : "")
+        setAirGzLoadingDate(modalSelectedRequest?.air_gz_loading_date ? modalSelectedRequest.air_gz_loading_date.split("T")[0] : "")
+        setAirGzExpectedArrivalDate(modalSelectedRequest?.air_gz_expected_arrival_date ? modalSelectedRequest.air_gz_expected_arrival_date.split("T")[0] : "")
+
+        setAirHkWeight(modalSelectedRequest?.air_hk_weight != null ? String(modalSelectedRequest.air_hk_weight) : "")
+        setAirHkPrice(modalSelectedRequest?.air_hk_cost != null ? String(modalSelectedRequest.air_hk_cost) : "")
+        setAirHkPieces(modalSelectedRequest?.air_hk_pieces != null ? String(modalSelectedRequest.air_hk_pieces) : "")
+        setAirHkLoadingDate(modalSelectedRequest?.air_hk_loading_date ? modalSelectedRequest.air_hk_loading_date.split("T")[0] : "")
+        setAirHkExpectedArrivalDate(modalSelectedRequest?.air_hk_expected_arrival_date ? modalSelectedRequest.air_hk_expected_arrival_date.split("T")[0] : "")
+
         setAdminReply(modalSelectedRequest?.admin_reply || "")
     }, [modalSelectedRequest])
 
@@ -176,6 +206,43 @@ const Page: NextPage = () => {
             formData.append("media_asset_ids", String(item.id))
         })
 
+        const isAir = modalSelectedRequest?.channel !== "sea"
+        const gzCost = Number(airGzPrice) || 0
+        const hkCost = Number(airHkPrice) || 0
+        const gzWeight = Number(airGzWeight) || 0
+        const hkWeight = Number(airHkWeight) || 0
+        const gzPieces = Number(airGzPieces) || 0
+        const hkPieces = Number(airHkPieces) || 0
+
+        let finalPrice = totalPrice
+        let finalWeight = totalWeight
+        let finalPieces = totalPieces
+        let finalLd = loadingDate
+        let finalEdd = expectedArrivalDate
+
+        if (isAir && (gzCost > 0 || hkCost > 0 || gzWeight > 0 || hkWeight > 0)) {
+            finalPrice = String(gzCost + hkCost)
+            finalWeight = String((gzWeight + hkWeight).toFixed(2))
+            finalPieces = String((gzPieces + hkPieces) || 1)
+            finalLd = airGzLoadingDate || airHkLoadingDate || loadingDate
+            finalEdd = airGzExpectedArrivalDate || airHkExpectedArrivalDate || expectedArrivalDate
+
+            if (gzWeight > 0 || gzCost > 0) {
+                formData.append("air_gz_weight", String(gzWeight))
+                formData.append("air_gz_cost", String(gzCost))
+                formData.append("air_gz_pieces", String(gzPieces || 1))
+                formData.append("air_gz_loading_date", airGzLoadingDate)
+                formData.append("air_gz_expected_arrival_date", airGzExpectedArrivalDate)
+            }
+            if (hkWeight > 0 || hkCost > 0) {
+                formData.append("air_hk_weight", String(hkWeight))
+                formData.append("air_hk_cost", String(hkCost))
+                formData.append("air_hk_pieces", String(hkPieces || 1))
+                formData.append("air_hk_loading_date", airHkLoadingDate)
+                formData.append("air_hk_expected_arrival_date", airHkExpectedArrivalDate)
+            }
+        }
+
         formData.append("customer_code", modalSelectedRequest?.customer_code || "")
         formData.append("origin_warehouse_id", "1")
         formData.append("destination_warehouse_id", "2")
@@ -186,13 +253,15 @@ const Page: NextPage = () => {
         formData.append("payment_time", `${modalSelectedRequest?.payment_time}` || "")
         formData.append("package_ids", `${modalSelectedRequest?.package_ids}` || "")
         formData.append("total_weight_unit", weightUnit)
-        formData.append("total_pieces", totalPieces || "1")
-        formData.append("loading_date", loadingDate)
-        formData.append("expected_arrival_date", expectedArrivalDate)
+        formData.append("total_pieces", finalPieces || "1")
+        formData.append("loading_date", finalLd)
+        formData.append("expected_arrival_date", finalEdd)
+        formData.append("total_price", finalPrice)
+        formData.append("total_weight", finalWeight)
         formData.append("admin_reply", adminReply.trim())
 
-        if(Number(formData.get("total_price") || 0) < 1 || Number(formData.get("total_weight") || 0.01) < 0.01){
-            toast.error("Input Price and Weight")
+        if(Number(finalPrice || 0) < 1 || Number(finalWeight || 0.01) < 0.01){
+            toast.error("Input Price and Weight for Air GZ or Air HK")
             setIsCreatingShipmentData(false)
             return 
         }
@@ -493,96 +562,247 @@ const Page: NextPage = () => {
                     )}
 
                     {modalSelectedRequest?.status === "accepted" && (
-                      <>
-                        <label className="portal-packages__field">
-                          <span className="portal-packages__field-label">Total price (N)</span>
-                          <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)", paddingTop: 8 }}>
-                            {modalSelectedRequest.total_price != null
-                              ? `N${Number(modalSelectedRequest.total_price).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`
-                              : "Not recorded"}
-                          </p>
-                        </label>
-
-                        <label className="portal-packages__field">
-                          <span className="portal-packages__field-label">Weight</span>
-                          <p className="portal-home__empty" style={{ color: "var(--color-dheir-ink)", paddingTop: 8 }}>
-                            {modalSelectedRequest.total_weight != null
-                              ? `${Number(modalSelectedRequest.total_weight).toFixed(2)} ${(modalSelectedRequest.total_weight_unit ?? "kg").toUpperCase()}`
-                              : "Not recorded"}
-                          </p>
-                        </label>
-                      </>
+                      <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                        {(modalSelectedRequest.air_gz_cost != null || modalSelectedRequest.air_gz_weight != null) && (
+                          <div style={{ padding: "10px 12px", border: "1px solid #e2e8f0", borderRadius: "6px", background: "#f8fafc" }}>
+                            <strong style={{ fontSize: "12px", color: "var(--color-dheir-blue)" }}>✈️ Air GZ Cargo (Guangzhou)</strong>
+                            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "4px", fontSize: "12px", color: "var(--color-dheir-ink)" }}>
+                              <span><strong>Cost:</strong> ₦{Number(modalSelectedRequest.air_gz_cost || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
+                              <span><strong>Weight:</strong> {Number(modalSelectedRequest.air_gz_weight || 0).toFixed(2)} KG</span>
+                              <span><strong>Pieces:</strong> {modalSelectedRequest.air_gz_pieces || 1} PCS</span>
+                              {modalSelectedRequest.air_gz_loading_date && <span><strong>LD:</strong> {modalSelectedRequest.air_gz_loading_date.split("T")[0]}</span>}
+                              {modalSelectedRequest.air_gz_expected_arrival_date && <span><strong>EDD:</strong> {modalSelectedRequest.air_gz_expected_arrival_date.split("T")[0]}</span>}
+                            </div>
+                          </div>
+                        )}
+                        {(modalSelectedRequest.air_hk_cost != null || modalSelectedRequest.air_hk_weight != null) && (
+                          <div style={{ padding: "10px 12px", border: "1px solid #fed7aa", borderRadius: "6px", background: "#fffaf5" }}>
+                            <strong style={{ fontSize: "12px", color: "var(--color-dheir-orange)" }}>✈️ Air HK Cargo (Hong Kong)</strong>
+                            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "4px", fontSize: "12px", color: "var(--color-dheir-ink)" }}>
+                              <span><strong>Cost:</strong> ₦{Number(modalSelectedRequest.air_hk_cost || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
+                              <span><strong>Weight:</strong> {Number(modalSelectedRequest.air_hk_weight || 0).toFixed(2)} KG</span>
+                              <span><strong>Pieces:</strong> {modalSelectedRequest.air_hk_pieces || 1} PCS</span>
+                              {modalSelectedRequest.air_hk_loading_date && <span><strong>LD:</strong> {modalSelectedRequest.air_hk_loading_date.split("T")[0]}</span>}
+                              {modalSelectedRequest.air_hk_expected_arrival_date && <span><strong>EDD:</strong> {modalSelectedRequest.air_hk_expected_arrival_date.split("T")[0]}</span>}
+                            </div>
+                          </div>
+                        )}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#f1f5f9", borderRadius: "6px", fontSize: "12px" }}>
+                          <span><strong>Total Price:</strong> {modalSelectedRequest.total_price != null ? `₦${Number(modalSelectedRequest.total_price).toLocaleString("en-NG", { minimumFractionDigits: 2 })}` : "Not recorded"}</span>
+                          <span><strong>Total Weight:</strong> {modalSelectedRequest.total_weight != null ? `${Number(modalSelectedRequest.total_weight).toFixed(2)} ${(modalSelectedRequest.total_weight_unit ?? "kg").toUpperCase()}` : "Not recorded"}</span>
+                          <span><strong>Total Pieces:</strong> {modalSelectedRequest.total_pieces || 1} PCS</span>
+                        </div>
+                      </div>
                     )}
 
                     {modalSelectedRequest?.status === "vetted" && (
-                      <>
-                        <label className="portal-packages__field">
-                          <span className="portal-packages__field-label">Total price (₦)</span>
-                          <input
-                            type="number"
-                            name="total_price"
-                            className="dheir-input"
-                            value={totalPrice}
-                            onChange={(e) => setTotalPrice(e.target.value)}
-                            min={0}
-                            step="0.01"
-                            required
-                          />
-                        </label>
+                      modalSelectedRequest.channel === "sea" ? (
+                        <>
+                          <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Total price (₦)</span>
+                            <input
+                              type="number"
+                              name="total_price"
+                              className="dheir-input"
+                              value={totalPrice}
+                              onChange={(e) => setTotalPrice(e.target.value)}
+                              min={0}
+                              step="0.01"
+                              required
+                            />
+                          </label>
 
-                        <label className="portal-packages__field">
-                          <span className="portal-packages__field-label">
-                            {getProductWeightFieldLabel(weightUnit)}
-                          </span>
-                          <input
-                            type="number"
-                            name="total_weight"
-                            className="dheir-input"
-                            value={totalWeight}
-                            onChange={(e) => setTotalWeight(e.target.value)}
-                            min={0}
-                            step="0.01"
-                            required
-                          />
-                        </label>
+                          <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">
+                              {getProductWeightFieldLabel(weightUnit)}
+                            </span>
+                            <input
+                              type="number"
+                              name="total_weight"
+                              className="dheir-input"
+                              value={totalWeight}
+                              onChange={(e) => setTotalWeight(e.target.value)}
+                              min={0}
+                              step="0.01"
+                              required
+                            />
+                          </label>
 
-                        <label className="portal-packages__field">
-                          <span className="portal-packages__field-label">Pieces (PCS)</span>
-                          <input
-                            type="number"
-                            name="total_pieces"
-                            className="dheir-input"
-                            value={totalPieces}
-                            onChange={(e) => setTotalPieces(e.target.value)}
-                            min={1}
-                            step="1"
-                            placeholder="e.g. 5"
-                            required
-                          />
-                        </label>
+                          <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Pieces (PCS)</span>
+                            <input
+                              type="number"
+                              name="total_pieces"
+                              className="dheir-input"
+                              value={totalPieces}
+                              onChange={(e) => setTotalPieces(e.target.value)}
+                              min={1}
+                              step="1"
+                              placeholder="e.g. 5"
+                              required
+                            />
+                          </label>
 
-                        <label className="portal-packages__field">
-                          <span className="portal-packages__field-label">Loading Date (LD)</span>
-                          <input
-                            type="date"
-                            name="loading_date"
-                            className="dheir-input"
-                            value={loadingDate}
-                            onChange={(e) => setLoadingDate(e.target.value)}
-                          />
-                        </label>
+                          <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Loading Date (LD)</span>
+                            <input
+                              type="date"
+                              name="loading_date"
+                              className="dheir-input"
+                              value={loadingDate}
+                              onChange={(e) => setLoadingDate(e.target.value)}
+                            />
+                          </label>
 
-                        <label className="portal-packages__field">
-                          <span className="portal-packages__field-label">Expected Arrival Date (EDD)</span>
-                          <input
-                            type="date"
-                            name="expected_arrival_date"
-                            className="dheir-input"
-                            value={expectedArrivalDate}
-                            onChange={(e) => setExpectedArrivalDate(e.target.value)}
-                          />
-                        </label>
-                      </>
+                          <label className="portal-packages__field">
+                            <span className="portal-packages__field-label">Expected Arrival Date (EDD)</span>
+                            <input
+                              type="date"
+                              name="expected_arrival_date"
+                              className="dheir-input"
+                              value={expectedArrivalDate}
+                              onChange={(e) => setExpectedArrivalDate(e.target.value)}
+                            />
+                          </label>
+                        </>
+                      ) : (
+                        <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "1rem" }}>
+                          {/* Air GZ Box */}
+                          <div style={{ padding: "12px", border: "1px solid #cbd5e1", borderRadius: "8px", background: "#f8fafc" }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", flexWrap: "wrap", gap: "4px" }}>
+                              <strong style={{ fontSize: "13px", color: "var(--color-dheir-blue)" }}>✈️ Air GZ Cargo (Guangzhou - Normal Goods)</strong>
+                              <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Clothes, bags, shoes, general items</span>
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px" }}>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Price (₦)</span>
+                                <input
+                                  type="number"
+                                  className="dheir-input"
+                                  value={airGzPrice}
+                                  onChange={(e) => setAirGzPrice(e.target.value)}
+                                  min={0}
+                                  step="0.01"
+                                  placeholder="e.g. 25000"
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Weight (KG)</span>
+                                <input
+                                  type="number"
+                                  className="dheir-input"
+                                  value={airGzWeight}
+                                  onChange={(e) => setAirGzWeight(e.target.value)}
+                                  min={0}
+                                  step="0.01"
+                                  placeholder="e.g. 5.2"
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Pieces (PCS)</span>
+                                <input
+                                  type="number"
+                                  className="dheir-input"
+                                  value={airGzPieces}
+                                  onChange={(e) => setAirGzPieces(e.target.value)}
+                                  min={1}
+                                  step="1"
+                                  placeholder="e.g. 3"
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Loading Date (LD)</span>
+                                <input
+                                  type="date"
+                                  className="dheir-input"
+                                  value={airGzLoadingDate}
+                                  onChange={(e) => setAirGzLoadingDate(e.target.value)}
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Arrival Date (EDD)</span>
+                                <input
+                                  type="date"
+                                  className="dheir-input"
+                                  value={airGzExpectedArrivalDate}
+                                  onChange={(e) => setAirGzExpectedArrivalDate(e.target.value)}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Air HK Box */}
+                          <div style={{ padding: "12px", border: "1px solid #fed7aa", borderRadius: "8px", background: "#fffaf5" }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", flexWrap: "wrap", gap: "4px" }}>
+                              <strong style={{ fontSize: "13px", color: "var(--color-dheir-orange)" }}>✈️ Air HK Cargo (Hong Kong - Sensitive Goods)</strong>
+                              <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Phones, batteries, liquids, branded items</span>
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px" }}>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Price (₦)</span>
+                                <input
+                                  type="number"
+                                  className="dheir-input"
+                                  value={airHkPrice}
+                                  onChange={(e) => setAirHkPrice(e.target.value)}
+                                  min={0}
+                                  step="0.01"
+                                  placeholder="e.g. 15000"
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Weight (KG)</span>
+                                <input
+                                  type="number"
+                                  className="dheir-input"
+                                  value={airHkWeight}
+                                  onChange={(e) => setAirHkWeight(e.target.value)}
+                                  min={0}
+                                  step="0.01"
+                                  placeholder="e.g. 2.1"
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Pieces (PCS)</span>
+                                <input
+                                  type="number"
+                                  className="dheir-input"
+                                  value={airHkPieces}
+                                  onChange={(e) => setAirHkPieces(e.target.value)}
+                                  min={1}
+                                  step="1"
+                                  placeholder="e.g. 1"
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Loading Date (LD)</span>
+                                <input
+                                  type="date"
+                                  className="dheir-input"
+                                  value={airHkLoadingDate}
+                                  onChange={(e) => setAirHkLoadingDate(e.target.value)}
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Arrival Date (EDD)</span>
+                                <input
+                                  type="date"
+                                  className="dheir-input"
+                                  value={airHkExpectedArrivalDate}
+                                  onChange={(e) => setAirHkExpectedArrivalDate(e.target.value)}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Combined Summary */}
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "#f1f5f9", borderRadius: "6px", fontSize: "13px", flexWrap: "wrap", gap: "8px" }}>
+                            <span><strong>Total Calculated Price:</strong> ₦{((Number(airGzPrice) || 0) + (Number(airHkPrice) || 0)).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
+                            <span><strong>Total Weight:</strong> {((Number(airGzWeight) || 0) + (Number(airHkWeight) || 0)).toFixed(2)} KG</span>
+                            <span><strong>Total Pieces:</strong> {((Number(airGzPieces) || 0) + (Number(airHkPieces) || 0)) || 1} PCS</span>
+                          </div>
+                        </div>
+                      )
                     )}
                   </div>
 

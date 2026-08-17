@@ -48,6 +48,16 @@ export type Shipment = {
     total_pieces?: number
     loading_date?: string
     expected_arrival_date?: string
+    air_gz_weight?: number
+    air_gz_cost?: number
+    air_gz_pieces?: number
+    air_gz_loading_date?: string
+    air_gz_expected_arrival_date?: string
+    air_hk_weight?: number
+    air_hk_cost?: number
+    air_hk_pieces?: number
+    air_hk_loading_date?: string
+    air_hk_expected_arrival_date?: string
     payment_time: "before" | "after"
     paid_for: boolean
     created_at: string
@@ -158,6 +168,16 @@ export type ShippingRequest = {
     total_pieces?: number
     loading_date?: string
     expected_arrival_date?: string
+    air_gz_weight?: number
+    air_gz_cost?: number
+    air_gz_pieces?: number
+    air_gz_loading_date?: string
+    air_gz_expected_arrival_date?: string
+    air_hk_weight?: number
+    air_hk_cost?: number
+    air_hk_pieces?: number
+    air_hk_loading_date?: string
+    air_hk_expected_arrival_date?: string
     total_price?: number
     customer_note: string
     packaging: string

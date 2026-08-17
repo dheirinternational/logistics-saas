@@ -18,6 +18,16 @@ export type PortalDashboardShipment = {
   totalCost: number
   totalWeight: number
   totalWeightUnit?: string
+  airGzWeight?: number
+  airGzCost?: number
+  airGzPieces?: number
+  airGzLoadingDate?: string
+  airGzExpectedArrivalDate?: string
+  airHkWeight?: number
+  airHkCost?: number
+  airHkPieces?: number
+  airHkLoadingDate?: string
+  airHkExpectedArrivalDate?: string
   paymentTime: string
   shipmentNote?: string
   adminReply?: string
@@ -104,6 +114,16 @@ export async function getPortalDashboardData(
         s.payment_time,
         s.shipment_note,
         s.admin_reply,
+        s.air_gz_weight,
+        s.air_gz_cost,
+        s.air_gz_pieces,
+        s.air_gz_loading_date,
+        s.air_gz_expected_arrival_date,
+        s.air_hk_weight,
+        s.air_hk_cost,
+        s.air_hk_pieces,
+        s.air_hk_loading_date,
+        s.air_hk_expected_arrival_date,
         s.created_at,
         ow.city AS origin_city,
         ow.country AS origin_country,
@@ -215,6 +235,16 @@ export async function getPortalDashboardData(
       totalCost: Number(row.total_cost ?? 0),
       totalWeight: Number(row.total_weight ?? 0),
       totalWeightUnit: row.total_weight_unit ?? "kg",
+      airGzWeight: row.air_gz_weight != null ? Number(row.air_gz_weight) : undefined,
+      airGzCost: row.air_gz_cost != null ? Number(row.air_gz_cost) : undefined,
+      airGzPieces: row.air_gz_pieces != null ? Number(row.air_gz_pieces) : undefined,
+      airGzLoadingDate: row.air_gz_loading_date ? new Date(row.air_gz_loading_date).toISOString() : undefined,
+      airGzExpectedArrivalDate: row.air_gz_expected_arrival_date ? new Date(row.air_gz_expected_arrival_date).toISOString() : undefined,
+      airHkWeight: row.air_hk_weight != null ? Number(row.air_hk_weight) : undefined,
+      airHkCost: row.air_hk_cost != null ? Number(row.air_hk_cost) : undefined,
+      airHkPieces: row.air_hk_pieces != null ? Number(row.air_hk_pieces) : undefined,
+      airHkLoadingDate: row.air_hk_loading_date ? new Date(row.air_hk_loading_date).toISOString() : undefined,
+      airHkExpectedArrivalDate: row.air_hk_expected_arrival_date ? new Date(row.air_hk_expected_arrival_date).toISOString() : undefined,
       paymentTime: row.payment_time ?? "",
       shipmentNote: row.shipment_note?.trim() || undefined,
       adminReply: row.admin_reply?.trim() || undefined,

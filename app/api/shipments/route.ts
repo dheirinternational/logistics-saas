@@ -62,6 +62,16 @@ export async function POST(req: NextRequest) {
             expected_arrival_date: formData.get("expected_arrival_date") ? String(formData.get("expected_arrival_date")) : null,
             price: Number(formData.get("total_price")).toFixed(2),
             admin_reply: formData.get("admin_reply") as string || null,
+            air_gz_weight: formData.get("air_gz_weight") ? Number(formData.get("air_gz_weight")) : null,
+            air_gz_cost: formData.get("air_gz_cost") ? Number(formData.get("air_gz_cost")) : null,
+            air_gz_pieces: formData.get("air_gz_pieces") ? Number(formData.get("air_gz_pieces")) : null,
+            air_gz_loading_date: formData.get("air_gz_loading_date") ? String(formData.get("air_gz_loading_date")) : null,
+            air_gz_expected_arrival_date: formData.get("air_gz_expected_arrival_date") ? String(formData.get("air_gz_expected_arrival_date")) : null,
+            air_hk_weight: formData.get("air_hk_weight") ? Number(formData.get("air_hk_weight")) : null,
+            air_hk_cost: formData.get("air_hk_cost") ? Number(formData.get("air_hk_cost")) : null,
+            air_hk_pieces: formData.get("air_hk_pieces") ? Number(formData.get("air_hk_pieces")) : null,
+            air_hk_loading_date: formData.get("air_hk_loading_date") ? String(formData.get("air_hk_loading_date")) : null,
+            air_hk_expected_arrival_date: formData.get("air_hk_expected_arrival_date") ? String(formData.get("air_hk_expected_arrival_date")) : null,
         }
 
         const package_ids = data.package_ids?.toString().split(",")
@@ -95,8 +105,8 @@ export async function POST(req: NextRequest) {
 
         const shipmentRes = await client.query(`
             INSERT INTO shipments
-            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit, total_pieces, loading_date, expected_arrival_date, admin_reply)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit, total_pieces, loading_date, expected_arrival_date, admin_reply, air_gz_weight, air_gz_cost, air_gz_pieces, air_gz_loading_date, air_gz_expected_arrival_date, air_hk_weight, air_hk_cost, air_hk_pieces, air_hk_loading_date, air_hk_expected_arrival_date)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26)
             RETURNING *
         `, [
             tracking_number,
@@ -115,6 +125,16 @@ export async function POST(req: NextRequest) {
             data.loading_date,
             data.expected_arrival_date,
             data.admin_reply,
+            data.air_gz_weight,
+            data.air_gz_cost,
+            data.air_gz_pieces,
+            data.air_gz_loading_date,
+            data.air_gz_expected_arrival_date,
+            data.air_hk_weight,
+            data.air_hk_cost,
+            data.air_hk_pieces,
+            data.air_hk_loading_date,
+            data.air_hk_expected_arrival_date,
         ]);
 
         const { id } = shipmentRes.rows[0]
@@ -131,9 +151,38 @@ export async function POST(req: NextRequest) {
                 total_pieces = $5,
                 loading_date = $6,
                 expected_arrival_date = $7,
-                admin_reply = $8
+                admin_reply = $8,
+                air_gz_weight = $9,
+                air_gz_cost = $10,
+                air_gz_pieces = $11,
+                air_gz_loading_date = $12,
+                air_gz_expected_arrival_date = $13,
+                air_hk_weight = $14,
+                air_hk_cost = $15,
+                air_hk_pieces = $16,
+                air_hk_loading_date = $17,
+                air_hk_expected_arrival_date = $18
             WHERE id = $1
-        `, [data.shipment_request_id, data.price, data.total_weight, data.total_weight_unit, data.total_pieces, data.loading_date, data.expected_arrival_date, data.admin_reply]);
+        `, [
+            data.shipment_request_id,
+            data.price,
+            data.total_weight,
+            data.total_weight_unit,
+            data.total_pieces,
+            data.loading_date,
+            data.expected_arrival_date,
+            data.admin_reply,
+            data.air_gz_weight,
+            data.air_gz_cost,
+            data.air_gz_pieces,
+            data.air_gz_loading_date,
+            data.air_gz_expected_arrival_date,
+            data.air_hk_weight,
+            data.air_hk_cost,
+            data.air_hk_pieces,
+            data.air_hk_loading_date,
+            data.air_hk_expected_arrival_date,
+        ]);
 
         await client.query(`
             UPDATE packages

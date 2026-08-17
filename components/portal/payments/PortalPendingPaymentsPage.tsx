@@ -258,6 +258,24 @@ export function PortalPendingPaymentsPage() {
                     </div>
                   </div>
 
+                  {((payment as any).air_gz_cost || (payment as any).air_hk_cost || (payment as any).air_gz_weight || (payment as any).air_hk_weight) && (
+                    <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem", padding: "8px 10px", borderRadius: 6, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <span className="font-semibold text-dheir-ink" style={{ fontSize: "0.75rem" }}>Flight Channel Breakdown:</span>
+                      {(payment as any).air_gz_weight != null && Number((payment as any).air_gz_weight) > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
+                          <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>✈️ Air GZ (Normal):</span>
+                          <span>{Number((payment as any).air_gz_weight).toFixed(2)} KG {(payment as any).air_gz_cost ? `· ₦${Number((payment as any).air_gz_cost).toLocaleString("en-NG")}` : ""} {(payment as any).air_gz_expected_arrival_date ? `· EDD: ${(payment as any).air_gz_expected_arrival_date.split("T")[0]}` : ""}</span>
+                        </div>
+                      )}
+                      {(payment as any).air_hk_weight != null && Number((payment as any).air_hk_weight) > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
+                          <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>✈️ Air HK (Sensitive):</span>
+                          <span>{Number((payment as any).air_hk_weight).toFixed(2)} KG {(payment as any).air_hk_cost ? `· ₦${Number((payment as any).air_hk_cost).toLocaleString("en-NG")}` : ""} {(payment as any).air_hk_expected_arrival_date ? `· EDD: ${(payment as any).air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed var(--color-dheir-border)", display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8rem" }}>
                     {(payment as any).origin_warehouse_name && (
                       <div>

@@ -100,6 +100,24 @@ export default function ShipmentRequestsPage() {
                   </div>
                 )}
 
+                {(req.air_gz_cost || req.air_hk_cost || req.air_gz_weight || req.air_hk_weight) && (
+                  <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 6, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Flight Channel Breakdown:</span>
+                    {req.air_gz_weight != null && Number(req.air_gz_weight) > 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                        <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>✈️ Air GZ (Normal):</span>
+                        <span>{Number(req.air_gz_weight).toFixed(2)} KG {req.air_gz_cost ? `· ₦${Number(req.air_gz_cost).toLocaleString("en-NG")}` : ""} {req.air_gz_expected_arrival_date ? `· EDD: ${req.air_gz_expected_arrival_date.split("T")[0]}` : ""}</span>
+                      </div>
+                    )}
+                    {req.air_hk_weight != null && Number(req.air_hk_weight) > 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                        <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>✈️ Air HK (Sensitive):</span>
+                        <span>{Number(req.air_hk_weight).toFixed(2)} KG {req.air_hk_cost ? `· ₦${Number(req.air_hk_cost).toLocaleString("en-NG")}` : ""} {req.air_hk_expected_arrival_date ? `· EDD: ${req.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {req.status === "rejected" && req.rejection_note && (
                   <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 6, backgroundColor: "#fef2f2", border: "1px solid #fee2e2" }}>
                     <p style={{ fontSize: "12px", color: "#b91c1c", fontWeight: 500, margin: 0 }}>

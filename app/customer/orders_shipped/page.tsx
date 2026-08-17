@@ -166,7 +166,24 @@ export default function TrackShipmentsPage() {
                   </div>
                 </div>
 
-                <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed var(--color-dheir-border)", display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8rem" }}>
+                  {(s.air_gz_cost || s.air_hk_cost || s.air_gz_weight || s.air_hk_weight) && (
+                    <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem", padding: "8px 10px", borderRadius: 6, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <span className="font-semibold text-dheir-ink" style={{ fontSize: "0.75rem" }}>Flight Channel Breakdown:</span>
+                      {s.air_gz_weight != null && Number(s.air_gz_weight) > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
+                          <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>✈️ Air GZ (Normal):</span>
+                          <span>{Number(s.air_gz_weight).toFixed(2)} KG {s.air_gz_cost ? `· ₦${Number(s.air_gz_cost).toLocaleString("en-NG")}` : ""} {s.air_gz_expected_arrival_date ? `· EDD: ${s.air_gz_expected_arrival_date.split("T")[0]}` : ""}</span>
+                        </div>
+                      )}
+                      {s.air_hk_weight != null && Number(s.air_hk_weight) > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
+                          <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>✈️ Air HK (Sensitive):</span>
+                          <span>{Number(s.air_hk_weight).toFixed(2)} KG {s.air_hk_cost ? `· ₦${Number(s.air_hk_cost).toLocaleString("en-NG")}` : ""} {s.air_hk_expected_arrival_date ? `· EDD: ${s.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {s.origin_warehouse_name && s.destination_warehouse_name && (
                     <div>
                       <span className="font-semibold text-dheir-ink">Route: </span>
@@ -192,7 +209,6 @@ export default function TrackShipmentsPage() {
                     </div>
                   )}
                 </div>
-              </div>
 
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-dheir-border)" }}>
                 <PortalShipmentTimeline shipment={s} />

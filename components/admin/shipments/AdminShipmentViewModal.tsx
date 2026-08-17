@@ -370,6 +370,25 @@ export function AdminShipmentViewModal() {
             </div>
           ) : null}
 
+          {/* Flight Breakdown (if exists) */}
+          {(selectedShipment.air_gz_cost || selectedShipment.air_hk_cost || selectedShipment.air_gz_weight || selectedShipment.air_hk_weight) && (
+            <div style={{ padding: "8px 10px", borderRadius: 6, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "4px" }}>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Flight Breakdown:</span>
+              {selectedShipment.air_gz_weight != null && Number(selectedShipment.air_gz_weight) > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                  <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>✈️ Air GZ (Normal):</span>
+                  <span>{Number(selectedShipment.air_gz_weight).toFixed(2)} KG {selectedShipment.air_gz_cost ? `· ₦${Number(selectedShipment.air_gz_cost).toLocaleString("en-NG")}` : ""} {selectedShipment.air_gz_expected_arrival_date ? `· EDD: ${selectedShipment.air_gz_expected_arrival_date.split("T")[0]}` : ""}</span>
+                </div>
+              )}
+              {selectedShipment.air_hk_weight != null && Number(selectedShipment.air_hk_weight) > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                  <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>✈️ Air HK (Sensitive):</span>
+                  <span>{Number(selectedShipment.air_hk_weight).toFixed(2)} KG {selectedShipment.air_hk_cost ? `· ₦${Number(selectedShipment.air_hk_cost).toLocaleString("en-NG")}` : ""} {selectedShipment.air_hk_expected_arrival_date ? `· EDD: ${selectedShipment.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Admin Note / Reply (editable) */}
           <label className="portal-packages__field">
             <span className="portal-packages__field-label">Admin Reply</span>
