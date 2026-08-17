@@ -41,7 +41,7 @@ export async function POST(
     }
 
     const requestRes = await pool.query(
-      "SELECT package_ids FROM shipment_requests WHERE id = $1",
+      "SELECT user_id, customer_code, package_ids FROM shipment_requests WHERE id = $1",
       [id]
     )
 
@@ -52,7 +52,7 @@ export async function POST(
       )
     }
 
-    const packageIds = requestRes.rows[0].package_ids
+    const { user_id: customerUserId, package_ids: packageIds } = requestRes.rows[0]
 
     const client = await pool.connect()
     try {
@@ -63,6 +63,19 @@ export async function POST(
           "UPDATE shipment_requests SET status = 'vetted', rejection_note = NULL, admin_reply = $2 WHERE id = $1",
           [id, admin_reply || null]
         )
+
+        if (admin_reply && admin_reply.trim() && customerUserId) {
+          await client.query(
+            `INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
+             VALUES ($1, $2, $3, $4, false)`,
+            [
+              session.user_id,
+              customerUserId,
+              `Shipment Request #${id} Vetted & Accepted`,
+              admin_reply.trim(),
+            ]
+          )
+        }
       } else {
         // reject
         await client.query(
@@ -74,6 +87,26 @@ export async function POST(
           await client.query(
             "UPDATE packages SET status = 'stored' WHERE id = ANY($1)",
             [packageIds]
+          )
+        }
+
+        if (customerUserId) {
+          const reasonText = [
+            rejection_note ? `Reason: ${rejection_note.trim()}` : "",
+            admin_reply ? `Note: ${admin_reply.trim()}` : "",
+          ]
+            .filter(Boolean)
+            .join("\n")
+
+          await client.query(
+            `INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
+             VALUES ($1, $2, $3, $4, false)`,
+            [
+              session.user_id,
+              customerUserId,
+              `Shipment Request #${id} Rejected`,
+              reasonText || "Your shipment request was rejected by admin.",
+            ]
           )
         }
       }

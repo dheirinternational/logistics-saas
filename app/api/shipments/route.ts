@@ -146,6 +146,19 @@ export async function POST(req: NextRequest) {
             VALUES ($1, $2, $3, $4, $5, NOW(), $6)
         `, [data.user_id, data.customer_code, tracking_number, data.price, 'pending', tracking_number]);
 
+        if (data.admin_reply && data.admin_reply.trim() && data.user_id) {
+            await client.query(
+                `INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
+                 VALUES ($1, $2, $3, $4, false)`,
+                [
+                    session.user_id,
+                    data.user_id,
+                    `Shipment Created (${tracking_number})`,
+                    data.admin_reply.trim(),
+                ]
+            );
+        }
+
         // Get user email BEFORE commit (still inside transaction)
         const userRes = await client.query(
             `SELECT email FROM users WHERE id = $1`,

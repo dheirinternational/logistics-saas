@@ -19,6 +19,8 @@ export type PortalDashboardShipment = {
   totalWeight: number
   totalWeightUnit?: string
   paymentTime: string
+  shipmentNote?: string
+  adminReply?: string
   createdAt: string
   originLabel: string
   destinationLabel: string
@@ -100,6 +102,8 @@ export async function getPortalDashboardData(
         s.total_weight,
         s.total_weight_unit,
         s.payment_time,
+        s.shipment_note,
+        s.admin_reply,
         s.created_at,
         ow.city AS origin_city,
         ow.country AS origin_country,
@@ -138,30 +142,36 @@ export async function getPortalDashboardData(
       UNION ALL
       (
         SELECT
-          p.incoming_package_id AS id,
+          p.id::text AS id,
           'package' AS kind,
-          p.package_name AS title,
+          p.description AS title,
           p.status::text AS status,
           NULL AS channel,
           p.weight AS total_weight,
-          NULL::numeric AS total_cost,
+          NULL AS total_cost,
           p.created_at,
-          NULL, NULL, NULL, NULL
+          NULL AS origin_city,
+          NULL AS origin_country,
+          NULL AS dest_city,
+          NULL AS dest_country
         FROM packages p
         WHERE p.user_id = $1
       )
       UNION ALL
       (
         SELECT
-          ip.incoming_tracking_number AS id,
+          ip.id::text AS id,
           'incoming' AS kind,
-          ip.declared_item_name AS title,
+          ip.description AS title,
           ip.status::text AS status,
           NULL AS channel,
-          ip.declared_item_weight AS total_weight,
-          NULL::numeric AS total_cost,
+          NULL AS total_weight,
+          NULL AS total_cost,
           ip.created_at,
-          NULL, NULL, NULL, NULL
+          NULL AS origin_city,
+          NULL AS origin_country,
+          NULL AS dest_city,
+          NULL AS dest_country
         FROM incoming_packages ip
         WHERE ip.user_id = $1
       )
@@ -172,18 +182,18 @@ export async function getPortalDashboardData(
     ),
   ])
 
-  const user = userRes.rows[0]
-  const counts = countsRes.rows[0] as PortalDashboardCounts
+  const user = userRes.rows[0] ?? {}
+  const counts = countsRes.rows[0] ?? {}
 
-  const activeShipmentIds = shipmentsRes.rows.map((row) => Number(row.id)).filter(Boolean)
+  const shipmentIds = shipmentsRes.rows.map((r) => Number(r.id)).filter(Boolean)
   let imagesMap: Record<number, { imageUrl: string; mediaType: string }[]> = {}
-  if (activeShipmentIds.length > 0) {
+  if (shipmentIds.length > 0) {
     const imagesRes = await pool.query(
       `SELECT shipment_id, image_url, media_type
        FROM shipment_images
        WHERE shipment_id = ANY($1)
        ORDER BY id ASC`,
-      [activeShipmentIds]
+      [shipmentIds]
     )
     for (const r of imagesRes.rows) {
       const sid = Number(r.shipment_id)
@@ -206,6 +216,8 @@ export async function getPortalDashboardData(
       totalWeight: Number(row.total_weight ?? 0),
       totalWeightUnit: row.total_weight_unit ?? "kg",
       paymentTime: row.payment_time ?? "",
+      shipmentNote: row.shipment_note?.trim() || undefined,
+      adminReply: row.admin_reply?.trim() || undefined,
       createdAt: row.created_at
         ? new Date(row.created_at).toISOString()
         : new Date().toISOString(),

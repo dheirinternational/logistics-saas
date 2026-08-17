@@ -172,6 +172,18 @@ export function PortalHomeOngoingSection({
                   <dd className="capitalize">{formatStatus(active.status)}</dd>
                 </div>
               </dl>
+              {active.shipmentNote && (
+                <div style={{ marginTop: 12, fontSize: "13px", color: "var(--color-dheir-muted)" }}>
+                  <strong style={{ color: "var(--color-dheir-ink)" }}>Customer Note:</strong> {active.shipmentNote}
+                </div>
+              )}
+              {active.adminReply && (
+                <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 6, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                  <p style={{ fontSize: "12px", color: "#166534", margin: 0 }}>
+                    <strong>Admin Reply:</strong> {active.adminReply}
+                  </p>
+                </div>
+              )}
               {active.images && active.images.length > 0 ? (
                 <div style={{ marginTop: 16 }}>
                   <p className="portal-home__ongoing-detail-label" style={{ marginBottom: 8 }}>Shipment pictures</p>
