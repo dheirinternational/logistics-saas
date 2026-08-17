@@ -40,6 +40,17 @@ export type PortalTrackingData = {
   shipments: PortalTrackingShipment[]
 }
 
+function safeIsoDate(val: any): string | undefined {
+  if (!val) return undefined
+  try {
+    const d = new Date(val)
+    if (isNaN(d.getTime())) return undefined
+    return d.toISOString()
+  } catch {
+    return undefined
+  }
+}
+
 function warehouseLabel(
   city: string | null,
   country: string | null,
@@ -89,20 +100,18 @@ function mapShipmentRow(
     airGzWeight: row.air_gz_weight != null ? Number(row.air_gz_weight) : undefined,
     airGzCost: row.air_gz_cost != null ? Number(row.air_gz_cost) : undefined,
     airGzPieces: row.air_gz_pieces != null ? Number(row.air_gz_pieces) : undefined,
-    airGzLoadingDate: row.air_gz_loading_date ? new Date(row.air_gz_loading_date).toISOString() : undefined,
-    airGzExpectedArrivalDate: row.air_gz_expected_arrival_date ? new Date(row.air_gz_expected_arrival_date).toISOString() : undefined,
+    airGzLoadingDate: safeIsoDate(row.air_gz_loading_date),
+    airGzExpectedArrivalDate: safeIsoDate(row.air_gz_expected_arrival_date),
     airHkWeight: row.air_hk_weight != null ? Number(row.air_hk_weight) : undefined,
     airHkCost: row.air_hk_cost != null ? Number(row.air_hk_cost) : undefined,
     airHkPieces: row.air_hk_pieces != null ? Number(row.air_hk_pieces) : undefined,
-    airHkLoadingDate: row.air_hk_loading_date ? new Date(row.air_hk_loading_date).toISOString() : undefined,
-    airHkExpectedArrivalDate: row.air_hk_expected_arrival_date ? new Date(row.air_hk_expected_arrival_date).toISOString() : undefined,
+    airHkLoadingDate: safeIsoDate(row.air_hk_loading_date),
+    airHkExpectedArrivalDate: safeIsoDate(row.air_hk_expected_arrival_date),
     paymentTime: row.payment_time ?? "",
     paidFor: Boolean(row.paid_for),
     shippingNote: row.shipment_note?.trim() ?? "",
     adminReply: row.admin_reply?.trim() ?? "",
-    createdAt: row.created_at
-      ? new Date(row.created_at).toISOString()
-      : new Date().toISOString(),
+    createdAt: safeIsoDate(row.created_at) || new Date().toISOString(),
     originLabel: warehouseLabel(row.origin_city, row.origin_country),
     destinationLabel: warehouseLabel(row.dest_city, row.dest_country),
     images: imagesMap[Number(row.id)] ?? []
