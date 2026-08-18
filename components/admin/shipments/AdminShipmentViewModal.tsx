@@ -377,13 +377,13 @@ export function AdminShipmentViewModal() {
               {selectedShipment.air_gz_weight != null && Number(selectedShipment.air_gz_weight) > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
                   <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>✈️ Air GZ (Normal):</span>
-                  <span>{Number(selectedShipment.air_gz_weight).toFixed(2)} KG {selectedShipment.air_gz_cost ? `· ₦${Number(selectedShipment.air_gz_cost).toLocaleString("en-NG")}` : ""} {selectedShipment.air_gz_expected_arrival_date ? `· EDD: ${selectedShipment.air_gz_expected_arrival_date.split("T")[0]}` : ""}</span>
+                  <span>{Number(selectedShipment.air_gz_weight).toFixed(2)} {(selectedShipment.air_gz_weight_unit ?? "kg").toUpperCase()} {selectedShipment.air_gz_cost ? `· ₦${Number(selectedShipment.air_gz_cost).toLocaleString("en-NG")}` : ""} {selectedShipment.air_gz_expected_arrival_date ? `· EDD: ${selectedShipment.air_gz_expected_arrival_date.split("T")[0]}` : ""}</span>
                 </div>
               )}
               {selectedShipment.air_hk_weight != null && Number(selectedShipment.air_hk_weight) > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
                   <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>✈️ Air HK (Sensitive):</span>
-                  <span>{Number(selectedShipment.air_hk_weight).toFixed(2)} KG {selectedShipment.air_hk_cost ? `· ₦${Number(selectedShipment.air_hk_cost).toLocaleString("en-NG")}` : ""} {selectedShipment.air_hk_expected_arrival_date ? `· EDD: ${selectedShipment.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
+                  <span>{Number(selectedShipment.air_hk_weight).toFixed(2)} {(selectedShipment.air_hk_weight_unit ?? "kg").toUpperCase()} {selectedShipment.air_hk_cost ? `· ₦${Number(selectedShipment.air_hk_cost).toLocaleString("en-NG")}` : ""} {selectedShipment.air_hk_expected_arrival_date ? `· EDD: ${selectedShipment.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
                 </div>
               )}
             </div>

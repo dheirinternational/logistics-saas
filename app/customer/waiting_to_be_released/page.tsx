@@ -106,13 +106,13 @@ export default function ShipmentRequestsPage() {
                     {req.air_gz_weight != null && Number(req.air_gz_weight) > 0 && (
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
                         <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>✈️ Air GZ (Normal):</span>
-                        <span>{Number(req.air_gz_weight).toFixed(2)} KG {req.air_gz_cost ? `· ₦${Number(req.air_gz_cost).toLocaleString("en-NG")}` : ""} {req.air_gz_expected_arrival_date ? `· EDD: ${req.air_gz_expected_arrival_date.split("T")[0]}` : ""}</span>
+                        <span>{Number(req.air_gz_weight).toFixed(2)} {(req.air_gz_weight_unit ?? "kg").toUpperCase()} {req.air_gz_cost ? `· ₦${Number(req.air_gz_cost).toLocaleString("en-NG")}` : ""} {req.air_gz_expected_arrival_date ? `· EDD: ${req.air_gz_expected_arrival_date.split("T")[0]}` : ""}</span>
                       </div>
                     )}
                     {req.air_hk_weight != null && Number(req.air_hk_weight) > 0 && (
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
                         <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>✈️ Air HK (Sensitive):</span>
-                        <span>{Number(req.air_hk_weight).toFixed(2)} KG {req.air_hk_cost ? `· ₦${Number(req.air_hk_cost).toLocaleString("en-NG")}` : ""} {req.air_hk_expected_arrival_date ? `· EDD: ${req.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
+                        <span>{Number(req.air_hk_weight).toFixed(2)} {(req.air_hk_weight_unit ?? "kg").toUpperCase()} {req.air_hk_cost ? `· ₦${Number(req.air_hk_cost).toLocaleString("en-NG")}` : ""} {req.air_hk_expected_arrival_date ? `· EDD: ${req.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
                       </div>
                     )}
                   </div>

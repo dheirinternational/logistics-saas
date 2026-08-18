@@ -16,11 +16,13 @@ export type PortalTrackingShipment = {
   totalWeight: number
   totalWeightUnit?: string
   airGzWeight?: number
+  airGzWeightUnit?: string
   airGzCost?: number
   airGzPieces?: number
   airGzLoadingDate?: string
   airGzExpectedArrivalDate?: string
   airHkWeight?: number
+  airHkWeightUnit?: string
   airHkCost?: number
   airHkPieces?: number
   airHkLoadingDate?: string
@@ -69,11 +71,13 @@ function mapShipmentRow(
     total_weight: string | number | null
     total_weight_unit: string | null
     air_gz_weight?: string | number | null
+    air_gz_weight_unit?: string | null
     air_gz_cost?: string | number | null
     air_gz_pieces?: string | number | null
     air_gz_loading_date?: Date | string | null
     air_gz_expected_arrival_date?: Date | string | null
     air_hk_weight?: string | number | null
+    air_hk_weight_unit?: string | null
     air_hk_cost?: string | number | null
     air_hk_pieces?: string | number | null
     air_hk_loading_date?: Date | string | null
@@ -98,11 +102,13 @@ function mapShipmentRow(
     totalWeight: Number(row.total_weight ?? 0),
     totalWeightUnit: row.total_weight_unit ?? "kg",
     airGzWeight: row.air_gz_weight != null ? Number(row.air_gz_weight) : undefined,
+    airGzWeightUnit: row.air_gz_weight_unit ?? "kg",
     airGzCost: row.air_gz_cost != null ? Number(row.air_gz_cost) : undefined,
     airGzPieces: row.air_gz_pieces != null ? Number(row.air_gz_pieces) : undefined,
     airGzLoadingDate: safeIsoDate(row.air_gz_loading_date),
     airGzExpectedArrivalDate: safeIsoDate(row.air_gz_expected_arrival_date),
     airHkWeight: row.air_hk_weight != null ? Number(row.air_hk_weight) : undefined,
+    airHkWeightUnit: row.air_hk_weight_unit ?? "kg",
     airHkCost: row.air_hk_cost != null ? Number(row.air_hk_cost) : undefined,
     airHkPieces: row.air_hk_pieces != null ? Number(row.air_hk_pieces) : undefined,
     airHkLoadingDate: safeIsoDate(row.air_hk_loading_date),
@@ -157,11 +163,13 @@ export async function getPortalTrackingData(
         s.shipment_note,
         s.admin_reply,
         s.air_gz_weight,
+        s.air_gz_weight_unit,
         s.air_gz_cost,
         s.air_gz_pieces,
         s.air_gz_loading_date,
         s.air_gz_expected_arrival_date,
         s.air_hk_weight,
+        s.air_hk_weight_unit,
         s.air_hk_cost,
         s.air_hk_pieces,
         s.air_hk_loading_date,

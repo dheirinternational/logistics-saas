@@ -49,11 +49,13 @@ export type Shipment = {
     loading_date?: string
     expected_arrival_date?: string
     air_gz_weight?: number
+    air_gz_weight_unit?: "kg" | "cbm" | string
     air_gz_cost?: number
     air_gz_pieces?: number
     air_gz_loading_date?: string
     air_gz_expected_arrival_date?: string
     air_hk_weight?: number
+    air_hk_weight_unit?: "kg" | "cbm" | string
     air_hk_cost?: number
     air_hk_pieces?: number
     air_hk_loading_date?: string
@@ -169,11 +171,13 @@ export type ShippingRequest = {
     loading_date?: string
     expected_arrival_date?: string
     air_gz_weight?: number
+    air_gz_weight_unit?: "kg" | "cbm" | string
     air_gz_cost?: number
     air_gz_pieces?: number
     air_gz_loading_date?: string
     air_gz_expected_arrival_date?: string
     air_hk_weight?: number
+    air_hk_weight_unit?: "kg" | "cbm" | string
     air_hk_cost?: number
     air_hk_pieces?: number
     air_hk_loading_date?: string
