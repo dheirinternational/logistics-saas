@@ -312,13 +312,13 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
           <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Flight Breakdown:</span>
           {shipment.airGzWeight != null && shipment.airGzWeight > 0 && (
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
-              <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>✈️ Air GZ (Normal):</span>
+              <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>Air GZ (Normal):</span>
               <span>{shipment.airGzWeight.toFixed(2)} {(shipment.airGzWeightUnit ?? "kg").toUpperCase()} {shipment.airGzCost ? `· ${formatNaira(shipment.airGzCost)}` : ""} {shipment.airGzExpectedArrivalDate ? `· EDD: ${new Date(shipment.airGzExpectedArrivalDate).toLocaleDateString()}` : ""}</span>
             </div>
           )}
           {shipment.airHkWeight != null && shipment.airHkWeight > 0 && (
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
-              <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>✈️ Air HK (Sensitive):</span>
+              <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>Air HK (Sensitive):</span>
               <span>{shipment.airHkWeight.toFixed(2)} {(shipment.airHkWeightUnit ?? "kg").toUpperCase()} {shipment.airHkCost ? `· ${formatNaira(shipment.airHkCost)}` : ""} {shipment.airHkExpectedArrivalDate ? `· EDD: ${new Date(shipment.airHkExpectedArrivalDate).toLocaleDateString()}` : ""}</span>
             </div>
           )}

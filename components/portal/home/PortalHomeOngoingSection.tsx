@@ -177,13 +177,13 @@ export function PortalHomeOngoingSection({
                   <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Flight Breakdown:</span>
                   {active.airGzWeight != null && active.airGzWeight > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
-                      <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>✈️ Air GZ (Normal):</span>
+                      <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>Air GZ (Normal):</span>
                       <span>{active.airGzWeight.toFixed(2)} {(active.airGzWeightUnit ?? "kg").toUpperCase()} {active.airGzCost ? `· ${formatNaira(active.airGzCost)}` : ""} {active.airGzExpectedArrivalDate ? `· EDD: ${new Date(active.airGzExpectedArrivalDate).toLocaleDateString()}` : ""}</span>
                     </div>
                   )}
                   {active.airHkWeight != null && active.airHkWeight > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
-                      <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>✈️ Air HK (Sensitive):</span>
+                      <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>Air HK (Sensitive):</span>
                       <span>{active.airHkWeight.toFixed(2)} {(active.airHkWeightUnit ?? "kg").toUpperCase()} {active.airHkCost ? `· ${formatNaira(active.airHkCost)}` : ""} {active.airHkExpectedArrivalDate ? `· EDD: ${new Date(active.airHkExpectedArrivalDate).toLocaleDateString()}` : ""}</span>
                     </div>
                   )}

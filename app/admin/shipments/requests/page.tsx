@@ -571,7 +571,7 @@ const Page: NextPage = () => {
                       <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                         {(modalSelectedRequest.air_gz_cost != null || modalSelectedRequest.air_gz_weight != null) && (
                           <div style={{ padding: "10px 12px", border: "1px solid #e2e8f0", borderRadius: "6px", background: "#f8fafc" }}>
-                            <strong style={{ fontSize: "12px", color: "var(--color-dheir-blue)" }}>✈️ Air GZ Cargo (Guangzhou)</strong>
+                            <strong style={{ fontSize: "12px", color: "var(--color-dheir-blue)" }}>Air GZ Cargo (Guangzhou)</strong>
                             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "4px", fontSize: "12px", color: "var(--color-dheir-ink)" }}>
                               <span><strong>Cost:</strong> ₦{Number(modalSelectedRequest.air_gz_cost || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
                               <span><strong>Weight:</strong> {Number(modalSelectedRequest.air_gz_weight || 0).toFixed(2)} {(modalSelectedRequest.air_gz_weight_unit ?? "kg").toUpperCase()}</span>
@@ -583,7 +583,7 @@ const Page: NextPage = () => {
                         )}
                         {(modalSelectedRequest.air_hk_cost != null || modalSelectedRequest.air_hk_weight != null) && (
                           <div style={{ padding: "10px 12px", border: "1px solid #fed7aa", borderRadius: "6px", background: "#fffaf5" }}>
-                            <strong style={{ fontSize: "12px", color: "var(--color-dheir-orange)" }}>✈️ Air HK Cargo (Hong Kong)</strong>
+                            <strong style={{ fontSize: "12px", color: "var(--color-dheir-orange)" }}>Air HK Cargo (Hong Kong)</strong>
                             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "4px", fontSize: "12px", color: "var(--color-dheir-ink)" }}>
                               <span><strong>Cost:</strong> ₦{Number(modalSelectedRequest.air_hk_cost || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
                               <span><strong>Weight:</strong> {Number(modalSelectedRequest.air_hk_weight || 0).toFixed(2)} {(modalSelectedRequest.air_hk_weight_unit ?? "kg").toUpperCase()}</span>
@@ -676,7 +676,7 @@ const Page: NextPage = () => {
                           {/* Air GZ Box */}
                           <div style={{ padding: "12px", border: "1px solid #cbd5e1", borderRadius: "8px", background: "#f8fafc" }}>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", flexWrap: "wrap", gap: "4px" }}>
-                              <strong style={{ fontSize: "13px", color: "var(--color-dheir-blue)" }}>✈️ Air GZ Cargo (Guangzhou - Normal Goods)</strong>
+                              <strong style={{ fontSize: "13px", color: "var(--color-dheir-blue)" }}>Air GZ Cargo (Guangzhou - Normal Goods)</strong>
                               <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Clothes, bags, shoes, general items</span>
                             </div>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px" }}>
@@ -752,7 +752,7 @@ const Page: NextPage = () => {
                           {/* Air HK Box */}
                           <div style={{ padding: "12px", border: "1px solid #fed7aa", borderRadius: "8px", background: "#fffaf5" }}>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", flexWrap: "wrap", gap: "4px" }}>
-                              <strong style={{ fontSize: "13px", color: "var(--color-dheir-orange)" }}>✈️ Air HK Cargo (Hong Kong - Sensitive Goods)</strong>
+                              <strong style={{ fontSize: "13px", color: "var(--color-dheir-orange)" }}>Air HK Cargo (Hong Kong - Sensitive Goods)</strong>
                               <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>Phones, batteries, liquids, branded items</span>
                             </div>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px" }}>
