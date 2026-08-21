@@ -9,6 +9,7 @@ export type MarketingHeaderUser = {
   profileImg: string | null
   displayName: string
   dashboardHref: string
+  memberCode?: string | null
 }
 
 type SessionRow = {
@@ -18,6 +19,7 @@ type SessionRow = {
   first_name?: string | null
   last_name?: string | null
   profile_img?: string | null
+  customer_code?: string | null
 }
 
 export function toMarketingHeaderUser(session: SessionRow): MarketingHeaderUser {
@@ -36,5 +38,6 @@ export function toMarketingHeaderUser(session: SessionRow): MarketingHeaderUser 
     profileImg: session.profile_img?.trim() || null,
     displayName,
     dashboardHref: resolveDashboardHref(session.role),
+    memberCode: session.customer_code || String(session.user_id),
   }
 }

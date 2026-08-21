@@ -16,6 +16,9 @@ import { usePathname } from "next/navigation"
 import { ReactNode, useEffect, useMemo, useState } from "react"
 import { IconShoppingCart } from "@tabler/icons-react"
 
+import { ProcurementPolicyModal } from "@/components/portal/procurement/ProcurementPolicyModal"
+import { PortalNotificationBannerModal } from "@/components/portal/notifications/PortalNotificationBannerModal"
+
 type PortalShellLayoutProps = {
   user: MarketingHeaderUser
   children: ReactNode
@@ -191,6 +194,9 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
         />
         <main className="portal-shell__main">{children}</main>
       </div>
+
+      <ProcurementPolicyModal memberCode={user.memberCode || undefined} />
+      <PortalNotificationBannerModal />
     </div>
   )
 }

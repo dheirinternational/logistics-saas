@@ -101,7 +101,6 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
       )}
 
       <PortalWhatsAppFab />
-      <ProcurementPolicyModal memberCode={data.memberCode} />
     </div>
   )
 }
