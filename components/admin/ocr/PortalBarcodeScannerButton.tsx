@@ -146,12 +146,7 @@ export function PortalBarcodeScannerButton() {
     stopCamera()
   }
 
-  const isShipmentsPage = 
-    pathname === "/admin/shipments" || 
-    pathname === "/admin/shipments/accepted_shipments" || 
-    pathname === "/admin/shipments/requests"
-
-  if (!isShipmentsPage) {
+  if (!pathname.startsWith("/admin") || pathname === "/admin/login") {
     return null
   }
 
@@ -163,20 +158,20 @@ export function PortalBarcodeScannerButton() {
         onClick={() => setIsOpen(true)}
         style={{
           position: "fixed",
-          bottom: "24px",
-          right: "24px",
-          width: "56px",
-          height: "56px",
+          bottom: "calc(20px + env(safe-area-inset-bottom, 0px))",
+          right: "20px",
+          width: "54px",
+          height: "54px",
           borderRadius: "50%",
           backgroundColor: "var(--color-dheir-blue, #0056cc)",
           color: "#ffffff",
-          border: "none",
+          border: "2px solid #ffffff",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-          zIndex: 999,
+          boxShadow: "0 4px 14px rgba(0, 0, 0, 0.3)",
+          zIndex: 9999,
           transition: "transform 200ms ease, background-color 200ms ease",
         }}
         onMouseEnter={(e) => {
@@ -188,8 +183,9 @@ export function PortalBarcodeScannerButton() {
           e.currentTarget.style.backgroundColor = "var(--color-dheir-blue, #0056cc)"
         }}
         aria-label="Scan barcode"
+        title="Barcode Scanner"
       >
-        <IconBarcode size={28} stroke={1.5} />
+        <IconBarcode size={26} stroke={1.5} />
       </button>
 
       {/* Modal Dialog */}

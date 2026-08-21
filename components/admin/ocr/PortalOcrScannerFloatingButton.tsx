@@ -134,8 +134,7 @@ export function PortalOcrScannerFloatingButton() {
       setResult(data.data)
       toast.success("Receipt scanned successfully!")
 
-      // Auto-fill logic when on the admin packages page
-      if (pathname === "/admin/packages" && data.data) {
+      if (data.data) {
         window.dispatchEvent(
           new CustomEvent("admin-package-scanned", {
             detail: {
@@ -145,7 +144,15 @@ export function PortalOcrScannerFloatingButton() {
             },
           })
         )
-        // Automatically close the scanner
+        if (data.data.shippingId) {
+          window.dispatchEvent(
+            new CustomEvent("admin-shipment-scanned", {
+              detail: {
+                trackingNumber: data.data.shippingId,
+              },
+            })
+          )
+        }
         handleClose()
       }
     } catch (err: any) {
@@ -174,7 +181,7 @@ export function PortalOcrScannerFloatingButton() {
     stopCamera()
   }
 
-  if (pathname !== "/admin/packages") {
+  if (!pathname.startsWith("/admin") || pathname === "/admin/login") {
     return null
   }
 
@@ -186,20 +193,20 @@ export function PortalOcrScannerFloatingButton() {
         onClick={() => setIsOpen(true)}
         style={{
           position: "fixed",
-          bottom: "24px",
-          right: "24px",
-          width: "56px",
-          height: "56px",
+          bottom: "calc(88px + env(safe-area-inset-bottom, 0px))",
+          right: "20px",
+          width: "54px",
+          height: "54px",
           borderRadius: "50%",
           backgroundColor: "var(--color-dheir-ink, #111)",
           color: "#ffffff",
-          border: "none",
+          border: "2px solid #ffffff",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-          zIndex: 999,
+          boxShadow: "0 4px 14px rgba(0, 0, 0, 0.3)",
+          zIndex: 9999,
           transition: "transform 200ms ease, background-color 200ms ease",
         }}
         onMouseEnter={(e) => {
@@ -210,9 +217,10 @@ export function PortalOcrScannerFloatingButton() {
           e.currentTarget.style.transform = "scale(1)"
           e.currentTarget.style.backgroundColor = "var(--color-dheir-ink, #111)"
         }}
-        aria-label="Scan receipt"
+        aria-label="Scan receipt with Gemini AI"
+        title="Receipt Live Scanner (Gemini AI)"
       >
-        <IconScan size={24} stroke={2} />
+        <IconScan size={26} stroke={2} />
       </button>
 
       {/* Modal Dialog */}

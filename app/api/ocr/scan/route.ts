@@ -26,12 +26,17 @@ export async function POST(req: Request) {
     const mimeType = file.type || "image/jpeg"
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-      },
-    })
+
+    const candidateModels = [
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash-latest",
+      "gemini-1.5-flash",
+      "gemini-1.5-flash-002",
+      "gemini-1.5-flash-001",
+      "gemini-1.5-pro-latest",
+      "gemini-1.5-pro",
+    ]
 
     const prompt = `Analyze this package label/receipt image. Extract the following details and return them in a JSON object matching this schema exactly:
 {
@@ -44,18 +49,50 @@ export async function POST(req: Request) {
 
 Do not include any formatting other than valid JSON.`
 
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: mimeType,
-        },
-      },
-      prompt,
-    ])
+    let responseText = ""
+    let lastError: any = null
 
-    const responseText = result.response.text()
-    const data = JSON.parse(responseText.trim())
+    for (const modelName of candidateModels) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
+        })
+
+        const result = await model.generateContent([
+          {
+            inlineData: {
+              data: base64Data,
+              mimeType: mimeType,
+            },
+          },
+          prompt,
+        ])
+
+        responseText = result.response.text()
+        if (responseText) {
+          console.log(`OCR scan successfully used model: ${modelName}`)
+          break
+        }
+      } catch (err: any) {
+        console.warn(`Gemini OCR model '${modelName}' failed, trying next candidate:`, err?.message || err)
+        lastError = err
+      }
+    }
+
+    if (!responseText) {
+      throw lastError || new Error("All Gemini OCR candidate models failed")
+    }
+
+    // Clean JSON response (strip markdown fences if present)
+    let cleanedText = responseText.trim()
+    if (cleanedText.startsWith("```")) {
+      cleanedText = cleanedText.replace(/^```[a-z]*\n?/i, "").replace(/\n?```$/i, "").trim()
+    }
+
+    const data = JSON.parse(cleanedText)
 
     return NextResponse.json({
       success: true,
