@@ -146,7 +146,9 @@ export function PortalBarcodeScannerButton() {
     stopCamera()
   }
 
-  if (!pathname.startsWith("/admin") || pathname === "/admin/login") {
+  const isShipmentsPage = pathname === "/admin/shipments" || pathname.startsWith("/admin/shipments/")
+
+  if (!isShipmentsPage) {
     return null
   }
 
@@ -158,10 +160,10 @@ export function PortalBarcodeScannerButton() {
         onClick={() => setIsOpen(true)}
         style={{
           position: "fixed",
-          bottom: "calc(20px + env(safe-area-inset-bottom, 0px))",
+          bottom: "calc(24px + env(safe-area-inset-bottom, 0px))",
           right: "20px",
-          width: "54px",
-          height: "54px",
+          width: "56px",
+          height: "56px",
           borderRadius: "50%",
           backgroundColor: "var(--color-dheir-blue, #0056cc)",
           color: "#ffffff",

@@ -181,7 +181,9 @@ export function PortalOcrScannerFloatingButton() {
     stopCamera()
   }
 
-  if (!pathname.startsWith("/admin") || pathname === "/admin/login") {
+  const isPackagesPage = pathname === "/admin/packages" || pathname.startsWith("/admin/packages/")
+
+  if (!isPackagesPage) {
     return null
   }
 
@@ -193,10 +195,10 @@ export function PortalOcrScannerFloatingButton() {
         onClick={() => setIsOpen(true)}
         style={{
           position: "fixed",
-          bottom: "calc(88px + env(safe-area-inset-bottom, 0px))",
+          bottom: "calc(24px + env(safe-area-inset-bottom, 0px))",
           right: "20px",
-          width: "54px",
-          height: "54px",
+          width: "56px",
+          height: "56px",
           borderRadius: "50%",
           backgroundColor: "var(--color-dheir-ink, #111)",
           color: "#ffffff",
