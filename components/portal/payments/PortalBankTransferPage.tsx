@@ -58,6 +58,8 @@ export function PortalBankTransferPage({
   const [transferReference, setTransferReference] = useState("")
   const [customerNote, setCustomerNote] = useState("")
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [successRedirectUrl, setSuccessRedirectUrl] = useState("")
 
   const apiBase =
     paymentType === "shipment"
@@ -140,7 +142,8 @@ export function PortalBankTransferPage({
       if (paymentType === "order") {
         clearCart()
       }
-      router.push(result.redirect_to || successRedirect)
+      setSuccessRedirectUrl(result.redirect_to || successRedirect)
+      setShowSuccessModal(true)
     } catch {
       toast.error("Could not submit transfer proof")
     } finally {
@@ -350,6 +353,76 @@ export function PortalBankTransferPage({
             </>
           )}
         </>
+      )}
+
+      {showSuccessModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+            backgroundColor: "rgba(0, 0, 0, 0.65)",
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "440px",
+              backgroundColor: "#ffffff",
+              borderRadius: "16px",
+              overflow: "hidden",
+              boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.25)",
+              border: "1px solid var(--color-dheir-border, #e2e8f0)",
+            }}
+          >
+            <div style={{ backgroundColor: "#1e293b", color: "#ffffff", padding: "20px 24px" }}>
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  color: "#38bdf8",
+                  textTransform: "uppercase",
+                }}
+              >
+                SUBMITTED FOR VERIFICATION
+              </span>
+              <h3 style={{ margin: "4px 0 0", fontSize: "18px", fontWeight: 700, color: "#ffffff" }}>
+                Receipt Uploaded!
+              </h3>
+            </div>
+            <div style={{ padding: "20px 24px 24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <p style={{ margin: 0, fontSize: "14px", color: "var(--color-dheir-ink, #334155)", lineHeight: 1.5 }}>
+                Thank you! We have received your transfer receipt for reference{" "}
+                <strong>{transferReference || reference}</strong>. Our accounting team is verifying your payment and will update your status shortly.
+              </p>
+              <button
+                type="button"
+                onClick={() => router.push(successRedirectUrl || successRedirect)}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  borderRadius: "10px",
+                  backgroundColor: "var(--color-dheir-blue, #1a5fff)",
+                  color: "#ffffff",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Got it, View Status
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

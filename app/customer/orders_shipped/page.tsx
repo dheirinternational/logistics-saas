@@ -9,6 +9,8 @@ import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import Image from "next/image"
 
+import Link from "next/link"
+import { IconBuildingBank } from "@tabler/icons-react"
 import { PortalMediaGalleryModal } from "@/components/portal/PortalMediaGalleryModal"
 import { PortalShipmentTimeline } from "@/components/portal/packages/PortalShipmentTimeline"
 
@@ -167,7 +169,7 @@ export default function TrackShipmentsPage() {
                 </div>
 
                   {(s.air_gz_cost || s.air_hk_cost || s.air_gz_weight || s.air_hk_weight) && (
-                    <div style={{ marginTop: "0.5rem", marginBottom: "0.5rem", padding: "8px 10px", borderRadius: 6, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <div style={{ marginTop: "0.75rem", marginBottom: "0.75rem", padding: "10px 12px", borderRadius: 8, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "6px" }}>
                       <span className="font-semibold text-dheir-ink" style={{ fontSize: "0.75rem" }}>Flight Channel Breakdown:</span>
                       {s.air_gz_weight != null && Number(s.air_gz_weight) > 0 && (
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
@@ -185,30 +187,46 @@ export default function TrackShipmentsPage() {
                   )}
 
                   {s.origin_warehouse_name && s.destination_warehouse_name && (
-                    <div>
+                    <div style={{ marginTop: "4px" }}>
                       <span className="font-semibold text-dheir-ink">Route: </span>
                       <span className="text-dheir-muted">{s.origin_warehouse_name} → {s.destination_warehouse_name}</span>
                     </div>
                   )}
-                  <div>
+                  <div style={{ marginTop: "4px" }}>
                     <span className="font-semibold text-dheir-ink">Payment Status: </span>
                     <span className={s.paid_for ? "text-green-600 font-medium" : "text-amber-600 font-medium"}>
                       {s.paid_for ? "Paid" : "Unpaid / Pending"}
                     </span>
                   </div>
                   {s.shipment_note && (
-                    <div>
-                      <span className="font-semibold text-dheir-ink">Customer Note: </span>
-                      <span className="text-dheir-muted">{s.shipment_note}</span>
+                    <div style={{ marginTop: 10, padding: "10px 12px", borderRadius: 8, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", fontSize: "13px", lineHeight: 1.5 }}>
+                      <strong style={{ color: "var(--color-dheir-ink)" }}>Customer Note: </strong>
+                      <span style={{ color: "var(--color-dheir-muted)" }}>{s.shipment_note}</span>
                     </div>
                   )}
                   {s.admin_reply && (
-                    <div style={{ marginTop: 4, padding: "6px 10px", borderRadius: 6, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                    <div style={{ marginTop: 6, padding: "8px 12px", borderRadius: 6, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: "13px", lineHeight: 1.5 }}>
                       <span className="font-semibold text-emerald-800">Admin Reply: </span>
                       <span className="text-emerald-900">{s.admin_reply}</span>
                     </div>
                   )}
                 </div>
+
+              {!s.paid_for && (
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--color-dheir-border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--color-dheir-muted)" }}>
+                    Pay freight bill to release this shipment.
+                  </p>
+                  <Link
+                    href={`/customer/payments/transfer/shipment/${encodeURIComponent(s.tracking_number)}`}
+                    className="portal-payments__pay-btn portal-payments__pay-btn--bank dheir-btn-primary"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "6px", width: "auto", textDecoration: "none" }}
+                  >
+                    <IconBuildingBank size={18} stroke={1.5} />
+                    Pay by transfer
+                  </Link>
+                </div>
+              )}
 
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-dheir-border)" }}>
                 <PortalShipmentTimeline shipment={s} />

@@ -276,40 +276,47 @@ export function PortalPendingPaymentsPage() {
                     </div>
                   )}
 
-                  <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed var(--color-dheir-border)", display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.8rem" }}>
-                    {(payment as any).origin_warehouse_name && (
+                    <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px dashed var(--color-dheir-border)", display: "flex", flexDirection: "column", gap: "0.4rem", fontSize: "0.8rem" }}>
+                      {(payment as any).origin_warehouse_name && (
+                        <div>
+                          <span className="font-semibold text-dheir-ink">Route: </span>
+                          <span className="text-dheir-muted">{(payment as any).origin_warehouse_name} → {(payment as any).destination_warehouse_name}</span>
+                        </div>
+                      )}
                       <div>
-                        <span className="font-semibold text-dheir-ink">Route: </span>
-                        <span className="text-dheir-muted">{(payment as any).origin_warehouse_name} → {(payment as any).destination_warehouse_name}</span>
+                        <span className="font-semibold text-dheir-ink">Payment Status: </span>
+                        <span className={payment.status === "awaiting_confirmation" ? "text-blue-600 font-semibold" : "text-amber-600 font-medium"}>
+                          {payment.status === "awaiting_confirmation" ? "Verification in Progress (Processing)" : "Unpaid / Pending"}
+                        </span>
                       </div>
-                    )}
-                    {payment.channel && (
-                      <div>
-                        <span className="font-semibold text-dheir-ink">Method: </span>
-                        <span className="text-dheir-muted">{payment.channel}</span>
-                      </div>
-                    )}
-                    {(payment as any).shipment_note && (
-                      <div>
-                        <span className="font-semibold text-dheir-ink">Customer Note: </span>
-                        <span className="text-dheir-muted">{(payment as any).shipment_note}</span>
-                      </div>
-                    )}
-                    {(payment as any).admin_reply && (
-                      <div style={{ marginTop: 4, padding: "4px 8px", borderRadius: 4, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
-                        <span className="font-semibold text-emerald-800">Admin Reply: </span>
-                        <span className="text-emerald-900">{(payment as any).admin_reply}</span>
-                      </div>
-                    )}
+                      {payment.channel && (
+                        <div>
+                          <span className="font-semibold text-dheir-ink">Method: </span>
+                          <span className="text-dheir-muted">{payment.channel}</span>
+                        </div>
+                      )}
+                      {(payment as any).shipment_note && (
+                        <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 8, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", fontSize: "13px", lineHeight: 1.5 }}>
+                          <span className="font-semibold text-dheir-ink">Customer Note: </span>
+                          <span className="text-dheir-muted">{(payment as any).shipment_note}</span>
+                        </div>
+                      )}
+                      {(payment as any).admin_reply && (
+                        <div style={{ marginTop: 6, padding: "8px 12px", borderRadius: 6, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: "13px", lineHeight: 1.5 }}>
+                          <span className="font-semibold text-emerald-800">Admin Reply: </span>
+                          <span className="text-emerald-900">{(payment as any).admin_reply}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
                 <div className="portal-payments__card-actions">
                   {payment.status === "awaiting_confirmation" ? (
-                    <p className="portal-payments__pay-hint">
-                      Your transfer proof is being verified. We will release this
-                      shipment once confirmed.
-                    </p>
+                    <div style={{ padding: "10px 12px", borderRadius: 8, backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", width: "100%" }}>
+                      <p className="portal-payments__pay-hint" style={{ color: "#1e40af", fontWeight: 600, margin: 0 }}>
+                        Transfer proof uploaded & under review. We will release this shipment once verified by Admin.
+                      </p>
+                    </div>
                   ) : (
                     <>
                       <p className="portal-payments__pay-hint">
