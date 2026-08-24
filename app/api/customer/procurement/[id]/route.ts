@@ -116,3 +116,52 @@ export async function POST(
     return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getSession()
+    if (!session) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
+    }
+
+    const { id } = await params
+    const requestId = Number(id)
+
+    const checkRes = await dbQuery(
+      `SELECT id, reference_number, user_id FROM procurement_requests WHERE id = $1 AND (user_id = $2 OR $3 = 'admin')`,
+      [requestId, session.user_id, session.role]
+    )
+
+    if (checkRes.rows.length === 0) {
+      return NextResponse.json({ success: false, message: "Procurement request not found or forbidden" }, { status: 404 })
+    }
+
+    const refNo = checkRes.rows[0].reference_number
+
+    await dbQuery(`DELETE FROM procurement_media WHERE request_id = $1`, [requestId])
+    await dbQuery(`DELETE FROM procurement_messages WHERE request_id = $1`, [requestId])
+    if (refNo) {
+      await dbQuery(
+        `DELETE FROM manual_payment_audit_log WHERE submission_id IN (SELECT id FROM manual_payment_submissions WHERE reference = $1 OR reference = $2)`,
+        [refNo, String(requestId)]
+      )
+      await dbQuery(
+        `DELETE FROM manual_payment_submissions WHERE reference = $1 OR reference = $2`,
+        [refNo, String(requestId)]
+      )
+    }
+    await dbQuery(`DELETE FROM procurement_requests WHERE id = $1`, [requestId])
+
+    return NextResponse.json({
+      success: true,
+      message: "Procurement request deleted successfully",
+    })
+  } catch (err) {
+    console.error("Error deleting procurement request", err)
+    return NextResponse.json({ success: false, message: "Could not delete procurement request" }, { status: 500 })
+  }
+}
+

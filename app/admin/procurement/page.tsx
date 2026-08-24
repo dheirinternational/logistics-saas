@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react"
 import { Table } from "@/components/admin/table/Table"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { createColumnHelper } from "@tanstack/react-table"
-import { IconClipboardCheck, IconSearch, IconBuildingFactory2, IconEye, IconX, IconSend } from "@tabler/icons-react"
+import { IconClipboardCheck, IconSearch, IconBuildingFactory2, IconEye, IconX, IconSend, IconTrash } from "@tabler/icons-react"
 import { toast } from "@/lib/ui/toast"
 
 type AdminProcurementItem = {
@@ -95,6 +95,28 @@ export default function AdminProcurementPage() {
   useEffect(() => {
     fetchRequests()
   }, [])
+
+  const handleDeleteProcurement = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this procurement request? This action cannot be undone.")) {
+      return
+    }
+    try {
+      const res = await fetch(`/api/admin/procurement/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+      const json = await res.json()
+      if (res.ok && json.success) {
+        toast.success("Procurement request deleted successfully!")
+        if (selected?.id === id) setSelected(null)
+        fetchRequests()
+      } else {
+        toast.error(json.message || "Failed to delete procurement request")
+      }
+    } catch {
+      toast.error("Network error while deleting procurement request")
+    }
+  }
 
   const openReview = async (item: AdminProcurementItem) => {
     setSelected(item)
@@ -246,14 +268,29 @@ export default function AdminProcurementPage() {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <button
-          type="button"
-          className="portal-home__table-btn"
-          onClick={() => openReview(row.original)}
-        >
-          <IconEye size={16} stroke={1.5} />
-          Review & Quote
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button
+            type="button"
+            className="portal-home__table-btn"
+            onClick={() => openReview(row.original)}
+          >
+            <IconEye size={16} stroke={1.5} />
+            Review & Quote
+          </button>
+          <button
+            type="button"
+            className="portal-home__table-btn"
+            style={{ color: "#ef4444", borderColor: "#fca5a5" }}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDeleteProcurement(row.original.id)
+            }}
+            title="Delete Request"
+          >
+            <IconTrash size={16} stroke={1.5} />
+            Delete
+          </button>
+        </div>
       ),
     }),
   ]
@@ -559,7 +596,29 @@ export default function AdminProcurementPage() {
                   />
                 </label>
 
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                  <button
+                    type="button"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "10px 16px",
+                      borderRadius: "8px",
+                      border: "1px solid #fca5a5",
+                      backgroundColor: "#fef2f2",
+                      color: "#ef4444",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      if (selected) handleDeleteProcurement(selected.id)
+                    }}
+                  >
+                    <IconTrash size={16} stroke={1.5} />
+                    Delete Request
+                  </button>
                   <button
                     type="submit"
                     disabled={saving}

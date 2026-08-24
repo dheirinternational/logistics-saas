@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { IconMessageCircle, IconClock, IconFileCheck, IconSend, IconPhoto, IconX } from "@tabler/icons-react"
+import { IconMessageCircle, IconClock, IconFileCheck, IconSend, IconPhoto, IconX, IconTrash } from "@tabler/icons-react"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 
@@ -61,6 +61,28 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
       toast.error("Network error while loading requests")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeleteRequest = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this procurement request?")) {
+      return
+    }
+    try {
+      const res = await fetch(`/api/customer/procurement/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+      const json = await res.json()
+      if (res.ok && json.success) {
+        toast.success("Procurement request deleted!")
+        if (selectedRequest?.id === id) setSelectedRequest(null)
+        fetchList()
+      } else {
+        toast.error(json.message || "Failed to delete request")
+      }
+    } catch {
+      toast.error("Network error deleting request")
     }
   }
 
@@ -208,13 +230,39 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
                   {item.message_count ? `${item.message_count} messages in thread` : "Start chat with procurement team"}
                 </span>
 
-                <button
-                  type="button"
-                  className="portal-home__btn portal-home__btn--secondary"
-                  style={{ padding: "6px 14px", fontSize: "12px" }}
-                >
-                  View Details & Chat
-                </button>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <button
+                    type="button"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "6px 10px",
+                      borderRadius: "6px",
+                      border: "1px solid #fca5a5",
+                      backgroundColor: "#fef2f2",
+                      color: "#ef4444",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteRequest(item.id)
+                    }}
+                    title="Delete Request"
+                  >
+                    <IconTrash size={14} stroke={1.5} />
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    className="portal-home__btn portal-home__btn--secondary"
+                    style={{ padding: "6px 14px", fontSize: "12px" }}
+                  >
+                    View Details & Chat
+                  </button>
+                </div>
               </div>
             </article>
           ))}
@@ -231,7 +279,7 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
           }}
         >
           <div className="dheir-dialog admin-modal" role="dialog" aria-modal="true" style={{ maxWidth: "680px" }}>
-            <div className="dheir-dialog__head">
+            <div className="dheir-dialog__head" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
                 <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--color-dheir-muted)" }}>
                   {selectedRequest.request_type} · {selectedRequest.reference_number}
@@ -240,14 +288,36 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
                   {selectedRequest.title}
                 </h2>
               </div>
-              <button
-                type="button"
-                className="dheir-dialog__close"
-                onClick={() => setSelectedRequest(null)}
-                aria-label="Close"
-              >
-                <IconX size={20} stroke={1.5} />
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <button
+                  type="button"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid #fca5a5",
+                    backgroundColor: "#fef2f2",
+                    color: "#ef4444",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleDeleteRequest(selectedRequest.id)}
+                >
+                  <IconTrash size={14} stroke={1.5} />
+                  Delete Request
+                </button>
+                <button
+                  type="button"
+                  className="dheir-dialog__close"
+                  onClick={() => setSelectedRequest(null)}
+                  aria-label="Close"
+                >
+                  <IconX size={20} stroke={1.5} />
+                </button>
+              </div>
             </div>
 
             <div className="admin-modal__body" style={{ maxHeight: "75vh", overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px" }}>
