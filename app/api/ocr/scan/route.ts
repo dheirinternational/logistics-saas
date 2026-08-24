@@ -28,14 +28,12 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey)
 
     const candidateModels = [
+      "gemini-3.6-flash",
+      "gemini-3.5-flash",
+      "gemini-3.7-flash",
+      "gemini-flash-latest",
       "gemini-2.5-flash",
       "gemini-2.0-flash",
-      "gemini-1.5-flash-latest",
-      "gemini-1.5-flash",
-      "gemini-1.5-flash-002",
-      "gemini-1.5-flash-001",
-      "gemini-1.5-pro-latest",
-      "gemini-1.5-pro",
     ]
 
     const prompt = `Analyze this package label/receipt image. Extract the following details and return them in a JSON object matching this schema exactly:
