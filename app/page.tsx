@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/marketing/HeroSection"
 import { AboutUsSection } from "@/components/marketing/AboutUsSection"
 import { ProcurementSourcingSection } from "@/components/marketing/ProcurementSourcingSection"
+import { ChinaShippingSection } from "@/components/marketing/ChinaShippingSection"
 import { CargoLogisticsSection } from "@/components/marketing/CargoLogisticsSection"
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection"
 import { BusinessSolutionsSection } from "@/components/marketing/BusinessSolutionsSection"
@@ -36,6 +37,7 @@ export default async function Home() {
         <HeroSection />
         <AboutUsSection />
         <ProcurementSourcingSection />
+        <ChinaShippingSection />
         <CargoLogisticsSection />
         <HowItWorksSection />
         <BusinessSolutionsSection />

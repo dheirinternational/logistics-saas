@@ -1,27 +1,8 @@
 "use client"
 
-import { IconShip, IconPlane, IconTruck } from "@tabler/icons-react"
 import { BlurReveal } from "@/components/auth/BlurReveal"
 
 export function CargoLogisticsSection() {
-  const shippingMethods = [
-    {
-      title: "Sea Freight",
-      description: "Suitable for larger and heavier commercial shipments where cost efficiency is important.",
-      icon: IconShip,
-    },
-    {
-      title: "Air Freight",
-      description: "Suitable for customers who need a faster transportation option for eligible goods.",
-      icon: IconPlane,
-    },
-    {
-      title: "Express Shipping",
-      description: "Designed for smaller and time-sensitive shipments where speed is a priority.",
-      icon: IconTruck,
-    },
-  ]
-
   const consolidationAudience = [
     "Small and medium-sized businesses",
     "New importers",
@@ -69,37 +50,10 @@ export function CargoLogisticsSection() {
           </BlurReveal>
         </div>
 
-        {/* 03. China to Nigeria Shipping Options */}
-        <div className="mb-16">
-          <BlurReveal delay={150}>
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">Service 03</span>
-              <h3 className="text-2xl font-bold text-dheir-ink">China-to-Nigeria Shipping</h3>
-            </div>
-          </BlurReveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {shippingMethods.map((method, idx) => {
-              const Icon = method.icon
-              return (
-                <BlurReveal key={method.title} delay={180 + idx * 80}>
-                  <div className="flex flex-col gap-4 p-6 rounded-2xl bg-dheir-surface h-full">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-dheir-blue/10 text-dheir-blue">
-                      <Icon size={22} stroke={1.5} />
-                    </div>
-                    <h4 className="text-lg font-bold text-dheir-ink">{method.title}</h4>
-                    <p className="text-sm text-dheir-muted leading-relaxed">{method.description}</p>
-                  </div>
-                </BlurReveal>
-              )
-            })}
-          </div>
-        </div>
-
         {/* 04 & 05: Consolidation & Handling */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
           {/* 04. Consolidation */}
-          <BlurReveal delay={200}>
+          <BlurReveal delay={150}>
             <div className="flex flex-col gap-5 p-8 rounded-2xl bg-dheir-surface h-full">
               <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">Service 04</span>
               <h3 className="text-xl font-bold text-dheir-ink">Cargo Consolidation & Groupage</h3>
@@ -121,7 +75,7 @@ export function CargoLogisticsSection() {
           </BlurReveal>
 
           {/* 05. Handling & Repacking */}
-          <BlurReveal delay={280}>
+          <BlurReveal delay={230}>
             <div className="flex flex-col gap-5 p-8 rounded-2xl bg-dheir-surface h-full">
               <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">Service 05</span>
               <h3 className="text-xl font-bold text-dheir-ink">Cargo Handling & Repacking</h3>
@@ -146,7 +100,7 @@ export function CargoLogisticsSection() {
         {/* 06 & 07: Customs & Last Mile */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* 06. Customs */}
-          <BlurReveal delay={220}>
+          <BlurReveal delay={180}>
             <div className="flex flex-col gap-5 p-8 rounded-2xl bg-dheir-surface h-full">
               <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">Service 06</span>
               <h3 className="text-xl font-bold text-dheir-ink">Customs & Clearing Support</h3>
@@ -165,7 +119,7 @@ export function CargoLogisticsSection() {
           </BlurReveal>
 
           {/* 07. Last Mile */}
-          <BlurReveal delay={300}>
+          <BlurReveal delay={260}>
             <div className="flex flex-col gap-5 p-8 rounded-2xl bg-dheir-surface h-full">
               <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">Service 07</span>
               <h3 className="text-xl font-bold text-dheir-ink">Last-Mile Delivery</h3>
