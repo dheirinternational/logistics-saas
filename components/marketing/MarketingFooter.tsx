@@ -15,9 +15,14 @@ import Image from "next/image"
 import Link from "next/link"
 
 const FOOTER_NAV = [
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Services", href: "#services" },
+  { label: "About Us", href: "#about-us" },
+  { label: "Procurement & Sourcing", href: "#procurement-sourcing" },
+  { label: "Cargo & Logistics", href: "#cargo-logistics" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Business Solutions", href: "#business-solutions" },
+  { label: "Why D_HEIR", href: "#why-dheir" },
   { label: "FAQ", href: "#faq" },
+  { label: "Contact Us", href: "#contact-us" },
 ] as const
 
 export function MarketingFooter() {

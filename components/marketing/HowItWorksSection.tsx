@@ -1,91 +1,75 @@
 "use client"
 
-import { BlurReveal } from "@/components/auth/BlurReveal"
-import { NetLift } from "@/components/marketing/NetLift"
-import { HOW_IT_WORKS_STEPS } from "@/lib/marketing/howItWorksSteps"
-import Image from "next/image"
-
-function StepCard({
-  step,
-  title,
-  description,
-  imageSrc,
-  imageAlt,
-}: (typeof HOW_IT_WORKS_STEPS)[number]) {
-  const stepLabel = String(step).padStart(2, "0")
-
-  return (
-    <article className="how-it-works-card flex h-[min(80vh,580px)] min-h-[460px] w-[min(82vw,300px)] shrink-0 flex-col overflow-hidden rounded-2xl bg-dheir-surface shadow-[var(--shadow-dheir-soft)] sm:w-[300px] md:h-[560px] md:w-auto">
-      <div className="relative mx-2 mt-2 min-h-[280px] flex-[2.4] overflow-hidden rounded-2xl bg-dheir-muted/20 md:min-h-[320px]">
-        <Image
-          src={imageSrc}
-          alt={imageAlt}
-          fill
-          sizes="(max-width: 768px) 86vw, 320px"
-          className="object-cover"
-        />
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-transparent"
-          aria-hidden
-        />
-        <span className="absolute left-4 top-4 z-10 font-display text-3xl font-extrabold tracking-tight text-white drop-shadow-md md:text-4xl">
-          {stepLabel}
-        </span>
-      </div>
-
-      <div className="flex shrink-0 flex-col justify-between p-4 md:p-5">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-dheir-blue">
-            Step {step}
-          </p>
-          <h3 className="font-display mt-2 text-lg font-bold leading-snug tracking-tight text-dheir-ink md:text-xl">
-            {title}
-          </h3>
-          <p className="mt-3 text-[14px] leading-[1.55] text-dheir-muted md:text-[15px]">
-            {description}
-          </p>
-        </div>
-      </div>
-    </article>
-  )
-}
-
 export function HowItWorksSection() {
+  const steps = [
+    {
+      num: "01",
+      title: "Tell Us What You Need",
+      description: "Send us product details, quantity, specifications, images, or any available information about your intended purchase.",
+    },
+    {
+      num: "02",
+      title: "Sourcing & Procurement",
+      description: "We assist with supplier identification, communication, negotiation, and procurement coordination according to selected services.",
+    },
+    {
+      num: "03",
+      title: "Arrival at China Warehouse",
+      description: "Purchased goods are coordinated for delivery to our designated receiving location in China.",
+    },
+    {
+      num: "04",
+      title: "Cargo Processing",
+      description: "Goods are received, checked, consolidated, repacked, measured, and prepared for shipment.",
+    },
+    {
+      num: "05",
+      title: "Shipping to Nigeria",
+      description: "The appropriate shipping method (Sea, Air, or Express) is selected based on shipment requirements.",
+    },
+    {
+      num: "06",
+      title: "Clearing & Delivery",
+      description: "Upon arrival in Nigeria, we coordinate the applicable clearing, customs, and delivery process.",
+    },
+    {
+      num: "07",
+      title: "You Receive Your Goods",
+      description: "Your shipment completes its connected journey from overseas supplier directly to your destination.",
+    },
+  ]
+
   return (
-    <section
-      id="how-it-works"
-      className="how-it-works-band relative scroll-mt-[5.5rem]"
-      aria-labelledby="how-it-works-heading"
-    >
-      <div className="how-it-works-band__bg w-full py-16 md:py-24">
-        <div className="marketing-container">
-          <BlurReveal>
-            <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-dheir-blue">
-              How it works
-            </p>
-            <h2
-              id="how-it-works-heading"
-              className="font-display mt-3 max-w-xl text-2xl font-bold tracking-tight text-dheir-ink md:text-[1.75rem]"
-            >
-              From China supplier to Nigeria doorstep
-            </h2>
-            <p className="mt-4 max-w-[42ch] text-[15px] leading-relaxed text-dheir-muted md:text-base">
-              Four clear steps. One portal for your address, packages, payments,
-              and delivery.
-            </p>
-          </BlurReveal>
+    <section id="how-it-works" className="marketing-section py-16 md:py-24 bg-dheir-surface">
+      <div className="marketing-container">
+        <div className="max-w-3xl mb-16">
+          <p className="text-xs font-bold uppercase tracking-widest text-dheir-blue">
+            Simple Process
+          </p>
+          <h2 className="font-display text-3xl font-extrabold text-dheir-ink md:text-4xl mt-2">
+            How It Works
+          </h2>
+          <p className="mt-4 text-base text-dheir-muted leading-relaxed">
+            Seven straightforward steps connecting your order from international suppliers to your door in Nigeria.
+          </p>
         </div>
 
-        <div className="how-it-works-track-wrap mt-12 md:mt-14">
-          <div className="how-it-works-track-inner marketing-container">
-            <div className="how-it-works-track marketing-scroll-x flex gap-5 pb-2 md:grid md:grid-cols-4 md:gap-8 md:pb-0">
-            {HOW_IT_WORKS_STEPS.map((item, index) => (
-              <NetLift key={item.step} delay={index * 60}>
-                <StepCard {...item} />
-              </NetLift>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {steps.map((step, idx) => (
+            <div
+              key={step.num}
+              className={`flex flex-col gap-4 p-6 rounded-2xl bg-dheir-page ${
+                idx === steps.length - 1 ? "md:col-span-2 lg:col-span-2" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-extrabold text-dheir-blue">{step.num}</span>
+                <span className="text-xs font-semibold text-dheir-muted uppercase tracking-wider">Step</span>
+              </div>
+              <h3 className="text-lg font-bold text-dheir-ink">{step.title}</h3>
+              <p className="text-xs leading-relaxed text-dheir-muted">{step.description}</p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

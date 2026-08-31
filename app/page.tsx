@@ -1,29 +1,26 @@
 import { HeroSection } from "@/components/marketing/HeroSection"
+import { AboutUsSection } from "@/components/marketing/AboutUsSection"
+import { ProcurementSourcingSection } from "@/components/marketing/ProcurementSourcingSection"
+import { CargoLogisticsSection } from "@/components/marketing/CargoLogisticsSection"
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection"
-import { ServicesSection } from "@/components/marketing/ServicesSection"
+import { BusinessSolutionsSection } from "@/components/marketing/BusinessSolutionsSection"
+import { WhyDheirSection } from "@/components/marketing/WhyDheirSection"
 import { FAQSection } from "@/components/marketing/FAQSection"
-import { ShopTeaserSection } from "@/components/marketing/ShopTeaserSection"
-import { TrustSection } from "@/components/marketing/TrustSection"
+import { ContactUsSection } from "@/components/marketing/ContactUsSection"
 import { MarketingFooter } from "@/components/marketing/MarketingFooter"
 import { MarketingHeader } from "@/components/marketing/MarketingHeader"
-import { SocialProofSection } from "@/components/marketing/SocialProofSection"
 import { getSession } from "@/lib/db/session"
 import { toMarketingHeaderUser } from "@/lib/marketing/headerUser"
-import { getMarketingReviews } from "@/lib/marketing/reviews"
 import {
   buildHomeMetadata,
   buildOrganizationJsonLd,
 } from "@/lib/marketing/siteMetadata"
 import { PortalWhatsAppFab } from "@/components/portal/home/PortalWhatsAppFab"
-import { FloatingVideoWidget } from "@/components/marketing/FloatingVideoWidget"
 
 export const metadata = buildHomeMetadata()
 
 export default async function Home() {
-  const [session, reviews] = await Promise.all([
-    getSession(),
-    getMarketingReviews(),
-  ])
+  const session = await getSession()
   const headerUser = session ? toMarketingHeaderUser(session) : null
   const jsonLd = buildOrganizationJsonLd()
 
@@ -36,16 +33,17 @@ export default async function Home() {
       <MarketingHeader user={headerUser} />
       <main id="top" className="relative">
         <HeroSection />
-        <SocialProofSection reviews={reviews} />
+        <AboutUsSection />
+        <ProcurementSourcingSection />
+        <CargoLogisticsSection />
         <HowItWorksSection />
-        <ServicesSection />
-        <TrustSection />
-        {/* <ShopTeaserSection isAuthenticated={!!session} /> */}
+        <BusinessSolutionsSection />
+        <WhyDheirSection />
         <FAQSection />
+        <ContactUsSection />
       </main>
       <MarketingFooter />
       <PortalWhatsAppFab />
-      <FloatingVideoWidget />
     </div>
   )
 }
