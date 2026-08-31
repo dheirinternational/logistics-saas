@@ -1,5 +1,7 @@
 "use client"
 
+import { BlurReveal } from "@/components/auth/BlurReveal"
+
 export function HowItWorksSection() {
   const steps = [
     {
@@ -43,32 +45,39 @@ export function HowItWorksSection() {
     <section id="how-it-works" className="marketing-section py-16 md:py-24 bg-dheir-surface">
       <div className="marketing-container">
         <div className="max-w-3xl mb-16">
-          <p className="text-xs font-bold uppercase tracking-widest text-dheir-blue">
-            Simple Process
-          </p>
-          <h2 className="font-display text-3xl font-extrabold text-dheir-ink md:text-4xl mt-2">
-            How It Works
-          </h2>
-          <p className="mt-4 text-base text-dheir-muted leading-relaxed">
-            Seven straightforward steps connecting your order from international suppliers to your door in Nigeria.
-          </p>
+          <BlurReveal delay={0}>
+            <p className="text-xs font-bold uppercase tracking-widest text-dheir-blue">
+              Simple Process
+            </p>
+          </BlurReveal>
+          <BlurReveal delay={60}>
+            <h2 className="font-display text-3xl font-extrabold text-dheir-ink md:text-4xl mt-2">
+              How It Works
+            </h2>
+          </BlurReveal>
+          <BlurReveal delay={120}>
+            <p className="mt-4 text-base text-dheir-muted leading-relaxed">
+              Seven straightforward steps connecting your order from international suppliers to your door in Nigeria.
+            </p>
+          </BlurReveal>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((step, idx) => (
-            <div
+            <BlurReveal
               key={step.num}
-              className={`flex flex-col gap-4 p-6 rounded-2xl bg-dheir-page ${
-                idx === steps.length - 1 ? "md:col-span-2 lg:col-span-2" : ""
-              }`}
+              delay={140 + idx * 50}
+              className={idx === steps.length - 1 ? "md:col-span-2 lg:col-span-2" : ""}
             >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl font-extrabold text-dheir-blue">{step.num}</span>
-                <span className="text-xs font-semibold text-dheir-muted uppercase tracking-wider">Step</span>
+              <div className="flex flex-col gap-4 p-6 rounded-2xl bg-dheir-page h-full">
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-extrabold text-dheir-blue">{step.num}</span>
+                  <span className="text-xs font-semibold text-dheir-muted uppercase tracking-wider">Step</span>
+                </div>
+                <h3 className="text-lg font-bold text-dheir-ink">{step.title}</h3>
+                <p className="text-xs leading-relaxed text-dheir-muted">{step.description}</p>
               </div>
-              <h3 className="text-lg font-bold text-dheir-ink">{step.title}</h3>
-              <p className="text-xs leading-relaxed text-dheir-muted">{step.description}</p>
-            </div>
+            </BlurReveal>
           ))}
         </div>
       </div>
