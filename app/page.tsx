@@ -16,6 +16,7 @@ import {
   buildOrganizationJsonLd,
 } from "@/lib/marketing/siteMetadata"
 import { PortalWhatsAppFab } from "@/components/portal/home/PortalWhatsAppFab"
+import { FloatingVideoWidget } from "@/components/marketing/FloatingVideoWidget"
 
 export const metadata = buildHomeMetadata()
 
@@ -44,6 +45,7 @@ export default async function Home() {
       </main>
       <MarketingFooter />
       <PortalWhatsAppFab />
+      <FloatingVideoWidget />
     </div>
   )
 }
