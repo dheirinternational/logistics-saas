@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { IconArrowUpRight, IconArrowRight } from "@tabler/icons-react"
+import { IconArrowUpRight, IconArrowRight, IconMail, IconPhone } from "@tabler/icons-react"
 import { BlurReveal } from "@/components/auth/BlurReveal"
 
 export function ContactUsSection() {
@@ -110,18 +110,58 @@ export function ContactUsSection() {
           ))}
         </div>
 
-        {/* Footer Brand Banner */}
+        {/* Direct Contact & Brand Slogan Banner */}
         <BlurReveal delay={200}>
-          <div className="text-center pt-10 border-t border-slate-900/10 max-w-4xl mx-auto">
-            <h3 className="font-display text-2xl font-extrabold text-slate-900 tracking-tight">
-              D_HEIR INTERNATIONAL
-            </h3>
-            <p className="mt-2 text-xs font-bold uppercase tracking-widest text-slate-600">
-              Procurement &middot; Sourcing &middot; Cargo &middot; Logistics &middot; Global Trade
-            </p>
-            <p className="mt-3 text-sm font-semibold text-dheir-blue">
-              Connecting Nigeria to Global Opportunities &middot; From Global Markets to Your Business
-            </p>
+          <div className="pt-10 border-t border-slate-900/10 max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+            <div>
+              <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                D_HEIR INTERNATIONAL
+              </h3>
+              <p className="mt-1.5 text-xs font-bold uppercase tracking-widest text-slate-600">
+                Procurement &middot; Sourcing &middot; Cargo &middot; Logistics &middot; Global Trade
+              </p>
+              <p className="mt-3 text-sm font-semibold text-dheir-blue max-w-lg leading-relaxed">
+                Calm shipping from China to Nigeria. Warehouse, packages, and delivery in one place.
+              </p>
+            </div>
+
+            {/* Direct Contact Card */}
+            <div className="bg-white p-6 sm:p-7 rounded-3xl text-left min-w-[280px] sm:min-w-[320px] transition-transform duration-300 hover:-translate-y-1">
+              <span className="text-xs font-extrabold uppercase tracking-widest text-slate-500 block mb-3">
+                Contact Direct
+              </span>
+              
+              <a
+                href="mailto:support@dheirinternational.com"
+                className="flex items-center gap-2.5 text-sm font-bold text-slate-900 hover:text-dheir-blue transition-colors mb-3"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-dheir-blue/10 text-dheir-blue shrink-0">
+                  <IconMail size={16} stroke={2} />
+                </div>
+                <span>support@dheirinternational.com</span>
+              </a>
+
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <a
+                  href="tel:+18813405374"
+                  className="flex items-center gap-2.5 text-xs font-bold text-slate-700 hover:text-dheir-blue transition-colors"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 shrink-0">
+                    <IconPhone size={14} stroke={2} />
+                  </div>
+                  <span>+18813405374</span>
+                </a>
+                <a
+                  href="tel:+2348167278847"
+                  className="flex items-center gap-2.5 text-xs font-bold text-slate-700 hover:text-dheir-blue transition-colors"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 shrink-0">
+                    <IconPhone size={14} stroke={2} />
+                  </div>
+                  <span>+234 816 727 8847</span>
+                </a>
+              </div>
+            </div>
           </div>
         </BlurReveal>
 
