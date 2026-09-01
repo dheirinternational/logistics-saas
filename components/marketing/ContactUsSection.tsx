@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { IconSearch, IconTruck, IconBuildingStore, IconArrowRight } from "@tabler/icons-react"
+import Image from "next/image"
+import { IconArrowUpRight, IconArrowRight } from "@tabler/icons-react"
 import { BlurReveal } from "@/components/auth/BlurReveal"
 
 export function ContactUsSection() {
@@ -11,83 +12,119 @@ export function ContactUsSection() {
       subtitle: "Talk to our procurement team for supplier research and order management.",
       cta: "Start Procurement",
       href: "/auth/signup",
-      icon: IconSearch,
+      btnBg: "bg-[#1a5fff] text-white hover:bg-blue-700",
+      cardBg: "bg-white",
     },
     {
       title: "Need to ship goods from China to Nigeria?",
       subtitle: "Talk to our cargo & logistics team for sea, air, and express shipping.",
       cta: "Ship Freight",
       href: "/auth/signup",
-      icon: IconTruck,
+      btnBg: "bg-[#0f2923] text-white hover:bg-[#163c34]",
+      cardBg: "bg-white",
     },
     {
       title: "Building a regular import business?",
       subtitle: "Let us discuss a structured, long-term supply chain & logistics solution.",
       cta: "Contact Us",
       href: "/auth/signup",
-      icon: IconBuildingStore,
+      btnBg: "bg-[#a3e635] text-slate-900 hover:bg-[#86efac]",
+      cardBg: "bg-white",
     },
   ]
 
   return (
-    <section id="contact-us" className="marketing-section py-16 md:py-24 bg-dheir-page">
-      <div className="marketing-container">
-        <div className="max-w-3xl mb-16">
+    <section
+      id="contact-us"
+      className="marketing-section py-16 md:py-24 bg-[#f5f4ef] relative overflow-hidden"
+      style={{
+        backgroundImage: "radial-gradient(#00000015 1.5px, transparent 1.5px)",
+        backgroundSize: "24px 24px",
+      }}
+    >
+      <div className="marketing-container relative z-10">
+        
+        {/* Architectural Hero Banner matching reference screenshot */}
+        <div className="relative bg-[#e2e0d5] rounded-[2.5rem] p-8 sm:p-12 lg:p-16 mb-16 text-center max-w-5xl mx-auto transition-transform duration-300">
+          
+          {/* Top-Right Floating Founder Image Badge matching reference */}
+          <div className="hidden md:block absolute -top-6 -right-6 w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-4 border-white transform rotate-6 z-20">
+            <Image
+              src="/ronke.jpg"
+              alt="Ronke - Founder D_HEIR"
+              width={96}
+              height={96}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Bottom-Left Floating Accent Square Badge matching reference */}
+          <div className="hidden md:flex absolute -bottom-6 -left-6 w-20 h-20 bg-[#a3e635] rounded-2xl items-center justify-center text-slate-900 transform -rotate-6 z-20">
+            <IconArrowUpRight size={32} stroke={2.5} />
+          </div>
+
           <BlurReveal delay={0}>
-            <p className="text-xs font-bold uppercase tracking-widest text-dheir-blue">
+            <p className="text-xs font-bold uppercase tracking-widest text-dheir-blue mb-3">
               Contact Us
             </p>
           </BlurReveal>
+
           <BlurReveal delay={60}>
-            <h2 className="font-display text-3xl font-extrabold text-dheir-ink md:text-4xl mt-2">
+            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto">
               Let&apos;s Move Your Business Forward
             </h2>
           </BlurReveal>
+
           <BlurReveal delay={120}>
-            <p className="mt-4 text-base text-dheir-muted leading-relaxed">
+            <p className="mt-6 text-base sm:text-lg text-slate-700 leading-relaxed font-medium max-w-2xl mx-auto">
               Whether you are importing for the first time, restocking an existing business, searching for products in China, or looking for a reliable logistics partner, D_HEIR INTERNATIONAL is ready to help you navigate the journey.
             </p>
           </BlurReveal>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          {options.map((opt, idx) => {
-            const Icon = opt.icon
-            return (
-              <BlurReveal key={opt.title} delay={140 + idx * 80}>
-                <div className="flex flex-col justify-between gap-6 p-8 rounded-2xl bg-dheir-surface h-full">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-dheir-blue/10 text-dheir-blue">
-                      <Icon size={22} stroke={1.5} />
-                    </div>
-                    <h3 className="text-lg font-bold text-dheir-ink leading-snug">{opt.title}</h3>
-                    <p className="text-xs leading-relaxed text-dheir-muted">{opt.subtitle}</p>
-                  </div>
-                  <Link
-                    href={opt.href}
-                    className="inline-flex items-center gap-2 text-xs font-bold text-dheir-blue hover:text-dheir-blue-hover transition-colors mt-auto"
-                  >
-                    {opt.cta}
-                    <IconArrowRight size={16} stroke={2} />
-                  </Link>
+        {/* 3 Action CTA Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-16 max-w-6xl mx-auto">
+          {options.map((opt, idx) => (
+            <BlurReveal key={opt.title} delay={140 + idx * 80}>
+              <div
+                className={`flex flex-col justify-between p-8 rounded-3xl ${opt.cardBg} h-full transition-transform duration-300 hover:-translate-y-2 cursor-pointer`}
+              >
+                <div>
+                  <h3 className="font-display text-xl font-extrabold text-slate-900 mb-3 tracking-tight leading-snug">
+                    {opt.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm font-semibold leading-relaxed text-slate-600 mb-8">
+                    {opt.subtitle}
+                  </p>
                 </div>
-              </BlurReveal>
-            )
-          })}
+
+                <Link
+                  href={opt.href}
+                  className={`inline-flex items-center justify-between px-6 py-3.5 rounded-full ${opt.btnBg} text-xs font-extrabold uppercase tracking-wider transition-all duration-300 mt-auto`}
+                >
+                  <span>{opt.cta}</span>
+                  <IconArrowRight size={16} stroke={2.5} />
+                </Link>
+              </div>
+            </BlurReveal>
+          ))}
         </div>
 
-        {/* Footer Brand Slogan */}
+        {/* Footer Brand Banner */}
         <BlurReveal delay={200}>
-          <div className="text-center pt-8 border-t border-dheir-border/60">
-            <h3 className="font-display text-xl font-bold text-dheir-ink">D_HEIR INTERNATIONAL</h3>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-dheir-muted">
-              Procurement · Sourcing · Cargo · Logistics · Global Trade
+          <div className="text-center pt-10 border-t border-slate-900/10 max-w-4xl mx-auto">
+            <h3 className="font-display text-2xl font-extrabold text-slate-900 tracking-tight">
+              D_HEIR INTERNATIONAL
+            </h3>
+            <p className="mt-2 text-xs font-bold uppercase tracking-widest text-slate-600">
+              Procurement &middot; Sourcing &middot; Cargo &middot; Logistics &middot; Global Trade
             </p>
-            <p className="mt-3 text-sm font-medium text-dheir-blue">
-              Connecting Nigeria to Global Opportunities · From Global Markets to Your Business
+            <p className="mt-3 text-sm font-semibold text-dheir-blue">
+              Connecting Nigeria to Global Opportunities &middot; From Global Markets to Your Business
             </p>
           </div>
         </BlurReveal>
+
       </div>
     </section>
   )

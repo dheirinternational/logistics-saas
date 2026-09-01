@@ -34,7 +34,7 @@ export function CargoLogisticsSection() {
     <section id="cargo-logistics" className="marketing-section py-16 md:py-24 bg-dheir-page">
       <div className="marketing-container">
         {/* Header */}
-        <div className="max-w-3xl mb-16">
+        <div className="max-w-3xl mb-12 sm:mb-16">
           <BlurReveal delay={0}>
             <p className="text-xs font-bold uppercase tracking-widest text-dheir-blue">
               D_HEIR Cargo & Logistics
@@ -54,11 +54,11 @@ export function CargoLogisticsSection() {
           </BlurReveal>
         </div>
 
-        {/* 2x2 Grid of Soft Ice-Teal Rounded Cards (Matching Reference Screenshot) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* 2x2 Grid of Soft Ice-Teal Rounded Cards (Responsive on Mobile to Desktop) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Service 04: Cargo Consolidation & Groupage */}
           <BlurReveal delay={150}>
-            <div className="flex flex-col justify-between p-8 md:p-10 rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
+            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700 bg-white/60 px-3 py-1 rounded-full inline-block mb-6">
                   Service 04
@@ -86,10 +86,10 @@ export function CargoLogisticsSection() {
 
               {/* Bottom Giant Service Number & Brand Metadata */}
               <div className="flex items-end justify-between border-t border-slate-900/15 pt-6 mt-8">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700">
+                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
                   D_HEIR LOGISTICS
                 </span>
-                <span className="font-display text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
+                <span className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
                   04
                 </span>
               </div>
@@ -98,7 +98,7 @@ export function CargoLogisticsSection() {
 
           {/* Service 05: Cargo Handling & Repacking */}
           <BlurReveal delay={230}>
-            <div className="flex flex-col justify-between p-8 md:p-10 rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
+            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700 bg-white/60 px-3 py-1 rounded-full inline-block mb-6">
                   Service 05
@@ -126,10 +126,10 @@ export function CargoLogisticsSection() {
 
               {/* Bottom Giant Service Number & Brand Metadata */}
               <div className="flex items-end justify-between border-t border-slate-900/15 pt-6 mt-8">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700">
+                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
                   D_HEIR LOGISTICS
                 </span>
-                <span className="font-display text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
+                <span className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
                   05
                 </span>
               </div>
@@ -138,7 +138,7 @@ export function CargoLogisticsSection() {
 
           {/* Service 06: Customs & Clearing Support */}
           <BlurReveal delay={180}>
-            <div className="flex flex-col justify-between p-8 md:p-10 rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
+            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700 bg-white/60 px-3 py-1 rounded-full inline-block mb-6">
                   Service 06
@@ -166,10 +166,10 @@ export function CargoLogisticsSection() {
 
               {/* Bottom Giant Service Number & Brand Metadata */}
               <div className="flex items-end justify-between border-t border-slate-900/15 pt-6 mt-8">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700">
+                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
                   D_HEIR LOGISTICS
                 </span>
-                <span className="font-display text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
+                <span className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
                   06
                 </span>
               </div>
@@ -178,7 +178,7 @@ export function CargoLogisticsSection() {
 
           {/* Service 07: Last-Mile Delivery */}
           <BlurReveal delay={260}>
-            <div className="flex flex-col justify-between p-8 md:p-10 rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
+            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700 bg-white/60 px-3 py-1 rounded-full inline-block mb-6">
                   Service 07
@@ -207,10 +207,10 @@ export function CargoLogisticsSection() {
 
               {/* Bottom Giant Service Number & Brand Metadata */}
               <div className="flex items-end justify-between border-t border-slate-900/15 pt-6 mt-8">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700">
+                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
                   D_HEIR LOGISTICS
                 </span>
-                <span className="font-display text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
+                <span className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
                   07
                 </span>
               </div>

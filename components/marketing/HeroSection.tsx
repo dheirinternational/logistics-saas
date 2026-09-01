@@ -77,7 +77,7 @@ export function HeroSection() {
                       </span>
                     </Link>
                     <MarketingAnchorLink
-                      href="#services"
+                      href="#procurement-sourcing"
                       className="marketing-hero-cta-secondary text-[15px] font-semibold text-white no-underline"
                     >
                       {HERO_COPY.secondaryCta}
