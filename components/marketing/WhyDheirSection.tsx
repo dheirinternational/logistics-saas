@@ -1,68 +1,54 @@
 "use client"
 
+import { useState } from "react"
+import { IconPlus, IconMinus, IconCheck } from "@tabler/icons-react"
 import { BlurReveal } from "@/components/auth/BlurReveal"
 
 export function WhyDheirSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
+
   const whyPoints = [
     {
       title: "One Journey, Multiple Solutions",
       description: "Instead of leaving customers to coordinate every stage independently, we help connect procurement and logistics into a more organized process.",
+      collapsedBg: "bg-[#4fef85]", // Bright Ramp mint
+      textColor: "text-slate-900",
     },
     {
       title: "Practical Importation Support",
       description: "We understand that international trade involves more than purchasing a product. Shipping, cargo handling, documentation, customs, and delivery all matter.",
+      collapsedBg: "bg-[#e3ff54]", // Bright Ramp lime
+      textColor: "text-slate-900",
     },
     {
       title: "Customer-Centric Approach",
       description: "Every shipment is different. Product type, quantity, volume, urgency, budget, and destination can influence the best logistics solution.",
+      collapsedBg: "bg-[#60a5fa]", // Soft sky blue
+      textColor: "text-slate-900",
     },
     {
       title: "Transparency",
       description: "We believe customers should understand what they are paying for and why. Clear communication, defined processes, and proper cost considerations.",
+      collapsedBg: "bg-[#a7f3d0]", // Soft emerald
+      textColor: "text-slate-900",
     },
     {
       title: "Business-Focused Solutions",
       description: "Designed for individuals, entrepreneurs, and businesses building sustainable, long-term international supply chains.",
+      collapsedBg: "bg-[#fef08a]", // Soft amber
+      textColor: "text-slate-900",
     },
   ]
 
-  const coreValues = [
-    {
-      title: "Integrity",
-      description: "We believe trust is the foundation of every successful business relationship.",
-    },
-    {
-      title: "Transparency",
-      description: "We communicate clearly about services, processes, costs, and expectations.",
-    },
-    {
-      title: "Reliability",
-      description: "We understand that customers are trusting us with their money, products, and business plans.",
-    },
-    {
-      title: "Professionalism",
-      description: "Every shipment and customer interaction should be handled with structure and accountability.",
-    },
-    {
-      title: "Continuous Improvement",
-      description: "We continue to improve our processes, partnerships, and customer experience as international trade evolves.",
-    },
-  ]
-
-  const differenceSteps = [
-    "Sourcing",
-    "Procurement",
-    "Supplier Coordination",
-    "Cargo Handling",
-    "International Shipping",
-    "Customs & Clearing",
-    "Delivery",
-  ]
+  const toggleAccordion = (idx: number) => {
+    setOpenIndex(openIndex === idx ? null : idx)
+  }
 
   return (
-    <section id="why-dheir" className="marketing-section py-16 md:py-24 bg-dheir-surface">
+    <section id="why-dheir" className="marketing-section py-16 md:py-24 bg-dheir-page">
       <div className="marketing-container">
-        {/* Why D_HEIR */}
+        
+        {/* Header */}
         <div className="max-w-3xl mb-16">
           <BlurReveal delay={0}>
             <p className="text-xs font-bold uppercase tracking-widest text-dheir-blue">
@@ -70,7 +56,7 @@ export function WhyDheirSection() {
             </p>
           </BlurReveal>
           <BlurReveal delay={60}>
-            <h2 className="font-display text-3xl font-extrabold text-dheir-ink md:text-4xl mt-2">
+            <h2 className="font-display text-3xl font-extrabold text-dheir-ink md:text-5xl mt-2 tracking-tight">
               Why D_HEIR International?
             </h2>
           </BlurReveal>
@@ -81,87 +67,91 @@ export function WhyDheirSection() {
           </BlurReveal>
         </div>
 
-        {/* Why Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-          {whyPoints.map((point, idx) => (
-            <BlurReveal key={point.title} delay={140 + idx * 50}>
-              <div className="flex flex-col gap-3 p-6 rounded-2xl bg-dheir-page h-full">
-                <h3 className="text-base font-bold text-dheir-ink">{point.title}</h3>
-                <p className="text-xs leading-relaxed text-dheir-muted">{point.description}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+          
+          {/* Left Panel: Vision, Mission & Value Preview Card matching Ramp style */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <BlurReveal delay={140}>
+              <div className="p-8 rounded-[2.5rem] bg-dheir-surface flex flex-col justify-between h-full space-y-8">
+                <div>
+                  <span className="text-xs font-extrabold uppercase tracking-widest text-dheir-blue block mb-3">
+                    Our Vision
+                  </span>
+                  <p className="text-sm font-medium text-dheir-ink leading-relaxed">
+                    To become a trusted international procurement and logistics brand connecting African businesses and consumers to global markets.
+                  </p>
+                </div>
+
+                <div className="pt-6 border-t border-dheir-border/60">
+                  <span className="text-xs font-extrabold uppercase tracking-widest text-dheir-blue block mb-3">
+                    Our Mission
+                  </span>
+                  <p className="text-sm font-medium text-dheir-ink leading-relaxed">
+                    To provide accessible, transparent, and dependable procurement and logistics solutions that help individuals and businesses successfully participate in international trade.
+                  </p>
+                </div>
+
+                <div className="pt-6 border-t border-dheir-border/60">
+                  <span className="text-xs font-extrabold uppercase tracking-widest text-dheir-blue block mb-3">
+                    Our Value
+                  </span>
+                  <p className="text-sm font-medium text-dheir-ink leading-relaxed">
+                    A business in Nigeria should be able to discover opportunities in China without having to build an entire overseas operation from scratch.
+                  </p>
+                </div>
               </div>
             </BlurReveal>
-          ))}
-        </div>
-
-        {/* Vision, Mission & Core Values */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-          <BlurReveal delay={150}>
-            <div className="p-8 rounded-2xl bg-dheir-page flex flex-col gap-4 h-full">
-              <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">Our Vision</span>
-              <p className="text-sm font-medium text-dheir-ink leading-relaxed">
-                To become a trusted international procurement and logistics brand connecting African businesses and consumers to global markets.
-              </p>
-            </div>
-          </BlurReveal>
-
-          <BlurReveal delay={220}>
-            <div className="p-8 rounded-2xl bg-dheir-page flex flex-col gap-4 h-full">
-              <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">Our Mission</span>
-              <p className="text-sm font-medium text-dheir-ink leading-relaxed">
-                To provide accessible, transparent, and dependable procurement and logistics solutions that help individuals and businesses successfully participate in international trade.
-              </p>
-            </div>
-          </BlurReveal>
-
-          <BlurReveal delay={290}>
-            <div className="p-8 rounded-2xl bg-dheir-page flex flex-col gap-4 h-full">
-              <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">Our Value</span>
-              <p className="text-sm font-medium text-dheir-ink leading-relaxed">
-                A business in Nigeria should be able to discover opportunities in China without having to build an entire overseas operation from scratch.
-              </p>
-            </div>
-          </BlurReveal>
-        </div>
-
-        {/* Core Values */}
-        <div className="mb-20">
-          <BlurReveal delay={150}>
-            <h3 className="text-xl font-bold text-dheir-ink mb-8">Our Core Values</h3>
-          </BlurReveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {coreValues.map((val, idx) => (
-              <BlurReveal key={val.title} delay={180 + idx * 50}>
-                <div className="p-5 rounded-xl bg-dheir-page flex flex-col gap-2 h-full">
-                  <h4 className="text-sm font-bold text-dheir-blue">{val.title}</h4>
-                  <p className="text-xs text-dheir-muted leading-relaxed">{val.description}</p>
-                </div>
-              </BlurReveal>
-            ))}
           </div>
-        </div>
 
-        {/* The D_HEIR Difference & Our Promise */}
-        <BlurReveal delay={200}>
-          <div className="p-8 md:p-12 rounded-3xl bg-dheir-page">
-            <div className="max-w-3xl">
-              <span className="text-xs font-bold uppercase tracking-wider text-dheir-blue">The D_HEIR Difference</span>
-              <h3 className="font-display text-2xl font-bold text-dheir-ink md:text-3xl mt-2 mb-4">
-                One connected journey. One trusted partner.
-              </h3>
-              <p className="text-sm text-dheir-muted leading-relaxed mb-6">
-                What we promise is to approach the process with clarity, communication, professionalism, and accountability. Because your shipment is not just cargo; it represents your money, your business, and your next opportunity.
-              </p>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-dheir-ink bg-dheir-surface p-4 rounded-xl">
-                {differenceSteps.map((step, idx) => (
-                  <span key={step} className="flex items-center gap-2">
-                    <span>{step}</span>
-                    {idx < differenceSteps.length - 1 && <span className="text-dheir-blue">&rarr;</span>}
-                  </span>
-                ))}
-              </div>
-            </div>
+          {/* Right Panel: Ramp-Style Interactive Accordion Cards */}
+          <div className="lg:col-span-7 flex flex-col space-y-4">
+            {whyPoints.map((point, idx) => {
+              const isOpen = openIndex === idx
+
+              return (
+                <BlurReveal key={point.title} delay={140 + idx * 50}>
+                  {isOpen ? (
+                    /* Expanded Accordion Card (Ramp Style) */
+                    <div
+                      onClick={() => toggleAccordion(idx)}
+                      className="rounded-[2.25rem] p-8 md:p-10 bg-dheir-surface text-slate-900 cursor-pointer transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-4 mb-4">
+                        <IconMinus size={28} stroke={3} className="shrink-0 text-slate-900" />
+                        <h3 className="font-display text-2xl md:text-3xl font-extrabold tracking-tight">
+                          {point.title}
+                        </h3>
+                      </div>
+
+                      <div className="pt-4 border-t border-slate-900/15 mt-4 space-y-4">
+                        <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed">
+                          {point.description}
+                        </p>
+
+                        <div className="flex items-center gap-2 text-xs font-extrabold text-dheir-blue pt-2">
+                          <IconCheck size={16} stroke={3} />
+                          <span>Structured, end-to-end trade coordination by D_HEIR International</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Collapsed Accordion Pill (Ramp Style) */
+                    <div
+                      onClick={() => toggleAccordion(idx)}
+                      className={`rounded-3xl p-6 sm:p-7 ${point.collapsedBg} ${point.textColor} flex items-center gap-4 cursor-pointer transition-all duration-300 hover:scale-[1.01]`}
+                    >
+                      <IconPlus size={24} stroke={3} className="shrink-0 text-slate-900" />
+                      <h3 className="font-display text-xl sm:text-2xl font-extrabold tracking-tight">
+                        {point.title}
+                      </h3>
+                    </div>
+                  )}
+                </BlurReveal>
+              )
+            })}
           </div>
-        </BlurReveal>
+
+        </div>
       </div>
     </section>
   )

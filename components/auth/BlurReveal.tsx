@@ -2,11 +2,12 @@
 
 import { blurReveal, blurRevealReduced } from "@/lib/motion/dheir"
 import { motion, useReducedMotion } from "framer-motion"
-import type { ReactNode } from "react"
+import type { CSSProperties, ReactNode } from "react"
 
 type BlurRevealProps = {
   children: ReactNode
   className?: string
+  style?: CSSProperties
   /** Stagger delay in milliseconds */
   delay?: number
   /** Animate on mount (auth pages) vs when scrolled into view */
@@ -16,6 +17,7 @@ type BlurRevealProps = {
 export function BlurReveal({
   children,
   className = "",
+  style,
   delay = 0,
   immediate = false,
 }: BlurRevealProps) {
@@ -26,6 +28,7 @@ export function BlurReveal({
   return (
     <motion.div
       className={className}
+      style={style}
       initial="hidden"
       animate={immediate ? "visible" : undefined}
       whileInView={immediate ? undefined : "visible"}

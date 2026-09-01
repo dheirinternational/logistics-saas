@@ -5,7 +5,10 @@ import { ChinaShippingSection } from "@/components/marketing/ChinaShippingSectio
 import { CargoLogisticsSection } from "@/components/marketing/CargoLogisticsSection"
 import { HowItWorksSection } from "@/components/marketing/HowItWorksSection"
 import { BusinessSolutionsSection } from "@/components/marketing/BusinessSolutionsSection"
+import { GrowthInfrastructureSection } from "@/components/marketing/GrowthInfrastructureSection"
 import { WhyDheirSection } from "@/components/marketing/WhyDheirSection"
+import { VisionMissionValuesSection } from "@/components/marketing/VisionMissionValuesSection"
+import { DheirDifferenceSection } from "@/components/marketing/DheirDifferenceSection"
 import { FAQSection } from "@/components/marketing/FAQSection"
 import { ContactUsSection } from "@/components/marketing/ContactUsSection"
 import { MarketingFooter } from "@/components/marketing/MarketingFooter"
@@ -41,7 +44,10 @@ export default async function Home() {
         <CargoLogisticsSection />
         <HowItWorksSection />
         <BusinessSolutionsSection />
+        <GrowthInfrastructureSection />
         <WhyDheirSection />
+        <VisionMissionValuesSection />
+        <DheirDifferenceSection />
         <FAQSection />
         <ContactUsSection />
       </main>
