@@ -38,6 +38,7 @@ export function getStaffAllowedRoutes(subRole: StaffSubRole): string[] {
       "/admin",
       "/admin/shipments",
       "/admin/packages",
+      "/admin/inventory",
       "/admin/procurement",
       "/admin/users",
       "/admin/warehouses",

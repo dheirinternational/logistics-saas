@@ -1,5 +1,6 @@
 import type { TablerIcon } from "@tabler/icons-react"
 import {
+  IconBox,
   IconBuildingStore,
   IconBuildingWarehouse,
   IconCash,
@@ -38,6 +39,11 @@ export const navLinks: NavLink[] = [
     name: "Packages",
     path: "/admin/packages",
     icon: IconPackage,
+  },
+  {
+    name: "Inventory",
+    path: "/admin/inventory",
+    icon: IconBox,
   },
   {
     name: "Procurement",
