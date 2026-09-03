@@ -7,9 +7,8 @@ import {
 } from "@/lib/portal/packageStatus"
 import type { Package, PackageImage } from "@/types/entityTypeDef"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
-
 import { PortalPackageTimeline } from "@/components/portal/packages/PortalPackageTimeline"
 
 type PortalPackageCardProps = {
@@ -45,6 +44,17 @@ export function PortalPackageCard({ packag, warehousesMap }: PortalPackageCardPr
 
   const whName = packag.warehouse_id && warehousesMap?.[packag.warehouse_id] ? warehousesMap[packag.warehouse_id] : ""
 
+  const timelineData = useMemo(
+    () => ({
+      status: packag.status,
+      created_at: packag.created_at,
+      stored_at: packag.stored_at,
+      received_at: packag.received_at,
+      warehouse_name: whName,
+    }),
+    [packag.status, packag.created_at, packag.stored_at, packag.received_at, whName]
+  )
+
   return (
     <article className="portal-packages__card">
       <div className="portal-packages__card-head">
@@ -69,15 +79,7 @@ export function PortalPackageCard({ packag, warehousesMap }: PortalPackageCardPr
         </ul>
 
         <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-dheir-border)" }}>
-          <PortalPackageTimeline
-            packag={{
-              status: packag.status,
-              created_at: packag.created_at,
-              stored_at: packag.stored_at,
-              received_at: packag.received_at,
-              warehouse_name: whName,
-            }}
-          />
+          <PortalPackageTimeline packag={timelineData} defaultOpen={true} />
         </div>
       </div>
 
