@@ -79,7 +79,7 @@ export function PortalPackageCard({ packag, warehousesMap }: PortalPackageCardPr
         </ul>
 
         <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-dheir-border)" }}>
-          <PortalPackageTimeline packag={timelineData} defaultOpen={true} />
+          <PortalPackageTimeline packag={timelineData} />
         </div>
       </div>
 

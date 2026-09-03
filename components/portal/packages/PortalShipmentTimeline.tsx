@@ -21,7 +21,7 @@ type PortalShipmentTimelineProps = {
   defaultOpen?: boolean
 }
 
-export function PortalShipmentTimeline({ shipment, defaultOpen = true }: PortalShipmentTimelineProps) {
+export function PortalShipmentTimeline({ shipment, defaultOpen = false }: PortalShipmentTimelineProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   const status = shipment.status

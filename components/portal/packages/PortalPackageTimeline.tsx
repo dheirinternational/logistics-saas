@@ -21,7 +21,7 @@ type PortalPackageTimelineProps = {
   defaultOpen?: boolean
 }
 
-export function PortalPackageTimeline({ packag, defaultOpen = true }: PortalPackageTimelineProps) {
+export function PortalPackageTimeline({ packag, defaultOpen = false }: PortalPackageTimelineProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   
   const isStored = ["stored", "requested_for", "assigned_to_shipment", "delivered"].includes(packag.status)
