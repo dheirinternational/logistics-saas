@@ -1,4 +1,5 @@
 import { HeroSection } from "@/components/marketing/HeroSection"
+import { ReviewsSection } from "@/components/marketing/ReviewsSection"
 import { AboutUsSection } from "@/components/marketing/AboutUsSection"
 import { ProcurementSourcingSection } from "@/components/marketing/ProcurementSourcingSection"
 import { ChinaShippingSection } from "@/components/marketing/ChinaShippingSection"
@@ -15,6 +16,7 @@ import { MarketingFooter } from "@/components/marketing/MarketingFooter"
 import { MarketingHeader } from "@/components/marketing/MarketingHeader"
 import { getSession } from "@/lib/db/session"
 import { toMarketingHeaderUser } from "@/lib/marketing/headerUser"
+import { getMarketingReviews } from "@/lib/marketing/reviews"
 import {
   buildHomeMetadata,
   buildOrganizationJsonLd,
@@ -28,6 +30,7 @@ export default async function Home() {
   const session = await getSession()
   const headerUser = session ? toMarketingHeaderUser(session) : null
   const jsonLd = buildOrganizationJsonLd()
+  const initialReviews = await getMarketingReviews(20)
 
   return (
     <div className="marketing-page min-h-dvh bg-dheir-page font-sans text-dheir-ink antialiased">
@@ -38,6 +41,7 @@ export default async function Home() {
       <MarketingHeader user={headerUser} />
       <main id="top" className="relative">
         <HeroSection />
+        <ReviewsSection initialReviews={initialReviews} />
         <AboutUsSection />
         <ProcurementSourcingSection />
         <ChinaShippingSection />
