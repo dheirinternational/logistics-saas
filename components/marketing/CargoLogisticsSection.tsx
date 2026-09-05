@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { BlurReveal } from "@/components/auth/BlurReveal"
 
 export function CargoLogisticsSection() {
@@ -54,21 +55,32 @@ export function CargoLogisticsSection() {
           </BlurReveal>
         </div>
 
-        {/* 2x2 Grid of Soft Ice-Teal Rounded Cards (Responsive on Mobile to Desktop) */}
+        {/* 2x2 Grid of Soft Ice-Teal Rounded Cards with Rich Imagery */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Service 04: Cargo Consolidation & Groupage */}
           <BlurReveal delay={150}>
-            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
+            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-9 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[560px] sm:min-h-[600px] group transition-transform duration-300 hover:-translate-y-1.5 cursor-pointer">
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700 bg-white/60 px-3 py-1 rounded-full inline-block mb-6">
-                  Service 04
-                </span>
+                {/* Image Banner */}
+                <div className="relative h-52 sm:h-60 w-full overflow-hidden rounded-[1.5rem] mb-6">
+                  <Image
+                    src="/services/service_consolidation.jpg"
+                    alt="Cargo Consolidation & Groupage"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full">
+                    <span className="text-xs font-extrabold uppercase tracking-widest text-slate-900">
+                      Service 04
+                    </span>
+                  </div>
+                </div>
 
-                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 tracking-tight leading-snug">
+                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight leading-snug">
                   Cargo Consolidation & Groupage
                 </h3>
 
-                <p className="text-sm md:text-[15px] font-medium text-slate-800 leading-relaxed mb-8">
+                <p className="text-sm md:text-[15px] font-medium text-slate-800 leading-relaxed mb-6">
                   Customers with smaller shipments do not always need to book an entire container. Our consolidation approach allows compatible shipments to be grouped together, helping customers access international shipping without carrying the cost of a full container.
                 </p>
 
@@ -84,31 +96,45 @@ export function CargoLogisticsSection() {
                 </div>
               </div>
 
-              {/* Bottom Giant Service Number & Brand Metadata */}
-              <div className="flex items-end justify-between border-t border-slate-900/15 pt-6 mt-8">
-                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
-                  D_HEIR LOGISTICS
-                </span>
-                <span className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
-                  04
-                </span>
+              {/* Bottom Service Number & Brand Metadata */}
+              <div>
+                <div className="h-px bg-slate-900/10 my-6" />
+                <div className="flex items-end justify-between">
+                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
+                    D_HEIR LOGISTICS
+                  </span>
+                  <span className="font-display text-5xl sm:text-6xl font-extrabold text-slate-900/90 leading-none">
+                    04
+                  </span>
+                </div>
               </div>
             </div>
           </BlurReveal>
 
           {/* Service 05: Cargo Handling & Repacking */}
           <BlurReveal delay={230}>
-            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
+            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-9 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[560px] sm:min-h-[600px] group transition-transform duration-300 hover:-translate-y-1.5 cursor-pointer">
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700 bg-white/60 px-3 py-1 rounded-full inline-block mb-6">
-                  Service 05
-                </span>
+                {/* Image Banner */}
+                <div className="relative h-52 sm:h-60 w-full overflow-hidden rounded-[1.5rem] mb-6">
+                  <Image
+                    src="/services/service_handling.jpg"
+                    alt="Cargo Handling & Repacking"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full">
+                    <span className="text-xs font-extrabold uppercase tracking-widest text-slate-900">
+                      Service 05
+                    </span>
+                  </div>
+                </div>
 
-                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 tracking-tight leading-snug">
+                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight leading-snug">
                   Cargo Handling & Repacking
                 </h3>
 
-                <p className="text-sm md:text-[15px] font-medium text-slate-800 leading-relaxed mb-8">
+                <p className="text-sm md:text-[15px] font-medium text-slate-800 leading-relaxed mb-6">
                   Proper cargo preparation makes a significant difference in international logistics. We ensure goods are properly inspected, measured, and protected before they begin their journey to Nigeria.
                 </p>
 
@@ -124,31 +150,45 @@ export function CargoLogisticsSection() {
                 </div>
               </div>
 
-              {/* Bottom Giant Service Number & Brand Metadata */}
-              <div className="flex items-end justify-between border-t border-slate-900/15 pt-6 mt-8">
-                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
-                  D_HEIR LOGISTICS
-                </span>
-                <span className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
-                  05
-                </span>
+              {/* Bottom Service Number & Brand Metadata */}
+              <div>
+                <div className="h-px bg-slate-900/10 my-6" />
+                <div className="flex items-end justify-between">
+                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
+                    D_HEIR LOGISTICS
+                  </span>
+                  <span className="font-display text-5xl sm:text-6xl font-extrabold text-slate-900/90 leading-none">
+                    05
+                  </span>
+                </div>
               </div>
             </div>
           </BlurReveal>
 
           {/* Service 06: Customs & Clearing Support */}
           <BlurReveal delay={180}>
-            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
+            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-9 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[560px] sm:min-h-[600px] group transition-transform duration-300 hover:-translate-y-1.5 cursor-pointer">
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700 bg-white/60 px-3 py-1 rounded-full inline-block mb-6">
-                  Service 06
-                </span>
+                {/* Image Banner */}
+                <div className="relative h-52 sm:h-60 w-full overflow-hidden rounded-[1.5rem] mb-6">
+                  <Image
+                    src="/services/service_customs.jpg"
+                    alt="Customs & Clearing Support"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full">
+                    <span className="text-xs font-extrabold uppercase tracking-widest text-slate-900">
+                      Service 06
+                    </span>
+                  </div>
+                </div>
 
-                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 tracking-tight leading-snug">
+                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight leading-snug">
                   Customs & Clearing Support
                 </h3>
 
-                <p className="text-sm md:text-[15px] font-medium text-slate-800 leading-relaxed mb-8">
+                <p className="text-sm md:text-[15px] font-medium text-slate-800 leading-relaxed mb-6">
                   We coordinate with relevant logistics and clearing partners to facilitate the movement of cargo through customs and port-related logistics in Nigeria.
                 </p>
 
@@ -164,31 +204,45 @@ export function CargoLogisticsSection() {
                 </div>
               </div>
 
-              {/* Bottom Giant Service Number & Brand Metadata */}
-              <div className="flex items-end justify-between border-t border-slate-900/15 pt-6 mt-8">
-                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
-                  D_HEIR LOGISTICS
-                </span>
-                <span className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
-                  06
-                </span>
+              {/* Bottom Service Number & Brand Metadata */}
+              <div>
+                <div className="h-px bg-slate-900/10 my-6" />
+                <div className="flex items-end justify-between">
+                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
+                    D_HEIR LOGISTICS
+                  </span>
+                  <span className="font-display text-5xl sm:text-6xl font-extrabold text-slate-900/90 leading-none">
+                    06
+                  </span>
+                </div>
               </div>
             </div>
           </BlurReveal>
 
           {/* Service 07: Last-Mile Delivery */}
           <BlurReveal delay={260}>
-            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] cursor-pointer">
+            <div className="flex flex-col justify-between p-6 sm:p-8 md:p-9 rounded-[2rem] sm:rounded-[2.5rem] bg-[#cce3e3] text-slate-900 min-h-[560px] sm:min-h-[600px] group transition-transform duration-300 hover:-translate-y-1.5 cursor-pointer">
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700 bg-white/60 px-3 py-1 rounded-full inline-block mb-6">
-                  Service 07
-                </span>
+                {/* Image Banner */}
+                <div className="relative h-52 sm:h-60 w-full overflow-hidden rounded-[1.5rem] mb-6">
+                  <Image
+                    src="/services/service_lastmile.jpg"
+                    alt="Last-Mile Delivery"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full">
+                    <span className="text-xs font-extrabold uppercase tracking-widest text-slate-900">
+                      Service 07
+                    </span>
+                  </div>
+                </div>
 
-                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 tracking-tight leading-snug">
+                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight leading-snug">
                   Last-Mile Delivery
                 </h3>
 
-                <p className="text-sm md:text-[15px] font-medium text-slate-800 leading-relaxed mb-8">
+                <p className="text-sm md:text-[15px] font-medium text-slate-800 leading-relaxed mb-6">
                   Getting cargo into Nigeria is only part of the journey. We coordinate delivery solutions designed to move goods from point of arrival to your final destination.
                 </p>
 
@@ -198,21 +252,24 @@ export function CargoLogisticsSection() {
                     {journeySteps.map((step, idx) => (
                       <span key={step} className="flex items-center gap-2">
                         <span>{step}</span>
-                        {idx < journeySteps.length - 1 && <span className="text-slate-500 font-normal">&rarr;</span>}
+                        {idx < journeySteps.length - 1 && <span className="text-slate-500 font-normal font-sans">&rarr;</span>}
                       </span>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Giant Service Number & Brand Metadata */}
-              <div className="flex items-end justify-between border-t border-slate-900/15 pt-6 mt-8">
-                <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
-                  D_HEIR LOGISTICS
-                </span>
-                <span className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900/90 leading-none">
-                  07
-                </span>
+              {/* Bottom Service Number & Brand Metadata */}
+              <div>
+                <div className="h-px bg-slate-900/10 my-6" />
+                <div className="flex items-end justify-between">
+                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-700">
+                    D_HEIR LOGISTICS
+                  </span>
+                  <span className="font-display text-5xl sm:text-6xl font-extrabold text-slate-900/90 leading-none">
+                    07
+                  </span>
+                </div>
               </div>
             </div>
           </BlurReveal>
@@ -221,3 +278,4 @@ export function CargoLogisticsSection() {
     </section>
   )
 }
+
