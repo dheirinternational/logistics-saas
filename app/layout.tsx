@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { DHEIRToastProvider } from "@/components/ui/DHEIRToastProvider";
 import { buildRootMetadata } from "@/lib/marketing/siteMetadata";
@@ -28,8 +29,10 @@ export default function RootLayout({
           `}
         </Script>
         {children}
+        <Analytics />
         <DHEIRToastProvider />
       </body>
     </html>
   );
 }
+
