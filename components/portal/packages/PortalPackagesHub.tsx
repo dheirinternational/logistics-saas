@@ -132,11 +132,11 @@ export function PortalPackagesHub() {
         }
       />
 
-      <div className="portal-packages__quick-links">
+      <div className="portal-packages__quick-links flex overflow-x-auto pb-1 -mx-1 px-1 sm:flex-wrap">
         {PACKAGES_QUICK_LINKS.map((link) => {
           const Icon = link.icon
           return (
-            <Link key={link.id} href={link.href} className="portal-packages__quick-link">
+            <Link key={link.id} href={link.href} className="portal-packages__quick-link shrink-0">
               <Icon size={18} stroke={1.5} aria-hidden />
               <span>{link.label}</span>
               <IconChevronRight size={14} stroke={1.5} style={{ opacity: 0.7 }} />

@@ -107,7 +107,7 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
             <PortalHomeActivityTable rows={data.recentActivity} />
           </div>
 
-          <div className="portal-home__split portal-home__split--actions">
+          <div className="hidden md:grid portal-home__split portal-home__split--actions">
             <PortalHomeActionGrid
               title="Start here"
               subtitle="Mostly used"
