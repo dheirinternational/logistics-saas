@@ -64,7 +64,6 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
         backgroundColor: "rgba(0, 0, 0, 0.65)",
         backdropFilter: "blur(4px)",
         WebkitBackdropFilter: "blur(4px)",
-        animation: "dheirFadeIn 200ms ease-out",
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose()
@@ -78,9 +77,6 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
           backgroundColor: "#ffffff",
           borderRadius: "16px",
           overflow: "hidden",
-          boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.25)",
-          border: "1px solid var(--color-dheir-border, #e2e8f0)",
-          animation: "dheirPopUp 250ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         {/* Header Banner */}
@@ -189,7 +185,6 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
                 backgroundColor: "#f8fafc",
                 padding: "10px 12px",
                 borderRadius: "8px",
-                border: "1px solid #e2e8f0",
               }}
             >
               <span style={{ color: "#2563eb", marginTop: "2px", flexShrink: 0 }}>
@@ -214,7 +209,6 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
                 backgroundColor: "#f8fafc",
                 padding: "10px 12px",
                 borderRadius: "8px",
-                border: "1px solid #e2e8f0",
               }}
             >
               <span style={{ color: "#2563eb", marginTop: "2px", flexShrink: 0 }}>
@@ -235,7 +229,6 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
                 backgroundColor: "#f8fafc",
                 padding: "10px 12px",
                 borderRadius: "8px",
-                border: "1px solid #e2e8f0",
               }}
             >
               <span style={{ color: "#2563eb", marginTop: "2px", flexShrink: 0 }}>
@@ -256,7 +249,6 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
                 backgroundColor: "#f8fafc",
                 padding: "10px 12px",
                 borderRadius: "8px",
-                border: "1px solid #e2e8f0",
               }}
             >
               <span style={{ color: "#2563eb", marginTop: "2px", flexShrink: 0 }}>
@@ -277,7 +269,6 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
                 backgroundColor: "#f8fafc",
                 padding: "10px 12px",
                 borderRadius: "8px",
-                border: "1px solid #e2e8f0",
               }}
             >
               <span style={{ color: "#2563eb", marginTop: "2px", flexShrink: 0 }}>
@@ -297,7 +288,6 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
           <div
             style={{
               backgroundColor: "#fff7ed",
-              border: "1px solid #ffedd5",
               borderRadius: "10px",
               padding: "12px 14px",
               display: "flex",
@@ -337,3 +327,4 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
     </div>
   )
 }
+

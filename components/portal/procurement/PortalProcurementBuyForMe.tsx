@@ -1,10 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { IconLink, IconPlus, IconTrash, IconCalculator, IconInfoCircle } from "@tabler/icons-react"
+import { IconPlus, IconTrash, IconCalculator, IconAlertCircle, IconPhone, IconCheck } from "@tabler/icons-react"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { LocalPhotoUploader } from "./LocalPhotoUploader"
 import { toast } from "@/lib/ui/toast"
+import Link from "next/link"
+
+const PROCUREMENT_DRAFT_KEY = "dheir_procurement_draft"
+const MAX_PROCUREMENT_LINKS = 5
+const MIN_MOQ_PER_LINK = 10
+const CUSTOMER_SERVICE_PHONE = "+234 816 727 8847"
+const CUSTOMER_SERVICE_HREF = "tel:+2348167278847"
 
 type ItemSpec = {
   id: string
@@ -32,7 +39,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
       title: "",
       url: "",
       variant: "",
-      quantity: 1,
+      quantity: 10,
       priceRmb: "",
       photos: [],
       note: "",
@@ -41,10 +48,43 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
 
   const [customerNote, setCustomerNote] = useState("")
   const [packagingInstruction, setPackagingInstruction] = useState("Standard export packaging")
-  const [exchangeRate, setExchangeRate] = useState<number>(209) // Dynamic RMB to NGN default (approx 209)
+  const [exchangeRate, setExchangeRate] = useState<number>(209)
   const [submitting, setSubmitting] = useState(false)
+  const [rejectionError, setRejectionError] = useState<string | null>(null)
+  const [successData, setSuccessData] = useState<{ reference: string } | null>(null)
 
-  const commitmentFee = 20000 // ₦20,000 commitment fee (refundable after 72 hours of quotation sent)
+  const commitmentFee = 20000
+
+  // Restore local draft on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(PROCUREMENT_DRAFT_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed.items) && parsed.items.length > 0) {
+          setItems(parsed.items.slice(0, MAX_PROCUREMENT_LINKS))
+        }
+        if (parsed.customerNote) setCustomerNote(parsed.customerNote)
+        if (parsed.packagingInstruction) setPackagingInstruction(parsed.packagingInstruction)
+      }
+    } catch {
+      // Ignore storage read errors
+    }
+  }, [])
+
+  // Auto-save draft on changes
+  useEffect(() => {
+    try {
+      const draft = {
+        items,
+        customerNote,
+        packagingInstruction,
+      }
+      localStorage.setItem(PROCUREMENT_DRAFT_KEY, JSON.stringify(draft))
+    } catch {
+      // Ignore storage write errors
+    }
+  }, [items, customerNote, packagingInstruction])
 
   useEffect(() => {
     fetch("/api/money-exchange-rate")
@@ -63,6 +103,14 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
   }, [])
 
   const addItem = () => {
+    if (items.length >= MAX_PROCUREMENT_LINKS) {
+      setRejectionError(
+        "Our online procurement service currently accepts a maximum of 5 product links. For orders above 5 links, please contact Customer Service."
+      )
+      return
+    }
+
+    setRejectionError(null)
     setItems((prev) => [
       ...prev,
       {
@@ -70,7 +118,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
         title: "",
         url: "",
         variant: "",
-        quantity: 1,
+        quantity: 10,
         priceRmb: "",
         photos: [],
         note: "",
@@ -80,6 +128,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
 
   const removeItem = (index: number) => {
     if (items.length <= 1) return
+    setRejectionError(null)
     setItems((prev) => prev.filter((_, idx) => idx !== index))
   }
 
@@ -92,7 +141,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
   }
 
   const totalRmb = items.reduce((acc, curr) => {
-    const qty = parseInt(String(curr.quantity).replace(/[^0-9]/g, ""), 10) || 1
+    const qty = parseInt(String(curr.quantity).replace(/[^0-9]/g, ""), 10) || 0
     const price = parsePrice(curr.priceRmb)
     return acc + price * qty
   }, 0)
@@ -100,6 +149,15 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setRejectionError(null)
+
+    // Flow Check 1: Max 5 links
+    if (items.length > MAX_PROCUREMENT_LINKS) {
+      setRejectionError(
+        "Our online procurement service currently accepts a maximum of 5 product links. For orders above 5 links, please contact Customer Service."
+      )
+      return
+    }
 
     const first = items[0]
     if (!first.title.trim() || !first.url.trim()) {
@@ -107,14 +165,34 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
       return
     }
 
+    // Flow Check 2: Minimum quantity (MOQ) 10 pieces per link
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i]
+      const qty = parseInt(String(it.quantity).replace(/[^0-9]/g, ""), 10) || 0
+      if (qty < MIN_MOQ_PER_LINK) {
+        setRejectionError(
+          "The minimum quantity for procurement is 10 pieces per product link. Please adjust the quantity or contact Customer Service."
+        )
+        return
+      }
+    }
+
     setSubmitting(true)
     try {
       const allImageUrls = items.flatMap((i) => i.photos).filter(Boolean)
       const variantSummary = items
-        .map((i, idx) => `Item #${idx + 1}: ${i.title} (${i.variant || "Standard"}) x${parseInt(String(i.quantity).replace(/[^0-9]/g, ""), 10) || 1} @ ¥${parsePrice(i.priceRmb)}`)
+        .map(
+          (i, idx) =>
+            `Item #${idx + 1}: ${i.title} (${i.variant || "Standard"}) x${
+              parseInt(String(i.quantity).replace(/[^0-9]/g, ""), 10) || 10
+            } @ ¥${parsePrice(i.priceRmb)} | Link: ${i.url}`
+        )
         .join("\n")
 
-      const totalQuantity = items.reduce((acc, curr) => acc + (parseInt(String(curr.quantity).replace(/[^0-9]/g, ""), 10) || 1), 0)
+      const totalQuantity = items.reduce(
+        (acc, curr) => acc + (parseInt(String(curr.quantity).replace(/[^0-9]/g, ""), 10) || 10),
+        0
+      )
 
       const res = await fetch("/api/customer/procurement", {
         method: "POST",
@@ -135,18 +213,107 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
 
       const json = await res.json()
       if (!res.ok || !json.success) {
-        toast.error(json.message || "Failed to submit procurement request")
+        setRejectionError(json.message || "Failed to submit procurement request. Please contact Customer Service.")
         return
       }
 
-      toast.success("Procurement request submitted successfully!")
-      onSuccess()
+      // Clear draft on successful submission
+      try {
+        localStorage.removeItem(PROCUREMENT_DRAFT_KEY)
+      } catch {
+        // Ignore
+      }
+
+      setSuccessData({ reference: json.data.reference_number })
     } catch (err) {
       console.error(err)
       toast.error("Network error while submitting request")
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // Confirmation View After Submission
+  if (successData) {
+    return (
+      <div
+        style={{
+          padding: "32px 24px",
+          borderRadius: "16px",
+          backgroundColor: "var(--color-dheir-surface)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          gap: "16px",
+        }}
+      >
+        <div
+          style={{
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            backgroundColor: "#dcfce7",
+            color: "#15803d",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconCheck size={28} stroke={2.5} />
+        </div>
+
+        <div>
+          <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--color-dheir-ink)", margin: 0 }}>
+            Your procurement request has been successfully received.
+          </h2>
+          <p style={{ fontSize: "14px", color: "var(--color-dheir-muted)", margin: "8px 0 0" }}>
+            Request submitted successfully. Our team will review your request and contact you with the next steps.
+          </p>
+        </div>
+
+        <div
+          style={{
+            padding: "16px 20px",
+            borderRadius: "12px",
+            backgroundColor: "#f8fafc",
+            width: "100%",
+            maxWidth: "420px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+            textAlign: "left",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+            <span style={{ color: "var(--color-dheir-muted)" }}>Reference Number:</span>
+            <span style={{ fontWeight: 700, color: "var(--color-dheir-ink)" }}>{successData.reference}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+            <span style={{ color: "var(--color-dheir-muted)" }}>Commitment Fee:</span>
+            <span style={{ fontWeight: 700, color: "var(--color-dheir-blue)" }}>₦{commitmentFee.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", marginTop: "8px" }}>
+          <Link
+            href={`/customer/payments/transfer/procurement/${encodeURIComponent(successData.reference)}`}
+            className="portal-home__btn portal-home__btn--primary"
+            style={{ padding: "12px 24px", fontSize: "14px", textDecoration: "none" }}
+          >
+            Proceed to Payment
+          </Link>
+          <button
+            type="button"
+            onClick={onSuccess}
+            className="portal-home__btn portal-home__btn--secondary"
+            style={{ padding: "12px 24px", fontSize: "14px" }}
+          >
+            View in My Requests
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -162,19 +329,77 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
           padding: "14px 18px",
           borderRadius: "12px",
           backgroundColor: "var(--color-dheir-surface)",
-          border: "1px solid var(--color-dheir-border)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <IconCalculator size={20} stroke={1.5} style={{ color: "var(--color-dheir-blue)" }} />
           <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
-            Today's Procurement Exchange Rate: 1 RMB = ₦{exchangeRate.toLocaleString()}
+            Today&apos;s Procurement Exchange Rate: 1 RMB = ₦{exchangeRate.toLocaleString()}
           </span>
         </div>
         <span style={{ fontSize: "12px", color: "var(--color-dheir-muted)" }}>
-          Commitment fee: ₦{commitmentFee.toLocaleString()} (Refundable after 72 hours of Quotation sent)
+          Max {MAX_PROCUREMENT_LINKS} links | Min {MIN_MOQ_PER_LINK} pcs per link | Commitment fee: ₦{commitmentFee.toLocaleString()}
         </span>
       </div>
+
+      {/* Rejection Alert Card with Customer Service Contact */}
+      {rejectionError && (
+        <div
+          style={{
+            padding: "16px 20px",
+            borderRadius: "12px",
+            backgroundColor: "#fef2f2",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+          }}
+        >
+          <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+            <IconAlertCircle size={20} stroke={2} style={{ color: "#dc2626", marginTop: "2px", flexShrink: 0 }} />
+            <div>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: "#991b1b", display: "block" }}>
+                Request Cannot Proceed
+              </span>
+              <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#b91c1c", lineHeight: 1.45 }}>
+                {rejectionError}
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              paddingTop: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "8px",
+            }}
+          >
+            <span style={{ fontSize: "12px", color: "#7f1d1d", fontWeight: 500 }}>
+              Need assistance or large volume order?
+            </span>
+            <a
+              href={CUSTOMER_SERVICE_HREF}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 14px",
+                borderRadius: "8px",
+                backgroundColor: "#dc2626",
+                color: "#ffffff",
+                fontSize: "12px",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              <IconPhone size={14} stroke={2} />
+              Contact Customer Service ({CUSTOMER_SERVICE_PHONE})
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Items Section */}
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -185,7 +410,6 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
               padding: "20px",
               borderRadius: "12px",
               backgroundColor: "var(--color-dheir-surface)",
-              border: "1px solid var(--color-dheir-border)",
               display: "flex",
               flexDirection: "column",
               gap: "16px",
@@ -193,7 +417,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-dheir-ink)" }}>
-                Item #{idx + 1}
+                Product Link #{idx + 1} of {MAX_PROCUREMENT_LINKS}
               </span>
               {items.length > 1 && (
                 <button
@@ -226,7 +450,10 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
                   placeholder="e.g. Electric Kettle 1.8L"
                   className="dheir-input"
                   value={item.title}
-                  onChange={(e) => updateItem(idx, "title", e.target.value)}
+                  onChange={(e) => {
+                    updateItem(idx, "title", e.target.value)
+                    if (rejectionError) setRejectionError(null)
+                  }}
                 />
               </label>
 
@@ -239,7 +466,10 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
                     placeholder="https://detail.1688.com/offer/... or paste link"
                     className="dheir-input"
                     value={item.url}
-                    onChange={(e) => updateItem(idx, "url", e.target.value)}
+                    onChange={(e) => {
+                      updateItem(idx, "url", e.target.value)
+                      if (rejectionError) setRejectionError(null)
+                    }}
                   />
                 </div>
               </label>
@@ -258,14 +488,18 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
               </label>
 
               <label className="portal-packages__field">
-                <span className="portal-packages__field-label">Quantity *</span>
+                <span className="portal-packages__field-label">Quantity (Min {MIN_MOQ_PER_LINK} pcs) *</span>
                 <input
                   type="text"
                   inputMode="numeric"
                   required
+                  placeholder="10"
                   className="dheir-input"
                   value={item.quantity}
-                  onChange={(e) => updateItem(idx, "quantity", e.target.value)}
+                  onChange={(e) => {
+                    updateItem(idx, "quantity", e.target.value)
+                    if (rejectionError) setRejectionError(null)
+                  }}
                 />
               </label>
 
@@ -293,27 +527,28 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
           </div>
         ))}
 
-        <button
-          type="button"
-          onClick={addItem}
-          style={{
-            alignSelf: "flex-start",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            border: "1px dashed var(--color-dheir-border)",
-            backgroundColor: "transparent",
-            color: "var(--color-dheir-blue)",
-            fontSize: "13px",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          <IconPlus size={16} stroke={1.5} />
-          Add Another Product Link
-        </button>
+        {items.length < MAX_PROCUREMENT_LINKS && (
+          <button
+            type="button"
+            onClick={addItem}
+            style={{
+              alignSelf: "flex-start",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 18px",
+              borderRadius: "8px",
+              backgroundColor: "var(--color-dheir-surface)",
+              color: "var(--color-dheir-blue)",
+              fontSize: "13px",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            <IconPlus size={16} stroke={1.5} />
+            Add Another Product Link ({items.length}/{MAX_PROCUREMENT_LINKS})
+          </button>
+        )}
       </div>
 
       {/* Packaging & Customer Instructions */}
@@ -322,7 +557,6 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
           padding: "20px",
           borderRadius: "12px",
           backgroundColor: "var(--color-dheir-surface)",
-          border: "1px solid var(--color-dheir-border)",
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: "16px",
@@ -347,7 +581,7 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
           <textarea
             rows={2}
             className="dheir-input"
-            placeholder="e.g. Ensure supplier packs all 100 units together with spare parts..."
+            placeholder="e.g. Ensure supplier packs all units together with spare parts..."
             value={customerNote}
             onChange={(e) => setCustomerNote(e.target.value)}
           />
@@ -360,7 +594,6 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
           padding: "20px",
           borderRadius: "12px",
           backgroundColor: "#f8fafc",
-          border: "1px solid var(--color-dheir-border)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -391,9 +624,10 @@ export function PortalProcurementBuyForMe({ onSuccess }: { onSuccess: () => void
           className="portal-home__btn portal-home__btn--primary"
           style={{ padding: "12px 28px", fontSize: "14px" }}
         >
-          {submitting ? <DHEIRLoader color="#ffffff" size={8} /> : "Submit Procurement Request"}
+          {submitting ? <DHEIRLoader color="#ffffff" size={8} /> : "Proceed to Payment"}
         </button>
       </div>
     </form>
   )
 }
+

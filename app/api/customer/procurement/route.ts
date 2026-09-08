@@ -103,6 +103,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Title / Product description is required" }, { status: 400 })
     }
 
+    function parseAmount(val: any): number | null {
+      if (val == null || val === "") return null
+      if (typeof val === "number") return isNaN(val) ? null : val
+      const cleaned = String(val).replace(/[^0-9.-]/g, "")
+      const parsed = parseFloat(cleaned)
+      return isNaN(parsed) ? null : parsed
+    }
+
+    function parseQuantity(val: any): number {
+      if (val == null || val === "") return 10
+      if (typeof val === "number") return isNaN(val) || val <= 0 ? 10 : Math.floor(val)
+      const cleaned = String(val).replace(/[^0-9]/g, "")
+      const parsed = parseInt(cleaned, 10)
+      return isNaN(parsed) || parsed <= 0 ? 10 : parsed
+    }
+
+    // Validation Check 1: Sourcing Minimum Order Budget (N500,000)
+    if (request_type === "sourcing") {
+      const budgetNum = parseAmount(target_budget) || 0
+      const curr = budget_currency || "NGN"
+      const budgetInNgn = curr === "USD" ? budgetNum * 1500 : curr === "RMB" ? budgetNum * 210 : budgetNum
+      if (budgetInNgn < 500000) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Our minimum sourcing order is ₦500,000. Please adjust your order or contact Customer Service for assistance.",
+          },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validation Check 2: Procurement Minimum Quantity (MOQ 10 pcs)
+    if (request_type === "procurement") {
+      const qtyNum = parseQuantity(quantity)
+      if (qtyNum < 10) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "The minimum quantity for procurement is 10 pieces per product link. Please adjust the quantity or contact Customer Service.",
+          },
+          { status: 400 }
+        )
+      }
+    }
+
     // Lookup customer code
     const userRes = await dbQuery<{ customer_code: string }>(
       `SELECT c.code as customer_code FROM users u LEFT JOIN customers c ON c.user_id = u.id WHERE u.id = $1`,
@@ -141,21 +187,6 @@ export async function POST(req: NextRequest) {
       RETURNING *;
     `
 
-function parseAmount(val: any): number | null {
-  if (val == null || val === "") return null
-  if (typeof val === "number") return isNaN(val) ? null : val
-  const cleaned = String(val).replace(/[^0-9.-]/g, "")
-  const parsed = parseFloat(cleaned)
-  return isNaN(parsed) ? null : parsed
-}
-
-function parseQuantity(val: any): number {
-  if (val == null || val === "") return 1
-  if (typeof val === "number") return isNaN(val) || val <= 0 ? 1 : Math.floor(val)
-  const cleaned = String(val).replace(/[^0-9]/g, "")
-  const parsed = parseInt(cleaned, 10)
-  return isNaN(parsed) || parsed <= 0 ? 1 : parsed
-}
 
 function normalizeUrl(raw: any): string | null {
   if (!raw || typeof raw !== "string") return null

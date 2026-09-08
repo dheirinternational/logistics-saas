@@ -1,10 +1,16 @@
 "use client"
 
-import { useState } from "react"
-import { IconSearch } from "@tabler/icons-react"
+import { useState, useEffect } from "react"
+import { IconSearch, IconAlertCircle, IconPhone, IconCheck } from "@tabler/icons-react"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { LocalPhotoUploader } from "./LocalPhotoUploader"
 import { toast } from "@/lib/ui/toast"
+import Link from "next/link"
+
+const SOURCING_DRAFT_KEY = "dheir_sourcing_draft"
+const MIN_SOURCING_BUDGET_NGN = 500000
+const CUSTOMER_SERVICE_PHONE = "+234 816 727 8847"
+const CUSTOMER_SERVICE_HREF = "tel:+2348167278847"
 
 function parsePrice(val: any): number | null {
   if (val == null || val === "") return null
@@ -24,22 +30,74 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
   const [customerNote, setCustomerNote] = useState("")
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
+  const [rejectionError, setRejectionError] = useState<string | null>(null)
+  const [successData, setSuccessData] = useState<{ reference: string } | null>(null)
 
   const commitmentFee = 20000 // Sourcing & negotiation fee
 
-  const updatePhotoUrl = (index: number, val: string) => {
-    setPhotoUrls((prev) => {
-      const copy = [...prev]
-      copy[index] = val
-      return copy
-    })
+  // Restore local draft on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SOURCING_DRAFT_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.title) setTitle(parsed.title)
+        if (parsed.qualityGrade) setQualityGrade(parsed.qualityGrade)
+        if (parsed.quantity) setQuantity(parsed.quantity)
+        if (parsed.targetBudget) setTargetBudget(parsed.targetBudget)
+        if (parsed.budgetCurrency) setBudgetCurrency(parsed.budgetCurrency)
+        if (parsed.variantDetails) setVariantDetails(parsed.variantDetails)
+        if (parsed.customerNote) setCustomerNote(parsed.customerNote)
+        if (Array.isArray(parsed.photoUrls)) setPhotoUrls(parsed.photoUrls)
+      }
+    } catch {
+      // Ignore storage read errors
+    }
+  }, [])
+
+  // Auto-save draft on changes
+  useEffect(() => {
+    try {
+      const draft = {
+        title,
+        qualityGrade,
+        quantity,
+        targetBudget,
+        budgetCurrency,
+        variantDetails,
+        customerNote,
+        photoUrls,
+      }
+      localStorage.setItem(SOURCING_DRAFT_KEY, JSON.stringify(draft))
+    } catch {
+      // Ignore storage write errors
+    }
+  }, [title, qualityGrade, quantity, targetBudget, budgetCurrency, variantDetails, customerNote, photoUrls])
+
+  const calculateBudgetInNgn = (budget: number | null, currency: string): number => {
+    if (!budget || budget <= 0) return 0
+    if (currency === "USD") return budget * 1500
+    if (currency === "RMB") return budget * 210
+    return budget
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setRejectionError(null)
 
     if (!title.trim()) {
       toast.error("Please describe what product you want us to source")
+      return
+    }
+
+    const parsedBudget = parsePrice(targetBudget)
+    const effectiveBudgetNgn = calculateBudgetInNgn(parsedBudget, budgetCurrency)
+
+    // Flow Requirement: Check minimum sourcing order amount (N500,000)
+    if (!parsedBudget || effectiveBudgetNgn < MIN_SOURCING_BUDGET_NGN) {
+      setRejectionError(
+        "Our minimum sourcing order is ₦500,000. Please adjust your order or contact Customer Service for assistance."
+      )
       return
     }
 
@@ -57,7 +115,7 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
           title: title.trim(),
           quality_grade: qualityGrade,
           quantity: parsedQty,
-          target_budget: parsePrice(targetBudget),
+          target_budget: parsedBudget,
           budget_currency: budgetCurrency,
           variant_details: variantDetails,
           customer_note: customerNote,
@@ -67,18 +125,107 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
 
       const json = await res.json()
       if (!res.ok || !json.success) {
-        toast.error(json.message || "Failed to submit sourcing request")
+        setRejectionError(json.message || "Failed to submit sourcing request. Please contact Customer Service.")
         return
       }
 
-      toast.success("Sourcing request submitted! Our Guangzhou team will begin finding suppliers.")
-      onSuccess()
+      // Clear draft on successful submission
+      try {
+        localStorage.removeItem(SOURCING_DRAFT_KEY)
+      } catch {
+        // Ignore
+      }
+
+      setSuccessData({ reference: json.data.reference_number })
     } catch (err) {
       console.error(err)
       toast.error("Network error while submitting sourcing request")
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // Confirmation View After Submission
+  if (successData) {
+    return (
+      <div
+        style={{
+          padding: "32px 24px",
+          borderRadius: "16px",
+          backgroundColor: "var(--color-dheir-surface)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          gap: "16px",
+        }}
+      >
+        <div
+          style={{
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            backgroundColor: "#dcfce7",
+            color: "#15803d",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconCheck size={28} stroke={2.5} />
+        </div>
+
+        <div>
+          <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--color-dheir-ink)", margin: 0 }}>
+            Your sourcing request has been successfully received.
+          </h2>
+          <p style={{ fontSize: "14px", color: "var(--color-dheir-muted)", margin: "8px 0 0" }}>
+            Request submitted successfully. Our team will review your request and contact you with the next steps.
+          </p>
+        </div>
+
+        <div
+          style={{
+            padding: "16px 20px",
+            borderRadius: "12px",
+            backgroundColor: "#f8fafc",
+            width: "100%",
+            maxWidth: "420px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+            textAlign: "left",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+            <span style={{ color: "var(--color-dheir-muted)" }}>Reference Number:</span>
+            <span style={{ fontWeight: 700, color: "var(--color-dheir-ink)" }}>{successData.reference}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+            <span style={{ color: "var(--color-dheir-muted)" }}>Commitment Fee:</span>
+            <span style={{ fontWeight: 700, color: "var(--color-dheir-blue)" }}>₦{commitmentFee.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", marginTop: "8px" }}>
+          <Link
+            href={`/customer/payments/transfer/procurement/${encodeURIComponent(successData.reference)}`}
+            className="portal-home__btn portal-home__btn--primary"
+            style={{ padding: "12px 24px", fontSize: "14px", textDecoration: "none" }}
+          >
+            Proceed to Payment
+          </Link>
+          <button
+            type="button"
+            onClick={onSuccess}
+            className="portal-home__btn portal-home__btn--secondary"
+            style={{ padding: "12px 24px", fontSize: "14px" }}
+          >
+            View in My Requests
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -89,7 +236,6 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
           padding: "16px 20px",
           borderRadius: "12px",
           backgroundColor: "var(--color-dheir-surface)",
-          border: "1px solid var(--color-dheir-border)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -104,9 +250,68 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
           </span>
         </div>
         <span style={{ fontSize: "12px", color: "var(--color-dheir-muted)" }}>
-          Sourcing commitment fee: ₦{commitmentFee.toLocaleString()} (Includes supplier quotation & MOQ matching)
+          Minimum sourcing order: ₦500,000 | Commitment fee: ₦{commitmentFee.toLocaleString()}
         </span>
       </div>
+
+      {/* Rejection Alert Card with Customer Service Contact */}
+      {rejectionError && (
+        <div
+          style={{
+            padding: "16px 20px",
+            borderRadius: "12px",
+            backgroundColor: "#fef2f2",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+          }}
+        >
+          <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+            <IconAlertCircle size={20} stroke={2} style={{ color: "#dc2626", marginTop: "2px", flexShrink: 0 }} />
+            <div>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: "#991b1b", display: "block" }}>
+                Request Cannot Proceed
+              </span>
+              <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#b91c1c", lineHeight: 1.45 }}>
+                {rejectionError}
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              paddingTop: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "8px",
+            }}
+          >
+            <span style={{ fontSize: "12px", color: "#7f1d1d", fontWeight: 500 }}>
+              Need help or custom quotation?
+            </span>
+            <a
+              href={CUSTOMER_SERVICE_HREF}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 14px",
+                borderRadius: "8px",
+                backgroundColor: "#dc2626",
+                color: "#ffffff",
+                fontSize: "12px",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              <IconPhone size={14} stroke={2} />
+              Contact Customer Service ({CUSTOMER_SERVICE_PHONE})
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Main Sourcing Form */}
       <div
@@ -114,7 +319,6 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
           padding: "20px",
           borderRadius: "12px",
           backgroundColor: "var(--color-dheir-surface)",
-          border: "1px solid var(--color-dheir-border)",
           display: "flex",
           flexDirection: "column",
           gap: "20px",
@@ -128,7 +332,10 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
             placeholder="e.g. Ergonomic Office Chairs with Lumbar Support"
             className="dheir-input"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value)
+              if (rejectionError) setRejectionError(null)
+            }}
           />
         </label>
 
@@ -160,15 +367,19 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
           </label>
 
           <label className="portal-packages__field">
-            <span className="portal-packages__field-label">Target Budget (Per unit or Total)</span>
+            <span className="portal-packages__field-label">Target Order Budget (Min ₦500,000) *</span>
             <div style={{ display: "flex", gap: "8px" }}>
               <input
                 type="text"
                 inputMode="decimal"
-                placeholder="50,000"
+                required
+                placeholder="500,000"
                 className="dheir-input"
                 value={targetBudget}
-                onChange={(e) => setTargetBudget(e.target.value)}
+                onChange={(e) => {
+                  setTargetBudget(e.target.value)
+                  if (rejectionError) setRejectionError(null)
+                }}
               />
               <select
                 className="dheir-input"
@@ -219,18 +430,25 @@ export function PortalProcurementSourcing({ onSuccess }: { onSuccess: () => void
       <div
         style={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
         }}
       >
+        <span style={{ fontSize: "12px", color: "var(--color-dheir-muted)" }}>
+          Your draft is safely saved automatically on this device.
+        </span>
         <button
           type="submit"
           disabled={submitting}
           className="portal-home__btn portal-home__btn--primary"
           style={{ padding: "12px 28px", fontSize: "14px" }}
         >
-          {submitting ? <DHEIRLoader color="#ffffff" size={8} /> : "Submit Sourcing Request"}
+          {submitting ? <DHEIRLoader color="#ffffff" size={8} /> : "Proceed to Payment"}
         </button>
       </div>
     </form>
   )
 }
+
