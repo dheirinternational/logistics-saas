@@ -18,6 +18,7 @@ import { IconShoppingCart } from "@tabler/icons-react"
 
 import { ProcurementPolicyModal } from "@/components/portal/procurement/ProcurementPolicyModal"
 import { PortalNotificationBannerModal } from "@/components/portal/notifications/PortalNotificationBannerModal"
+import { PortalMobileBottomNav } from "@/components/portal/PortalMobileBottomNav"
 
 type PortalShellLayoutProps = {
   user: MarketingHeaderUser
@@ -195,6 +196,7 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
         <main className="portal-shell__main">{children}</main>
       </div>
 
+      <PortalMobileBottomNav />
       <ProcurementPolicyModal memberCode={user.memberCode || undefined} />
       <PortalNotificationBannerModal />
     </div>

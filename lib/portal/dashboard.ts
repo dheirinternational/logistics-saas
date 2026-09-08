@@ -55,6 +55,8 @@ export type PortalDashboardData = {
   firstName: string
   lastName: string
   memberCode: string
+  phone?: string
+  profileImg?: string
   counts: PortalDashboardCounts
   activeShipments: PortalDashboardShipment[]
   recentActivity: PortalDashboardActivityRow[]
@@ -85,7 +87,7 @@ export async function getPortalDashboardData(
   const [userRes, countsRes, shipmentsRes, activityRes] = await Promise.all([
     pool.query(
       `
-      SELECT u.first_name, u.last_name, c.code
+      SELECT u.first_name, u.last_name, u.phone, u.profile_img, c.code
       FROM users u
       JOIN customers c ON u.id = c.user_id
       WHERE u.id = $1
@@ -93,6 +95,7 @@ export async function getPortalDashboardData(
       [userId],
     ),
     pool.query(
+
       `
       SELECT
         (SELECT COUNT(*)::int FROM incoming_packages
@@ -297,6 +300,8 @@ export async function getPortalDashboardData(
     firstName: user?.first_name?.trim() || "",
     lastName: user?.last_name?.trim() || "",
     memberCode: user?.code ?? "",
+    phone: user?.phone?.trim() || undefined,
+    profileImg: user?.profile_img || undefined,
     counts: {
       waiting_to_be_stored: Number(counts?.waiting_to_be_stored ?? 0),
       total_packages: Number(counts?.total_packages ?? 0),

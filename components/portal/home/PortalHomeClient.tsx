@@ -8,12 +8,15 @@ import { PortalHomeStatsCards } from "@/components/portal/home/PortalHomeStatsCa
 import { PortalHomeToolbar } from "@/components/portal/home/PortalHomeToolbar"
 import { PortalHomeTrackingView } from "@/components/portal/home/PortalHomeTrackingView"
 import { PortalWhatsAppFab } from "@/components/portal/home/PortalWhatsAppFab"
+import { PortalMobileUserCard } from "@/components/portal/home/PortalMobileUserCard"
+import { PortalWorkflowStatusGrid } from "@/components/portal/home/PortalWorkflowStatusGrid"
+import { PortalHomeTrackingSnippet } from "@/components/portal/home/PortalHomeTrackingSnippet"
+import { PortalAnnouncementTicker } from "@/components/portal/home/PortalAnnouncementTicker"
 import type { PortalDashboardData } from "@/lib/portal/dashboard"
 import {
   PORTAL_HOME_PRIORITY_ACTIONS,
   PORTAL_HOME_QUICK_ACTIONS,
 } from "@/lib/portal/homeActions"
-import { ProcurementPolicyModal } from "@/components/portal/procurement/ProcurementPolicyModal"
 import { useCallback, useEffect, useState } from "react"
 
 export type PortalHomeTab = "overview" | "tracking"
@@ -45,34 +48,59 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
   }, [])
 
   return (
-    <div className="portal-home">
-      <PortalHomeGreeting
+    <div className="portal-home pb-16 md:pb-0">
+      {/* Mobile Top Profile Card */}
+      <PortalMobileUserCard
         firstName={data.firstName}
+        lastName={data.lastName}
         memberCode={data.memberCode}
+        phone={data.phone}
+        profileImg={data.profileImg}
       />
 
+      {/* Flight Schedule / News Ticker */}
+      <PortalAnnouncementTicker />
+
+      {/* Mobile 4-Column Workflow Status Grid */}
+      <div className="md:hidden block">
+        <PortalWorkflowStatusGrid counts={data.counts} />
+        <PortalHomeTrackingSnippet shipments={data.activeShipments} />
+      </div>
+
+      {/* Desktop Greeting Header */}
+      <div className="hidden md:block">
+        <PortalHomeGreeting
+          firstName={data.firstName}
+          memberCode={data.memberCode}
+        />
+      </div>
+
+      {/* Important Notice */}
       <div 
-        className="my-6 p-5 rounded-xl border text-sm" 
+        className="my-4 p-4 rounded-2xl text-xs sm:text-sm" 
         style={{ 
           backgroundColor: "#fef2f2", 
-          borderColor: "#fca5a5", 
           color: "#991b1b",
           lineHeight: "1.6"
         }}
       >
-        <p style={{ margin: 0, fontWeight: 600 }}>
+        <p style={{ margin: 0, fontWeight: 700 }}>
           Important Shipment Name Notice:
         </p>
         <p style={{ margin: "4px 0 0" }}>
-          Please use the shipping method followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>Air/{data.memberCode || "Ronke-DHI0040"}</strong> or <strong style={{ fontWeight: 700 }}>Sea/{data.memberCode || "Ronke-DHI0040"}</strong>). Goods without shipping method and unique code will be rejected!!!
+          Please use the shipping method followed by your unique code as the shipment name (example: <strong style={{ fontWeight: 700 }}>Air/{data.memberCode || "Ronke-DHI0040"}</strong> or <strong style={{ fontWeight: 700 }}>Sea/{data.memberCode || "Ronke-DHI0040"}</strong>). Goods without shipping method and unique code will be rejected.
         </p>
       </div>
 
-      <PortalHomeToolbar activeTab={tab} onTabChange={onTabChange} />
+      <div className="hidden md:block">
+        <PortalHomeToolbar activeTab={tab} onTabChange={onTabChange} />
+      </div>
 
       {tab === "overview" ? (
         <>
-          <PortalHomeStatsCards counts={data.counts} />
+          <div className="hidden md:block">
+            <PortalHomeStatsCards counts={data.counts} />
+          </div>
 
           <div className="portal-home__split portal-home__split--main">
             <PortalHomeOngoingSection shipments={data.activeShipments} />
