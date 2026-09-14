@@ -83,8 +83,9 @@ export async function POST(
     const body = await req.json()
     const { message, attachment_url } = body
 
-    if (!message || !message.trim()) {
-      return NextResponse.json({ success: false, message: "Message content cannot be empty" }, { status: 400 })
+    const text = (message || "").trim()
+    if (!text && !attachment_url) {
+      return NextResponse.json({ success: false, message: "Message or image attachment cannot be empty" }, { status: 400 })
     }
 
     // Verify access
@@ -103,7 +104,7 @@ export async function POST(
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
       `,
-      [requestId, session.user_id, session.role === "admin" ? "admin" : "customer", message.trim(), attachment_url || null]
+      [requestId, session.user_id, session.role === "admin" ? "admin" : "customer", text || "Photo attachment", attachment_url || null]
     )
 
     return NextResponse.json({

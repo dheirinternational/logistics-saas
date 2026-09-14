@@ -1,10 +1,20 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { IconMessageCircle, IconClock, IconFileCheck, IconSend, IconPhoto, IconX, IconTrash } from "@tabler/icons-react"
+import {
+  IconMessageCircle,
+  IconClock,
+  IconFileCheck,
+  IconSend,
+  IconPhoto,
+  IconX,
+  IconTrash,
+  IconLoader2,
+} from "@tabler/icons-react"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
+import { uploadCustomerProcurementFile } from "@/lib/media/uploadCustomerProcurementFile"
 
 type ProcurementItem = {
   id: number
@@ -26,7 +36,7 @@ type ProcurementItem = {
   customer_note?: string
   commitment_fee: number
   commitment_fee_paid: boolean
-  images?: { id: number; image_url: string }[]
+  images?: { id: number; image_url: string; media_type?: string; caption?: string }[]
   message_count?: number
 }
 
@@ -45,7 +55,10 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
   const [messages, setMessages] = useState<MessageItem[]>([])
   const [loadingChat, setLoadingChat] = useState(false)
   const [newMessage, setNewMessage] = useState("")
+  const [chatAttachment, setChatAttachment] = useState<string | null>(null)
+  const [chatUploading, setChatUploading] = useState(false)
   const [sendingMessage, setSendingMessage] = useState(false)
+  const chatFileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchList = async () => {
     setLoading(true)
@@ -92,12 +105,16 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
 
   const openDetail = async (req: ProcurementItem) => {
     setSelectedRequest(req)
+    setChatAttachment(null)
     setLoadingChat(true)
     try {
       const res = await fetch(`/api/customer/procurement/${req.id}`, { credentials: "include" })
       const json = await res.json()
       if (res.ok && json.success) {
         setMessages(json.data.messages || [])
+        if (json.data.request) {
+          setSelectedRequest(json.data.request)
+        }
       }
     } catch {
       toast.error("Could not load message history")
@@ -106,9 +123,29 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
     }
   }
 
+  const handleChatFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setChatUploading(true)
+    try {
+      const res = await uploadCustomerProcurementFile(file)
+      if (res.ok && res.asset) {
+        setChatAttachment(res.asset.publicUrl)
+        toast.success("Image attached")
+      } else {
+        toast.error(res.message || "Failed to upload image")
+      }
+    } catch {
+      toast.error("Upload failed")
+    } finally {
+      setChatUploading(false)
+      if (chatFileInputRef.current) chatFileInputRef.current.value = ""
+    }
+  }
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedRequest || !newMessage.trim()) return
+    if (!selectedRequest || (!newMessage.trim() && !chatAttachment)) return
 
     setSendingMessage(true)
     try {
@@ -116,12 +153,16 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ message: newMessage.trim() }),
+        body: JSON.stringify({
+          message: newMessage.trim() || (chatAttachment ? "Photo attachment" : ""),
+          attachment_url: chatAttachment || null,
+        }),
       })
       const json = await res.json()
       if (res.ok && json.success) {
         setMessages((prev) => [...prev, json.data])
         setNewMessage("")
+        setChatAttachment(null)
       } else {
         toast.error(json.message || "Could not send message")
       }
@@ -386,6 +427,42 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
                 </div>
               )}
 
+              {/* Photos & Inspection Samples */}
+              {selectedRequest.images && selectedRequest.images.filter((img) => img && img.image_url).length > 0 && (
+                <div style={{ padding: "14px", borderRadius: "8px", backgroundColor: "var(--color-dheir-surface)", border: "1px solid var(--color-dheir-border)" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-dheir-muted)", textTransform: "uppercase" }}>
+                    Photos &amp; Inspection Samples ({selectedRequest.images.filter((img) => img && img.image_url).length}):
+                  </span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "8px" }}>
+                    {selectedRequest.images
+                      .filter((img) => img && img.image_url)
+                      .map((img, idx) => (
+                        <a
+                          key={img.id || idx}
+                          href={img.image_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            position: "relative",
+                            width: "76px",
+                            height: "76px",
+                            borderRadius: "8px",
+                            overflow: "hidden",
+                            border: "1px solid var(--color-dheir-border)",
+                            display: "block",
+                          }}
+                        >
+                          <img
+                            src={img.image_url}
+                            alt={`Sample ${idx + 1}`}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        </a>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               {/* Chat Thread */}
               <div>
                 <h4 style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-dheir-ink)", marginBottom: "12px" }}>
@@ -435,17 +512,79 @@ export function PortalProcurementOrderList({ refreshKey }: { refreshKey: number 
                             {isMe ? "You" : "DHEIR China Agent"} · {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </span>
                           <p style={{ margin: 0 }}>{m.message}</p>
+                          {m.attachment_url && (
+                            <a
+                              href={m.attachment_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ display: "block", marginTop: "6px", borderRadius: "6px", overflow: "hidden", maxWidth: "200px" }}
+                            >
+                              <img
+                                src={m.attachment_url}
+                                alt="Attachment"
+                                style={{ width: "100%", maxHeight: "150px", objectFit: "cover", borderRadius: "6px" }}
+                              />
+                            </a>
+                          )}
                         </div>
                       )
                     })
                   )}
                 </div>
 
+                {chatAttachment && (
+                  <div style={{ position: "relative", display: "inline-block", marginTop: "8px" }}>
+                    <img
+                      src={chatAttachment}
+                      alt="Attachment preview"
+                      style={{ width: "56px", height: "56px", objectFit: "cover", borderRadius: "6px", border: "1px solid var(--color-dheir-border)" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setChatAttachment(null)}
+                      style={{
+                        position: "absolute",
+                        top: "-4px",
+                        right: "-4px",
+                        width: "18px",
+                        height: "18px",
+                        borderRadius: "50%",
+                        backgroundColor: "#ef4444",
+                        color: "#ffffff",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      title="Remove attachment"
+                    >
+                      <IconX size={12} stroke={2} />
+                    </button>
+                  </div>
+                )}
+
                 {/* Reply Form */}
                 <form onSubmit={sendMessage} style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
                   <input
+                    ref={chatFileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic"
+                    style={{ display: "none" }}
+                    onChange={handleChatFileChange}
+                  />
+                  <button
+                    type="button"
+                    disabled={chatUploading || sendingMessage}
+                    onClick={() => chatFileInputRef.current?.click()}
+                    className="portal-home__btn portal-home__btn--secondary"
+                    style={{ height: "42px", padding: "0 12px" }}
+                    title="Attach Photo"
+                  >
+                    {chatUploading ? <IconLoader2 size={16} className="animate-spin" /> : <IconPhoto size={16} stroke={1.5} />}
+                  </button>
+                  <input
                     type="text"
-                    required
                     placeholder="Type message to procurement officer..."
                     className="dheir-input"
                     style={{ minHeight: "42px" }}

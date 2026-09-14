@@ -1,11 +1,24 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useRef } from "react"
 import { Table } from "@/components/admin/table/Table"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { createColumnHelper } from "@tanstack/react-table"
-import { IconClipboardCheck, IconSearch, IconBuildingFactory2, IconEye, IconX, IconSend, IconTrash } from "@tabler/icons-react"
+import {
+  IconClipboardCheck,
+  IconSearch,
+  IconBuildingFactory2,
+  IconEye,
+  IconX,
+  IconSend,
+  IconTrash,
+  IconPhoto,
+  IconPaperclip,
+  IconLoader2,
+} from "@tabler/icons-react"
 import { toast } from "@/lib/ui/toast"
+import { LocalPhotoUploader } from "@/components/portal/procurement/LocalPhotoUploader"
+import { uploadCustomerProcurementFile } from "@/lib/media/uploadCustomerProcurementFile"
 
 type AdminProcurementItem = {
   id: number
@@ -48,6 +61,7 @@ type MessageItem = {
   created_at: string
   sender_role: "customer" | "admin"
   message: string
+  attachment_url?: string
 }
 
 const columnHelper = createColumnHelper<AdminProcurementItem>()
@@ -68,12 +82,17 @@ export default function AdminProcurementPage() {
   const [adminReply, setAdminReply] = useState("")
   const [chinaTracking, setChinaTracking] = useState("")
   const [feePaid, setFeePaid] = useState(false)
+  const [adminNewPhotos, setAdminNewPhotos] = useState<string[]>([])
+  const [deletedImageIds, setDeletedImageIds] = useState<number[]>([])
   const [saving, setSaving] = useState(false)
 
   // Chat States
   const [messages, setMessages] = useState<MessageItem[]>([])
   const [newMessage, setNewMessage] = useState("")
+  const [chatAttachment, setChatAttachment] = useState<string | null>(null)
+  const [chatUploading, setChatUploading] = useState(false)
   const [sendingMsg, setSendingMsg] = useState(false)
+  const chatFileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchRequests = async () => {
     setLoading(true)
@@ -128,15 +147,41 @@ export default function AdminProcurementPage() {
     setAdminReply(item.admin_reply || "")
     setChinaTracking(item.china_tracking_number || "")
     setFeePaid(Boolean(item.commitment_fee_paid))
+    setAdminNewPhotos([])
+    setDeletedImageIds([])
+    setChatAttachment(null)
 
     try {
       const res = await fetch(`/api/admin/procurement/${item.id}`, { credentials: "include" })
       const json = await res.json()
       if (res.ok && json.success) {
         setMessages(json.data.messages || [])
+        if (json.data.request) {
+          setSelected(json.data.request)
+        }
       }
     } catch {
       toast.error("Could not load message history")
+    }
+  }
+
+  const handleChatFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setChatUploading(true)
+    try {
+      const res = await uploadCustomerProcurementFile(file)
+      if (res.ok && res.asset) {
+        setChatAttachment(res.asset.publicUrl)
+        toast.success("Image attached")
+      } else {
+        toast.error(res.message || "Failed to upload image")
+      }
+    } catch {
+      toast.error("Upload failed")
+    } finally {
+      setChatUploading(false)
+      if (chatFileInputRef.current) chatFileInputRef.current.value = ""
     }
   }
 
@@ -159,6 +204,8 @@ export default function AdminProcurementPage() {
           admin_reply: adminReply,
           china_tracking_number: chinaTracking,
           commitment_fee_paid: feePaid,
+          new_images: adminNewPhotos,
+          deleted_image_ids: deletedImageIds,
         }),
       })
 
@@ -170,7 +217,11 @@ export default function AdminProcurementPage() {
 
       toast.success("Procurement updated successfully!")
       fetchRequests()
-      setSelected(null)
+      if (json.data) {
+        setSelected((prev) => prev ? { ...prev, ...json.data, images: json.data.images || prev.images } : null)
+      }
+      setAdminNewPhotos([])
+      setDeletedImageIds([])
     } catch {
       toast.error("Network error while updating")
     } finally {
@@ -180,7 +231,7 @@ export default function AdminProcurementPage() {
 
   const sendAdminMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selected || !newMessage.trim()) return
+    if (!selected || (!newMessage.trim() && !chatAttachment)) return
 
     setSendingMsg(true)
     try {
@@ -188,12 +239,16 @@ export default function AdminProcurementPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ message: newMessage.trim() }),
+        body: JSON.stringify({
+          message: newMessage.trim() || (chatAttachment ? "Photo attachment" : ""),
+          attachment_url: chatAttachment || null,
+        }),
       })
       const json = await res.json()
       if (res.ok && json.success) {
         setMessages((prev) => [...prev, json.data])
         setNewMessage("")
+        setChatAttachment(null)
       } else {
         toast.error(json.message || "Failed to send message")
       }
@@ -507,37 +562,65 @@ export default function AdminProcurementPage() {
                   </div>
                 )}
 
-                {/* Uploaded Reference Photos */}
-                {selected.images && selected.images.filter((img) => img && img.image_url).length > 0 && (
+                {/* Uploaded Photos Section (Customer Reference & Admin Factory Photos) */}
+                {selected.images && selected.images.filter((img) => img && img.image_url && !deletedImageIds.includes(img.id)).length > 0 && (
                   <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1px solid var(--color-dheir-border)", backgroundColor: "#ffffff" }}>
                     <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-dheir-muted)", textTransform: "uppercase" }}>
-                      Customer Reference Photos / Samples ({selected.images.filter((img) => img && img.image_url).length}):
+                      Current Request Photos &amp; Samples ({selected.images.filter((img) => img && img.image_url && !deletedImageIds.includes(img.id)).length}):
                     </span>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "8px" }}>
                       {selected.images
-                        .filter((img) => img && img.image_url)
+                        .filter((img) => img && img.image_url && !deletedImageIds.includes(img.id))
                         .map((img, idx) => (
-                          <a
-                            key={idx}
-                            href={img.image_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <div
+                            key={img.id || idx}
                             style={{
                               position: "relative",
-                              width: "72px",
-                              height: "72px",
-                              borderRadius: "6px",
+                              width: "80px",
+                              height: "80px",
+                              borderRadius: "8px",
                               overflow: "hidden",
                               border: "1px solid var(--color-dheir-border)",
-                              display: "block",
+                              backgroundColor: "#f8fafc",
                             }}
                           >
-                            <img
-                              src={img.image_url}
-                              alt={`Sample ${idx + 1}`}
-                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                            />
-                          </a>
+                            <a
+                              href={img.image_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ display: "block", width: "100%", height: "100%" }}
+                            >
+                              <img
+                                src={img.image_url}
+                                alt={`Sample ${idx + 1}`}
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (img.id) setDeletedImageIds((prev) => [...prev, img.id])
+                              }}
+                              style={{
+                                position: "absolute",
+                                top: "2px",
+                                right: "2px",
+                                width: "20px",
+                                height: "20px",
+                                borderRadius: "50%",
+                                backgroundColor: "rgba(239, 68, 68, 0.9)",
+                                color: "#ffffff",
+                                border: "none",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                              title="Delete photo"
+                            >
+                              <IconX size={12} stroke={2} />
+                            </button>
+                          </div>
                         ))}
                     </div>
                   </div>
@@ -546,7 +629,7 @@ export default function AdminProcurementPage() {
 
               {/* Admin Quotation Form */}
               <form onSubmit={handleSaveUpdate} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <h3 style={{ fontSize: "14px", fontWeight: 700, margin: 0 }}>Quotation & Status Management</h3>
+                <h3 style={{ fontSize: "14px", fontWeight: 700, margin: 0 }}>Quotation &amp; Status Management</h3>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
                   <label className="portal-packages__field">
@@ -596,6 +679,17 @@ export default function AdminProcurementPage() {
                   />
                 </label>
 
+                {/* Admin Factory / Inspection Photo Uploader */}
+                <div style={{ padding: "14px", borderRadius: "8px", backgroundColor: "#ffffff", border: "1px solid var(--color-dheir-border)" }}>
+                  <LocalPhotoUploader
+                    label="Upload Factory / Inspection Photos for Customer"
+                    helperText="Add factory quotation sheets, sample checks, or warehouse arrival photos"
+                    maxPhotos={6}
+                    value={adminNewPhotos}
+                    onChange={setAdminNewPhotos}
+                  />
+                </div>
+
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
                   <button
                     type="button"
@@ -633,7 +727,7 @@ export default function AdminProcurementPage() {
               {/* Chat Thread */}
               <div style={{ borderTop: "1px solid var(--color-dheir-border)", paddingTop: "16px" }}>
                 <h4 style={{ fontSize: "13px", fontWeight: 700, margin: "0 0 10px 0" }}>Two-Way Chat with Buyer</h4>
-                <div style={{ minHeight: "140px", maxHeight: "200px", overflowY: "auto", padding: "10px", backgroundColor: "#f8fafc", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{ minHeight: "140px", maxHeight: "240px", overflowY: "auto", padding: "10px", backgroundColor: "#f8fafc", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   {messages.length === 0 ? (
                     <p style={{ fontSize: "12px", color: "var(--color-dheir-muted)", margin: "auto 0", textAlign: "center" }}>No messages in thread yet.</p>
                   ) : (
@@ -643,7 +737,7 @@ export default function AdminProcurementPage() {
                         style={{
                           alignSelf: m.sender_role === "admin" ? "flex-end" : "flex-start",
                           maxWidth: "80%",
-                          padding: "6px 12px",
+                          padding: "8px 12px",
                           borderRadius: "8px",
                           backgroundColor: m.sender_role === "admin" ? "var(--color-dheir-blue)" : "#ffffff",
                           color: m.sender_role === "admin" ? "#ffffff" : "var(--color-dheir-ink)",
@@ -651,19 +745,81 @@ export default function AdminProcurementPage() {
                           fontSize: "13px",
                         }}
                       >
-                        <span style={{ display: "block", fontSize: "10px", opacity: 0.8 }}>
+                        <span style={{ display: "block", fontSize: "10px", opacity: 0.8, marginBottom: "2px" }}>
                           {m.sender_role === "admin" ? "Admin" : "Customer"} · {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </span>
                         <p style={{ margin: 0 }}>{m.message}</p>
+                        {m.attachment_url && (
+                          <a
+                            href={m.attachment_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: "block", marginTop: "6px", borderRadius: "6px", overflow: "hidden", maxWidth: "200px" }}
+                          >
+                            <img
+                              src={m.attachment_url}
+                              alt="Attachment"
+                              style={{ width: "100%", maxHeight: "150px", objectFit: "cover", borderRadius: "6px" }}
+                            />
+                          </a>
+                        )}
                       </div>
                     ))
                   )}
                 </div>
 
+                {chatAttachment && (
+                  <div style={{ position: "relative", display: "inline-block", marginTop: "8px" }}>
+                    <img
+                      src={chatAttachment}
+                      alt="Attachment preview"
+                      style={{ width: "56px", height: "56px", objectFit: "cover", borderRadius: "6px", border: "1px solid var(--color-dheir-border)" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setChatAttachment(null)}
+                      style={{
+                        position: "absolute",
+                        top: "-4px",
+                        right: "-4px",
+                        width: "18px",
+                        height: "18px",
+                        borderRadius: "50%",
+                        backgroundColor: "#ef4444",
+                        color: "#ffffff",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      title="Remove attachment"
+                    >
+                      <IconX size={12} stroke={2} />
+                    </button>
+                  </div>
+                )}
+
                 <form onSubmit={sendAdminMessage} style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
                   <input
+                    ref={chatFileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic"
+                    style={{ display: "none" }}
+                    onChange={handleChatFileChange}
+                  />
+                  <button
+                    type="button"
+                    disabled={chatUploading || sendingMsg}
+                    onClick={() => chatFileInputRef.current?.click()}
+                    className="portal-home__btn portal-home__btn--secondary"
+                    style={{ height: "40px", padding: "0 10px" }}
+                    title="Attach Photo"
+                  >
+                    {chatUploading ? <IconLoader2 size={16} className="animate-spin" /> : <IconPhoto size={16} stroke={1.5} />}
+                  </button>
+                  <input
                     type="text"
-                    required
                     placeholder="Reply to customer..."
                     className="dheir-input"
                     style={{ minHeight: "40px" }}

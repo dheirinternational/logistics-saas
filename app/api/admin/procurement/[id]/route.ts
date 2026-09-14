@@ -91,7 +91,32 @@ export async function PUT(
       admin_reply,
       china_tracking_number,
       commitment_fee_paid,
+      new_images,
+      deleted_image_ids,
     } = body
+
+    // 1. Process deleted image IDs
+    if (Array.isArray(deleted_image_ids) && deleted_image_ids.length > 0) {
+      await dbQuery(
+        `DELETE FROM procurement_media WHERE id = ANY($1) AND request_id = $2`,
+        [deleted_image_ids, requestId]
+      )
+    }
+
+    // 2. Process newly uploaded images
+    if (Array.isArray(new_images) && new_images.length > 0) {
+      for (const item of new_images) {
+        const url = typeof item === "string" ? item : item?.image_url
+        const mediaType = typeof item === "object" && item?.media_type ? item.media_type : "admin_sample"
+        const caption = typeof item === "object" && item?.caption ? item.caption : null
+        if (url && typeof url === "string" && url.trim()) {
+          await dbQuery(
+            `INSERT INTO procurement_media (request_id, image_url, media_type, caption) VALUES ($1, $2, $3, $4)`,
+            [requestId, url.trim(), mediaType, caption]
+          )
+        }
+      }
+    }
 
     const updateSql = `
       UPDATE procurement_requests
@@ -123,9 +148,17 @@ export async function PUT(
       requestId,
     ])
 
+    const imagesRes = await dbQuery(
+      `SELECT id, image_url, media_type, caption FROM procurement_media WHERE request_id = $1 ORDER BY id ASC`,
+      [requestId]
+    )
+
     return NextResponse.json({
       success: true,
-      data: rows[0],
+      data: {
+        ...rows[0],
+        images: imagesRes.rows,
+      },
       message: "Procurement request updated successfully",
     })
   } catch (err) {
