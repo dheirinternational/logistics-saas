@@ -48,8 +48,11 @@ const Page: NextPage = () => {
     }
 
     try {
-      const params = opts?.sync ? "?sync=1" : ""
-      const res = await fetch(`/api/admin/media${params}`, { credentials: "include" })
+      const syncQuery = opts?.sync ? "sync=1&" : ""
+      const res = await fetch(`/api/admin/media?${syncQuery}t=${Date.now()}`, {
+        credentials: "include",
+        cache: "no-store",
+      })
       const result = await res.json()
       if (!res.ok) {
         toast.error(result.message ?? "Could not load media")
@@ -277,6 +280,7 @@ const Page: NextPage = () => {
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
         onFinished={async () => {
+          setUploadOpen(false)
           setUploadBusy(true)
           try {
             await loadMedia({ silent: true })

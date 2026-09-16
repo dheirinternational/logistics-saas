@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import {
@@ -168,8 +171,28 @@ export async function PUT(
         )
       }
 
-      // Also update media links if array is provided
-      if (Array.isArray(media_asset_ids)) {
+      // Also update media links if array is provided (supports images array or media_asset_ids)
+      if (Array.isArray(body.images)) {
+        await client.query(
+          `DELETE FROM shipment_images WHERE shipment_id = $1`,
+          [shipmentId]
+        )
+        for (let i = 0; i < body.images.length; i++) {
+          const img = body.images[i]
+          const url = (typeof img === "string" ? img : img.image_url || img.imageUrl || "").trim()
+          if (!url) continue
+          const isPrimary = i === 0
+          const mediaType = (typeof img === "object" && (img.media_type || img.mediaType))
+            ? (img.media_type || img.mediaType)
+            : (/\.(mp4|webm|mov)$/i.test(url) ? "video" : "photo")
+          const assetId = (typeof img === "object" && Number(img.media_asset_id || img.mediaAssetId)) || null
+          await client.query(
+            `INSERT INTO shipment_images (shipment_id, image_url, is_primary, media_type, media_asset_id)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [shipmentId, url, isPrimary, mediaType, assetId && assetId > 0 ? assetId : null]
+          )
+        }
+      } else if (Array.isArray(media_asset_ids)) {
         // Clear previous associations first to support replacing
         await client.query(
           `DELETE FROM shipment_images WHERE shipment_id = $1`,

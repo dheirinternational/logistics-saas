@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 import { databaseErrorResponse, pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
 import { generateTrackingNumber } from "@/lib/generators/generateTrackingNumber";
@@ -302,13 +305,14 @@ export async function GET(){
         `)
 
         const shipmentIds = res.rows.map(r => Number(r.id))
-        const imagesMap: Record<number, { image_url: string; media_type?: string }[]> = {}
+        const imagesMap: Record<number, { id?: number; image_url: string; imageUrl: string; media_type: string; mediaType: string; media_asset_id?: number | null }[]> = {}
         
         if (shipmentIds.length > 0) {
             const imagesRes = await pool.query(
-                `SELECT shipment_id, image_url, media_type 
+                `SELECT id, shipment_id, image_url, media_type, media_asset_id 
                  FROM shipment_images 
-                 WHERE shipment_id = ANY($1)`,
+                 WHERE shipment_id = ANY($1)
+                 ORDER BY id ASC`,
                 [shipmentIds]
             )
             for (const r of imagesRes.rows) {
@@ -316,9 +320,14 @@ export async function GET(){
                 if (!imagesMap[sid]) {
                     imagesMap[sid] = []
                 }
+                const mType = r.media_type || (/\.(mp4|webm|mov)$/i.test(r.image_url) ? "video" : "photo")
                 imagesMap[sid].push({
+                    id: Number(r.id),
                     image_url: r.image_url,
-                    media_type: r.media_type || "photo"
+                    imageUrl: r.image_url,
+                    media_type: mType,
+                    mediaType: mType,
+                    media_asset_id: r.media_asset_id ? Number(r.media_asset_id) : null,
                 })
             }
         }
@@ -328,10 +337,17 @@ export async function GET(){
             images: imagesMap[Number(row.id)] ?? []
         }))
 
-        return NextResponse.json({
-            success: true,
-            data
-        })
+        return NextResponse.json(
+            {
+                success: true,
+                data
+            },
+            {
+                headers: {
+                    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+                },
+            }
+        )
 
     }
 

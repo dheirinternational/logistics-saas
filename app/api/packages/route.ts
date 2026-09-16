@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 import { databaseErrorResponse, dbQuery, pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
 import { linkPackageMediaAssets, parsePackageMediaAssetIds } from "@/lib/packages/linkPackageMedia";
@@ -229,10 +232,17 @@ export async function GET(){
             SELECT * FROM packages    
         `)
 
-        return NextResponse.json({
-            success: true,
-            data: res.rows
-        })
+        return NextResponse.json(
+            {
+                success: true,
+                data: res.rows
+            },
+            {
+                headers: {
+                    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+                },
+            }
+        )
 
     }
     catch(err){

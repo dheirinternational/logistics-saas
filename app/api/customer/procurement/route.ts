@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { NextRequest, NextResponse } from "next/server"
@@ -58,10 +61,17 @@ export async function GET(req: NextRequest) {
 
     const { rows } = await dbQuery(sql, params)
 
-    return NextResponse.json({
-      success: true,
-      data: rows,
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        data: rows,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    )
   } catch (err) {
     console.error("Error fetching customer procurement requests", err)
     return NextResponse.json({ success: false, message: "Could not fetch procurement requests" }, { status: 500 })

@@ -169,6 +169,7 @@ export function MediaUploadModal({ open, onClose, onFinished }: MediaUploadModal
       toast.success(
         succeeded === 1 ? "1 file uploaded" : `${succeeded} files uploaded successfully`,
       )
+      onClose()
     } else if (succeeded > 0 && failed > 0) {
       toast.info(`${succeeded} uploaded, ${failed} failed. See the list for details.`)
     } else if (failed > 0) {

@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { NextRequest, NextResponse } from "next/server"
@@ -55,13 +58,20 @@ export async function GET(
       [requestId]
     )
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        request: requestRes.rows[0],
-        messages: messagesRes.rows,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          request: requestRes.rows[0],
+          messages: messagesRes.rows,
+        },
       },
-    })
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    )
   } catch (err) {
     console.error("Error fetching single procurement request", err)
     return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })

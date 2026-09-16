@@ -1,4 +1,6 @@
 export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+export const revalidate = 0
 export const maxDuration = 60
 
 import { databaseErrorResponse, DatabaseUnavailableError } from "@/lib/db/db"
@@ -62,17 +64,24 @@ export async function GET(req: Request) {
       : null
     const items = await listAdminMediaAssets()
 
-    return NextResponse.json({
-      success: true,
-      data: items,
-      sync: sync
-        ? {
-            imported: sync.fromStorage + sync.fromUrls,
-            linksUpdated: sync.linksUpdated,
-            pruned: sync.pruned,
-          }
-        : null,
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        data: items,
+        sync: sync
+          ? {
+              imported: sync.fromStorage + sync.fromUrls,
+              linksUpdated: sync.linksUpdated,
+              pruned: sync.pruned,
+            }
+          : null,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    )
   } catch (err) {
     const { message, status } = databaseErrorResponse(err, "Could not load media")
     return NextResponse.json({ success: false, message }, { status })

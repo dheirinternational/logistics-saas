@@ -99,12 +99,13 @@ export function AdminShipmentViewModal() {
       setAdminReply(selectedShipment.admin_reply || "")
 
       // Map incoming media
-      if (selectedShipment.images) {
-        const mappedMedia: AdminMediaItem[] = selectedShipment.images.map((img: any, idx) => {
+      if (selectedShipment.images && Array.isArray(selectedShipment.images)) {
+        const mappedMedia: AdminMediaItem[] = selectedShipment.images.map((img: any, idx: number) => {
           const url = img.image_url || img.imageUrl || ""
           const isVideo = img.media_type === "video" || img.mediaType === "video" || /\.(mp4|webm|mov)$/i.test(url)
+          const assetId = img.media_asset_id || img.mediaAssetId || (img.id && !Number.isNaN(Number(img.id)) && Number(img.id) < 10000 ? Number(img.id) : null)
           return {
-            id: img.id || idx + 10000,
+            id: assetId || idx + 10000,
             name: "shipment_media",
             path: "",
             publicUrl: url,
@@ -151,7 +152,14 @@ export function AdminShipmentViewModal() {
           status,
           shipment_note: shipmentNote,
           admin_reply: adminReply,
-          media_asset_ids: libraryMedia.map((m) => m.id),
+          images: libraryMedia.map((m) => ({
+            image_url: m.publicUrl,
+            imageUrl: m.publicUrl,
+            media_type: m.mediaType === "video" ? "video" : "photo",
+            mediaType: m.mediaType === "video" ? "video" : "photo",
+            media_asset_id: m.id && m.id < 10000 ? m.id : null,
+          })),
+          media_asset_ids: libraryMedia.map((m) => m.id).filter((id) => id && id < 10000),
         }),
       })
       const result = await res.json()
