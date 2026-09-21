@@ -1,8 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { NextResponse } from "next/server"
-import sharp from "sharp"
 
-const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"] as const
+// Active, high-availability Gemini models with vision capabilities
+const MODELS = [
+  "gemini-flash-latest",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-3.6-flash",
+] as const
 
 const PROMPT = `Analyze this package label, waybill, shipping receipt, or package box image.
 Carefully read all text (including Chinese, English, French, Turkish, etc.) and translate all extracted descriptive values into standard English.
@@ -24,42 +29,12 @@ Important Instructions:
 2. Ensure 'weight' is always a pure number in KG (e.g. 2.45).
 3. Return ONLY valid JSON, with NO markdown formatting or extra text.`
 
-async function compressImage(buffer: Buffer, mimeType: string): Promise<{ data: string; mime: string }> {
-  try {
-    const image = sharp(buffer)
-    const metadata = await image.metadata()
-
-    // Resize to max 1200px width, maintaining aspect ratio
-    let pipeline = image
-    if (metadata.width && metadata.width > 1200) {
-      pipeline = pipeline.resize(1200, undefined, { fit: "inside", withoutEnlargement: true })
-    }
-
-    // Convert to JPEG for consistency and smaller size
-    const compressed = await pipeline
-      .jpeg({ quality: 80 })
-      .toBuffer()
-
-    return {
-      data: compressed.toString("base64"),
-      mime: "image/jpeg",
-    }
-  } catch (err) {
-    // Fallback: use original image if sharp fails
-    console.warn("Image compression failed, using original:", err)
-    return {
-      data: buffer.toString("base64"),
-      mime: mimeType || "image/jpeg",
-    }
-  }
-}
-
 export async function POST(req: Request) {
   try {
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       return NextResponse.json(
-        { message: "GEMINI_API_KEY is not configured on the server" },
+        { success: false, message: "GEMINI_API_KEY is not configured on the server" },
         { status: 500 }
       )
     }
@@ -69,17 +44,14 @@ export async function POST(req: Request) {
 
     if (!file) {
       return NextResponse.json(
-        { message: "No receipt file uploaded" },
+        { success: false, message: "No receipt file uploaded" },
         { status: 400 }
       )
     }
 
     const arrayBuffer = await file.arrayBuffer()
-    const rawBuffer = Buffer.from(arrayBuffer)
-    const originalMimeType = file.type || "image/jpeg"
-
-    // Compress and resize the image before sending to Gemini
-    const { data: base64Data, mime: mimeType } = await compressImage(rawBuffer, originalMimeType)
+    const base64Data = Buffer.from(arrayBuffer).toString("base64")
+    const mimeType = file.type || "image/jpeg"
 
     const genAI = new GoogleGenerativeAI(apiKey)
 
@@ -89,7 +61,7 @@ export async function POST(req: Request) {
     for (const modelName of MODELS) {
       try {
         const controller = new AbortController()
-        const timeout = setTimeout(() => controller.abort(), 15000) // 15s timeout
+        const timeout = setTimeout(() => controller.abort(), 12000) // 12s per candidate
 
         const model = genAI.getGenerativeModel({
           model: modelName,
@@ -115,7 +87,7 @@ export async function POST(req: Request) {
 
         responseText = result.response.text()
         if (responseText) {
-          console.log(`OCR scan used model: ${modelName} (image: ${Math.round(base64Data.length / 1024)}KB base64)`)
+          console.log(`OCR scan successfully used model: ${modelName}`)
           break
         }
       } catch (err: any) {
@@ -147,7 +119,10 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("OCR Scan Error:", error)
     return NextResponse.json(
-      { message: error?.message || "Failed to process receipt" },
+      {
+        success: false,
+        message: error?.message || "Failed to process receipt",
+      },
       { status: 500 }
     )
   }

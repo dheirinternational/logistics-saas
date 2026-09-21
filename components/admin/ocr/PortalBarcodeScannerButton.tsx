@@ -167,15 +167,21 @@ export function PortalBarcodeScannerButton() {
         signal: controller.signal,
       })
 
-      clearTimeout(timeout)
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to scan barcode")
+      let data: any = null
+      const contentType = res.headers.get("content-type") || ""
+      if (contentType.includes("application/json")) {
+        try {
+          data = await res.json()
+        } catch {
+          data = null
+        }
       }
 
-      setResult(data.data)
+      if (!res.ok) {
+        throw new Error(data?.message || `Server returned status ${res.status}. Please try again.`)
+      }
+
+      setResult(data?.data || null)
       toast.success("Barcode scanned successfully!")
       
       if (data.data?.shippingId) {

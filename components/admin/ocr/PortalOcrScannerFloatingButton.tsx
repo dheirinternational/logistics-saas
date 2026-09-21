@@ -178,10 +178,22 @@ export function PortalOcrScannerFloatingButton() {
 
       clearTimeout(timeout)
 
-      const data = await res.json()
+      let data: any = null
+      const contentType = res.headers.get("content-type") || ""
+      if (contentType.includes("application/json")) {
+        try {
+          data = await res.json()
+        } catch {
+          data = null
+        }
+      }
 
       if (!res.ok) {
-        throw new Error(data.message || "Failed to scan receipt")
+        throw new Error(data?.message || `Server returned status ${res.status}. Please try again.`)
+      }
+
+      if (!data?.data) {
+        throw new Error("No data returned from scanner")
       }
 
       setResult(data.data)

@@ -27,7 +27,6 @@
     "react-leaflet": "^5.0.0",
     "recharts": "^3.10.1",
     "resend": "^6.11.0",
-    "sharp": "^0.35.4",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
@@ -44,9 +43,5 @@
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
     "typescript": "^5"
-  },
-  "allowScripts": {
-    "sharp@0.34.5": true,
-    "sharp@0.35.4": true
   }
 }
