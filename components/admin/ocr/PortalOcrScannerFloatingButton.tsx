@@ -201,19 +201,21 @@ export function PortalOcrScannerFloatingButton() {
 
       if (data.data) {
         handleClose()
-        window.dispatchEvent(
-          new CustomEvent("admin-package-scanned", {
-            detail: {
-              customerCode: data.data.customerCode,
-              warehouseName: data.data.warehouseName,
-              shippingId: data.data.shippingId,
-              weight: data.data.weight,
-              weightUnit: data.data.weightUnit || "kg",
-              packageName: data.data.packageName,
-              cost: data.data.cost,
-            },
-          })
-        )
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("admin-package-scanned", {
+              detail: {
+                customerCode: data.data.customerCode,
+                warehouseName: data.data.warehouseName,
+                shippingId: data.data.shippingId,
+                weight: data.data.weight,
+                weightUnit: data.data.weightUnit || "kg",
+                packageName: data.data.packageName,
+                cost: data.data.cost,
+              },
+            })
+          )
+        }, 100)
       }
     } catch (err: any) {
       const isTimeout = err?.name === "AbortError"

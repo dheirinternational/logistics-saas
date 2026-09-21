@@ -24,7 +24,7 @@ const columnHelper = createColumnHelper<Package>()
 
 const Page: NextPage = () => {
   const { trigger, setSelectedPackage: setPackage, setReadOnly, resetReadOnly } = usePackageStore()
-  const { setIsModalActive } = useEditModalStore()
+  const { openModal } = useEditModalStore()
   const router = useRouter()
 
   const [packages, setPackages] = useState<Package[]>([])
@@ -129,7 +129,7 @@ const Page: NextPage = () => {
           onClick={() => {
             resetReadOnly()
             setPackage(row.original)
-            setIsModalActive()
+            openModal()
           }}
         >
           View / edit
@@ -203,7 +203,7 @@ const Page: NextPage = () => {
               stored_at: "",
               created_at: "",
             })
-            setIsModalActive()
+            openModal()
           }}
         >
           Add package

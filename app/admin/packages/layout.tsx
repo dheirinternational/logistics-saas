@@ -20,7 +20,7 @@ import { IconCamera, IconX as IconClose } from "@tabler/icons-react";
 import { useRef } from "react";
 
 export default function PageLayout({ children }: { children: ReactNode }) {
-    const { isModalActive, setIsModalActive, openModal } = useEditModalStore()
+    const { isModalActive, openModal, closeModal } = useEditModalStore()
     const { selectedPackage, setSelectedPackage, setReadOnly } = usePackageStore()
     const isEditing = Number(selectedPackage?.id ?? 0) > 0
 
@@ -104,8 +104,9 @@ export default function PageLayout({ children }: { children: ReactNode }) {
                     className="dheir-dialog-backdrop"
                     role="presentation"
                     onClick={(e) => {
-                        if (e.target === e.currentTarget) setIsModalActive()
+                        if (e.target === e.currentTarget) closeModal()
                     }}
+                    style={{ zIndex: 1100 }}
                 >
                     <div
                         className="dheir-dialog admin-modal"
@@ -127,7 +128,7 @@ export default function PageLayout({ children }: { children: ReactNode }) {
                             <button
                                 type="button"
                                 className="dheir-dialog__close"
-                                onClick={() => setIsModalActive()}
+                                onClick={() => closeModal()}
                                 aria-label="Close"
                             >
                                 <IconX size={20} stroke={1.5} />
@@ -147,7 +148,7 @@ export default function PageLayout({ children }: { children: ReactNode }) {
 
 const PackageEditComponent = () => {
 
-    const { setIsModalActive } = useEditModalStore()
+    const { closeModal } = useEditModalStore()
     const { selectedPackage, handleSelectedPackageInput, handleSelectedPackageSelect, setPackageWarehouse, resetSelectedPackage, setTrigger, readonly } = usePackageStore()
 
     // Arrays
@@ -343,7 +344,7 @@ const PackageEditComponent = () => {
             toast.success(isEditing ? "Package updated successfully" : "Successfully Added package")
             setTrigger()
             resetSelectedPackage()
-            setIsModalActive()
+            closeModal()
             setImages([])
             setLibraryMedia([])
         }
