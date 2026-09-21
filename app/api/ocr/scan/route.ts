@@ -1,10 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { NextResponse } from "next/server"
 
-// Current official models: gemini-flash-latest (primary) with gemini-3.8-flash (fallback)
-const PRIMARY_MODEL = "gemini-flash-latest"
-const FALLBACK_MODEL = "gemini-3.8-flash"
-
 const PROMPT = `Analyze this package label, waybill, shipping receipt, or package box image.
 Carefully read all text (including Chinese, English, French, Turkish, etc.) and translate all extracted descriptive values into standard English.
 
@@ -25,12 +21,175 @@ Important Instructions:
 2. Ensure 'weight' is always a pure number in KG (e.g. 2.45).
 3. Return ONLY valid JSON, with NO markdown formatting or extra text.`
 
+let rotationIndex = 0
+
+// Provider caller functions
+async function callOpenAI(apiKey: string, base64Data: string, mimeType: string): Promise<string> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 15000)
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: PROMPT },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Data}`,
+                },
+              },
+            ],
+          },
+        ],
+        max_tokens: 500,
+        temperature: 0.1,
+      }),
+      signal: controller.signal,
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err?.error?.message || `OpenAI HTTP ${res.status}`)
+    }
+
+    const json = await res.json()
+    return json.choices?.[0]?.message?.content || ""
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function callGroq(apiKey: string, base64Data: string, mimeType: string): Promise<string> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 15000)
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.2-11b-vision-preview",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: PROMPT },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Data}`,
+                },
+              },
+            ],
+          },
+        ],
+        temperature: 0.1,
+      }),
+      signal: controller.signal,
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err?.error?.message || `Groq HTTP ${res.status}`)
+    }
+
+    const json = await res.json()
+    return json.choices?.[0]?.message?.content || ""
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function callGemini(apiKey: string, modelName: string, base64Data: string, mimeType: string): Promise<string> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 12000)
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
+    })
+
+    const result = await model.generateContent(
+      [
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType: mimeType,
+          },
+        },
+        PROMPT,
+      ],
+      { signal: controller.signal } as any
+    )
+
+    return result.response.text() || ""
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 export async function POST(req: Request) {
   try {
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
+    const openaiKey = process.env.OPENAI_API_KEY
+    const groqKey = process.env.GROQ_API_KEY
+    const geminiKey = process.env.GEMINI_API_KEY
+
+    // Assemble the active provider pool based on configured keys
+    const pool: { name: string; run: (b64: string, mime: string) => Promise<string> }[] = []
+
+    if (openaiKey) {
+      pool.push({
+        name: "OpenAI (gpt-4o-mini)",
+        run: (b64, mime) => callOpenAI(openaiKey, b64, mime),
+      })
+    }
+
+    if (groqKey) {
+      pool.push({
+        name: "Groq (llama-3.2-vision)",
+        run: (b64, mime) => callGroq(groqKey, b64, mime),
+      })
+    }
+
+    if (geminiKey) {
+      pool.push(
+        {
+          name: "Gemini (gemini-flash-latest)",
+          run: (b64, mime) => callGemini(geminiKey, "gemini-flash-latest", b64, mime),
+        },
+        {
+          name: "Gemini (gemini-3.5-flash-lite)",
+          run: (b64, mime) => callGemini(geminiKey, "gemini-3.5-flash-lite", b64, mime),
+        },
+        {
+          name: "Gemini (gemini-3.1-flash-lite)",
+          run: (b64, mime) => callGemini(geminiKey, "gemini-3.1-flash-lite", b64, mime),
+        }
+      )
+    }
+
+    if (pool.length === 0) {
       return NextResponse.json(
-        { success: false, message: "GEMINI_API_KEY is not configured on the server" },
+        {
+          success: false,
+          message: "No OCR API keys configured. Please add OPENAI_API_KEY, GROQ_API_KEY, or GEMINI_API_KEY to .env",
+        },
         { status: 500 }
       )
     }
@@ -49,55 +208,33 @@ export async function POST(req: Request) {
     const base64Data = Buffer.from(arrayBuffer).toString("base64")
     const mimeType = file.type || "image/jpeg"
 
-    const genAI = new GoogleGenerativeAI(apiKey)
+    // Rotate starting provider on each scan to distribute rate-limit quotas
+    const startIndex = rotationIndex % pool.length
+    rotationIndex++
+
+    const orderedPool = [
+      ...pool.slice(startIndex),
+      ...pool.slice(0, startIndex),
+    ]
 
     let responseText = ""
     let lastError: any = null
 
-    for (const modelName of [PRIMARY_MODEL, FALLBACK_MODEL]) {
+    for (const provider of orderedPool) {
       try {
-        const controller = new AbortController()
-        const timeout = setTimeout(() => controller.abort(), 12000) // 12s per candidate
-
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: {
-            responseMimeType: "application/json",
-          },
-        })
-
-        const result = await model.generateContent(
-          [
-            {
-              inlineData: {
-                data: base64Data,
-                mimeType: mimeType,
-              },
-            },
-            PROMPT,
-          ],
-          { signal: controller.signal } as any
-        )
-
-        clearTimeout(timeout)
-
-        responseText = result.response.text()
+        responseText = await provider.run(base64Data, mimeType)
         if (responseText) {
-          console.log(`OCR scan successfully used model: ${modelName}`)
+          console.log(`OCR scan successfully processed via: ${provider.name}`)
           break
         }
       } catch (err: any) {
         lastError = err
-        const isTimeout = err?.name === "AbortError"
-        console.warn(
-          `Gemini OCR model '${modelName}' ${isTimeout ? "timed out" : "failed"}:`,
-          err?.message || err
-        )
+        console.warn(`OCR provider '${provider.name}' failed or hit rate limit:`, err?.message || err)
       }
     }
 
     if (!responseText) {
-      throw lastError || new Error("All Gemini OCR models failed")
+      throw lastError || new Error("All configured OCR providers failed")
     }
 
     // Clean JSON response (strip markdown fences if present)
