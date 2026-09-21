@@ -17,10 +17,46 @@ import { usePathname } from "next/navigation"
 
 type ExtractedData = {
   customerName: string | null
-  cost: number | null
-  shippingId: string | null
   customerCode: string | null
+  shippingId: string | null
+  weight: number | null
+  weightUnit?: string | null
+  packageName: string | null
+  cost: number | null
   warehouseName: string | null
+}
+
+/** Compress image client-side using canvas before uploading */
+function compressImageClientSide(file: File, maxWidth = 1200, quality = 0.7): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      let { width, height } = img
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width)
+        width = maxWidth
+      }
+      const canvas = document.createElement("canvas")
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext("2d")
+      if (!ctx) { resolve(file); return }
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: "image/jpeg" }))
+          } else {
+            resolve(file)
+          }
+        },
+        "image/jpeg",
+        quality
+      )
+    }
+    img.onerror = () => resolve(file) // fallback to original
+    img.src = URL.createObjectURL(file)
+  })
 }
 
 export function PortalOcrScannerFloatingButton() {
@@ -31,6 +67,7 @@ export function PortalOcrScannerFloatingButton() {
   const [isScanning, setIsScanning] = useState(false)
   const [result, setResult] = useState<ExtractedData | null>(null)
   const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [scanElapsed, setScanElapsed] = useState(0)
 
   // Camera WebRTC States
   const [stream, setStream] = useState<MediaStream | null>(null)
@@ -112,18 +149,34 @@ export function PortalOcrScannerFloatingButton() {
     }
   }
 
-  const handleScan = async () => {
+  const handleScan = async (retryCount = 0) => {
     if (!selectedFile) return
 
     setIsScanning(true)
-    const formData = new FormData()
-    formData.append("file", selectedFile)
+    setScanElapsed(0)
+
+    // Start elapsed timer
+    const startTime = Date.now()
+    const timer = setInterval(() => {
+      setScanElapsed(Math.floor((Date.now() - startTime) / 1000))
+    }, 1000)
 
     try {
+      // Compress image before uploading
+      const compressed = await compressImageClientSide(selectedFile)
+      const formData = new FormData()
+      formData.append("file", compressed)
+
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 20000) // 20s client timeout
+
       const res = await fetch("/api/ocr/scan", {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       })
+
+      clearTimeout(timeout)
 
       const data = await res.json()
 
@@ -141,6 +194,10 @@ export function PortalOcrScannerFloatingButton() {
               customerCode: data.data.customerCode,
               warehouseName: data.data.warehouseName,
               shippingId: data.data.shippingId,
+              weight: data.data.weight,
+              weightUnit: data.data.weightUnit || "kg",
+              packageName: data.data.packageName,
+              cost: data.data.cost,
             },
           })
         )
@@ -156,9 +213,21 @@ export function PortalOcrScannerFloatingButton() {
         handleClose()
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to scan receipt")
+      const isTimeout = err?.name === "AbortError"
+      const msg = isTimeout ? "Scan timed out" : (err.message || "Failed to scan receipt")
+
+      // Auto-retry once
+      if (retryCount === 0) {
+        console.warn(`OCR scan failed, auto-retrying: ${msg}`)
+        clearInterval(timer)
+        setScanElapsed(0)
+        return handleScan(1)
+      }
+
+      toast.error(msg)
       console.error(err)
     } finally {
+      clearInterval(timer)
       setIsScanning(false)
     }
   }
@@ -476,7 +545,7 @@ export function PortalOcrScannerFloatingButton() {
                   <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                     <button
                       type="button"
-                      onClick={handleScan}
+                      onClick={() => handleScan()}
                       style={{
                         flex: 1,
                         minWidth: "140px",
@@ -554,11 +623,16 @@ export function PortalOcrScannerFloatingButton() {
                     style={{ color: "var(--color-dheir-blue)" }}
                   />
                   <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>
-                    Scanning receipt with Gemini AI...
+                    Scanning receipt...
                   </p>
                   <p style={{ margin: 0, fontSize: "12px", color: "var(--color-dheir-muted)" }}>
-                    Extracting structured information
+                    {scanElapsed > 0 ? `${scanElapsed}s elapsed` : "Extracting structured information"}
                   </p>
+                  {scanElapsed >= 8 && (
+                    <p style={{ margin: 0, fontSize: "11px", color: "var(--color-dheir-muted)", fontStyle: "italic" }}>
+                      Taking a moment... almost there
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -566,16 +640,16 @@ export function PortalOcrScannerFloatingButton() {
               {result && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    {/* Customer Name Field */}
+                    {/* Package / Item Description */}
                     <div>
                       <label style={{ display: "block", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--color-dheir-muted)", marginBottom: "4px" }}>
-                        Customer Name
+                        Package / Item Name (Translated)
                       </label>
                       <div style={{ display: "flex", gap: "8px" }}>
                         <input
                           type="text"
                           readOnly
-                          value={result.customerName || "Not found"}
+                          value={result.packageName || "Not found"}
                           style={{
                             flex: 1,
                             padding: "8px 12px",
@@ -585,10 +659,10 @@ export function PortalOcrScannerFloatingButton() {
                             fontSize: "14px",
                           }}
                         />
-                        {result.customerName && (
+                        {result.packageName && (
                           <button
                             type="button"
-                            onClick={() => handleCopy(result.customerName!, "Customer Name")}
+                            onClick={() => handleCopy(result.packageName!, "Package Name")}
                             style={{
                               padding: "8px",
                               borderRadius: "6px",
@@ -597,7 +671,89 @@ export function PortalOcrScannerFloatingButton() {
                               cursor: "pointer",
                             }}
                           >
-                            {copiedField === "Customer Name" ? (
+                            {copiedField === "Package Name" ? (
+                              <IconCheck size={16} stroke={1.5} style={{ color: "green" }} />
+                            ) : (
+                              <IconCopy size={16} stroke={1.5} />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Weight Field */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--color-dheir-muted)", marginBottom: "4px" }}>
+                        Weight
+                      </label>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <input
+                          type="text"
+                          readOnly
+                          value={result.weight != null ? `${result.weight} ${result.weightUnit || "kg"}` : "Not found"}
+                          style={{
+                            flex: 1,
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            border: "1px solid var(--color-dheir-border)",
+                            background: "rgba(0, 0, 0, 0.02)",
+                            fontSize: "14px",
+                          }}
+                        />
+                        {result.weight != null && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(`${result.weight}`, "Weight")}
+                            style={{
+                              padding: "8px",
+                              borderRadius: "6px",
+                              border: "1px solid var(--color-dheir-border)",
+                              background: "#fff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {copiedField === "Weight" ? (
+                              <IconCheck size={16} stroke={1.5} style={{ color: "green" }} />
+                            ) : (
+                              <IconCopy size={16} stroke={1.5} />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Customer Code / Name Field */}
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--color-dheir-muted)", marginBottom: "4px" }}>
+                        Customer Code / Name
+                      </label>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <input
+                          type="text"
+                          readOnly
+                          value={result.customerCode ? `${result.customerCode}${result.customerName ? ` (${result.customerName})` : ''}` : (result.customerName || "Not found")}
+                          style={{
+                            flex: 1,
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            border: "1px solid var(--color-dheir-border)",
+                            background: "rgba(0, 0, 0, 0.02)",
+                            fontSize: "14px",
+                          }}
+                        />
+                        {(result.customerCode || result.customerName) && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(result.customerCode || result.customerName!, "Customer")}
+                            style={{
+                              padding: "8px",
+                              borderRadius: "6px",
+                              border: "1px solid var(--color-dheir-border)",
+                              background: "#fff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {copiedField === "Customer" ? (
                               <IconCheck size={16} stroke={1.5} style={{ color: "green" }} />
                             ) : (
                               <IconCopy size={16} stroke={1.5} />

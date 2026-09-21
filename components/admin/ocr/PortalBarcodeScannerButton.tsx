@@ -21,6 +21,39 @@ type ExtractedData = {
   warehouseName: string | null
 }
 
+/** Compress image client-side using canvas before uploading */
+function compressImageClientSide(file: File, maxWidth = 1200, quality = 0.7): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      let { width, height } = img
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width)
+        width = maxWidth
+      }
+      const canvas = document.createElement("canvas")
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext("2d")
+      if (!ctx) { resolve(file); return }
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: "image/jpeg" }))
+          } else {
+            resolve(file)
+          }
+        },
+        "image/jpeg",
+        quality
+      )
+    }
+    img.onerror = () => resolve(file)
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 export function PortalBarcodeScannerButton() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
@@ -28,6 +61,7 @@ export function PortalBarcodeScannerButton() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [result, setResult] = useState<ExtractedData | null>(null)
+  const [scanElapsed, setScanElapsed] = useState(0)
 
   // Camera WebRTC States
   const [stream, setStream] = useState<MediaStream | null>(null)
@@ -108,18 +142,32 @@ export function PortalBarcodeScannerButton() {
     }
   }
 
-  const handleScan = async () => {
+  const handleScan = async (retryCount = 0) => {
     if (!selectedFile) return
 
     setIsScanning(true)
-    const formData = new FormData()
-    formData.append("file", selectedFile)
+    setScanElapsed(0)
+
+    const startTime = Date.now()
+    const timer = setInterval(() => {
+      setScanElapsed(Math.floor((Date.now() - startTime) / 1000))
+    }, 1000)
 
     try {
+      const compressed = await compressImageClientSide(selectedFile)
+      const formData = new FormData()
+      formData.append("file", compressed)
+
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 20000)
+
       const res = await fetch("/api/ocr/scan", {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       })
+
+      clearTimeout(timeout)
 
       const data = await res.json()
 
@@ -143,9 +191,20 @@ export function PortalBarcodeScannerButton() {
         toast.error("No tracking number detected in the scan.")
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to scan barcode")
+      const isTimeout = err?.name === "AbortError"
+      const msg = isTimeout ? "Scan timed out" : (err.message || "Failed to scan barcode")
+
+      if (retryCount === 0) {
+        console.warn(`Barcode scan failed, auto-retrying: ${msg}`)
+        clearInterval(timer)
+        setScanElapsed(0)
+        return handleScan(1)
+      }
+
+      toast.error(msg)
       console.error(err)
     } finally {
+      clearInterval(timer)
       setIsScanning(false)
     }
   }
@@ -455,7 +514,7 @@ export function PortalBarcodeScannerButton() {
                   <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                     <button
                       type="button"
-                      onClick={handleScan}
+                      onClick={() => handleScan()}
                       style={{
                         flex: 1,
                         minWidth: "140px",
@@ -533,8 +592,16 @@ export function PortalBarcodeScannerButton() {
                     style={{ color: "var(--color-dheir-blue)" }}
                   />
                   <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>
-                    Scanning barcode with Gemini AI...
+                    Scanning barcode...
                   </p>
+                  <p style={{ margin: 0, fontSize: "12px", color: "var(--color-dheir-muted)" }}>
+                    {scanElapsed > 0 ? `${scanElapsed}s elapsed` : "Analyzing barcode image"}
+                  </p>
+                  {scanElapsed >= 8 && (
+                    <p style={{ margin: 0, fontSize: "11px", color: "var(--color-dheir-muted)", fontStyle: "italic" }}>
+                      Taking a moment... almost there
+                    </p>
+                  )}
                 </div>
               )}
             </div>

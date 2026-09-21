@@ -44,11 +44,15 @@ export default function PageLayout({ children }: { children: ReactNode }) {
     useEffect(() => {
         const handlePackageScanned = (e: Event) => {
             const customEvent = e as CustomEvent<{
-                customerCode: string | null
-                warehouseName: string | null
-                shippingId: string | null
+                customerCode?: string | null
+                warehouseName?: string | null
+                shippingId?: string | null
+                weight?: number | null
+                weightUnit?: string | null
+                packageName?: string | null
+                cost?: number | null
             }>
-            const { customerCode, warehouseName, shippingId } = customEvent.detail
+            const { customerCode, warehouseName, shippingId, weight, weightUnit, packageName, cost } = customEvent.detail
 
             // Match warehouse name case-insensitively
             let matchedWarehouseId = 0
@@ -68,13 +72,13 @@ export default function PageLayout({ children }: { children: ReactNode }) {
             setSelectedPackage({
                 id: 0,
                 incoming_package_id: shippingId || "",
-                package_name: "",
+                package_name: packageName || "",
                 user_id: 0,
                 customer_code: customerCode || "",
                 warehouse_id: matchedWarehouseId,
-                weight: 0,
-                weight_unit: "kg",
-                amount: 0,
+                weight: typeof weight === "number" && !isNaN(weight) ? weight : (Number(weight) || 0),
+                weight_unit: weightUnit === "cbm" ? "cbm" : "kg",
+                amount: typeof cost === "number" && !isNaN(cost) ? cost : (Number(cost) || 0),
                 condition: "good",
                 status: "stored",
                 received_at: new Date().toISOString().split("T")[0],
