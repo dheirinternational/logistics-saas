@@ -200,6 +200,7 @@ export function PortalOcrScannerFloatingButton() {
       toast.success("Receipt scanned successfully!")
 
       if (data.data) {
+        handleClose()
         window.dispatchEvent(
           new CustomEvent("admin-package-scanned", {
             detail: {
@@ -213,16 +214,6 @@ export function PortalOcrScannerFloatingButton() {
             },
           })
         )
-        if (data.data.shippingId) {
-          window.dispatchEvent(
-            new CustomEvent("admin-shipment-scanned", {
-              detail: {
-                trackingNumber: data.data.shippingId,
-              },
-            })
-          )
-        }
-        handleClose()
       }
     } catch (err: any) {
       const isTimeout = err?.name === "AbortError"

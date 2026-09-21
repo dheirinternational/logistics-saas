@@ -69,50 +69,6 @@ async function callOpenAI(apiKey: string, base64Data: string, mimeType: string):
   }
 }
 
-async function callGroq(apiKey: string, base64Data: string, mimeType: string): Promise<string> {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 15000)
-  try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.2-11b-vision-preview",
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: PROMPT },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${base64Data}`,
-                },
-              },
-            ],
-          },
-        ],
-        temperature: 0.1,
-      }),
-      signal: controller.signal,
-    })
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err?.error?.message || `Groq HTTP ${res.status}`)
-    }
-
-    const json = await res.json()
-    return json.choices?.[0]?.message?.content || ""
-  } finally {
-    clearTimeout(timeout)
-  }
-}
-
 async function callGemini(apiKey: string, modelName: string, base64Data: string, mimeType: string): Promise<string> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 12000)
@@ -147,7 +103,6 @@ async function callGemini(apiKey: string, modelName: string, base64Data: string,
 export async function POST(req: Request) {
   try {
     const openaiKey = process.env.OPENAI_API_KEY
-    const groqKey = process.env.GROQ_API_KEY
     const geminiKey = process.env.GEMINI_API_KEY
 
     // Assemble the active provider pool based on configured keys
@@ -157,13 +112,6 @@ export async function POST(req: Request) {
       pool.push({
         name: "OpenAI (gpt-4o-mini)",
         run: (b64, mime) => callOpenAI(openaiKey, b64, mime),
-      })
-    }
-
-    if (groqKey) {
-      pool.push({
-        name: "Groq (llama-3.2-vision)",
-        run: (b64, mime) => callGroq(groqKey, b64, mime),
       })
     }
 
@@ -180,6 +128,14 @@ export async function POST(req: Request) {
         {
           name: "Gemini (gemini-3.1-flash-lite)",
           run: (b64, mime) => callGemini(geminiKey, "gemini-3.1-flash-lite", b64, mime),
+        },
+        {
+          name: "Gemini (gemini-3.6-flash)",
+          run: (b64, mime) => callGemini(geminiKey, "gemini-3.6-flash", b64, mime),
+        },
+        {
+          name: "Gemini (gemini-3.5-flash)",
+          run: (b64, mime) => callGemini(geminiKey, "gemini-3.5-flash", b64, mime),
         }
       )
     }
@@ -188,7 +144,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "No OCR API keys configured. Please add OPENAI_API_KEY, GROQ_API_KEY, or GEMINI_API_KEY to .env",
+          message: "No OCR API keys configured. Please add OPENAI_API_KEY or GEMINI_API_KEY to .env",
         },
         { status: 500 }
       )

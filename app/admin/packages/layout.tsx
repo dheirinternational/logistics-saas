@@ -20,7 +20,7 @@ import { IconCamera, IconX as IconClose } from "@tabler/icons-react";
 import { useRef } from "react";
 
 export default function PageLayout({ children }: { children: ReactNode }) {
-    const { isModalActive, setIsModalActive } = useEditModalStore()
+    const { isModalActive, setIsModalActive, openModal } = useEditModalStore()
     const { selectedPackage, setSelectedPackage, setReadOnly } = usePackageStore()
     const isEditing = Number(selectedPackage?.id ?? 0) > 0
 
@@ -85,7 +85,7 @@ export default function PageLayout({ children }: { children: ReactNode }) {
                 stored_at: new Date().toISOString().split("T")[0],
                 created_at: "",
             })
-            setIsModalActive()
+            openModal()
             toast.success("Autofilled scanned details!")
         }
 
