@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect } from "react"
 import {
   IconBarcode,
+  IconScan,
   IconX,
   IconLoader2,
   IconCamera,
   IconRefresh,
+  IconUpload,
 } from "@tabler/icons-react"
 import { toast } from "@/lib/ui/toast"
 import { usePathname } from "next/navigation"
@@ -31,6 +33,7 @@ export function PortalBarcodeScannerButton() {
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [cameraActive, setCameraActive] = useState(false)
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const startCamera = async () => {
@@ -92,6 +95,16 @@ export function PortalBarcodeScannerButton() {
           }
         }, "image/jpeg", 0.95)
       }
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      stopCamera()
+      setSelectedFile(file)
+      setPreviewUrl(URL.createObjectURL(file))
+      setResult(null)
     }
   }
 
@@ -243,7 +256,7 @@ export function PortalBarcodeScannerButton() {
               <div>
                 <h2 className="dheir-dialog__title">Barcode Scanner</h2>
                 <p className="admin-modal__subtitle">
-                  Point camera at the shipment barcode to automatically open its details.
+                  Point camera or upload an image of the shipment barcode to automatically open its details.
                 </p>
               </div>
               <button
@@ -257,6 +270,13 @@ export function PortalBarcodeScannerButton() {
             </div>
 
             <div className="admin-modal__body" style={{ padding: "20px" }}>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
               
               {/* Main Camera Scan Interface */}
               {!previewUrl && !isScanning && !result && (
@@ -300,27 +320,50 @@ export function PortalBarcodeScannerButton() {
                           />
                         </div>
                         
-                        <button
-                          type="button"
-                          onClick={handleCapture}
-                          style={{
-                            width: "100%",
-                            padding: "12px",
-                            borderRadius: "8px",
-                            backgroundColor: "var(--color-dheir-blue)",
-                            color: "#fff",
-                            border: "none",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          <IconCamera size={20} />
-                          Capture Barcode
-                        </button>
+                        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            onClick={handleCapture}
+                            style={{
+                              flex: 1,
+                              minWidth: "160px",
+                              padding: "12px",
+                              borderRadius: "8px",
+                              backgroundColor: "var(--color-dheir-blue)",
+                              color: "#fff",
+                              border: "none",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <IconCamera size={20} stroke={1.8} />
+                            Capture Barcode
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                              padding: "12px 20px",
+                              borderRadius: "8px",
+                              backgroundColor: "#ffffff",
+                              color: "var(--color-dheir-ink)",
+                              border: "1px solid var(--color-dheir-border)",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <IconUpload size={20} stroke={1.8} />
+                            Upload Image
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <div
@@ -341,22 +384,47 @@ export function PortalBarcodeScannerButton() {
                       >
                         <IconCamera size={48} stroke={1.5} style={{ marginBottom: "12px" }} />
                         <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>No camera active or allowed</p>
-                        <button 
-                          type="button" 
-                          onClick={startCamera}
-                          style={{
-                            marginTop: "16px",
-                            padding: "8px 16px",
-                            borderRadius: "6px",
-                            border: "1px solid var(--color-dheir-border)",
-                            backgroundColor: "#fff",
-                            cursor: "pointer",
-                            fontSize: "12px",
-                            fontWeight: 600
-                          }}
-                        >
-                          Try Again
-                        </button>
+                        <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap", justifyContent: "center" }}>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                              padding: "10px 18px",
+                              borderRadius: "8px",
+                              backgroundColor: "var(--color-dheir-blue)",
+                              color: "#fff",
+                              border: "none",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              fontSize: "13px",
+                            }}
+                          >
+                            <IconUpload size={18} stroke={1.8} />
+                            Upload Barcode Image
+                          </button>
+                          <button 
+                            type="button" 
+                            onClick={startCamera}
+                            style={{
+                              padding: "10px 16px",
+                              borderRadius: "8px",
+                              border: "1px solid var(--color-dheir-border)",
+                              backgroundColor: "#fff",
+                              cursor: "pointer",
+                              fontSize: "13px",
+                              fontWeight: 600,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                            }}
+                          >
+                            <IconRefresh size={16} stroke={1.8} />
+                            Try Camera
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -384,12 +452,13 @@ export function PortalBarcodeScannerButton() {
                       style={{ width: "100%", height: "100%", objectFit: "contain" }}
                     />
                   </div>
-                  <div style={{ display: "flex", gap: "12px" }}>
+                  <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                     <button
                       type="button"
                       onClick={handleScan}
                       style={{
                         flex: 1,
+                        minWidth: "140px",
                         padding: "10px 16px",
                         borderRadius: "8px",
                         backgroundColor: "var(--color-dheir-blue)",
@@ -397,8 +466,13 @@ export function PortalBarcodeScannerButton() {
                         border: "none",
                         fontWeight: 600,
                         cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
                       }}
                     >
+                      <IconScan size={18} stroke={1.8} />
                       Scan Barcode
                     </button>
                     <button
@@ -416,8 +490,26 @@ export function PortalBarcodeScannerButton() {
                         gap: "6px",
                       }}
                     >
-                      <IconRefresh size={16} />
-                      Retake
+                      <IconCamera size={16} stroke={1.8} />
+                      Camera
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        padding: "10px 16px",
+                        borderRadius: "8px",
+                        border: "1px solid var(--color-dheir-border)",
+                        backgroundColor: "transparent",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <IconUpload size={16} stroke={1.8} />
+                      Upload Different
                     </button>
                   </div>
                 </div>

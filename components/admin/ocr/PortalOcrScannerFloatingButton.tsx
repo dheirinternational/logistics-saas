@@ -277,7 +277,7 @@ export function PortalOcrScannerFloatingButton() {
               <div>
                 <h2 className="dheir-dialog__title">Receipt Live Scanner</h2>
                 <p className="admin-modal__subtitle">
-                  Use device camera to snap and extract Customer Name, Cost, and Tracking ID.
+                  Snap or upload a receipt to extract Customer Name, Cost, and Tracking ID.
                 </p>
               </div>
               <button
@@ -291,6 +291,13 @@ export function PortalOcrScannerFloatingButton() {
             </div>
 
             <div className="admin-modal__body" style={{ padding: "20px" }}>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
 
               {/* Main Camera Scan Interface */}
               {!previewUrl && !isScanning && !result && (
@@ -334,27 +341,50 @@ export function PortalOcrScannerFloatingButton() {
                           />
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={handleCapture}
-                          style={{
-                            width: "100%",
-                            padding: "12px",
-                            borderRadius: "8px",
-                            backgroundColor: "var(--color-dheir-blue)",
-                            color: "#fff",
-                            border: "none",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          <IconCamera size={20} />
-                          Capture Label / Receipt
-                        </button>
+                        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            onClick={handleCapture}
+                            style={{
+                              flex: 1,
+                              minWidth: "160px",
+                              padding: "12px",
+                              borderRadius: "8px",
+                              backgroundColor: "var(--color-dheir-blue)",
+                              color: "#fff",
+                              border: "none",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <IconCamera size={20} stroke={1.8} />
+                            Capture Receipt
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                              padding: "12px 20px",
+                              borderRadius: "8px",
+                              backgroundColor: "#ffffff",
+                              color: "var(--color-dheir-ink)",
+                              border: "1px solid var(--color-dheir-border)",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <IconUpload size={20} stroke={1.8} />
+                            Upload Image
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <div
@@ -375,22 +405,47 @@ export function PortalOcrScannerFloatingButton() {
                       >
                         <IconCamera size={48} stroke={1.5} style={{ marginBottom: "12px" }} />
                         <p style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>No camera active or allowed</p>
-                        <button
-                          type="button"
-                          onClick={startCamera}
-                          style={{
-                            marginTop: "16px",
-                            padding: "8px 16px",
-                            borderRadius: "6px",
-                            border: "1px solid var(--color-dheir-border)",
-                            backgroundColor: "#fff",
-                            cursor: "pointer",
-                            fontSize: "12px",
-                            fontWeight: 600
-                          }}
-                        >
-                          Try Again
-                        </button>
+                        <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap", justifyContent: "center" }}>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                              padding: "10px 18px",
+                              borderRadius: "8px",
+                              backgroundColor: "var(--color-dheir-blue)",
+                              color: "#fff",
+                              border: "none",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              fontSize: "13px",
+                            }}
+                          >
+                            <IconUpload size={18} stroke={1.8} />
+                            Upload Receipt Image
+                          </button>
+                          <button
+                            type="button"
+                            onClick={startCamera}
+                            style={{
+                              padding: "10px 16px",
+                              borderRadius: "8px",
+                              border: "1px solid var(--color-dheir-border)",
+                              backgroundColor: "#fff",
+                              cursor: "pointer",
+                              fontSize: "13px",
+                              fontWeight: 600,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                            }}
+                          >
+                            <IconRefresh size={16} stroke={1.8} />
+                            Try Camera
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -418,12 +473,13 @@ export function PortalOcrScannerFloatingButton() {
                       style={{ width: "100%", height: "100%", objectFit: "contain" }}
                     />
                   </div>
-                  <div style={{ display: "flex", gap: "12px" }}>
+                  <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                     <button
                       type="button"
                       onClick={handleScan}
                       style={{
                         flex: 1,
+                        minWidth: "140px",
                         padding: "10px 16px",
                         borderRadius: "8px",
                         backgroundColor: "var(--color-dheir-blue)",
@@ -431,8 +487,13 @@ export function PortalOcrScannerFloatingButton() {
                         border: "none",
                         fontWeight: 600,
                         cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
                       }}
                     >
+                      <IconScan size={18} stroke={1.8} />
                       Scan Receipt
                     </button>
                     <button
@@ -450,8 +511,26 @@ export function PortalOcrScannerFloatingButton() {
                         gap: "6px",
                       }}
                     >
-                      <IconRefresh size={16} />
-                      Retake
+                      <IconCamera size={16} stroke={1.8} />
+                      Camera
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        padding: "10px 16px",
+                        borderRadius: "8px",
+                        border: "1px solid var(--color-dheir-border)",
+                        backgroundColor: "transparent",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <IconUpload size={16} stroke={1.8} />
+                      Upload Different
                     </button>
                   </div>
                 </div>
@@ -612,21 +691,50 @@ export function PortalOcrScannerFloatingButton() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={startCamera}
-                    style={{
-                      width: "100%",
-                      padding: "10px 16px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--color-dheir-border)",
-                      backgroundColor: "transparent",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Scan Another Receipt
-                  </button>
+                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      onClick={startCamera}
+                      style={{
+                        flex: 1,
+                        minWidth: "150px",
+                        padding: "10px 16px",
+                        borderRadius: "8px",
+                        border: "1px solid var(--color-dheir-border)",
+                        backgroundColor: "transparent",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <IconCamera size={18} stroke={1.8} />
+                      Scan with Camera
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        flex: 1,
+                        minWidth: "150px",
+                        padding: "10px 16px",
+                        borderRadius: "8px",
+                        border: "1px solid var(--color-dheir-border)",
+                        backgroundColor: "transparent",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <IconUpload size={18} stroke={1.8} />
+                      Upload New Receipt
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
