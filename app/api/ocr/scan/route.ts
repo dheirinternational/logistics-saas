@@ -1,13 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { NextResponse } from "next/server"
 
-// Active, high-availability Gemini models with vision capabilities
-const MODELS = [
-  "gemini-flash-latest",
-  "gemini-3.5-flash-lite",
-  "gemini-3.1-flash-lite",
-  "gemini-3.6-flash",
-] as const
+// Current official models: gemini-flash-latest (primary) with gemini-3.8-flash (fallback)
+const PRIMARY_MODEL = "gemini-flash-latest"
+const FALLBACK_MODEL = "gemini-3.8-flash"
 
 const PROMPT = `Analyze this package label, waybill, shipping receipt, or package box image.
 Carefully read all text (including Chinese, English, French, Turkish, etc.) and translate all extracted descriptive values into standard English.
@@ -58,7 +54,7 @@ export async function POST(req: Request) {
     let responseText = ""
     let lastError: any = null
 
-    for (const modelName of MODELS) {
+    for (const modelName of [PRIMARY_MODEL, FALLBACK_MODEL]) {
       try {
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), 12000) // 12s per candidate
