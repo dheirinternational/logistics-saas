@@ -4,7 +4,7 @@ import { usePackageStore } from "@/store/incomingPackagesStore";
 import { useEditModalStore } from "@/types/editModalStore";
 import { PackageImage, Warehouse } from "@/types/entityTypeDef";
 import Image from "next/image";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState, useCallback } from "react";
 import { toast } from "@/lib/ui/toast";
 import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal";
 import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal";
@@ -162,7 +162,40 @@ const PackageEditComponent = () => {
     const [cameraOpen, setCameraOpen] = useState(false)
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
     const [isCapturing, setIsCapturing] = useState(false)
-    const videoRef = useRef<HTMLVideoElement>(null)
+    const videoRef = useRef<HTMLVideoElement | null>(null)
+    const streamRef = useRef<MediaStream | null>(null)
+
+    // Attach stream to video whenever element mounts
+    const setVideoRef = useCallback((element: HTMLVideoElement | null) => {
+        videoRef.current = element
+        if (element && streamRef.current) {
+            element.muted = true
+            element.defaultMuted = true
+            element.playsInline = true
+            if (element.srcObject !== streamRef.current) {
+                element.srcObject = streamRef.current
+            }
+            element.play().catch((err) => {
+                console.warn("Video play error in callback ref:", err)
+            })
+        }
+    }, [])
+
+    // Sync stream to video element when state changes
+    useEffect(() => {
+        if (videoRef.current && cameraStream) {
+            const video = videoRef.current
+            video.muted = true
+            video.defaultMuted = true
+            video.playsInline = true
+            if (video.srcObject !== cameraStream) {
+                video.srcObject = cameraStream
+            }
+            video.play().catch((err) => {
+                console.warn("Video play error in useEffect:", err)
+            })
+        }
+    }, [cameraStream, cameraOpen])
 
     // Selected Objects
     const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
@@ -178,25 +211,52 @@ const PackageEditComponent = () => {
     // Camera Actions
     const startCamera = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" },
-                audio: false
-            })
+            let stream: MediaStream
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: "environment" },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    audio: false
+                })
+            } catch (firstErr) {
+                console.warn("Falling back to generic camera constraints:", firstErr)
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                })
+            }
+
+            streamRef.current = stream
             setCameraStream(stream)
             setCameraOpen(true)
+
             if (videoRef.current) {
+                videoRef.current.muted = true
+                videoRef.current.defaultMuted = true
+                videoRef.current.playsInline = true
                 videoRef.current.srcObject = stream
+                videoRef.current.play().catch((err) => console.warn("Video play error:", err))
             }
         } catch (err) {
             console.error("Camera error", err)
-            toast.error("Could not access camera device.")
+            toast.error("Could not access camera device. Please check permissions.")
         }
     }
 
     const stopCamera = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach((track) => track.stop())
+            streamRef.current = null
+        }
         if (cameraStream) {
             cameraStream.getTracks().forEach((track) => track.stop())
             setCameraStream(null)
+        }
+        if (videoRef.current) {
+            videoRef.current.srcObject = null
         }
         setCameraOpen(false)
     }
@@ -694,10 +754,13 @@ const PackageEditComponent = () => {
                         <div className="camera-viewport-container">
                             {/* Live video */}
                             <video
-                                ref={videoRef}
+                                ref={setVideoRef}
                                 autoPlay
                                 playsInline
                                 muted
+                                onLoadedMetadata={(e) => {
+                                    e.currentTarget.play().catch(() => {})
+                                }}
                                 className="camera-video-element"
                             />
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import {
   IconScan,
   IconX,
@@ -74,21 +74,74 @@ export function PortalOcrScannerFloatingButton() {
   const [cameraActive, setCameraActive] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+
+  // Attach stream to video whenever element mounts or stream updates
+  const setVideoRef = useCallback((element: HTMLVideoElement | null) => {
+    videoRef.current = element
+    if (element && streamRef.current) {
+      element.muted = true
+      element.defaultMuted = true
+      element.playsInline = true
+      if (element.srcObject !== streamRef.current) {
+        element.srcObject = streamRef.current
+      }
+      element.play().catch((err) => {
+        console.warn("Video play error in callback ref:", err)
+      })
+    }
+  }, [])
+
+  // Sync stream to video element when state changes
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      const video = videoRef.current
+      video.muted = true
+      video.defaultMuted = true
+      video.playsInline = true
+      if (video.srcObject !== stream) {
+        video.srcObject = stream
+      }
+      video.play().catch((err) => {
+        console.warn("Video play error in useEffect:", err)
+      })
+    }
+  }, [stream, cameraActive])
 
   const startCamera = async () => {
     setResult(null)
     setSelectedFile(null)
     setPreviewUrl(null)
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-        audio: false,
-      })
+      let mediaStream: MediaStream
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+          },
+          audio: false,
+        })
+      } catch (firstErr) {
+        console.warn("Falling back to generic camera constraints:", firstErr)
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        })
+      }
+
+      streamRef.current = mediaStream
       setStream(mediaStream)
       setCameraActive(true)
+
       if (videoRef.current) {
+        videoRef.current.muted = true
+        videoRef.current.defaultMuted = true
+        videoRef.current.playsInline = true
         videoRef.current.srcObject = mediaStream
+        videoRef.current.play().catch((err) => console.warn("Video play error:", err))
       }
     } catch (err) {
       console.error("Camera access error:", err)
@@ -98,9 +151,16 @@ export function PortalOcrScannerFloatingButton() {
   }
 
   const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
+    }
     if (stream) {
       stream.getTracks().forEach((track) => track.stop())
       setStream(null)
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
     }
     setCameraActive(false)
   }
@@ -119,8 +179,11 @@ export function PortalOcrScannerFloatingButton() {
   const handleCapture = () => {
     if (videoRef.current) {
       const video = videoRef.current
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        toast.error("Camera feed is still loading. Please wait a second.")
+        return
+      }
       const canvas = document.createElement("canvas")
-      // Match high resolution of video feed
       canvas.width = video.videoWidth || 640
       canvas.height = video.videoHeight || 480
 
@@ -392,10 +455,13 @@ export function PortalOcrScannerFloatingButton() {
                           }}
                         >
                           <video
-                            ref={videoRef}
+                            ref={setVideoRef}
                             autoPlay
                             playsInline
                             muted
+                            onLoadedMetadata={(e) => {
+                              e.currentTarget.play().catch(() => {})
+                            }}
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           />
 
