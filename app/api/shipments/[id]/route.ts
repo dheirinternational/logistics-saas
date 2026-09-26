@@ -157,18 +157,25 @@ export async function PUT(
 
       // Notify customer if admin reply changed
       if (admin_reply !== undefined && admin_reply.trim() !== oldReply.trim() && customerUserId) {
-        await client.query(
-          `
-          INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
-          VALUES ($1, $2, $3, $4, false)
-          `,
-          [
-            session.user_id,
-            customerUserId,
-            `Shipment Note Update (${trackingNo || tracking_number})`,
-            admin_reply.trim(),
-          ]
-        )
+        try {
+          const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [customerUserId])
+          if (userCheck.rows.length > 0) {
+            await client.query(
+              `
+              INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
+              VALUES ($1, $2, $3, $4, false)
+              `,
+              [
+                session.user_id,
+                customerUserId,
+                `Shipment Note Update (${trackingNo || tracking_number})`,
+                admin_reply.trim(),
+              ]
+            )
+          }
+        } catch (inboxErr) {
+          console.warn("Failed to send inbox notification for shipment note update:", inboxErr)
+        }
       }
 
       // Also update media links if array is provided (supports images array or media_asset_ids)
@@ -182,14 +189,21 @@ export async function PUT(
           const url = (typeof img === "string" ? img : img.image_url || img.imageUrl || "").trim()
           if (!url) continue
           const isPrimary = i === 0
-          const mediaType = (typeof img === "object" && (img.media_type || img.mediaType))
-            ? (img.media_type || img.mediaType)
-            : (/\.(mp4|webm|mov)$/i.test(url) ? "video" : "photo")
-          const assetId = (typeof img === "object" && Number(img.media_asset_id || img.mediaAssetId)) || null
+          const rawType = (typeof img === "object" && (img.media_type || img.mediaType)) || ""
+          // Constraint requires media_type to be 'image' or 'video' (never 'photo')
+          const mediaType = (rawType === "video" || /\.(mp4|webm|mov)$/i.test(url)) ? "video" : "image"
+          const rawAssetId = (typeof img === "object" && Number(img.media_asset_id || img.mediaAssetId)) || null
+          let validAssetId: number | null = null
+          if (rawAssetId && rawAssetId > 0) {
+            const assetCheck = await client.query("SELECT id FROM media_assets WHERE id = $1", [rawAssetId])
+            if (assetCheck.rows.length > 0) {
+              validAssetId = rawAssetId
+            }
+          }
           await client.query(
             `INSERT INTO shipment_images (shipment_id, image_url, is_primary, media_type, media_asset_id)
              VALUES ($1, $2, $3, $4, $5)`,
-            [shipmentId, url, isPrimary, mediaType, assetId && assetId > 0 ? assetId : null]
+            [shipmentId, url, isPrimary, mediaType, validAssetId]
           )
         }
       } else if (Array.isArray(media_asset_ids)) {
@@ -212,10 +226,10 @@ export async function PUT(
     } finally {
       client.release()
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error updating shipment:", err)
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: err?.message || "Internal server error" },
       { status: 500 }
     )
   }

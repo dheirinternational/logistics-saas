@@ -92,7 +92,7 @@ export function AdminShipmentViewModal() {
       setTotalCost(String(selectedShipment.total_cost || ""))
       setTotalWeight(String(selectedShipment.total_weight || ""))
       setTotalWeightUnit(selectedShipment.total_weight_unit || "kg")
-      setPaymentTime(selectedShipment.payment_time || "before")
+      setPaymentTime(selectedShipment.payment_time?.includes("after") ? "after" : "before")
       setPaidFor(Boolean(selectedShipment.paid_for))
       setStatus(selectedShipment.status as ShipmentStatus)
       setShipmentNote(selectedShipment.shipment_note || "")
@@ -103,7 +103,7 @@ export function AdminShipmentViewModal() {
         const mappedMedia: AdminMediaItem[] = selectedShipment.images.map((img: any, idx: number) => {
           const url = img.image_url || img.imageUrl || ""
           const isVideo = img.media_type === "video" || img.mediaType === "video" || /\.(mp4|webm|mov)$/i.test(url)
-          const assetId = img.media_asset_id || img.mediaAssetId || (img.id && !Number.isNaN(Number(img.id)) && Number(img.id) < 10000 ? Number(img.id) : null)
+          const assetId = img.media_asset_id || img.mediaAssetId || null
           return {
             id: assetId || idx + 10000,
             name: "shipment_media",
@@ -155,8 +155,8 @@ export function AdminShipmentViewModal() {
           images: libraryMedia.map((m) => ({
             image_url: m.publicUrl,
             imageUrl: m.publicUrl,
-            media_type: m.mediaType === "video" ? "video" : "photo",
-            mediaType: m.mediaType === "video" ? "video" : "photo",
+            media_type: m.mediaType === "video" ? "video" : "image",
+            mediaType: m.mediaType === "video" ? "video" : "image",
             media_asset_id: m.id && m.id < 10000 ? m.id : null,
           })),
           media_asset_ids: libraryMedia.map((m) => m.id).filter((id) => id && id < 10000),
@@ -243,6 +243,7 @@ export function AdminShipmentViewModal() {
                 onChange={(e) => setChannel(e.target.value)}
                 required
               >
+                <option value="air">Air</option>
                 <option value="air_gz">Air Gz</option>
                 <option value="air_hk">Air HK</option>
                 <option value="sea">Sea</option>
