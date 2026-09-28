@@ -32,7 +32,7 @@ function formatNaira(amount: number) {
 export function PortalHomeStatsCards({ counts }: PortalHomeStatsCardsProps) {
   const cards: StatCard[] = [
     {
-      label: "On the way",
+      label: "Awaiting warehouse",
       value: counts.waiting_to_be_stored,
       hint: "Not in warehouse yet",
       href: "/customer/waiting_to_be_stored",

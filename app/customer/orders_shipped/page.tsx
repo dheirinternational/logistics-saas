@@ -54,7 +54,7 @@ export default function TrackShipmentsPage() {
     <div className="portal-packages">
       <PortalPackagesPageHeader
         title="Track shipment"
-        description="Active shipments on the way to Nigeria."
+        description="Active shipments in transit to Nigeria."
         backHref="/customer"
         backLabel="Home"
       />

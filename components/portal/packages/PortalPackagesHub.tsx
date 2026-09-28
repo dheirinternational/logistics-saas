@@ -81,7 +81,7 @@ export function PortalPackagesHub() {
   const filterOptions = useMemo(() => {
     return [
       { value: "", label: "All packages", count: packages.length + incoming.length },
-      { value: "expected", label: "Not in warehouse yet", count: incoming.length },
+      { value: "expected", label: "Awaiting warehouse", count: incoming.length },
       { value: "stored", label: "At warehouse", count: packages.filter((p) => p.status === "stored").length },
       { value: "requested_for", label: "Ready to ship", count: packages.filter((p) => p.status === "requested_for").length },
       { value: "assigned_to_shipment", label: "In shipment", count: packages.filter((p) => p.status === "assigned_to_shipment").length },

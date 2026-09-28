@@ -111,7 +111,7 @@ export default function AddPackagePage() {
     <div className="portal-packages">
       <PortalPackagesPageHeader
         title="Add incoming package"
-        description="Tell us what is on the way to our China warehouse so we can match it when it arrives."
+        description="Register parcels sent by your supplier so our warehouse can identify them upon arrival."
         backHref="/customer/packages"
         backLabel="Packages"
       />

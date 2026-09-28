@@ -277,7 +277,7 @@ export async function getPortalDashboardData(
         row.kind === "shipment" && row.origin_city
           ? `${origin} → ${dest}`
           : row.kind === "incoming"
-            ? "On the way to warehouse"
+            ? "Awaiting warehouse arrival"
             : "At warehouse"
 
       return {

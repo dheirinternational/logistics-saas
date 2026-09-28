@@ -62,7 +62,7 @@ export const PORTAL_HOME_PRIORITY_ACTIONS: PortalHomeAction[] = [
 export const PORTAL_HOME_QUICK_ACTIONS: PortalHomeAction[] = [
   {
     id: "waiting",
-    label: "On the way",
+    label: "Awaiting warehouse",
     description: "Packages not yet in warehouse",
     href: "/customer/waiting_to_be_stored",
     icon: IconPackage,

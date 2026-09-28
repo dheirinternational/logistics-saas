@@ -31,30 +31,30 @@ export function PortalPackageTimeline({ packag, defaultOpen = false }: PortalPac
 
   const steps: TimelineStep[] = [
     {
-      label: "Package registered",
-      description: "Supplier tracking details added by customer",
+      label: "Tracking Added (With Seller)",
+      description: "Tracking number saved. Package is en route from your seller to our warehouse via local courier.",
       date: packag.created_at,
       status: isStored ? "completed" : "current",
     },
     {
-      label: "Arrived at warehouse",
-      description: packag.warehouse_name ? `Received at ${packag.warehouse_name}` : "Stored at origin warehouse",
+      label: "Received at Warehouse",
+      description: packag.warehouse_name ? `Safely received, weighed, and stored at ${packag.warehouse_name}` : "Safely received, weighed, and stored at warehouse",
       date: packag.stored_at || packag.received_at,
       status: isStored ? (isRequested ? "completed" : "current") : "pending",
     },
     {
-      label: "Release requested",
-      description: "Consolidation complete & shipment registered",
+      label: "Shipment Requested",
+      description: "Shipment requested. Goods prepared for packing & dispatch.",
       status: isRequested ? (isShipped ? "completed" : "current") : "pending",
     },
     {
-      label: "Outbound shipment active",
-      description: "Dispatched & in transit to destination",
+      label: "Shipped (In Transit to Nigeria)",
+      description: "Dispatched from warehouse and en route to Nigeria via air/sea freight.",
       status: isShipped ? (isDelivered ? "completed" : "current") : "pending",
     },
     {
-      label: "Delivered",
-      description: "Package signed & verified",
+      label: "Delivered / Picked Up",
+      description: "Package collected at destination office or delivered to your door.",
       status: isDelivered ? "completed" : "pending",
     },
   ]

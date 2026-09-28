@@ -23,7 +23,7 @@ const PACKAGE_STATUS_VARIANTS: Record<PackageStatus, PackageStatusChipVariant> =
   }
 
 const INCOMING_STATUS_LABELS: Record<IncomingPackageStatus, string> = {
-  expected: "On the way",
+  expected: "Awaiting warehouse",
   received: "Received",
   cancelled: "Cancelled",
   stored: "Stored",

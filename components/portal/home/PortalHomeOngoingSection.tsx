@@ -72,7 +72,7 @@ export function PortalHomeOngoingSection({
             Ongoing delivery
           </h2>
           <p className="portal-home__section-sub">
-            Shipments currently on the way to you
+            Shipments in transit to you
           </p>
         </div>
         <a href="/customer/orders_shipped" className="portal-home__text-link">
@@ -123,7 +123,7 @@ export function PortalHomeOngoingSection({
 
           {active ? (
             <aside id="ongoing-detail-aside" className="portal-home__ongoing-detail">
-              <p className="portal-home__ongoing-detail-label">On the way</p>
+              <p className="portal-home__ongoing-detail-label">In transit</p>
               <h3 className="portal-home__ongoing-detail-title">
                 {active.trackingNumber}
               </h3>
