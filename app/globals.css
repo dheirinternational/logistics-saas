@@ -5639,9 +5639,9 @@ a.portal-packages__card--link:focus-visible {
 
 .portal-quote__header-row {
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
 }
 
 .portal-quote__header-action {
@@ -5652,13 +5652,12 @@ a.portal-packages__card--link:focus-visible {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-shrink: 0;
+    flex-wrap: wrap;
 }
 
 .portal-account__title,
 .portal-home__section-title,
-.portal-packages__title,
-.portal-quote__title {
+.portal-packages__title {
     display: inline-flex;
     align-items: center;
     flex-wrap: wrap;
@@ -5666,6 +5665,10 @@ a.portal-packages__card--link:focus-visible {
 }
 
 .portal-quote__title {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
     margin: 0;
     font-family: var(--font-display);
     font-size: clamp(1.5rem, 3vw, 2rem);
@@ -5831,15 +5834,26 @@ a.portal-packages__card--link:focus-visible {
     display: flex;
     gap: 8px;
     margin-bottom: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+}
+
+.portal-quote__channels::-webkit-scrollbar {
+    display: none;
 }
 
 .portal-quote__channel {
     display: inline-flex;
-    flex: 1;
+    flex: 1 0 auto;
+    flex-shrink: 0;
+    white-space: nowrap;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 10px;
+    padding: 12px 18px;
     border: 1px solid var(--color-dheir-border);
     border-radius: 10px;
     background: var(--color-dheir-page);

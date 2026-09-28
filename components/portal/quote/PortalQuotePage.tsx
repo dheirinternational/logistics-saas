@@ -183,7 +183,7 @@ export function PortalQuotePage() {
                 onClick={() => switchChannel(id)}
               >
                 <Icon size={18} stroke={1.5} aria-hidden />
-                {label}
+                <span>{label}</span>
               </button>
             ))}
           </div>
