@@ -9,19 +9,26 @@ import {
 import {
   formatWarehouseCopyText,
   getWarehouseAddressDetails,
+  getWarehouseShippingChannel,
 } from "@/lib/portal/warehouseAddress"
 import type { Warehouse } from "@/types/entityTypeDef"
 import { useEffect, useMemo, useState } from "react"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
+import { PortalAirWarehouseNoticeModal } from "@/components/portal/warehouse/PortalAirWarehouseNoticeModal"
 
-import { IconCopy } from "@tabler/icons-react"
+import { IconAlertCircle, IconCopy } from "@tabler/icons-react"
 
 export default function WarehouseAddressPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [memberCode, setMemberCode] = useState("")
   const [selectedId, setSelectedId] = useState<string>("")
   const [loading, setLoading] = useState(true)
+
+  const [airModalOpen, setAirModalOpen] = useState(false)
+  const [pendingCopy, setPendingCopy] = useState<{ text: string; label: string } | null>(null)
+  const [copiedTrigger, setCopiedTrigger] = useState(0)
+  const [hasAcknowledgedAirTerms, setHasAcknowledgedAirTerms] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -56,15 +63,51 @@ export default function WarehouseAddressPage() {
   }, [])
 
   const selected = warehouses.find((w) => String(w.id) === selectedId)
+  const isAir = selected ? getWarehouseShippingChannel(selected) === "Air" : false
 
   const copyText = useMemo(() => {
     if (!selected || !memberCode) return ""
     return formatWarehouseCopyText(selected, memberCode)
   }, [selected, memberCode])
 
+  const handleCardCopyClick = () => {
+    if (isAir && !hasAcknowledgedAirTerms) {
+      setPendingCopy({ text: copyText, label: "Warehouse address" })
+      setAirModalOpen(true)
+    } else {
+      navigator.clipboard.writeText(copyText)
+      setCopiedTrigger((prev) => prev + 1)
+      toast.success("Warehouse address copied")
+    }
+  }
+
   const handleCopyField = (label: string, val: string) => {
-    navigator.clipboard.writeText(val)
-    toast.success(`${label} copied`)
+    if (isAir && !hasAcknowledgedAirTerms) {
+      setPendingCopy({ text: val, label })
+      setAirModalOpen(true)
+    } else {
+      navigator.clipboard.writeText(val)
+      toast.success(`${label} copied`)
+    }
+  }
+
+  const handleConfirmAirNotice = async () => {
+    if (pendingCopy) {
+      try {
+        await navigator.clipboard.writeText(pendingCopy.text)
+        setHasAcknowledgedAirTerms(true)
+        if (pendingCopy.label === "Warehouse address") {
+          setCopiedTrigger((prev) => prev + 1)
+          toast.success("Air warehouse address copied")
+        } else {
+          toast.success(`${pendingCopy.label} copied`)
+        }
+      } catch {
+        toast.error("Could not copy address")
+      }
+    }
+    setAirModalOpen(false)
+    setPendingCopy(null)
   }
 
   if (loading) {
@@ -106,7 +149,10 @@ export default function WarehouseAddressPage() {
           <PortalFormField label="Select warehouse">
             <PortalFormSelect
               value={selectedId}
-              onChange={(e) => setSelectedId(e.target.value)}
+              onChange={(e) => {
+                setSelectedId(e.target.value)
+                setHasAcknowledgedAirTerms(false)
+              }}
             >
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -118,10 +164,37 @@ export default function WarehouseAddressPage() {
         </div>
       ) : null}
 
+      {isAir ? (
+        <div 
+          className="my-3 p-4 rounded-xl border text-sm" 
+          style={{ 
+            backgroundColor: "#fffbeb", 
+            borderColor: "#fde68a", 
+            color: "#92400e",
+            lineHeight: "1.6"
+          }}
+        >
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <IconAlertCircle size={20} style={{ color: "#d97706", flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <p style={{ margin: 0, fontWeight: 700, color: "#78350f" }}>
+                Important Air Shipping Notice:
+              </p>
+              <ul style={{ margin: "6px 0 0", paddingLeft: 18, listStyleType: "disc" }}>
+                <li>The minimum we accept for air is <strong>1kg</strong>.</li>
+                <li>Air shipping is <strong>prepaid</strong>, which means you pay the shipping fee before we ship out the goods.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {selected && copyText ? (
         <PortalHomeWarehouseCard
           warehouseName={selected.name}
           copyText={copyText}
+          onCopyClick={handleCardCopyClick}
+          copiedTrigger={copiedTrigger}
         />
       ) : (
         <div className="portal-packages__empty">
@@ -168,6 +241,16 @@ export default function WarehouseAddressPage() {
           ))}
         </section>
       ) : null}
+
+      <PortalAirWarehouseNoticeModal
+        isOpen={airModalOpen}
+        onClose={() => {
+          setAirModalOpen(false)
+          setPendingCopy(null)
+        }}
+        onConfirm={handleConfirmAirNotice}
+        copyTargetLabel={pendingCopy?.label}
+      />
     </div>
   )
 }

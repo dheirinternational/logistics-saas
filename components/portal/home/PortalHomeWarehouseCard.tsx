@@ -7,13 +7,23 @@ import { toast } from "@/lib/ui/toast"
 type PortalHomeWarehouseCardProps = {
   warehouseName: string
   copyText: string
+  onCopyClick?: () => void
+  copiedTrigger?: number
 }
 
 export function PortalHomeWarehouseCard({
   warehouseName,
   copyText,
+  onCopyClick,
+  copiedTrigger,
 }: PortalHomeWarehouseCardProps) {
   const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (copiedTrigger && copiedTrigger > 0) {
+      setCopied(true)
+    }
+  }, [copiedTrigger])
 
   useEffect(() => {
     if (!copied) return
@@ -22,6 +32,10 @@ export function PortalHomeWarehouseCard({
   }, [copied])
 
   const handleCopy = async () => {
+    if (onCopyClick) {
+      onCopyClick()
+      return
+    }
     try {
       await navigator.clipboard.writeText(copyText)
       setCopied(true)
