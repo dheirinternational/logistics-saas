@@ -168,9 +168,9 @@ export default function TrackShipmentsPage() {
                   </div>
                 </div>
 
-                  {(s.air_gz_cost || s.air_hk_cost || s.air_gz_weight || s.air_hk_weight) && (
+                  {(s.air_gz_cost || s.air_hk_cost || s.air_gz_weight || s.air_hk_weight || s.sea_cost || s.sea_weight) && (
                     <div style={{ marginTop: "0.75rem", marginBottom: "0.75rem", padding: "10px 12px", borderRadius: 8, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "6px" }}>
-                      <span className="font-semibold text-dheir-ink" style={{ fontSize: "0.75rem" }}>Flight Channel Breakdown:</span>
+                      <span className="font-semibold text-dheir-ink" style={{ fontSize: "0.75rem" }}>Cargo Breakdown:</span>
                       {s.air_gz_weight != null && Number(s.air_gz_weight) > 0 && (
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
                           <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>Air GZ (Normal):</span>
@@ -181,6 +181,12 @@ export default function TrackShipmentsPage() {
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
                           <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>Air HK (Sensitive):</span>
                           <span>{Number(s.air_hk_weight).toFixed(2)} {(s.air_hk_weight_unit ?? "kg").toUpperCase()} {s.air_hk_cost ? `· ₦${Number(s.air_hk_cost).toLocaleString("en-NG")}` : ""} {s.air_hk_expected_arrival_date ? `· EDD: ${s.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
+                        </div>
+                      )}
+                      {s.sea_weight != null && Number(s.sea_weight) > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem" }}>
+                          <span style={{ color: "var(--color-dheir-navy, #1e3a8a)", fontWeight: 500 }}>Sea Cargo:</span>
+                          <span>{Number(s.sea_weight).toFixed(2)} {(s.sea_weight_unit ?? "cbm").toUpperCase()} {s.sea_cost ? `· ₦${Number(s.sea_cost).toLocaleString("en-NG")}` : ""} {s.sea_expected_arrival_date ? `· EDD: ${s.sea_expected_arrival_date.split("T")[0]}` : ""}</span>
                         </div>
                       )}
                     </div>

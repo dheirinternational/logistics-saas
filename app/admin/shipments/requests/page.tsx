@@ -81,6 +81,14 @@ const Page: NextPage = () => {
     const [airHkLoadingDate, setAirHkLoadingDate] = useState("")
     const [airHkExpectedArrivalDate, setAirHkExpectedArrivalDate] = useState("")
 
+    // Sea Cargo States
+    const [seaWeight, setSeaWeight] = useState("")
+    const [seaWeightUnit, setSeaWeightUnit] = useState<"kg" | "cbm">("cbm")
+    const [seaPrice, setSeaPrice] = useState("")
+    const [seaPieces, setSeaPieces] = useState("")
+    const [seaLoadingDate, setSeaLoadingDate] = useState("")
+    const [seaExpectedArrivalDate, setSeaExpectedArrivalDate] = useState("")
+
     useEffect(() => {
         const inferred = modalSelectedRequest?.channel === "sea" ? "cbm" : "kg"
         setWeightUnit((modalSelectedRequest?.total_weight_unit as any) ?? inferred)
@@ -107,6 +115,13 @@ const Page: NextPage = () => {
         setAirHkPieces(modalSelectedRequest?.air_hk_pieces != null ? String(modalSelectedRequest.air_hk_pieces) : "")
         setAirHkLoadingDate(modalSelectedRequest?.air_hk_loading_date ? modalSelectedRequest.air_hk_loading_date.split("T")[0] : "")
         setAirHkExpectedArrivalDate(modalSelectedRequest?.air_hk_expected_arrival_date ? modalSelectedRequest.air_hk_expected_arrival_date.split("T")[0] : "")
+
+        setSeaWeight(modalSelectedRequest?.sea_weight != null ? String(modalSelectedRequest.sea_weight) : "")
+        setSeaWeightUnit(((modalSelectedRequest?.sea_weight_unit as any) ?? "cbm") as "kg" | "cbm")
+        setSeaPrice(modalSelectedRequest?.sea_cost != null ? String(modalSelectedRequest.sea_cost) : "")
+        setSeaPieces(modalSelectedRequest?.sea_pieces != null ? String(modalSelectedRequest.sea_pieces) : "")
+        setSeaLoadingDate(modalSelectedRequest?.sea_loading_date ? modalSelectedRequest.sea_loading_date.split("T")[0] : "")
+        setSeaExpectedArrivalDate(modalSelectedRequest?.sea_expected_arrival_date ? modalSelectedRequest.sea_expected_arrival_date.split("T")[0] : "")
 
         setAdminReply(modalSelectedRequest?.admin_reply || "")
     }, [modalSelectedRequest])
@@ -210,13 +225,17 @@ const Page: NextPage = () => {
             formData.append("media_asset_ids", String(item.id))
         })
 
-        const isAir = modalSelectedRequest?.channel !== "sea"
         const gzCost = Number(airGzPrice) || 0
         const hkCost = Number(airHkPrice) || 0
+        const seaC = Number(seaPrice) || 0
         const gzWeight = Number(airGzWeight) || 0
         const hkWeight = Number(airHkWeight) || 0
+        const seaW = Number(seaWeight) || 0
         const gzPieces = Number(airGzPieces) || 0
         const hkPieces = Number(airHkPieces) || 0
+        const seaP = Number(seaPieces) || 0
+
+        const hasBreakdown = (gzCost > 0 || hkCost > 0 || seaC > 0 || gzWeight > 0 || hkWeight > 0 || seaW > 0)
 
         let finalPrice = totalPrice
         let finalWeight = totalWeight
@@ -224,12 +243,12 @@ const Page: NextPage = () => {
         let finalLd = loadingDate
         let finalEdd = expectedArrivalDate
 
-        if (isAir && (gzCost > 0 || hkCost > 0 || gzWeight > 0 || hkWeight > 0)) {
-            finalPrice = String(gzCost + hkCost)
-            finalWeight = String((gzWeight + hkWeight).toFixed(2))
-            finalPieces = String((gzPieces + hkPieces) || 1)
-            finalLd = airGzLoadingDate || airHkLoadingDate || loadingDate
-            finalEdd = airGzExpectedArrivalDate || airHkExpectedArrivalDate || expectedArrivalDate
+        if (hasBreakdown) {
+            finalPrice = String(gzCost + hkCost + seaC)
+            finalWeight = String((gzWeight + hkWeight + seaW).toFixed(2))
+            finalPieces = String((gzPieces + hkPieces + seaP) || 1)
+            finalLd = airGzLoadingDate || airHkLoadingDate || seaLoadingDate || loadingDate
+            finalEdd = airGzExpectedArrivalDate || airHkExpectedArrivalDate || seaExpectedArrivalDate || expectedArrivalDate
 
             if (gzWeight > 0 || gzCost > 0) {
                 formData.append("air_gz_weight", String(gzWeight))
@@ -247,18 +266,40 @@ const Page: NextPage = () => {
                 formData.append("air_hk_loading_date", airHkLoadingDate)
                 formData.append("air_hk_expected_arrival_date", airHkExpectedArrivalDate)
             }
+            if (seaW > 0 || seaC > 0) {
+                formData.append("sea_weight", String(seaW))
+                formData.append("sea_weight_unit", seaWeightUnit)
+                formData.append("sea_cost", String(seaC))
+                formData.append("sea_pieces", String(seaP || 1))
+                formData.append("sea_loading_date", seaLoadingDate)
+                formData.append("sea_expected_arrival_date", seaExpectedArrivalDate)
+            }
         }
 
+        const hasSea = seaC > 0 || seaW > 0
+        const hasAir = (gzCost > 0 || gzWeight > 0 || hkCost > 0 || hkWeight > 0)
+        let resolvedChannel = modalSelectedRequest?.channel || "air"
+        if (hasSea && !hasAir) {
+            resolvedChannel = "sea"
+        } else if (hasAir && !hasSea) {
+            resolvedChannel = "air"
+        }
+
+        const isSeaShipment = resolvedChannel === "sea"
+        const originWarehouseId = isSeaShipment ? "14" : "8"
+        const destinationWarehouseId = isSeaShipment ? "11" : "10"
+        const resolvedWeightUnit = isSeaShipment && !hasAir ? "cbm" : weightUnit
+
         formData.append("customer_code", modalSelectedRequest?.customer_code || "")
-        formData.append("origin_warehouse_id", "1")
-        formData.append("destination_warehouse_id", "2")
-        formData.append("channel", modalSelectedRequest?.channel || "")
+        formData.append("origin_warehouse_id", originWarehouseId)
+        formData.append("destination_warehouse_id", destinationWarehouseId)
+        formData.append("channel", resolvedChannel)
         formData.append("shipment_request_id", modalSelectedRequest?.id || "")
         formData.append("shipment_note", modalSelectedRequest?.customer_note || "")
         formData.append("user_id", `${modalSelectedRequest?.user_id}` || "")
         formData.append("payment_time", `${modalSelectedRequest?.payment_time}` || "")
         formData.append("package_ids", `${modalSelectedRequest?.package_ids}` || "")
-        formData.append("total_weight_unit", weightUnit)
+        formData.append("total_weight_unit", resolvedWeightUnit)
         formData.append("total_pieces", finalPieces || "1")
         formData.append("loading_date", finalLd)
         formData.append("expected_arrival_date", finalEdd)
@@ -267,7 +308,7 @@ const Page: NextPage = () => {
         formData.append("admin_reply", adminReply.trim())
 
         if(Number(finalPrice || 0) < 1 || Number(finalWeight || 0.01) < 0.01){
-            toast.error("Input Price and Weight for Air GZ or Air HK")
+            toast.error("Input Price and Weight for Air GZ, Air HK, or Sea Cargo")
             setIsCreatingShipmentData(false)
             return 
         }
@@ -593,6 +634,18 @@ const Page: NextPage = () => {
                             </div>
                           </div>
                         )}
+                        {(modalSelectedRequest.sea_cost != null || modalSelectedRequest.sea_weight != null) && (
+                          <div style={{ padding: "10px 12px", border: "1px solid #93c5fd", borderRadius: "6px", background: "#f0f9ff" }}>
+                            <strong style={{ fontSize: "12px", color: "var(--color-dheir-navy, #1e3a8a)" }}>Sea Cargo (Guangzhou)</strong>
+                            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "4px", fontSize: "12px", color: "var(--color-dheir-ink)" }}>
+                              <span><strong>Cost:</strong> ₦{Number(modalSelectedRequest.sea_cost || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
+                              <span><strong>Weight / Vol:</strong> {Number(modalSelectedRequest.sea_weight || 0).toFixed(2)} {(modalSelectedRequest.sea_weight_unit ?? "cbm").toUpperCase()}</span>
+                              <span><strong>Pieces:</strong> {modalSelectedRequest.sea_pieces || 1} PCS</span>
+                              {modalSelectedRequest.sea_loading_date && <span><strong>LD:</strong> {modalSelectedRequest.sea_loading_date.split("T")[0]}</span>}
+                              {modalSelectedRequest.sea_expected_arrival_date && <span><strong>EDD:</strong> {modalSelectedRequest.sea_expected_arrival_date.split("T")[0]}</span>}
+                            </div>
+                          </div>
+                        )}
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#f1f5f9", borderRadius: "6px", fontSize: "12px" }}>
                           <span><strong>Total Price:</strong> {modalSelectedRequest.total_price != null ? `₦${Number(modalSelectedRequest.total_price).toLocaleString("en-NG", { minimumFractionDigits: 2 })}` : "Not recorded"}</span>
                           <span><strong>Total Weight:</strong> {modalSelectedRequest.total_weight != null ? `${Number(modalSelectedRequest.total_weight).toFixed(2)} ${(modalSelectedRequest.total_weight_unit ?? "kg").toUpperCase()}` : "Not recorded"}</span>
@@ -602,76 +655,6 @@ const Page: NextPage = () => {
                     )}
 
                     {modalSelectedRequest?.status === "vetted" && (
-                      modalSelectedRequest.channel === "sea" ? (
-                        <>
-                          <label className="portal-packages__field">
-                            <span className="portal-packages__field-label">Total price (₦)</span>
-                            <input
-                              type="number"
-                              name="total_price"
-                              className="dheir-input"
-                              value={totalPrice}
-                              onChange={(e) => setTotalPrice(e.target.value)}
-                              min={0}
-                              step="0.01"
-                              required
-                            />
-                          </label>
-
-                          <label className="portal-packages__field">
-                            <span className="portal-packages__field-label">
-                              {getProductWeightFieldLabel(weightUnit)}
-                            </span>
-                            <input
-                              type="number"
-                              name="total_weight"
-                              className="dheir-input"
-                              value={totalWeight}
-                              onChange={(e) => setTotalWeight(e.target.value)}
-                              min={0}
-                              step="0.01"
-                              required
-                            />
-                          </label>
-
-                          <label className="portal-packages__field">
-                            <span className="portal-packages__field-label">Pieces (PCS)</span>
-                            <input
-                              type="number"
-                              name="total_pieces"
-                              className="dheir-input"
-                              value={totalPieces}
-                              onChange={(e) => setTotalPieces(e.target.value)}
-                              min={1}
-                              step="1"
-                              placeholder="e.g. 5"
-                              required
-                            />
-                          </label>
-
-                          <label className="portal-packages__field">
-                            <span className="portal-packages__field-label">Loading Date (LD)</span>
-                            <input
-                              type="date"
-                              name="loading_date"
-                              className="dheir-input"
-                              value={loadingDate}
-                              onChange={(e) => setLoadingDate(e.target.value)}
-                            />
-                          </label>
-
-                          <label className="portal-packages__field">
-                            <span className="portal-packages__field-label">Expected Arrival Date (EDD)</span>
-                            <input
-                              type="date"
-                              name="expected_arrival_date"
-                              className="dheir-input"
-                              value={expectedArrivalDate}
-                              onChange={(e) => setExpectedArrivalDate(e.target.value)}
-                            />
-                          </label>
-                        </>
-                      ) : (
                         <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "1rem" }}>
                           {/* Air GZ Box */}
                           <div style={{ padding: "12px", border: "1px solid #cbd5e1", borderRadius: "8px", background: "#f8fafc" }}>
@@ -825,19 +808,96 @@ const Page: NextPage = () => {
                             </div>
                           </div>
 
+                          {/* Sea Cargo Box */}
+                          <div style={{ padding: "12px", border: "1px solid #93c5fd", borderRadius: "8px", background: "#f0f9ff" }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", flexWrap: "wrap", gap: "4px" }}>
+                              <strong style={{ fontSize: "13px", color: "var(--color-dheir-navy, #1e3a8a)" }}>Sea Cargo (Guangzhou - Sea Freight)</strong>
+                              <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>General goods, machinery, commercial & bulk items</span>
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "8px" }}>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Price (₦)</span>
+                                <input
+                                  type="number"
+                                  className="dheir-input"
+                                  value={seaPrice}
+                                  onChange={(e) => setSeaPrice(e.target.value)}
+                                  min={0}
+                                  step="0.01"
+                                  placeholder="e.g. 72800"
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">CBM / Volume</span>
+                                <div style={{ display: "flex", gap: "6px" }}>
+                                  <input
+                                    type="number"
+                                    className="dheir-input"
+                                    style={{ flex: 1, minWidth: 0 }}
+                                    value={seaWeight}
+                                    onChange={(e) => setSeaWeight(e.target.value)}
+                                    min={0}
+                                    step="0.001"
+                                    placeholder="e.g. 0.14"
+                                  />
+                                  <select
+                                    className="dheir-input"
+                                    style={{ width: "76px", padding: "6px 8px" }}
+                                    value={seaWeightUnit}
+                                    onChange={(e) => setSeaWeightUnit(e.target.value as "kg" | "cbm")}
+                                  >
+                                    <option value="cbm">CBM</option>
+                                    <option value="kg">KG</option>
+                                  </select>
+                                </div>
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Pieces (PCS)</span>
+                                <input
+                                  type="number"
+                                  className="dheir-input"
+                                  value={seaPieces}
+                                  onChange={(e) => setSeaPieces(e.target.value)}
+                                  min={1}
+                                  step="1"
+                                  placeholder="e.g. 1"
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Loading Date (LD)</span>
+                                <input
+                                  type="date"
+                                  className="dheir-input"
+                                  value={seaLoadingDate}
+                                  onChange={(e) => setSeaLoadingDate(e.target.value)}
+                                />
+                              </label>
+                              <label className="portal-packages__field">
+                                <span className="portal-packages__field-label">Arrival Date (EDD)</span>
+                                <input
+                                  type="date"
+                                  className="dheir-input"
+                                  value={seaExpectedArrivalDate}
+                                  onChange={(e) => setSeaExpectedArrivalDate(e.target.value)}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
                           {/* Combined Summary */}
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "#f1f5f9", borderRadius: "6px", fontSize: "13px", flexWrap: "wrap", gap: "8px" }}>
-                            <span><strong>Total Calculated Price:</strong> ₦{((Number(airGzPrice) || 0) + (Number(airHkPrice) || 0)).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
+                            <span><strong>Total Calculated Price:</strong> ₦{((Number(airGzPrice) || 0) + (Number(airHkPrice) || 0) + (Number(seaPrice) || 0)).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</span>
                             <span>
                               <strong>Total Quantity:</strong>{" "}
-                              {airGzWeight && Number(airGzWeight) > 0 ? `${Number(airGzWeight).toFixed(2)} ${airGzWeightUnit.toUpperCase()}` : ""}
-                              {airGzWeight && Number(airGzWeight) > 0 && airHkWeight && Number(airHkWeight) > 0 ? " + " : ""}
-                              {airHkWeight && Number(airHkWeight) > 0 ? `${Number(airHkWeight).toFixed(2)} ${airHkWeightUnit.toUpperCase()}` : (!airGzWeight || Number(airGzWeight) === 0 ? "0.00 KG" : "")}
+                              {[
+                                airGzWeight && Number(airGzWeight) > 0 ? `${Number(airGzWeight).toFixed(2)} ${airGzWeightUnit.toUpperCase()}` : "",
+                                airHkWeight && Number(airHkWeight) > 0 ? `${Number(airHkWeight).toFixed(2)} ${airHkWeightUnit.toUpperCase()}` : "",
+                                seaWeight && Number(seaWeight) > 0 ? `${Number(seaWeight).toFixed(2)} ${seaWeightUnit.toUpperCase()}` : "",
+                              ].filter(Boolean).join(" + ") || "0.00"}
                             </span>
-                            <span><strong>Total Pieces:</strong> {((Number(airGzPieces) || 0) + (Number(airHkPieces) || 0)) || 1} PCS</span>
+                            <span><strong>Total Pieces:</strong> {((Number(airGzPieces) || 0) + (Number(airHkPieces) || 0) + (Number(seaPieces) || 0)) || 1} PCS</span>
                           </div>
                         </div>
-                      )
                     )}
                   </div>
 

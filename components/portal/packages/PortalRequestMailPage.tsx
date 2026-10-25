@@ -193,18 +193,37 @@ export function PortalRequestMailPage() {
         </div>
 
         <div>
-          <p className="portal-request-mail__label">Payment timing</p>
+          <p className="portal-request-mail__label">
+            Payment timing
+            {shippingMethod === "air" && (
+              <span style={{ marginLeft: "8px", fontSize: "11px", color: "var(--color-dheir-orange)", fontWeight: 500 }}>
+                (Air shipping is strictly prepaid)
+              </span>
+            )}
+          </p>
           <div className="portal-request-mail__chips">
-            {PAYMENT_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                className={`portal-request-mail__chip${shippingPayment === opt.id ? " is-active" : ""}`}
-                onClick={() => setShippingPayment(opt.id)}
-              >
-                {opt.label}
-              </button>
-            ))}
+            {PAYMENT_OPTIONS.map((opt) => {
+              const disabled = shippingMethod === "air" && opt.id === "pay_after_shipment"
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  disabled={disabled}
+                  title={disabled ? "Air shipping is strictly prepaid before departure" : undefined}
+                  className={`portal-request-mail__chip${shippingPayment === opt.id ? " is-active" : ""}`}
+                  style={disabled ? { opacity: 0.45, cursor: "not-allowed" } : undefined}
+                  onClick={() => {
+                    if (disabled) {
+                      toast.info("Air shipping is strictly prepaid before departure from China.")
+                      return
+                    }
+                    setShippingPayment(opt.id)
+                  }}
+                >
+                  {opt.label}
+                </button>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -245,6 +264,9 @@ export function PortalRequestMailPage() {
             toast.error("Select at least one package")
             return
           }
+          if (shippingMethod === "air" && shippingPayment === "pay_after_shipment") {
+            setShippingPayment("pay_before_shipment")
+          }
           setConfirmOpen(true)
         }}
       >
@@ -254,6 +276,7 @@ export function PortalRequestMailPage() {
       <PortalRequestMailConfirmDialog
         open={confirmOpen}
         submitting={submitting}
+        shippingMethod={shippingMethod}
         onClose={() => setConfirmOpen(false)}
         onSubmit={handleSubmitRequest}
       />

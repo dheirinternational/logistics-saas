@@ -16,6 +16,7 @@ export type PaymentStatus =
     | "awaiting_confirmation"
 
 export type ShipmentStatus = 
+    | "pending_payment"
     | "processing" 
     | "shipped" 
     | "in_transit" 

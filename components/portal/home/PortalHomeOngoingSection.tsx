@@ -172,9 +172,9 @@ export function PortalHomeOngoingSection({
                   <dd className="capitalize">{formatStatus(active.status)}</dd>
                 </div>
               </dl>
-              {(active.airGzCost != null || active.airHkCost != null || active.airGzWeight != null || active.airHkWeight != null) && (
+              {(active.airGzCost != null || active.airHkCost != null || active.airGzWeight != null || active.airHkWeight != null || active.seaCost != null || active.seaWeight != null) && (
                 <div style={{ marginTop: 12, padding: "8px 10px", borderRadius: 6, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Flight Breakdown:</span>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Cargo Breakdown:</span>
                   {active.airGzWeight != null && active.airGzWeight > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
                       <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>Air GZ (Normal):</span>
@@ -185,6 +185,12 @@ export function PortalHomeOngoingSection({
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
                       <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>Air HK (Sensitive):</span>
                       <span>{active.airHkWeight.toFixed(2)} {(active.airHkWeightUnit ?? "kg").toUpperCase()} {active.airHkCost ? `· ${formatNaira(active.airHkCost)}` : ""} {active.airHkExpectedArrivalDate ? `· EDD: ${new Date(active.airHkExpectedArrivalDate).toLocaleDateString()}` : ""}</span>
+                    </div>
+                  )}
+                  {active.seaWeight != null && active.seaWeight > 0 && (
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                      <span style={{ color: "var(--color-dheir-navy, #1e3a8a)", fontWeight: 500 }}>Sea Cargo:</span>
+                      <span>{active.seaWeight.toFixed(2)} {(active.seaWeightUnit ?? "cbm").toUpperCase()} {active.seaCost ? `· ${formatNaira(active.seaCost)}` : ""} {active.seaExpectedArrivalDate ? `· EDD: ${new Date(active.seaExpectedArrivalDate).toLocaleDateString()}` : ""}</span>
                     </div>
                   )}
                 </div>

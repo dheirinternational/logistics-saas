@@ -60,6 +60,12 @@ export type Shipment = {
     air_hk_pieces?: number
     air_hk_loading_date?: string
     air_hk_expected_arrival_date?: string
+    sea_weight?: number
+    sea_weight_unit?: "kg" | "cbm" | string
+    sea_cost?: number
+    sea_pieces?: number
+    sea_loading_date?: string
+    sea_expected_arrival_date?: string
     payment_time: "before" | "after"
     paid_for: boolean
     created_at: string
@@ -182,6 +188,12 @@ export type ShippingRequest = {
     air_hk_pieces?: number
     air_hk_loading_date?: string
     air_hk_expected_arrival_date?: string
+    sea_weight?: number
+    sea_weight_unit?: "kg" | "cbm" | string
+    sea_cost?: number
+    sea_pieces?: number
+    sea_loading_date?: string
+    sea_expected_arrival_date?: string
     total_price?: number
     customer_note: string
     packaging: string

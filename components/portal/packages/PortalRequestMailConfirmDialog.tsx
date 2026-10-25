@@ -18,6 +18,7 @@ type PackagingOption = (typeof PACKAGING_OPTIONS)[number]
 type PortalRequestMailConfirmDialogProps = {
   open: boolean
   submitting: boolean
+  shippingMethod?: "air" | "sea" | "express"
   onClose: () => void
   onSubmit: (packaging: string, customerNote: string) => Promise<void>
 }
@@ -25,18 +26,21 @@ type PortalRequestMailConfirmDialogProps = {
 export function PortalRequestMailConfirmDialog({
   open,
   submitting,
+  shippingMethod = "air",
   onClose,
   onSubmit,
 }: PortalRequestMailConfirmDialogProps) {
   const [step, setStep] = useState<"policy" | "confirm">("policy")
   const [packaging, setPackaging] = useState<PackagingOption | null>(null)
   const [customerNote, setCustomerNote] = useState("")
+  const [airAcknowledged, setAirAcknowledged] = useState(false)
 
   useEffect(() => {
     if (!open) return
     setStep("policy")
     setPackaging(null)
     setCustomerNote("")
+    setAirAcknowledged(false)
   }, [open])
 
   useEffect(() => {
@@ -92,6 +96,35 @@ export function PortalRequestMailConfirmDialog({
         <div className="portal-request-mail__dialog-body">
           {step === "policy" ? (
             <article className="portal-request-mail__policy">
+              {shippingMethod === "air" && (
+                <div style={{
+                  padding: "12px 14px",
+                  borderRadius: "8px",
+                  backgroundColor: "#fff7ed",
+                  border: "1px solid #fed7aa",
+                  marginBottom: "1rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--color-dheir-orange, #c2410c)", fontWeight: 600, fontSize: "13px" }}>
+                    <span>⚠️ Important Air Shipping Requirements</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: "12px", color: "#9a3412", lineHeight: 1.5 }}>
+                    • <strong>Minimum weight:</strong> The minimum acceptable billing weight for Air cargo is <strong>1kg</strong>.<br />
+                    • <strong>Strictly Prepaid:</strong> Air shipping is prepaid, which means you must pay the shipping fee before your goods are shipped out from China.
+                  </p>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#7c2d12", fontWeight: 600, cursor: "pointer", marginTop: "4px" }}>
+                    <input
+                      type="checkbox"
+                      checked={airAcknowledged}
+                      onChange={(e) => setAirAcknowledged(e.target.checked)}
+                      style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                    />
+                    <span>I understand that Air shipping is strictly prepaid and minimum weight is 1kg</span>
+                  </label>
+                </div>
+              )}
               <p>
                 Please review these points before we process your shipment. By continuing,
                 you confirm the contents and accept our warehouse packing rules.
@@ -180,8 +213,14 @@ export function PortalRequestMailConfirmDialog({
               <button
                 type="button"
                 className="portal-packages__btn-primary"
-                onClick={() => setStep("confirm")}
-                disabled={submitting}
+                onClick={() => {
+                  if (shippingMethod === "air" && !airAcknowledged) {
+                    toast.error("Please acknowledge the Air shipping requirements to continue")
+                    return
+                  }
+                  setStep("confirm")
+                }}
+                disabled={submitting || (shippingMethod === "air" && !airAcknowledged)}
               >
                 Continue
               </button>

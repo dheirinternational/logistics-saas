@@ -70,6 +70,7 @@ export function getIncomingStatusVariant(
 }
 
 const SHIPMENT_STATUS_LABELS: Record<string, string> = {
+  pending_payment: "Pending payment",
   processing: "Processing",
   shipped: "Shipped",
   in_transit: "In transit",
@@ -79,6 +80,7 @@ const SHIPMENT_STATUS_LABELS: Record<string, string> = {
 }
 
 const SHIPMENT_STATUS_VARIANTS: Record<string, PackageStatusChipVariant> = {
+  pending_payment: "orange",
   processing: "orange",
   shipped: "blue",
   in_transit: "blue",

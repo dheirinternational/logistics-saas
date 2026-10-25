@@ -27,6 +27,12 @@ export type PortalTrackingShipment = {
   airHkPieces?: number
   airHkLoadingDate?: string
   airHkExpectedArrivalDate?: string
+  seaWeight?: number
+  seaWeightUnit?: string
+  seaCost?: number
+  seaPieces?: number
+  seaLoadingDate?: string
+  seaExpectedArrivalDate?: string
   paymentTime: string
   paidFor: boolean
   shippingNote: string
@@ -82,6 +88,12 @@ function mapShipmentRow(
     air_hk_pieces?: string | number | null
     air_hk_loading_date?: Date | string | null
     air_hk_expected_arrival_date?: Date | string | null
+    sea_weight?: string | number | null
+    sea_weight_unit?: string | null
+    sea_cost?: string | number | null
+    sea_pieces?: string | number | null
+    sea_loading_date?: Date | string | null
+    sea_expected_arrival_date?: Date | string | null
     payment_time: string | null
     paid_for: boolean | null
     shipment_note: string | null
@@ -113,6 +125,12 @@ function mapShipmentRow(
     airHkPieces: row.air_hk_pieces != null ? Number(row.air_hk_pieces) : undefined,
     airHkLoadingDate: safeIsoDate(row.air_hk_loading_date),
     airHkExpectedArrivalDate: safeIsoDate(row.air_hk_expected_arrival_date),
+    seaWeight: row.sea_weight != null ? Number(row.sea_weight) : undefined,
+    seaWeightUnit: row.sea_weight_unit ?? "cbm",
+    seaCost: row.sea_cost != null ? Number(row.sea_cost) : undefined,
+    seaPieces: row.sea_pieces != null ? Number(row.sea_pieces) : undefined,
+    seaLoadingDate: safeIsoDate(row.sea_loading_date),
+    seaExpectedArrivalDate: safeIsoDate(row.sea_expected_arrival_date),
     paymentTime: row.payment_time ?? "",
     paidFor: Boolean(row.paid_for),
     shippingNote: row.shipment_note?.trim() ?? "",
@@ -174,6 +192,12 @@ export async function getPortalTrackingData(
         s.air_hk_pieces,
         s.air_hk_loading_date,
         s.air_hk_expected_arrival_date,
+        s.sea_weight,
+        s.sea_weight_unit,
+        s.sea_cost,
+        s.sea_pieces,
+        s.sea_loading_date,
+        s.sea_expected_arrival_date,
         s.created_at,
         ow.city AS origin_city,
         ow.country AS origin_country,

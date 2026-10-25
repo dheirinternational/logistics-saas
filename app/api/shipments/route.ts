@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         let destinationWarehouseId = Number(formData.get("destination_warehouse_id"))
 
         if (!originWarehouseId || !Number.isFinite(originWarehouseId) || originWarehouseId < 8) {
-            originWarehouseId = 8 // Default Guangzhou Consolidation Warehouse
+            originWarehouseId = String(formData.get("channel")) === "sea" ? 14 : 8 // Default Guangzhou Sea (14) or Air (8)
         }
         if (!destinationWarehouseId || !Number.isFinite(destinationWarehouseId) || destinationWarehouseId < 8) {
             destinationWarehouseId = String(formData.get("channel")) === "sea" ? 11 : 10 // Default Lagos Sea/Air Warehouse
@@ -77,6 +77,12 @@ export async function POST(req: NextRequest) {
             air_hk_pieces: formData.get("air_hk_pieces") ? Number(formData.get("air_hk_pieces")) : null,
             air_hk_loading_date: formData.get("air_hk_loading_date") ? String(formData.get("air_hk_loading_date")) : null,
             air_hk_expected_arrival_date: formData.get("air_hk_expected_arrival_date") ? String(formData.get("air_hk_expected_arrival_date")) : null,
+            sea_weight: formData.get("sea_weight") ? Number(formData.get("sea_weight")) : null,
+            sea_weight_unit: formData.get("sea_weight_unit") ? String(formData.get("sea_weight_unit")) : "cbm",
+            sea_cost: formData.get("sea_cost") ? Number(formData.get("sea_cost")) : null,
+            sea_pieces: formData.get("sea_pieces") ? Number(formData.get("sea_pieces")) : null,
+            sea_loading_date: formData.get("sea_loading_date") ? String(formData.get("sea_loading_date")) : null,
+            sea_expected_arrival_date: formData.get("sea_expected_arrival_date") ? String(formData.get("sea_expected_arrival_date")) : null,
         }
 
         const package_ids = data.package_ids?.toString().split(",")
@@ -110,8 +116,8 @@ export async function POST(req: NextRequest) {
 
         const shipmentRes = await client.query(`
             INSERT INTO shipments
-            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit, total_pieces, loading_date, expected_arrival_date, admin_reply, air_gz_weight, air_gz_weight_unit, air_gz_cost, air_gz_pieces, air_gz_loading_date, air_gz_expected_arrival_date, air_hk_weight, air_hk_weight_unit, air_hk_cost, air_hk_pieces, air_hk_loading_date, air_hk_expected_arrival_date)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
+            (tracking_number, customer_code, origin_warehouse_id, destination_warehouse_id, channel, total_cost, shipment_note, user_id, payment_time, package_ids, total_weight, total_weight_unit, total_pieces, loading_date, expected_arrival_date, admin_reply, air_gz_weight, air_gz_weight_unit, air_gz_cost, air_gz_pieces, air_gz_loading_date, air_gz_expected_arrival_date, air_hk_weight, air_hk_weight_unit, air_hk_cost, air_hk_pieces, air_hk_loading_date, air_hk_expected_arrival_date, sea_weight, sea_weight_unit, sea_cost, sea_pieces, sea_loading_date, sea_expected_arrival_date)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34)
             RETURNING *
         `, [
             tracking_number,
@@ -142,6 +148,12 @@ export async function POST(req: NextRequest) {
             data.air_hk_pieces,
             data.air_hk_loading_date,
             data.air_hk_expected_arrival_date,
+            data.sea_weight,
+            data.sea_weight_unit,
+            data.sea_cost,
+            data.sea_pieces,
+            data.sea_loading_date,
+            data.sea_expected_arrival_date,
         ]);
 
         const { id } = shipmentRes.rows[0]
@@ -170,7 +182,13 @@ export async function POST(req: NextRequest) {
                 air_hk_cost = $17,
                 air_hk_pieces = $18,
                 air_hk_loading_date = $19,
-                air_hk_expected_arrival_date = $20
+                air_hk_expected_arrival_date = $20,
+                sea_weight = $21,
+                sea_weight_unit = $22,
+                sea_cost = $23,
+                sea_pieces = $24,
+                sea_loading_date = $25,
+                sea_expected_arrival_date = $26
             WHERE id = $1
         `, [
             data.shipment_request_id,
@@ -193,6 +211,12 @@ export async function POST(req: NextRequest) {
             data.air_hk_pieces,
             data.air_hk_loading_date,
             data.air_hk_expected_arrival_date,
+            data.sea_weight,
+            data.sea_weight_unit,
+            data.sea_cost,
+            data.sea_pieces,
+            data.sea_loading_date,
+            data.sea_expected_arrival_date,
         ]);
 
         await client.query(`

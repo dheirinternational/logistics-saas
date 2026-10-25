@@ -22,6 +22,7 @@ import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import Image from "next/image"
 
 const SHIPMENT_STATUSES: ShipmentStatus[] = [
+  "pending_payment",
   "processing",
   "shipped",
   "in_transit",
@@ -86,12 +87,12 @@ export function AdminShipmentViewModal() {
       setCustomerCode(selectedShipment.customer_code || "")
       const origId = Number(selectedShipment.origin_warehouse_id)
       const destId = Number(selectedShipment.destination_warehouse_id)
-      setOriginWarehouseId(origId && origId >= 8 ? String(origId) : "8")
+      setOriginWarehouseId(origId && origId >= 8 ? String(origId) : (selectedShipment.channel === "sea" ? "14" : "8"))
       setDestinationWarehouseId(destId && destId >= 8 ? String(destId) : (selectedShipment.channel === "sea" ? "11" : "10"))
       setChannel(selectedShipment.channel || "")
       setTotalCost(String(selectedShipment.total_cost || ""))
       setTotalWeight(String(selectedShipment.total_weight || ""))
-      setTotalWeightUnit(selectedShipment.total_weight_unit || "kg")
+      setTotalWeightUnit(selectedShipment.total_weight_unit || (selectedShipment.channel === "sea" ? "cbm" : "kg"))
       setPaymentTime(selectedShipment.payment_time?.includes("after") ? "after" : "before")
       setPaidFor(Boolean(selectedShipment.paid_for))
       setStatus(selectedShipment.status as ShipmentStatus)
@@ -379,10 +380,10 @@ export function AdminShipmentViewModal() {
             </div>
           ) : null}
 
-          {/* Flight Breakdown (if exists) */}
-          {(selectedShipment.air_gz_cost || selectedShipment.air_hk_cost || selectedShipment.air_gz_weight || selectedShipment.air_hk_weight) && (
+          {/* Cargo Breakdown (if exists) */}
+          {(selectedShipment.air_gz_cost || selectedShipment.air_hk_cost || selectedShipment.air_gz_weight || selectedShipment.air_hk_weight || selectedShipment.sea_cost || selectedShipment.sea_weight) && (
             <div style={{ padding: "8px 10px", borderRadius: 6, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "4px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Flight Breakdown:</span>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Cargo Breakdown:</span>
               {selectedShipment.air_gz_weight != null && Number(selectedShipment.air_gz_weight) > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
                   <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>Air GZ (Normal):</span>
@@ -393,6 +394,12 @@ export function AdminShipmentViewModal() {
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
                   <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>Air HK (Sensitive):</span>
                   <span>{Number(selectedShipment.air_hk_weight).toFixed(2)} {(selectedShipment.air_hk_weight_unit ?? "kg").toUpperCase()} {selectedShipment.air_hk_cost ? `· ₦${Number(selectedShipment.air_hk_cost).toLocaleString("en-NG")}` : ""} {selectedShipment.air_hk_expected_arrival_date ? `· EDD: ${selectedShipment.air_hk_expected_arrival_date.split("T")[0]}` : ""}</span>
+                </div>
+              )}
+              {selectedShipment.sea_weight != null && Number(selectedShipment.sea_weight) > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+                  <span style={{ color: "var(--color-dheir-navy, #1e3a8a)", fontWeight: 500 }}>Sea Cargo:</span>
+                  <span>{Number(selectedShipment.sea_weight).toFixed(2)} {(selectedShipment.sea_weight_unit ?? "cbm").toUpperCase()} {selectedShipment.sea_cost ? `· ₦${Number(selectedShipment.sea_cost).toLocaleString("en-NG")}` : ""} {selectedShipment.sea_expected_arrival_date ? `· EDD: ${selectedShipment.sea_expected_arrival_date.split("T")[0]}` : ""}</span>
                 </div>
               )}
             </div>

@@ -307,9 +307,9 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
           <strong style={{ color: "#166534" }}>Admin Reply:</strong> <span style={{ color: "#14532d" }}>{shipment.adminReply}</span>
         </div>
       ) : null}
-      {(shipment.airGzCost != null || shipment.airHkCost != null || shipment.airGzWeight != null || shipment.airHkWeight != null) && (
+      {(shipment.airGzCost != null || shipment.airHkCost != null || shipment.airGzWeight != null || shipment.airHkWeight != null || shipment.seaCost != null || shipment.seaWeight != null) && (
         <div style={{ marginTop: 6, marginBottom: 8, padding: "8px 10px", borderRadius: 6, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "4px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Flight Breakdown:</span>
+          <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>Cargo Breakdown:</span>
           {shipment.airGzWeight != null && shipment.airGzWeight > 0 && (
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
               <span style={{ color: "var(--color-dheir-blue)", fontWeight: 500 }}>Air GZ (Normal):</span>
@@ -320,6 +320,12 @@ function TrackingDetail({ shipment }: { shipment: PortalTrackingShipment }) {
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
               <span style={{ color: "var(--color-dheir-orange)", fontWeight: 500 }}>Air HK (Sensitive):</span>
               <span>{shipment.airHkWeight.toFixed(2)} {(shipment.airHkWeightUnit ?? "kg").toUpperCase()} {shipment.airHkCost ? `· ${formatNaira(shipment.airHkCost)}` : ""} {shipment.airHkExpectedArrivalDate ? `· EDD: ${new Date(shipment.airHkExpectedArrivalDate).toLocaleDateString()}` : ""}</span>
+            </div>
+          )}
+          {shipment.seaWeight != null && shipment.seaWeight > 0 && (
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
+              <span style={{ color: "var(--color-dheir-navy, #1e3a8a)", fontWeight: 500 }}>Sea Cargo:</span>
+              <span>{shipment.seaWeight.toFixed(2)} {(shipment.seaWeightUnit ?? "cbm").toUpperCase()} {shipment.seaCost ? `· ${formatNaira(shipment.seaCost)}` : ""} {shipment.seaExpectedArrivalDate ? `· EDD: ${new Date(shipment.seaExpectedArrivalDate).toLocaleDateString()}` : ""}</span>
             </div>
           )}
         </div>
