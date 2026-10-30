@@ -1,6 +1,6 @@
 "use client"
 
-import MonnifyPaymentButton from "@/components/base/MonnifyPaymentBtn"
+import PaystackPaymentButton from "@/components/base/PaystackPaymentBtn"
 import { PortalPageBack } from "@/components/portal/PortalPageBack"
 import { PortalPolicyInfoButton } from "@/components/portal/PortalPolicyInfoButton"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
@@ -16,7 +16,9 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "@/lib/ui/toast"
 
-const MONNIFY_ENABLED = process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED !== "false"
+const PAYSTACK_ENABLED =
+  (process.env.NEXT_PUBLIC_PAYSTACK_CHECKOUT_ENABLED ??
+    process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED) !== "false"
 
 export function PortalPendingPaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([])
@@ -340,23 +342,23 @@ export function PortalPendingPaymentsPage() {
                         ) : null}
                         <div
                           className={
-                            MONNIFY_ENABLED
-                              ? "portal-payments__monnify-wrap"
-                              : "portal-payments__monnify-wrap portal-payments__monnify-wrap--paused"
+                            PAYSTACK_ENABLED
+                              ? "portal-payments__paystack-wrap"
+                              : "portal-payments__paystack-wrap portal-payments__paystack-wrap--paused"
                           }
                           title={
-                            MONNIFY_ENABLED
+                            PAYSTACK_ENABLED
                               ? undefined
                               : "Card payments are temporarily unavailable"
                           }
                         >
-                          <MonnifyPaymentButton
+                          <PaystackPaymentButton
                             amount={payment.amount}
                             customerEmail={user?.email ?? ""}
                             customerName={customerName || user?.email || ""}
                             paymentReference={payment.transaction_ref}
                             className="portal-payments__pay-btn dheir-btn-primary"
-                            disabled={!user?.email || !MONNIFY_ENABLED}
+                            disabled={!user?.email || !PAYSTACK_ENABLED}
                           />
                         </div>
                       </div>

@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db/db"
-import { fulfillShipmentPayment } from "@/lib/monnify/fulfillment"
-import { isMonnifyPaymentPaid, verifyMonnifyTransaction } from "@/lib/monnify/verify"
+import { fulfillShipmentPayment } from "@/lib/paystack/fulfillment"
+import { isPaystackPaymentPaid, verifyPaystackTransaction } from "@/lib/paystack/verify"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
@@ -11,13 +11,13 @@ export async function GET(
 
   try {
     const { reference } = await params
-    const transaction = await verifyMonnifyTransaction(reference)
+    const transaction = await verifyPaystackTransaction(reference)
 
-    if (!isMonnifyPaymentPaid(transaction.paymentStatus)) {
+    if (!isPaystackPaymentPaid(transaction.status)) {
       return NextResponse.json(
         {
           message: "Payment not successful",
-          redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/customer/pending_payments`,
+          redirect_to: `${process.env.NEXT_PUBLIC_APP_URL || ""}/customer/pending_payments`,
         },
         { status: 400 }
       )
@@ -26,7 +26,7 @@ export async function GET(
     await client.query("BEGIN")
     const result = await fulfillShipmentPayment(
       client,
-      transaction.paymentReference
+      transaction.reference
     )
     await client.query("COMMIT")
 
@@ -36,15 +36,15 @@ export async function GET(
 
     return NextResponse.json({
       message: "Payment verified",
-      redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/customer/pending_payments`,
+      redirect_to: `${process.env.NEXT_PUBLIC_APP_URL || ""}/customer/pending_payments`,
     })
   } catch (err) {
-    await client.query("ROLLBACK")
-    console.error("Shipment payment verification failed:", err)
+    await client.query("ROLLBACK").catch(() => undefined)
+    console.error("Paystack shipment payment verification failed:", err)
     return NextResponse.json(
       {
-        message: "Verification failed",
-        redirect_to: `${process.env.NEXT_PUBLIC_APP_URL}/customer/pending_payments`,
+        message: err instanceof Error ? err.message : "Verification failed",
+        redirect_to: `${process.env.NEXT_PUBLIC_APP_URL || ""}/customer/pending_payments`,
       },
       { status: 500 }
     )
@@ -52,3 +52,4 @@ export async function GET(
     client.release()
   }
 }
+

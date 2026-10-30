@@ -16,7 +16,7 @@ This repository is a logistics SaaS application built with Next.js App Router, R
 - Leaflet maps (`leaflet`, `react-leaflet`)
 - Zustand for local state management
 - Resend email service
-- Paystack and Monnify payment gateways
+- Paystack payment gateway (shipment and ecommerce)
 
 ## Running the Project
 
@@ -81,10 +81,8 @@ Key environment variables:
 - `CLOUDINARY_API_KEY` - Cloudinary API key.
 - `CLOUDINARY_API_SECRET` - Cloudinary API secret.
 - `PAYSTACK_SECRET_KEY` - Paystack secret key for payment initialization and verification.
-- `MONNIFY_API_KEY` - Monnify API key for authentication.
-- `MONNIFY_SECRET_KEY` - Monnify secret key for authentication.
-- `MONNIFY_BASE_URL` - Monnify base URL, usually `https://sandbox.monnify.com` for testing.
-- `MONNIFY_CONTRACT_CODE` - Monnify contract code for payment creation.
+- `PAYSTACK_PUBLIC_KEY` - Paystack public key.
+- `PAYSTACK_CHECKOUT_ENABLED` - Enable or disable Paystack card checkout.
 - `RESEND_API_KEY` - Resend mail provider API key.
 - `SESSION_COOKIE_NAME` - optional session cookie name; defaults to `session` when unset.
 
@@ -209,20 +207,12 @@ All API routes are implemented under `app/api/` using Next.js route handlers. Th
 
 ### Paystack Integration
 
-- `POST /api/paystack/initialize-payment` - initialize Paystack payment
-- `GET /api/paystack/verify-payment/[reference]` - verify Paystack payment by reference
-
-### Paystack Ecommerce Integration
-
-- `POST /api/paystack-ecommerce/initialize-payment` - initialize ecommerce payment
-- `GET /api/paystack-ecommerce/verify-payment/[reference]` - verify ecommerce payment by reference
-- `POST /api/paystack-ecommerce/webhook` - Paystack ecommerce webhook receiver
-
-### Monnify Integration
-
-- `POST /api/monnify/initialize` - initialize Monnify payment
-- `GET /api/monnify/verify/[reference]` - verify Monnify payment by reference
-- `POST /api/monnify/webhooks` - Monnify webhook receiver
+- `POST /api/paystack/initialize/shipment` - initialize Paystack shipment payment
+- `POST /api/paystack/initialize/order` - initialize Paystack marketplace order payment
+- `GET /api/paystack/verify/shipment/[reference]` - verify shipment payment by reference
+- `GET /api/paystack/verify/order/[reference]` - verify marketplace order payment by reference
+- `GET /api/paystack/verify/[reference]` - verify payment by reference (auto-routes shipment vs order)
+- `POST /api/paystack/webhooks` - Paystack webhook receiver (charge.success)
 
 ### Fulfillment & Shipping
 
@@ -239,7 +229,7 @@ All API routes are implemented under `app/api/` using Next.js route handlers. Th
 
 - Admin dashboards for orders, shipments, packages, staff, warehouse, and users
 - Customer-facing portal with order tracking, pending payments, profile management, and marketplace access
-- Payment handling via Paystack, Paystack Ecommerce, and Monnify
+- Payment handling via Paystack
 - Shipping fee and pricing calculations
 - Image upload support via Cloudinary
 - Announcement and review management
@@ -256,5 +246,5 @@ All API routes are implemented under `app/api/` using Next.js route handlers. Th
 ## Recommended Next Steps
 
 - Review `app/api` route handlers to add request/response contract documentation.
-- Add environment setup details to `.env.example` with keys for database, Supabase, Cloudinary, Paystack, Monnify, and email provider.
+- Add environment setup details to `.env.example` with keys for database, Supabase, Cloudinary, Paystack, and email provider.
 - Document any database schema or migrations used by the application.

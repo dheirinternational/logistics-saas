@@ -1,4 +1,4 @@
-import { resolvePaymentType } from "@/lib/monnify/resolvePaymentType"
+import { resolvePaymentType } from "@/lib/paystack/resolvePaymentType"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
@@ -11,15 +11,16 @@ export async function GET(
 
   if (paymentType === "shipment") {
     return NextResponse.redirect(
-      new URL(`/api/monnify/verify/shipment/${encodeURIComponent(reference)}`, base)
+      new URL(`/api/paystack/verify/shipment/${encodeURIComponent(reference)}`, base)
     )
   }
 
   if (paymentType === "order") {
     return NextResponse.redirect(
-      new URL(`/api/monnify/verify/order/${encodeURIComponent(reference)}`, base)
+      new URL(`/api/paystack/verify/order/${encodeURIComponent(reference)}`, base)
     )
   }
 
   return NextResponse.json({ message: "Payment reference not found" }, { status: 404 })
 }
+

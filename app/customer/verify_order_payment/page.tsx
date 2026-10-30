@@ -9,8 +9,9 @@ import { toast } from "@/lib/ui/toast"
 export default function VerifyOrderPayment() {
   const searchParams = useSearchParams()
   const reference =
-    searchParams.get("paymentReference") ||
     searchParams.get("reference") ||
+    searchParams.get("trxref") ||
+    searchParams.get("paymentReference") ||
     searchParams.get("transactionReference") ||
     ""
 
@@ -32,7 +33,7 @@ export default function VerifyOrderPayment() {
 
       try {
         const res = await fetch(
-          `/api/monnify/verify/order/${encodeURIComponent(reference)}`
+          `/api/paystack/verify/order/${encodeURIComponent(reference)}`
         )
 
         const result = await res.json()

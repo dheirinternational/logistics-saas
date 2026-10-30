@@ -25,6 +25,9 @@ export function isBankTransferEnabled() {
   }
 }
 
-export function isMonnifyCheckoutEnabled() {
-  return process.env.MONNIFY_CHECKOUT_ENABLED !== "false"
+export function isPaystackCheckoutEnabled() {
+  return process.env.PAYSTACK_CHECKOUT_ENABLED !== "false"
 }
+
+// Deprecated alias for backwards compatibility
+export const isMonnifyCheckoutEnabled = isPaystackCheckoutEnabled

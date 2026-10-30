@@ -2,8 +2,8 @@ import { pool } from "@/lib/db/db"
 import { getHost } from "@/lib/db/getHost"
 import { getSession } from "@/lib/db/session"
 import { generateOrderTrackingNumber } from "@/lib/generators/generateTrackingNumber"
-import { initializeMonnifyPayment } from "@/lib/monnify/initialize"
-import { isMonnifyCheckoutEnabled } from "@/lib/bankTransfer/config"
+import { initializePaystackPayment } from "@/lib/paystack/initialize"
+import { isPaystackCheckoutEnabled } from "@/lib/bankTransfer/config"
 import { resolveAuthorizedShopDeliveryFee } from "@/lib/shop/deliveryFee"
 import { getCartSubtotal, getUnitPriceForQuantity } from "@/lib/shop/pricing"
 import { CartProduct } from "@/types/entityTypeDef"
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   let client: PoolClient | null = null
 
   try {
-    if (!isMonnifyCheckoutEnabled()) {
+    if (!isPaystackCheckoutEnabled()) {
       return NextResponse.json(
         { message: "Card payment is temporarily unavailable" },
         { status: 503 }
@@ -158,13 +158,12 @@ export async function POST(req: NextRequest) {
     const customerName =
       `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() || email
 
-    const checkout = await initializeMonnifyPayment({
+    const checkout = await initializePaystackPayment({
       amount: expectedTotal,
       customerName,
       customerEmail: email,
       paymentReference: order_id,
-      paymentDescription: "DHEIR marketplace order",
-      redirectUrl: `${origin}/customer/verify_order_payment?paymentReference=${encodeURIComponent(order_id)}`,
+      redirectUrl: `${origin}/customer/verify_order_payment?reference=${encodeURIComponent(order_id)}`,
       metaData: {
         type: "order",
         order_id,
@@ -178,7 +177,7 @@ export async function POST(req: NextRequest) {
           updated_at = NOW()
       WHERE order_id = $2
       `,
-      [order_id, order_id]
+      [checkout.reference, order_id]
     )
 
     await client.query("COMMIT")
@@ -192,7 +191,7 @@ export async function POST(req: NextRequest) {
     if (client) {
       await client.query("ROLLBACK").catch(() => undefined)
     }
-    console.error("Order payment initialization failed:", err)
+    console.error("Paystack order payment initialization failed:", err)
     return NextResponse.json(
       {
         message:
@@ -204,3 +203,4 @@ export async function POST(req: NextRequest) {
     client?.release()
   }
 }
+

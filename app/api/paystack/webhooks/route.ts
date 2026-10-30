@@ -3,43 +3,39 @@ import {
   fulfillOrderPayment,
   fulfillShipmentPayment,
   markOrderPaymentFailed,
-} from "@/lib/monnify/fulfillment"
-import { resolvePaymentType } from "@/lib/monnify/resolvePaymentType"
-import { verifyMonnifySignature } from "@/lib/monnify/signature"
-import { isMonnifyPaymentPaid } from "@/lib/monnify/verify"
+} from "@/lib/paystack/fulfillment"
+import { resolvePaymentType } from "@/lib/paystack/resolvePaymentType"
+import { verifyPaystackSignature } from "@/lib/paystack/signature"
+import { isPaystackPaymentPaid } from "@/lib/paystack/verify"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
-    const client = await pool.connect()
+  const client = await pool.connect()
 
   try {
-        const rawBody = await req.text()
-        const signature = req.headers.get("monnify-signature") || ""
+    const rawBody = await req.text()
+    const signature = req.headers.get("x-paystack-signature") || ""
 
-    if (!verifyMonnifySignature(rawBody, signature)) {
+    if (!verifyPaystackSignature(rawBody, signature)) {
       return NextResponse.json({ message: "Invalid signature" }, { status: 401 })
-        }
+    }
 
-        const body = JSON.parse(rawBody) 
-    const eventType = body.eventType
-    const eventData = body.eventData ?? {}
+    const body = JSON.parse(rawBody)
+    const eventType = body.event
+    const data = body.data ?? {}
 
-    if (eventType !== "SUCCESSFUL_TRANSACTION") {
+    if (eventType !== "charge.success") {
       return NextResponse.json({ received: true })
     }
 
-    const paymentReference =
-      eventData.paymentReference ??
-      eventData.product?.reference ??
-      eventData.transactionReference
-
+    const paymentReference = data.reference
     if (!paymentReference) {
       return NextResponse.json({ message: "Missing payment reference" }, { status: 400 })
     }
 
-    const paymentStatus = eventData.paymentStatus
+    const paymentStatus = data.status
 
-    if (!isMonnifyPaymentPaid(paymentStatus)) {
+    if (!isPaystackPaymentPaid(paymentStatus)) {
       const paymentType = await resolvePaymentType(paymentReference)
 
       if (paymentType === "order") {
@@ -52,9 +48,9 @@ export async function POST(req: NextRequest) {
     }
 
     const paymentType =
-      eventData.metaData?.type === "shipment" || eventData.metaData?.type === "order"
-        ? eventData.metaData.type
-        : await resolvePaymentType(paymentReference)
+      data.metadata?.type === "shipment" || data.metadata?.type === "order"
+        ? data.metadata.type
+        : await resolvePaymentType(paymentReference, client)
 
     if (paymentType === "shipment") {
       await client.query("BEGIN")
@@ -80,13 +76,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: "ok" })
     }
 
-    console.warn("Monnify webhook: unknown payment type for reference", paymentReference)
+    console.warn("Paystack webhook: unknown payment type for reference", paymentReference)
     return NextResponse.json({ received: true })
   } catch (err) {
-    await client.query("ROLLBACK")
-    console.error("Monnify webhook error:", err)
+    await client.query("ROLLBACK").catch(() => undefined)
+    console.error("Paystack webhook error:", err)
     return NextResponse.json({ success: false }, { status: 500 })
-    } finally {
+  } finally {
     client.release()
-    }
+  }
 }
+

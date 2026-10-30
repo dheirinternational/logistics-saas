@@ -5,7 +5,7 @@ import { FaMapLocationDot, FaUserTag } from "react-icons/fa6";
 import { GrDocument, GrOrderedList } from "react-icons/gr";
 import { LiaFirstOrder } from "react-icons/lia";
 import { LuPackagePlus } from "react-icons/lu";
-import { MdLocalShipping, MdPayment, MdPendingActions} from "react-icons/md";
+import { MdLocalShipping, MdPayment, MdPendingActions } from "react-icons/md";
 
 export const ctaButtonsProps: CTARedirectButton[] = [
     {
@@ -69,12 +69,12 @@ export const profileCtaButtonsProps: CTARedirectButton[] = [
     },
     {
         title: "Pending Payments",
-        icon: MdPendingActions, 
+        icon: MdPendingActions,
         path: "/customer/pending_payments"
     },
     {
         title: "Orders",
-        icon: BsCart3, 
+        icon: BsCart3,
         path: "/customer/orders"
     }
 ]

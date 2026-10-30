@@ -1,13 +1,13 @@
 import { pool } from "@/lib/db/db"
 import { getHost } from "@/lib/db/getHost"
 import { getSession } from "@/lib/db/session"
-import { initializeMonnifyPayment } from "@/lib/monnify/initialize"
-import { isMonnifyCheckoutEnabled } from "@/lib/bankTransfer/config"
+import { initializePaystackPayment } from "@/lib/paystack/initialize"
+import { isPaystackCheckoutEnabled } from "@/lib/bankTransfer/config"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
   try {
-    if (!isMonnifyCheckoutEnabled()) {
+    if (!isPaystackCheckoutEnabled()) {
       return NextResponse.json(
         { message: "Card payment is temporarily unavailable" },
         { status: 503 }
@@ -53,13 +53,12 @@ export async function POST(req: NextRequest) {
     const customerName =
       `${payment.first_name ?? ""} ${payment.last_name ?? ""}`.trim() || payment.email
 
-    const checkout = await initializeMonnifyPayment({
+    const checkout = await initializePaystackPayment({
       amount: Number(payment.amount),
       customerName,
       customerEmail: payment.email,
       paymentReference: payment.transaction_ref,
-      paymentDescription: "DHEIR shipment payment",
-      redirectUrl: `${origin}/customer/verify_payment?paymentReference=${encodeURIComponent(payment.transaction_ref)}`,
+      redirectUrl: `${origin}/customer/verify_payment?reference=${encodeURIComponent(payment.transaction_ref)}`,
       metaData: {
         type: "shipment",
         shipment_tracking_number: payment.shipment_tracking_number,
@@ -71,10 +70,11 @@ export async function POST(req: NextRequest) {
       data: checkout,
     })
   } catch (err) {
-    console.error("Shipment payment initialization failed:", err)
+    console.error("Paystack shipment payment initialization failed:", err)
     return NextResponse.json(
-      { message: "Error initializing payment" },
+      { message: err instanceof Error ? err.message : "Error initializing payment" },
       { status: 500 }
     )
   }
 }
+

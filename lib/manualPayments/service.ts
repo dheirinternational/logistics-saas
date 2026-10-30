@@ -2,7 +2,7 @@ import type { PoolClient } from "pg"
 import {
   fulfillOrderPayment,
   fulfillShipmentPayment,
-} from "@/lib/monnify/fulfillment"
+} from "@/lib/paystack/fulfillment"
 import type {
   ManualPaymentSubmission,
   ManualPaymentSubmissionWithCustomer,

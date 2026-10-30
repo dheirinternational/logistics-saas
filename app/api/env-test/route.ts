@@ -1,8 +1,6 @@
-// app/api/env-test/route.ts
-
 export async function GET() {
-    return Response.json({
-        apiKey: process.env.MONNIFY_API_KEY,
-        baseUrl: process.env.MONNIFY_BASE_URL
-    });
+  return Response.json({
+    hasPaystackSecret: Boolean(process.env.PAYSTACK_SECRET_KEY),
+    hasPaystackPublic: Boolean(process.env.PAYSTACK_PUBLIC_KEY),
+  })
 }

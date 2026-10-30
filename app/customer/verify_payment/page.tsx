@@ -7,8 +7,9 @@ export default async function VerifyPayment({
 }) {
   const params = await searchParams
   const reference =
-    (typeof params.paymentReference === "string" && params.paymentReference) ||
     (typeof params.reference === "string" && params.reference) ||
+    (typeof params.trxref === "string" && params.trxref) ||
+    (typeof params.paymentReference === "string" && params.paymentReference) ||
     (typeof params.transactionReference === "string" && params.transactionReference)
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.BASE_URL || ""
@@ -20,7 +21,7 @@ export default async function VerifyPayment({
 
   try {
     const res = await fetch(
-      `${appUrl}/api/monnify/verify/shipment/${encodeURIComponent(reference)}`,
+      `${appUrl}/api/paystack/verify/shipment/${encodeURIComponent(reference)}`,
       { cache: "no-store" }
     )
     const result = await res.json()

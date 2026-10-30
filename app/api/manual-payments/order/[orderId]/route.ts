@@ -134,7 +134,7 @@ export async function POST(
     )
 
     if (existingOrder.rowCount === 0) {
-      // Validate stock with row locks like Monnify init.
+      // Validate stock with row locks like Paystack init.
       const productIds = cartItems.map((item) => item.id)
       const productsRes = await client.query(
         `

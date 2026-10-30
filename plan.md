@@ -469,7 +469,7 @@ Repeated across inner pages:
 ### 10.4 Payments
 | Route | Revamp focus |
 |-------|----------------|
-| `/customer/pending_payments` | Amount + ref + pay CTA (Monnify or manual per ops plan) |
+| `/customer/pending_payments` | Amount + ref + pay CTA (Paystack or manual per ops plan) |
 | `/customer/payment_receipts` | History with status chips |
 | `/customer/verify_payment` | Minimal verifying state (already server redirect) |
 
@@ -582,7 +582,7 @@ Build under `components/customer/` (or extend `components/auth/` + `components/m
 
 ### Phase 3 — Packages + payments UI
 - [ ] Package list/add flows  
-- [ ] Pending payments (Monnify + manual path per ops)  
+- [ ] Pending payments (Paystack + manual path per ops)  
 
 ### Phase 4 — Marketplace
 - [ ] Grid + PDP + cart styling  
@@ -643,7 +643,7 @@ Confirm with Ronke:
 1. Shop teaser on landing — yes/no  
 2. Marketplace as fifth tab vs inside Account  
 3. Hero photography — client asset vs stock  
-4. Manual bank transfer UI vs Monnify-only messaging on pending payments  
+4. Manual bank transfer UI vs Paystack-only messaging on pending payments  
 
 ### Risk
 Revamping every `/customer` route at once will thrash QA. Follow phase order; keep auth as the reference implementation and diff new screens against `AuthPageShell` spacing and token usage.

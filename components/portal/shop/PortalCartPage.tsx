@@ -36,7 +36,9 @@ export function PortalCartPage() {
   const [isBankPaying, setIsBankPaying] = useState(false)
   const [bankTransferEnabled, setBankTransferEnabled] = useState(false)
 
-  const MONNIFY_ENABLED = process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED !== "false"
+  const PAYSTACK_ENABLED =
+    (process.env.NEXT_PUBLIC_PAYSTACK_CHECKOUT_ENABLED ??
+      process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED) !== "false"
 
   const subtotal = useMemo(() => {
     return cart.reduce((acc, item) => {
@@ -122,7 +124,7 @@ export function PortalCartPage() {
 
     setIsPaying(true)
     try {
-      const res = await fetch("/api/monnify/initialize/order", {
+      const res = await fetch("/api/paystack/initialize/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -283,9 +285,9 @@ export function PortalCartPage() {
 
               <div
                 className={
-                  MONNIFY_ENABLED
-                    ? "portal-cart__monnify-wrap"
-                    : "portal-cart__monnify-wrap portal-cart__monnify-wrap--paused"
+                  PAYSTACK_ENABLED
+                    ? "portal-cart__paystack-wrap portal-cart__monnify-wrap"
+                    : "portal-cart__paystack-wrap portal-cart__paystack-wrap--paused portal-cart__monnify-wrap portal-cart__monnify-wrap--paused"
                 }
               >
                 <button
@@ -297,14 +299,14 @@ export function PortalCartPage() {
                     loadingAddress ||
                     loadingUser ||
                     !address ||
-                    !MONNIFY_ENABLED
+                    !PAYSTACK_ENABLED
                   }
                   onClick={initializePayment}
                 >
                   {isPaying ? (
                     <DHEIRLoader color="#fff" size={8} />
-                  ) : MONNIFY_ENABLED ? (
-                    "Pay with card (Monnify)"
+                  ) : PAYSTACK_ENABLED ? (
+                    "Pay with card (Paystack)"
                   ) : (
                     "Card payment unavailable"
                   )}
