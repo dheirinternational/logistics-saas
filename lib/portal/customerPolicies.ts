@@ -15,7 +15,7 @@ export const LOGISTICS_SHIPPING_POLICY: CustomerPolicy = {
     {
       title: "Shipping time",
       items: [
-        "The estimated delivery time for sea shipment is 3–4 months. However, delivery timelines may vary depending on the supplier's local dispatch schedule.",
+        "The estimated delivery time for sea shipment is 3 to 4 months. However, delivery timelines may vary depending on the supplier's local dispatch schedule.",
         "Once goods arrive at our warehouse and shipment is processed, international shipping will commence accordingly. While we strive to ensure timely delivery, some factors are beyond our direct control.",
       ],
     },

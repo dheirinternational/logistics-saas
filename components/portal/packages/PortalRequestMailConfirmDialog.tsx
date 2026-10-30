@@ -101,18 +101,17 @@ export function PortalRequestMailConfirmDialog({
                   padding: "12px 14px",
                   borderRadius: "8px",
                   backgroundColor: "#fff7ed",
-                  border: "1px solid #fed7aa",
                   marginBottom: "1rem",
                   display: "flex",
                   flexDirection: "column",
                   gap: "8px"
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--color-dheir-orange, #c2410c)", fontWeight: 600, fontSize: "13px" }}>
-                    <span>⚠️ Important Air Shipping Requirements</span>
+                    <span>Important Air Shipping Requirements</span>
                   </div>
                   <p style={{ margin: 0, fontSize: "12px", color: "#9a3412", lineHeight: 1.5 }}>
-                    • <strong>Minimum weight:</strong> The minimum acceptable billing weight for Air cargo is <strong>1kg</strong>.<br />
-                    • <strong>Strictly Prepaid:</strong> Air shipping is prepaid, which means you must pay the shipping fee before your goods are shipped out from China.
+                    Minimum weight: The minimum acceptable billing weight for Air cargo is 1kg.<br />
+                    Strictly Prepaid: Air shipping is prepaid, which means you must pay the shipping fee before your goods are shipped out from China.
                   </p>
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#7c2d12", fontWeight: 600, cursor: "pointer", marginTop: "4px" }}>
                     <input

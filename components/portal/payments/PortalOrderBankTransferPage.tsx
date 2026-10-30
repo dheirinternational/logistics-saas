@@ -47,6 +47,7 @@ export function PortalOrderBankTransferPage() {
   const [transferReference, setTransferReference] = useState("")
   const [customerNote, setCustomerNote] = useState("")
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [policyAccepted, setPolicyAccepted] = useState(false)
 
   const subtotal = useMemo(() => {
     return cart.reduce((acc, item) => {
@@ -148,6 +149,11 @@ export function PortalOrderBankTransferPage() {
   const handleSubmit = async () => {
     if (!receiptFile) {
       toast.error("Upload your transfer receipt to continue")
+      return
+    }
+
+    if (!policyAccepted) {
+      toast.error("Please accept the delivery and refund policy to proceed")
       return
     }
 
@@ -311,7 +317,7 @@ export function PortalOrderBankTransferPage() {
           <section className="portal-home__panel portal-bank-transfer__upload">
             <h2 className="portal-account__card-title">Upload receipt</h2>
             <p className="portal-bank-transfer__hint">
-            JPG, PNG, WebP, or PDF - max 5MB.
+            JPG, PNG, WebP, or PDF, maximum 5MB.
             </p>
 
             <div className="portal-bank-transfer__fields">
@@ -359,10 +365,24 @@ export function PortalOrderBankTransferPage() {
               </div>
             </div>
 
+            <div style={{ margin: "1rem 0" }}>
+              <label style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "13px", cursor: "pointer", color: "var(--color-dheir-ink)" }}>
+                <input
+                  type="checkbox"
+                  checked={policyAccepted}
+                  onChange={(e) => setPolicyAccepted(e.target.checked)}
+                  style={{ marginTop: "2px", cursor: "pointer" }}
+                />
+                <span>
+                  I accept the shop delivery fee terms and confirm that orders are non refundable once payment is completed
+                </span>
+              </label>
+            </div>
+
             <button
               type="button"
               className="portal-packages__btn-primary portal-packages__btn-primary--block"
-              disabled={submitting || !receiptFile}
+              disabled={submitting || !receiptFile || !policyAccepted}
               onClick={handleSubmit}
             >
               {submitting ? (

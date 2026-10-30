@@ -58,6 +58,7 @@ export function PortalBankTransferPage({
   const [transferReference, setTransferReference] = useState("")
   const [customerNote, setCustomerNote] = useState("")
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [policyAccepted, setPolicyAccepted] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successRedirectUrl, setSuccessRedirectUrl] = useState("")
 
@@ -114,6 +115,11 @@ export function PortalBankTransferPage({
   const handleSubmit = async () => {
     if (!context || !receiptFile) {
       toast.error("Upload your transfer receipt to continue")
+      return
+    }
+
+    if (!policyAccepted) {
+      toast.error("Please accept the checkout policy to proceed")
       return
     }
 
@@ -289,7 +295,7 @@ export function PortalBankTransferPage({
               <section className="portal-home__panel portal-bank-transfer__upload">
                 <h2 className="portal-account__card-title">Upload receipt</h2>
                 <p className="portal-bank-transfer__hint">
-                  JPG, PNG, WebP, or PDF - max 5MB.
+                  JPG, PNG, WebP, or PDF, maximum 5MB.
                 </p>
 
                 <div className="portal-bank-transfer__fields">
@@ -337,10 +343,26 @@ export function PortalBankTransferPage({
                   </div>
                 </div>
 
+                <div style={{ margin: "1rem 0" }}>
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "13px", cursor: "pointer", color: "var(--color-dheir-ink)" }}>
+                    <input
+                      type="checkbox"
+                      checked={policyAccepted}
+                      onChange={(e) => setPolicyAccepted(e.target.checked)}
+                      style={{ marginTop: "2px", cursor: "pointer" }}
+                    />
+                    <span>
+                      {paymentType === "shipment"
+                        ? "I confirm that Air shipping is prepaid before departure and minimum billing weight is 1kg"
+                        : "I accept the checkout terms and confirm that orders are non refundable once payment is completed"}
+                    </span>
+                  </label>
+                </div>
+
                 <button
                   type="button"
                   className="portal-packages__btn-primary portal-packages__btn-primary--block"
-                  disabled={submitting || !receiptFile}
+                  disabled={submitting || !receiptFile || !policyAccepted}
                   onClick={handleSubmit}
                 >
                   {submitting ? (

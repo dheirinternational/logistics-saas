@@ -13,6 +13,7 @@ import {
 import type { Payment, User } from "@/types/entityTypeDef"
 import { IconBuildingBank, IconCreditCard } from "@tabler/icons-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "@/lib/ui/toast"
 
@@ -21,11 +22,13 @@ const PAYSTACK_ENABLED =
     process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED) !== "false"
 
 export function PortalPendingPaymentsPage() {
+  const router = useRouter()
   const [payments, setPayments] = useState<Payment[]>([])
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [bankTransferEnabled, setBankTransferEnabled] = useState(false)
+  const [acceptedPolicies, setAcceptedPolicies] = useState<Record<string, boolean>>({})
 
   const fetchPayments = useCallback(async () => {
     setLoading(true)
@@ -158,14 +161,22 @@ export function PortalPendingPaymentsPage() {
           <p>No pending payments.</p>
           <p className="portal-payments__empty-hint">
             {payments.length === 0
-              ? "You're all caught up - nothing is waiting for payment."
+              ? "You are all caught up, nothing is waiting for payment."
               : "Try a different search term."}
           </p>
         </div>
       ) : (
         <ul className="portal-payments__list">
-          {filtered.map((payment) => (
-            <li key={payment.id}>
+          {filtered.map((payment) => {
+            const isAir =
+              !payment.channel ||
+              payment.channel.toLowerCase().includes("air") ||
+              payment.channel.toLowerCase().includes("skyjet") ||
+              Boolean((payment as any).air_gz_weight || (payment as any).air_hk_weight)
+            const isPolicyAccepted = Boolean(acceptedPolicies[payment.id])
+
+            return (
+              <li key={payment.id}>
               <article className="portal-payments__card portal-payments__card--pending">
                 <div className="portal-payments__card-head" style={{ flexDirection: "column", alignItems: "flex-start", gap: "0.75rem", width: "100%" }}>
                   <div className="flex w-full justify-between items-center" style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
@@ -320,25 +331,52 @@ export function PortalPendingPaymentsPage() {
 
                 <div className="portal-payments__card-actions">
                   {payment.status === "awaiting_confirmation" ? (
-                    <div style={{ padding: "10px 12px", borderRadius: 8, backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", width: "100%" }}>
+                    <div style={{ padding: "10px 12px", borderRadius: 8, backgroundColor: "#eff6ff", width: "100%" }}>
                       <p className="portal-payments__pay-hint" style={{ color: "#1e40af", fontWeight: 600, margin: 0 }}>
-                        Transfer proof uploaded & under review. We will release this shipment once verified by Admin.
+                        Transfer proof uploaded and under review. We will release this shipment once verified by Admin.
                       </p>
                     </div>
                   ) : (
                     <>
-                      <p className="portal-payments__pay-hint">
-                        Pay now to release this shipment.
-                      </p>
+                      <div style={{ margin: "8px 0 12px 0", width: "100%" }}>
+                        <label style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "13px", cursor: "pointer", color: "var(--color-dheir-ink)" }}>
+                          <input
+                            type="checkbox"
+                            checked={isPolicyAccepted}
+                            onChange={(e) =>
+                              setAcceptedPolicies((prev) => ({
+                                ...prev,
+                                [payment.id]: e.target.checked,
+                              }))
+                            }
+                            style={{ marginTop: "2px", cursor: "pointer" }}
+                          />
+                          <span>
+                            {isAir
+                              ? "I confirm that Air shipping is prepaid before departure and minimum billing weight is 1kg"
+                              : "I accept the shipping policy and confirm payment to release this shipment"}
+                          </span>
+                        </label>
+                      </div>
+
                       <div className="portal-payments__pay-options">
                         {bankTransferEnabled ? (
-                          <Link
-                            href={`/customer/payments/transfer/shipment/${encodeURIComponent(payment.transaction_ref)}`}
+                          <button
+                            type="button"
+                            disabled={!isPolicyAccepted}
+                            onClick={() => {
+                              if (!isPolicyAccepted) {
+                                toast.error("Please accept the shipping policy to continue")
+                                return
+                              }
+                              router.push(`/customer/payments/transfer/shipment/${encodeURIComponent(payment.transaction_ref)}`)
+                            }}
                             className="portal-payments__pay-btn portal-payments__pay-btn--bank dheir-btn-primary"
+                            style={!isPolicyAccepted ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
                           >
                             <IconBuildingBank size={18} stroke={1.5} aria-hidden />
                             Pay by transfer
-                          </Link>
+                          </button>
                         ) : null}
                         <div
                           className={
@@ -358,7 +396,7 @@ export function PortalPendingPaymentsPage() {
                             customerName={customerName || user?.email || ""}
                             paymentReference={payment.transaction_ref}
                             className="portal-payments__pay-btn dheir-btn-primary"
-                            disabled={!user?.email || !PAYSTACK_ENABLED}
+                            disabled={!isPolicyAccepted || !user?.email || !PAYSTACK_ENABLED}
                           />
                         </div>
                       </div>
@@ -367,7 +405,8 @@ export function PortalPendingPaymentsPage() {
                 </div>
               </article>
             </li>
-          ))}
+          )
+        })}
         </ul>
       )}
     </div>

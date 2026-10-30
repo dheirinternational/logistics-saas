@@ -35,6 +35,7 @@ export function PortalCartPage() {
   const [isPaying, setIsPaying] = useState(false)
   const [isBankPaying, setIsBankPaying] = useState(false)
   const [bankTransferEnabled, setBankTransferEnabled] = useState(false)
+  const [policyAccepted, setPolicyAccepted] = useState(false)
 
   const PAYSTACK_ENABLED =
     (process.env.NEXT_PUBLIC_PAYSTACK_CHECKOUT_ENABLED ??
@@ -113,6 +114,10 @@ export function PortalCartPage() {
 
   const initializePayment = async () => {
     if (cart.length === 0) return
+    if (!policyAccepted) {
+      toast.error("Please accept the delivery and refund policy to proceed")
+      return
+    }
     if (!user.email || !user.code) {
       toast.error("Account details are still loading")
       return
@@ -161,6 +166,10 @@ export function PortalCartPage() {
 
   const initializeBankTransfer = async () => {
     if (cart.length === 0) return
+    if (!policyAccepted) {
+      toast.error("Please accept the delivery and refund policy to proceed")
+      return
+    }
     if (!user.email || !user.code) {
       toast.error("Account details are still loading")
       return
@@ -262,11 +271,26 @@ export function PortalCartPage() {
 
           {cart.length > 0 ? (
             <div className="portal-cart__checkout-actions">
+              <div style={{ margin: "1rem 0" }}>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "13px", cursor: "pointer", color: "var(--color-dheir-ink)" }}>
+                  <input
+                    type="checkbox"
+                    checked={policyAccepted}
+                    onChange={(e) => setPolicyAccepted(e.target.checked)}
+                    style={{ marginTop: "2px", cursor: "pointer" }}
+                  />
+                  <span>
+                    I accept the shop delivery fee terms and confirm that orders are non refundable once payment is completed
+                  </span>
+                </label>
+              </div>
+
               {bankTransferEnabled ? (
                 <button
                   type="button"
                   className="portal-packages__btn-primary portal-packages__btn-primary--block portal-cart__checkout-btn"
                   disabled={
+                    !policyAccepted ||
                     isBankPaying ||
                     isPaying ||
                     loadingAddress ||
@@ -294,6 +318,7 @@ export function PortalCartPage() {
                   type="button"
                   className="portal-packages__btn-primary portal-packages__btn-primary--block portal-cart__checkout-btn portal-cart__checkout-btn--secondary"
                   disabled={
+                    !policyAccepted ||
                     isPaying ||
                     isBankPaying ||
                     loadingAddress ||

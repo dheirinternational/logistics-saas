@@ -91,7 +91,6 @@ export function PortalAirWarehouseNoticeModal({
               padding: "14px 16px",
               borderRadius: "12px",
               background: "#fffbeb",
-              border: "1px solid #fde68a",
               color: "#92400e",
               marginBottom: 16,
             }}
@@ -136,7 +135,7 @@ export function PortalAirWarehouseNoticeModal({
             style={{
               padding: "9px 16px",
               borderRadius: "10px",
-              border: "1px solid var(--color-dheir-border)",
+              border: "none",
               background: "var(--color-dheir-surface)",
               color: "var(--color-dheir-muted)",
               fontSize: "13px",
@@ -161,11 +160,10 @@ export function PortalAirWarehouseNoticeModal({
               fontSize: "13px",
               fontWeight: 600,
               cursor: "pointer",
-              boxShadow: "0 2px 6px rgba(0, 82, 255, 0.25)",
             }}
           >
             <IconCopy size={16} stroke={1.5} />
-            <span>I Understand & Copy</span>
+            <span>I Understand and Copy</span>
           </button>
         </div>
       </div>
