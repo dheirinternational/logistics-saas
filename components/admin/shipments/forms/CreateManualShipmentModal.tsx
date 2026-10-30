@@ -8,7 +8,7 @@ import { MediaPickerModal } from "@/components/admin/media/MediaPickerModal"
 import { MediaUploadModal } from "@/components/admin/media/MediaUploadModal"
 import type { AdminMediaItem } from "@/lib/media/adminMedia"
 import Image from "next/image"
-import { FaImage } from "react-icons/fa"
+import { IconPhoto } from "@tabler/icons-react"
 
 type Customer = {
   id: number
@@ -439,7 +439,7 @@ export default function CreateManualShipmentModal({
               onClick={() => setPickerOpen(true)}
             >
               <span className="inline-flex items-center gap-2">
-                Choose from library <FaImage />
+                Choose from library <IconPhoto size={16} />
               </span>
             </button>
             <button

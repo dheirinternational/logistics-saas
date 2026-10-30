@@ -4,7 +4,7 @@ import { Product, ProductImage } from "@/types/entityTypeDef"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { FaStar } from "react-icons/fa"
+import { IconStar } from "@tabler/icons-react"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 
 
@@ -41,7 +41,7 @@ const ProductCard = (props: Product) => {
         {
           props.is_featured && 
           <div className="absolute top-1 left-1 z-100 rounded-full p-1 bg-white/50"> 
-             <FaStar className="text-[10px] text-accent-blue"/>
+             <IconStar size={12} className="text-[10px] text-accent-blue" />
           </div>
         }
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import InputComponent from "../../admin/shipments/InputComponent"
 import Link from "next/link"
-import { FaCartShopping } from "react-icons/fa6"
+import { IconShoppingCart } from "@tabler/icons-react"
 import { useCartStore } from "@/store/cartStore"
 import Image from "next/image"
 import { toast } from "@/lib/ui/toast"
@@ -140,7 +140,7 @@ const MarketSearch = () => {
         {/* Cart */}
 
         <Link href={"/customer/marketplace/cart"} className="relative">
-          <FaCartShopping className="text-xl"/>
+          <IconShoppingCart size={22} className="text-xl"/>
           {cartItemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-accent-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {cartItemCount}

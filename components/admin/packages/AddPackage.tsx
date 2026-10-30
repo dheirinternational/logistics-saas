@@ -1,7 +1,6 @@
 "use client"
 
 import { ChangeEvent, FormEvent, useState } from "react"
-import { IoCreate } from "react-icons/io5"
 import { IncomingPackage, Package } from "@/types/entityTypeDef"
 import InputComponent from "../shipments/InputComponent"
 import Image from "next/image"

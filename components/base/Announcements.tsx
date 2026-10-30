@@ -2,18 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { HiSpeakerWave } from "react-icons/hi2";
+import { IconSpeakerphone } from "@tabler/icons-react";
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast";
-
-
-
 
 export const Announcements = () => {
 
     const [announcements, setAnnouncements] = useState<{id: string, title: string, message: string}[]>([])
     const [isDataFeching, setIsDataFetching] = useState(true)
-
 
     useEffect(() => {
         // Fetch announcements from the server
@@ -40,12 +36,10 @@ export const Announcements = () => {
 
     }, [])
 
-
-
     return (
         <div className='p-body px-2 bg-white shadow shadow-dark/10 flex md:max-w-125 md:mx-auto items-center '>
             <div className=' h-full flex items-center justify-center w-fit p-2 text-xs gap-1'>
-                <HiSpeakerWave className='' />
+                <IconSpeakerphone size={16} />
                 <span>Announcement:</span>
             </div>
 

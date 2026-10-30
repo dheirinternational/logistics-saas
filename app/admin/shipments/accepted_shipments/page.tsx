@@ -11,7 +11,6 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { NextPage } from 'next'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { FaX } from 'react-icons/fa6'
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { deleteSelectedRows, formatDeleteFailures } from "@/lib/admin/deleteSelected"
 import { matchesStatusFilter } from "@/lib/admin/tableFilters"

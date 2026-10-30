@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { FaCheck } from "react-icons/fa"
+import { IconCheck } from "@tabler/icons-react"
 
 const CopyWarehouseDetails = ({text, title, ignoreText} : {text: string, title: string, ignoreText?: boolean}) => {
 
@@ -39,7 +39,7 @@ const CopyWarehouseDetails = ({text, title, ignoreText} : {text: string, title: 
         onClick={handleCopy}
         >
             {
-                isCopied ? <FaCheck/> : !ignoreText ? "copy" : "copy all"
+                isCopied ? <IconCheck size={14} /> : !ignoreText ? "copy" : "copy all"
             }
         </button>
     </div>

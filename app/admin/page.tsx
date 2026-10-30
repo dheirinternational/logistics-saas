@@ -12,7 +12,6 @@ import { buttonsProps } from '@/components_map_definitions/quickActionsBtns'
 import { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import { IconChecks, IconLoader2, IconPackage, IconTruck } from "@tabler/icons-react"
-// import { GrDeliver } from 'react-icons/gr'
 import { toast } from "@/lib/ui/toast"
 
 

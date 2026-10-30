@@ -7,7 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { FaCheckCircle, FaUser } from 'react-icons/fa'
+import { IconCircleCheck, IconUser } from '@tabler/icons-react'
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import { IconCamera, IconMail, IconShieldLock, IconUserCircle } from "@tabler/icons-react"
@@ -273,7 +273,7 @@ const Page: NextPage = () => {
                 Edit profile
             </h1>
             <Link href={"/customer/profile"} className='flex-1 flex justify-end'>
-                <FaUser />
+                <IconUser size={16} />
             </Link>
         </div> */}
           <section className="portal-home__panel" aria-label="Profile photo">
@@ -451,7 +451,7 @@ const Page: NextPage = () => {
                   </button>
                 ) : (
                   <p className="portal-home__section-sub" style={{ margin: 0, display: "flex", gap: 8, alignItems: "center" }}>
-                    Email verified <FaCheckCircle className="text-green-300 text-[12px]" />
+                    Email verified <IconCircleCheck size={14} className="text-green-300 text-[12px]" />
                   </p>
                 )}
 

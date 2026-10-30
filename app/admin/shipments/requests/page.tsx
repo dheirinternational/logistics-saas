@@ -11,8 +11,7 @@ import { NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
-import { BiCheck } from 'react-icons/bi'
-import { FaImage } from 'react-icons/fa'
+import { IconCheck, IconPhoto } from '@tabler/icons-react'
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { DHEIRSelect } from "@/components/ui/DHEIRSelect"
 import { matchesStatusFilter } from "@/lib/admin/tableFilters"
@@ -920,7 +919,7 @@ const Page: NextPage = () => {
                             onClick={() => setPickerOpen(true)}
                           >
                             <span className="inline-flex items-center gap-2">
-                              Choose from library <FaImage />
+                              Choose from library <IconPhoto size={16} />
                             </span>
                           </button>
                           <button
@@ -1050,7 +1049,7 @@ const Page: NextPage = () => {
                                 <DHEIRLoader color="#fff" size={10} />
                               ) : (
                                 <span className="inline-flex items-center gap-2">
-                                  <BiCheck className="text-lg" />
+                                  <IconCheck size={18} className="text-lg" />
                                   Accept Request
                                 </span>
                               )}
@@ -1094,7 +1093,7 @@ const Page: NextPage = () => {
                           <DHEIRLoader color="#fff" size={10} />
                         ) : (
                           <span className="inline-flex items-center gap-2">
-                            <BiCheck className="text-lg" />
+                            <IconCheck size={18} className="text-lg" />
                             Generate Shipment
                           </span>
                         )}

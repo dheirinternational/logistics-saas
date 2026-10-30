@@ -2,7 +2,7 @@
 
 import { useCartStore } from "@/store/cartStore"
 import { Address, CartProduct } from "@/types/entityTypeDef"
-import { BiCartAdd } from "react-icons/bi"
+import { IconShoppingCartPlus } from "@tabler/icons-react"
 import { toast } from "@/lib/ui/toast"
 
 const AddToCart = ({product, address } : {product: CartProduct, address: Address | null}) => {
@@ -29,7 +29,7 @@ const AddToCart = ({product, address } : {product: CartProduct, address: Address
       toast.success("Added to cart")
     }}
     >
-        <BiCartAdd className="text-xl"/>
+        <IconShoppingCartPlus size={20} className="text-xl"/>
         {
           product.quantity < 1 ? 
           "Out of stock":

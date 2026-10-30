@@ -3,8 +3,7 @@
 import { carouselImages } from "@/assets/carousel-images/carousel-images"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
-
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 
 const Carousel = () => {
 
@@ -13,9 +12,7 @@ const Carousel = () => {
     
     const sliderRef = useRef<HTMLDivElement>(null)
 
-
     // Interval 
-
     useEffect(() => {
         const intervalId = setInterval(() => setCurrentIndex(prev => prev + 1) , 5000)
 
@@ -23,13 +20,11 @@ const Carousel = () => {
     }, [clickDetector])
 
     // Watch Transition
-
     useEffect(() => {
         const slider = sliderRef.current
         if (!slider) return
 
         function handleTransition() {
-
             if(!slider) return
 
             if(currentIndex > 3){
@@ -47,8 +42,6 @@ const Carousel = () => {
 
         return () => slider.removeEventListener("transitionend", handleTransition)
     }, [currentIndex])
-
-
 
   return (
     <div className="bg-accent-blue h-50 relative max-w-[100vw] overflow-hidden md:h-110">
@@ -75,13 +68,6 @@ const Carousel = () => {
 
                     {/* Shadow Cover */}
                     <div className="w-full h-full absolute bg-black/10 pointer-events-none" />
-
-                    {/* Content */}
-                    {/* <div className="absolute text-xs left-1/2 top-1/2 -translate-1/2">
-                        <h2 className="max-w-60 text-center text-white font-bold">
-                            Lorem ipsum dolor sit amet
-                        </h2>
-                    </div> */}
                 </div>
                 )
             }
@@ -111,7 +97,6 @@ const Carousel = () => {
             }
         </div>
 
-
         {/* Controls */}
         <button className="absolute top-1/2 -translate-y-1/2 left-4 text-white p-3 rounded-full bg-white/30 backdrop-blur-lg border border-white/60"
         onClick={() => {
@@ -119,7 +104,7 @@ const Carousel = () => {
             setClickDetector(!clickDetector)
         }}
         >
-            <FaChevronLeft/>                
+            <IconChevronLeft size={20} />                
         </button>
         <button className="absolute top-1/2 -translate-y-1/2 right-4 text-white p-3 rounded-full bg-white/30 backdrop-blur-lg border border-white/60"
         onClick={() => {
@@ -127,13 +112,11 @@ const Carousel = () => {
             setClickDetector(!clickDetector)
         }}
         >
-            <FaChevronRight/>
+            <IconChevronRight size={20} />
         </button>
-
 
         {/* Indicator */}
         <div className="flex w-fit left-1/2 bottom-2 -translate-x-1/2 gap-1 absolute">
-            
             {carouselImages.map( (_, indicator) => 
                 <div
                 key={indicator} 
@@ -146,8 +129,6 @@ const Carousel = () => {
                 />
             )} 
         </div>
-
-       
     </div>
   )
 }

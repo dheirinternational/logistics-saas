@@ -1,4 +1,4 @@
-import { BsArrowRight } from "react-icons/bs"
+import { IconArrowRight } from "@tabler/icons-react"
 
 const RecentShipmentCard = () => {
   return (
@@ -11,7 +11,7 @@ const RecentShipmentCard = () => {
         </p>
         <div className="text-xs flex items-center gap-2 mt-4">
             <span>Location A</span>
-            <BsArrowRight/>
+            <IconArrowRight size={16} />
             <span>Location B</span>
         </div>
         <span className="text-[10px] font-bold block absolute top-1 right-1 px-3 py-1 bg-accent-blue/20 rounded-full text-accent-blue">

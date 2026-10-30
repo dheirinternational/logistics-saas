@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react"
 import InputComponent from "../shipments/InputComponent"
-import { LuHousePlus } from "react-icons/lu"
+import { IconBuildingPlus } from "@tabler/icons-react"
 import { toast } from "@/lib/ui/toast"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 
@@ -135,7 +135,7 @@ const AddWarehouse = () => {
                     <DHEIRLoader color="#fff" size={15} />
                 ) : (
                     <>
-                        <LuHousePlus/>
+                        <IconBuildingPlus size={16} />
                         <p className="text-xs font-bold">
                             Add Warehouse
                         </p>

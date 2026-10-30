@@ -1,112 +1,112 @@
-import type { CTARedirectButton } from "@/components/base/CTARedirectButton";
-import { BsBoxArrowInDown, BsBoxArrowUp, BsCart3, BsList } from "react-icons/bs";
-import { FaBoxes, FaShippingFast, FaUserEdit } from "react-icons/fa";
-import { FaMapLocationDot, FaUserTag } from "react-icons/fa6";
-import { GrDocument, GrOrderedList } from "react-icons/gr";
-import { LiaFirstOrder } from "react-icons/lia";
-import { LuPackagePlus } from "react-icons/lu";
-import { MdLocalShipping, MdPayment, MdPendingActions } from "react-icons/md";
+import type { CTARedirectButton } from "@/components/base/CTARedirectButton"
+import {
+  IconBuildingWarehouse,
+  IconClockHour4,
+  IconMapPin,
+  IconPackage,
+  IconPackageImport,
+  IconPackages,
+  IconReceipt,
+  IconSend,
+  IconShoppingCart,
+  IconTruck,
+  IconTruckDelivery,
+  IconUserEdit,
+} from "@tabler/icons-react"
 
 export const ctaButtonsProps: CTARedirectButton[] = [
-    {
-        title: "Request Mail",
-        icon: FaShippingFast,
-        path: "/customer/request_mail"
-    },
-    {
-        title: "Warehouse Address",
-        icon: FaMapLocationDot,
-        path: "/customer/warehouse_address"
-    },
-    {
-        title: "Pending Payments",
-        icon: MdPendingActions,
-        path: "/customer/pending_payments"
-    },
-
-    // {
-    //     title: "New User Ordering Process",
-    //     icon: FaUserTag,
-    //     path: "/in_development"
-    // },
+  {
+    title: "Request Mail",
+    icon: IconTruckDelivery,
+    path: "/customer/request_mail",
+  },
+  {
+    title: "Warehouse Address",
+    icon: IconBuildingWarehouse,
+    path: "/customer/warehouse_address",
+  },
+  {
+    title: "Pending Payments",
+    icon: IconClockHour4,
+    path: "/customer/pending_payments",
+  },
 ]
 
 export const profileCtaButtonsProps: CTARedirectButton[] = [
-    {
-        title: "Add Package",
-        icon: LuPackagePlus,
-        path: "/customer/add_package"
-    },
-    {
-        title: "Waiting To Be Received",
-        icon: BsBoxArrowInDown,
-        path: "/customer/waiting_to_be_stored"
-    },
-    {
-        title: "All Packages",
-        icon: FaBoxes,
-        path: "/customer/packages"
-    },
-    {
-        title: "Request Mail",
-        icon: FaShippingFast,
-        path: "/customer/request_mail"
-    },
-    {
-        title: "Shipment Requests",
-        icon: BsBoxArrowUp,
-        path: "/customer/waiting_to_be_released"
-    },
-    {
-        title: "Shipment",
-        icon: MdLocalShipping,
-        path: "/customer/orders_shipped"
-    },
-    {
-        title: "Payment Receipts",
-        icon: MdPayment,
-        path: "/customer/payment_receipts"
-    },
-    {
-        title: "Pending Payments",
-        icon: MdPendingActions,
-        path: "/customer/pending_payments"
-    },
-    {
-        title: "Orders",
-        icon: BsCart3,
-        path: "/customer/orders"
-    }
+  {
+    title: "Add Package",
+    icon: IconPackage,
+    path: "/customer/add_package",
+  },
+  {
+    title: "Waiting To Be Received",
+    icon: IconPackageImport,
+    path: "/customer/waiting_to_be_stored",
+  },
+  {
+    title: "All Packages",
+    icon: IconPackages,
+    path: "/customer/packages",
+  },
+  {
+    title: "Request Mail",
+    icon: IconTruckDelivery,
+    path: "/customer/request_mail",
+  },
+  {
+    title: "Shipment Requests",
+    icon: IconSend,
+    path: "/customer/waiting_to_be_released",
+  },
+  {
+    title: "Shipment",
+    icon: IconTruck,
+    path: "/customer/orders_shipped",
+  },
+  {
+    title: "Payment Receipts",
+    icon: IconReceipt,
+    path: "/customer/payment_receipts",
+  },
+  {
+    title: "Pending Payments",
+    icon: IconClockHour4,
+    path: "/customer/pending_payments",
+  },
+  {
+    title: "Orders",
+    icon: IconShoppingCart,
+    path: "/customer/orders",
+  },
 ]
 
 export const profileMenuCtaButtonsProps: CTARedirectButton[] = [
-    {
-        title: "Shop",
-        path: "/customer/shop",
-        icon: BsCart3
-    },
-    {
-        title: "Warehouse Address",
-        path: "/customer/warehouse_address",
-        icon: FaMapLocationDot
-    },
-    {
-        title: "My Address",
-        path: "/customer/my_address",
-        icon: FaMapLocationDot
-    },
-    {
-        title: "Edit profile",
-        path: "/customer/edit_profile",
-        icon: FaUserEdit
-    }
+  {
+    title: "Shop",
+    path: "/customer/shop",
+    icon: IconShoppingCart,
+  },
+  {
+    title: "Warehouse Address",
+    path: "/customer/warehouse_address",
+    icon: IconBuildingWarehouse,
+  },
+  {
+    title: "My Address",
+    path: "/customer/my_address",
+    icon: IconMapPin,
+  },
+  {
+    title: "Edit profile",
+    path: "/customer/edit_profile",
+    icon: IconUserEdit,
+  },
 ]
 
 export const adminProfileMenuCtaButtonsProps: CTARedirectButton[] = [
-
-    {
-        title: "Edit profile",
-        path: "/admin/edit_profile",
-        icon: FaUserEdit
-    }
+  {
+    title: "Edit profile",
+    path: "/admin/edit_profile",
+    icon: IconUserEdit,
+  },
 ]

@@ -11,7 +11,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
-import { FaGlobe, FaImage, FaPlus } from "react-icons/fa";
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast";
 import { IconX } from "@tabler/icons-react"

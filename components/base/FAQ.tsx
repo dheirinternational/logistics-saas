@@ -1,9 +1,8 @@
 "use client"
 
-
 import type { FAQ } from "@/types/miscallaneous"
 import { useState } from "react"
-import { FaChevronDown } from "react-icons/fa"
+import { IconChevronDown } from "@tabler/icons-react"
 
 const FAQ = ({question, answer}: FAQ) => {
 
@@ -19,7 +18,7 @@ const FAQ = ({question, answer}: FAQ) => {
               onClick={() => setIsActive(!isActive)}
               className={`${isActive && "rotate-180"}`}
               >
-                <FaChevronDown />
+                <IconChevronDown size={16} />
               </button>
             </div>
             <div className={` bg-light -mt-2 relative z-40  rounded-b-lg shadow shadow-dark/10 transition-set overflow-hidden 

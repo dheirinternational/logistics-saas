@@ -3,14 +3,11 @@
 import { useCartStore } from "@/store/cartStore"
 import { CartProduct } from "@/types/entityTypeDef"
 import Image from "next/image"
-import { FaMinus, FaPlus } from "react-icons/fa"
+import { IconMinus, IconPlus } from "@tabler/icons-react"
 
 const CheckoutCartCard = (props: CartProduct) => {
 
     const { removeProduct, increaseAmount, decreaseAmount, editIndividualItem} = useCartStore()
-
-
-    console.log(props)
 
   return (
     <div className='flex relative'>
@@ -46,7 +43,7 @@ const CheckoutCartCard = (props: CartProduct) => {
                 }}  
                 disabled={props.amount_to_be_ordered < 2}
                 >
-                    <FaMinus/>
+                    <IconMinus size={14} />
                 </button>
                 
                 <input 
@@ -62,7 +59,7 @@ const CheckoutCartCard = (props: CartProduct) => {
                 }} 
                 disabled={props.amount_to_be_ordered > props.quantity - 1} 
                 >
-                    <FaPlus/>
+                    <IconPlus size={14} />
                 </button>
             </div>
         </div>
