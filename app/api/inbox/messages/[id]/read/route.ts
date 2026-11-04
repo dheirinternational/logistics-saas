@@ -21,7 +21,11 @@ export async function POST(
     await pool.query(
       `
       INSERT INTO inbox_read_receipts (message_id, user_id)
-      VALUES ($1, $2)
+      SELECT m.id, $2
+      FROM inbox_messages m
+      WHERE m.id = $1 
+         OR m.parent_id = $1 
+         OR m.thread_id = (SELECT COALESCE(thread_id, id) FROM inbox_messages WHERE id = $1 LIMIT 1)
       ON CONFLICT (user_id, message_id) DO NOTHING
       `,
       [id, session.user_id],

@@ -14,6 +14,24 @@ export async function GET() {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
     }
 
+    if (session.role === "admin") {
+      // For Admin: Count unread messages/replies sent by customers
+      const res = await pool.query(
+        `
+        SELECT COUNT(*) AS count
+        FROM inbox_messages m
+        LEFT JOIN inbox_read_receipts r
+          ON r.message_id = m.id AND r.user_id = $1
+        WHERE m.sender_role = 'customer'
+          AND r.read_at IS NULL
+        `,
+        [session.user_id],
+      )
+      const count = Number(res.rows[0]?.count ?? 0)
+      return NextResponse.json({ success: true, data: { count } })
+    }
+
+    // For Customer: Count unread messages sent by admin / system
     const res = await pool.query(
       `
       SELECT COUNT(*) AS count
@@ -21,6 +39,7 @@ export async function GET() {
       LEFT JOIN inbox_read_receipts r
         ON r.message_id = m.id AND r.user_id = $1
       WHERE (m.recipient_id = $1 OR m.is_broadcast = TRUE)
+        AND m.sender_role = 'admin'
         AND r.read_at IS NULL
       `,
       [session.user_id],

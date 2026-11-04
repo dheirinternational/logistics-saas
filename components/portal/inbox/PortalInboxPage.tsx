@@ -1,19 +1,30 @@
 "use client"
 
 import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPackagesPageHeader"
+import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import type { InboxMessage } from "@/lib/portal/inbox"
+import { toast } from "@/lib/ui/toast"
 import {
-  IconMailOpened,
-  IconMail,
-  IconBroadcast,
-  IconUser,
-  IconSearch,
+  IconArrowLeft,
   IconInbox,
+  IconMail,
+  IconSearch,
+  IconSend,
 } from "@tabler/icons-react"
-import { useEffect, useRef, useState, useMemo } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 type Props = {
   messages: InboxMessage[]
+}
+
+type ThreadReply = {
+  id: string
+  body: string
+  senderRole: "admin" | "customer"
+  senderId: number
+  senderName: string
+  customerCode: string | null
+  createdAt: string
 }
 
 function formatDate(iso: string) {
@@ -24,12 +35,26 @@ function formatDate(iso: string) {
   })
 }
 
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
 export function PortalInboxPage({ messages: initial }: Props) {
   const [messages, setMessages] = useState<InboxMessage[]>(initial)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
   const [activeTab, setActiveTab] = useState<"all" | "unread" | "broadcast" | "direct">("all")
   const markingRef = useRef<Set<string>>(new Set())
+
+  // Thread replies state
+  const [threadReplies, setThreadReplies] = useState<ThreadReply[]>([])
+  const [loadingThread, setLoadingThread] = useState(false)
+  const [replyText, setReplyText] = useState("")
+  const [sendingReply, setSendingReply] = useState(false)
+  const threadEndRef = useRef<HTMLDivElement>(null)
 
   // Revalidate on window focus (tab regains visibility)
   useEffect(() => {
@@ -50,6 +75,38 @@ export function PortalInboxPage({ messages: initial }: Props) {
     return messages.find((m) => m.id === selectedId) || null
   }, [messages, selectedId])
 
+  // Fetch thread conversation when selected message changes
+  useEffect(() => {
+    if (!selectedId) {
+      setThreadReplies([])
+      setReplyText("")
+      return
+    }
+    let cancelled = false
+    setLoadingThread(true)
+    fetch(`/api/inbox/messages/${selectedId}/thread`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((json) => {
+        if (!cancelled && json.success) {
+          setThreadReplies(json.data.replies || [])
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingThread(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [selectedId])
+
+  // Scroll to bottom of conversation thread when new reply is added
+  useEffect(() => {
+    if (threadReplies.length > 0) {
+      threadEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [threadReplies.length])
+
   const handleSelect = (id: string) => {
     setSelectedId(id)
 
@@ -68,6 +125,32 @@ export function PortalInboxPage({ messages: initial }: Props) {
           })
           .catch(() => {})
       }
+    }
+  }
+
+  const handleSendReply = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = replyText.trim()
+    if (!trimmed || !selectedId || sendingReply) return
+
+    setSendingReply(true)
+    try {
+      const res = await fetch(`/api/inbox/messages/${selectedId}/reply`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: trimmed }),
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.message || "Failed to send reply")
+
+      setThreadReplies((prev) => [...prev, json.data])
+      setReplyText("")
+      toast.success("Reply sent")
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send reply")
+    } finally {
+      setSendingReply(false)
     }
   }
 
@@ -99,7 +182,7 @@ export function PortalInboxPage({ messages: initial }: Props) {
 
       <div className="inbox-layout">
         {/* Left Sidebar Pane */}
-        <div className="inbox-layout__sidebar">
+        <div className={`inbox-layout__sidebar${selectedId ? " is-hidden" : ""}`}>
           <div className="inbox-layout__search-container">
             <div className="inbox-layout__search-wrapper">
               <IconSearch size={16} className="inbox-layout__search-icon" aria-hidden />
@@ -177,10 +260,9 @@ export function PortalInboxPage({ messages: initial }: Props) {
                           {msg.body}
                         </div>
                         <div className="inbox-layout__card-meta">
-                          <span className="inbox-layout__card-badge">
+                          <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>
                             {msg.isBroadcast ? "Broadcast" : "Direct"}
                           </span>
-                          {isUnread && <span className="inbox-layout__unread-dot" />}
                         </div>
                       </div>
                     </button>
@@ -192,7 +274,7 @@ export function PortalInboxPage({ messages: initial }: Props) {
         </div>
 
         {/* Right Content Pane */}
-        <div className="inbox-layout__content">
+        <div className={`inbox-layout__content${!selectedId ? " is-hidden" : ""}`}>
           {!selectedMessage ? (
             <div className="inbox-layout__empty">
               <IconMail size={40} stroke={1} className="inbox-layout__empty-icon" aria-hidden />
@@ -201,9 +283,17 @@ export function PortalInboxPage({ messages: initial }: Props) {
           ) : (
             <div className="inbox-layout__message">
               <div className="inbox-layout__message-header">
+                <button
+                  type="button"
+                  className="inbox-layout__mobile-back"
+                  onClick={() => setSelectedId(null)}
+                >
+                  <IconArrowLeft size={16} stroke={1.5} />
+                  <span>Back to messages</span>
+                </button>
                 <div className="inbox-layout__message-title-row">
                   <h2 className="inbox-layout__message-subject">{selectedMessage.title}</h2>
-                  <span className="inbox-layout__card-badge">
+                  <span style={{ fontSize: "12px", color: "var(--color-dheir-muted)" }}>
                     {selectedMessage.isBroadcast ? "Broadcast Announcement" : "Direct Message"}
                   </span>
                 </div>
@@ -212,20 +302,146 @@ export function PortalInboxPage({ messages: initial }: Props) {
                   <div className="inbox-layout__sender-meta">
                     <span className="inbox-layout__sender-name">DHEIR Cargo Administration</span>
                     <time className="inbox-layout__message-date" dateTime={selectedMessage.createdAt}>
-                      Sent on {formatDate(selectedMessage.createdAt)}
+                      Sent on {formatDate(selectedMessage.createdAt)} at {formatTime(selectedMessage.createdAt)}
                     </time>
                   </div>
                 </div>
               </div>
 
               <div className="inbox-layout__message-body-container">
-                <div className="inbox-layout__message-card">
+                {/* Root Message Card */}
+                <div
+                  style={{
+                    backgroundColor: "var(--color-dheir-surface)",
+                    borderRadius: "8px",
+                    padding: "20px",
+                    marginBottom: "16px",
+                  }}
+                >
                   <div className="inbox-layout__message-text">
                     {selectedMessage.body.trim().split("\n").map((para, i) => (
                       <p key={i}>{para}</p>
                     ))}
                   </div>
                 </div>
+
+                {/* Loading indicator for conversation replies */}
+                {loadingThread && (
+                  <div style={{ display: "flex", justifyContent: "center", padding: "16px" }}>
+                    <DHEIRLoader size={8} color="var(--color-dheir-blue)" />
+                  </div>
+                )}
+
+                {/* Conversation Thread Replies */}
+                {threadReplies.length > 0 && (
+                  <div style={{ margin: "20px 0", display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div style={{ fontSize: "12px", color: "var(--color-dheir-muted)", fontWeight: 600 }}>
+                      Conversation History
+                    </div>
+
+                    {threadReplies.map((reply) => {
+                      const isMe = reply.senderRole === "customer"
+
+                      return (
+                        <div
+                          key={reply.id}
+                          style={{
+                            alignSelf: isMe ? "flex-end" : "flex-start",
+                            maxWidth: "85%",
+                            backgroundColor: isMe ? "var(--color-dheir-page)" : "rgba(0, 82, 255, 0.05)",
+                            borderRadius: "8px",
+                            padding: "14px 16px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              gap: "12px",
+                              marginBottom: "6px",
+                              fontSize: "11px",
+                              color: "var(--color-dheir-muted)",
+                            }}
+                          >
+                            <span style={{ fontWeight: 600, color: isMe ? "var(--color-dheir-ink)" : "var(--color-dheir-blue)" }}>
+                              {isMe ? "You" : "DHEIR Administration"}
+                            </span>
+                            <time dateTime={reply.createdAt}>
+                              {formatDate(reply.createdAt)} {formatTime(reply.createdAt)}
+                            </time>
+                          </div>
+                          <div style={{ fontSize: "13px", lineHeight: 1.6, color: "var(--color-dheir-ink)", whiteSpace: "pre-wrap" }}>
+                            {reply.body}
+                          </div>
+                        </div>
+                      )
+                    })}
+                    <div ref={threadEndRef} />
+                  </div>
+                )}
+
+                {/* Minimalist Reply Form */}
+                <form
+                  onSubmit={handleSendReply}
+                  style={{
+                    marginTop: "24px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                  }}
+                >
+                  <label htmlFor="inbox-reply-input" style={{ fontSize: "12px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
+                    Reply
+                  </label>
+                  <textarea
+                    id="inbox-reply-input"
+                    rows={4}
+                    placeholder="Type your reply here..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      borderRadius: "8px",
+                      border: "none",
+                      backgroundColor: "var(--color-dheir-page)",
+                      color: "var(--color-dheir-ink)",
+                      fontSize: "13px",
+                      lineHeight: 1.5,
+                      fontFamily: "inherit",
+                      resize: "vertical",
+                      outline: "none",
+                    }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      type="submit"
+                      disabled={sendingReply || !replyText.trim()}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "9px 18px",
+                        borderRadius: "8px",
+                        border: "none",
+                        backgroundColor: "var(--color-dheir-blue)",
+                        color: "#fff",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        cursor: sendingReply || !replyText.trim() ? "not-allowed" : "pointer",
+                        opacity: sendingReply || !replyText.trim() ? 0.6 : 1,
+                      }}
+                    >
+                      {sendingReply ? (
+                        <DHEIRLoader size={6} color="#fff" />
+                      ) : (
+                        <IconSend size={15} stroke={1.5} />
+                      )}
+                      <span>Send reply</span>
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}

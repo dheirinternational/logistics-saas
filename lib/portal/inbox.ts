@@ -28,7 +28,8 @@ export async function getPortalInboxMessages(
     FROM inbox_messages m
     LEFT JOIN inbox_read_receipts r
       ON r.message_id = m.id AND r.user_id = $1
-    WHERE m.recipient_id = $1 OR m.is_broadcast = TRUE
+    WHERE (m.recipient_id = $1 OR m.is_broadcast = TRUE)
+      AND m.parent_id IS NULL
     ORDER BY m.created_at DESC
     `,
     [userId],
