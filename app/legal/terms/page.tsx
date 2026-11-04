@@ -135,14 +135,10 @@ freight, before onward dispatch to Africa. Delivery is currently available to:
 African nations by arrangement
 4.2 Estimated Delivery Times
 Item Policy
-Sea freight (China to Nigeria) Approximately 3–4 months from order confirmation date
-Air freight (China to Nigeria) Approximately 2–4 weeks (subject to availability and order type)
-Delivery to other African
-countries
-Timeline communicated on a per-order basis
-Last-mile delivery within
-Nigeria
-3–10 business days after customs clearance
+Standard delivery within Nigeria 3 to 7 business days from order confirmation
+Express delivery within Nigeria 1 to 3 business days
+Regional dispatch via courier partners 3 to 10 business days
+Maximum delivery timeframe All deliveries are completed within 14 calendar days of payment
 Shipping Time Disclaimer
 All delivery timelines are estimates only. D_HEIR International has limited control over actual
 shipping schedules, port congestion, customs processing times, and the internal schedules of
@@ -344,7 +340,7 @@ Refunds Strictly no refunds once payment received and processed to
 supplier
 Limited refund exception Only if supplier not yet paid — subject to FX reconversion loss
 Product image variations Minor variations are normal — not grounds for refund
-Sea freight delivery time Approx. 3–4 months from order confirmation
+Delivery timeframe 3 to 7 business days (maximum 14 days from payment)
 Shipping fee payment window 7 calendar days from notification
 Non-payment of shipping fee Item resold — no refund issued
 Damage in international

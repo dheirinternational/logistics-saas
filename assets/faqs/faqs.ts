@@ -54,12 +54,12 @@ export const faqs: FAQ[] = [
   {
     question: "If I place an order now, when will I receive my goods?",
     answer:
-      "Goods typically arrive in Nigeria within 2 to 3 weeks, depending on how quickly your supplier delivers to our warehouse in China.",
+      "Orders and ready shipments are delivered within 3 to 7 business days nationwide.",
   },
   {
     question: "How long does shipping take?",
     answer:
-      "Shipping time depends on the method chosen: Normal Air Shipping (5 to 7 days), Express Shipping (3 to 5 days), Sea Shipping (2 to 3 months).",
+      "Delivery takes between 3 to 7 business days, with all deliveries completed within a maximum timeframe of 14 days.",
   },
   {
     question: "How does importation work, and how can I be sure of product quality?",
