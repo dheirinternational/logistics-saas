@@ -37,10 +37,6 @@ export function PortalCartPage() {
   const [bankTransferEnabled, setBankTransferEnabled] = useState(false)
   const [policyAccepted, setPolicyAccepted] = useState(false)
 
-  const PAYSTACK_ENABLED =
-    (process.env.NEXT_PUBLIC_PAYSTACK_CHECKOUT_ENABLED ??
-      process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED) !== "false"
-
   const subtotal = useMemo(() => {
     return cart.reduce((acc, item) => {
       const price = getUnitPriceForQuantity({
@@ -307,13 +303,7 @@ export function PortalCartPage() {
                 </button>
               ) : null}
 
-              <div
-                className={
-                  PAYSTACK_ENABLED
-                    ? "portal-cart__paystack-wrap portal-cart__monnify-wrap"
-                    : "portal-cart__paystack-wrap portal-cart__paystack-wrap--paused portal-cart__monnify-wrap portal-cart__monnify-wrap--paused"
-                }
-              >
+              <div className="portal-cart__paystack-wrap portal-cart__monnify-wrap">
                 <button
                   type="button"
                   className="portal-packages__btn-primary portal-packages__btn-primary--block portal-cart__checkout-btn portal-cart__checkout-btn--secondary"
@@ -323,17 +313,14 @@ export function PortalCartPage() {
                     isBankPaying ||
                     loadingAddress ||
                     loadingUser ||
-                    !address ||
-                    !PAYSTACK_ENABLED
+                    !address
                   }
                   onClick={initializePayment}
                 >
                   {isPaying ? (
                     <DHEIRLoader color="#fff" size={8} />
-                  ) : PAYSTACK_ENABLED ? (
-                    "Pay with card (Paystack)"
                   ) : (
-                    "Card payment unavailable"
+                    "Pay with card"
                   )}
                 </button>
               </div>

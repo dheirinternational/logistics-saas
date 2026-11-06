@@ -8158,7 +8158,6 @@ a.portal-packages__card--link:focus-visible {
 .portal-payments__monnify-wrap--paused,
 .portal-payments__paystack-wrap--paused {
     opacity: 0.45;
-    filter: blur(1px);
     pointer-events: none;
 }
 
@@ -8335,7 +8334,6 @@ a.portal-packages__card--link:focus-visible {
 .portal-cart__monnify-wrap--paused,
 .portal-cart__paystack-wrap--paused {
     opacity: 0.45;
-    filter: blur(1px);
     pointer-events: none;
 }
 

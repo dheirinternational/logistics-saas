@@ -17,10 +17,6 @@ import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "@/lib/ui/toast"
 
-const PAYSTACK_ENABLED =
-  (process.env.NEXT_PUBLIC_PAYSTACK_CHECKOUT_ENABLED ??
-    process.env.NEXT_PUBLIC_MONNIFY_CHECKOUT_ENABLED) !== "false"
-
 export function PortalPendingPaymentsPage() {
   const router = useRouter()
   const [payments, setPayments] = useState<Payment[]>([])
@@ -378,25 +374,14 @@ export function PortalPendingPaymentsPage() {
                             Pay by transfer
                           </button>
                         ) : null}
-                        <div
-                          className={
-                            PAYSTACK_ENABLED
-                              ? "portal-payments__paystack-wrap"
-                              : "portal-payments__paystack-wrap portal-payments__paystack-wrap--paused"
-                          }
-                          title={
-                            PAYSTACK_ENABLED
-                              ? undefined
-                              : "Card payments are temporarily unavailable"
-                          }
-                        >
+                        <div className="portal-payments__paystack-wrap">
                           <PaystackPaymentButton
                             amount={payment.amount}
                             customerEmail={user?.email ?? ""}
                             customerName={customerName || user?.email || ""}
                             paymentReference={payment.transaction_ref}
                             className="portal-payments__pay-btn dheir-btn-primary"
-                            disabled={!isPolicyAccepted || !user?.email || !PAYSTACK_ENABLED}
+                            disabled={!isPolicyAccepted || !user?.email}
                           />
                         </div>
                       </div>
