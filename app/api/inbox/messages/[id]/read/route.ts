@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 /**
  * POST /api/inbox/messages/[id]/read
- * Marks the given message as read for the current user.
+ * Marks the given message or direct thread as read for the current user.
  */
 export async function POST(
   _req: NextRequest,
@@ -17,6 +17,27 @@ export async function POST(
     }
 
     const { id } = await params
+
+    if (id === "support-chat") {
+      // Mark all direct admin messages for this customer as read
+      await pool.query(
+        `
+        INSERT INTO inbox_read_receipts (message_id, user_id)
+        SELECT m.id, $1
+        FROM inbox_messages m
+        WHERE (m.recipient_id = $1 OR m.sender_id = $1)
+          AND m.is_broadcast = FALSE
+        ON CONFLICT (user_id, message_id) DO NOTHING
+        `,
+        [session.user_id],
+      )
+      return NextResponse.json({ success: true })
+    }
+
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    if (!isUuid) {
+      return NextResponse.json({ success: false, message: "Invalid message ID" }, { status: 400 })
+    }
 
     await pool.query(
       `

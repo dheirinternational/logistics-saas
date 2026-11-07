@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 /**
  * GET /api/inbox/messages/[id]/thread
- * Returns the full conversation thread for a given message.
+ * Returns the full conversation thread for a given message or support chat.
  */
 export async function GET(
   req: NextRequest,
@@ -20,36 +20,94 @@ export async function GET(
     const { searchParams } = new URL(req.url)
     const filterCustomerId = searchParams.get("customer_id")
 
-    // Fetch root message
-    const rootRes = await pool.query(
-      `
-      SELECT
-        m.id,
-        m.title,
-        m.body,
-        m.is_broadcast,
-        m.created_at,
-        m.sender_role,
-        m.sender_id,
-        m.recipient_id,
-        m.thread_id,
-        (r.read_at IS NOT NULL) AS is_read
-      FROM inbox_messages m
-      LEFT JOIN inbox_read_receipts r
-        ON r.message_id = m.id AND r.user_id = $1
-      WHERE m.id = $2
-      `,
-      [session.user_id, id],
-    )
+    let rootRes
+    let isSupportPlaceholder = false
 
-    if (rootRes.rows.length === 0) {
+    if (id === "support-chat") {
+      // Find customer's direct root message if exists
+      const existingRes = await pool.query(
+        `
+        SELECT
+          m.id,
+          m.title,
+          m.body,
+          m.is_broadcast,
+          m.created_at,
+          m.sender_role,
+          m.sender_id,
+          m.recipient_id,
+          m.thread_id,
+          (r.read_at IS NOT NULL) AS is_read
+        FROM inbox_messages m
+        LEFT JOIN inbox_read_receipts r
+          ON r.message_id = m.id AND r.user_id = $1
+        WHERE m.is_broadcast = FALSE
+          AND (m.recipient_id = $1 OR m.sender_id = $1)
+          AND m.parent_id IS NULL
+        ORDER BY m.created_at ASC
+        LIMIT 1
+        `,
+        [session.user_id],
+      )
+
+      if (existingRes.rows.length === 0) {
+        isSupportPlaceholder = true
+      } else {
+        rootRes = existingRes
+      }
+    } else {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+      if (!isUuid) {
+        return NextResponse.json({ success: false, message: "Invalid message ID" }, { status: 400 })
+      }
+
+      rootRes = await pool.query(
+        `
+        SELECT
+          m.id,
+          m.title,
+          m.body,
+          m.is_broadcast,
+          m.created_at,
+          m.sender_role,
+          m.sender_id,
+          m.recipient_id,
+          m.thread_id,
+          (r.read_at IS NOT NULL) AS is_read
+        FROM inbox_messages m
+        LEFT JOIN inbox_read_receipts r
+          ON r.message_id = m.id AND r.user_id = $1
+        WHERE m.id = $2
+        `,
+        [session.user_id, id],
+      )
+    }
+
+    if (isSupportPlaceholder) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          root: {
+            id: "support-chat",
+            title: "DHEIR Support",
+            body: "Welcome to DHEIR Cargo Support. Send a message below to start a chat with our administration team.",
+            isBroadcast: false,
+            createdAt: new Date().toISOString(),
+            isRead: true,
+          },
+          replies: [],
+        },
+      })
+    }
+
+    if (!rootRes || rootRes.rows.length === 0) {
       return NextResponse.json({ success: false, message: "Message not found" }, { status: 404 })
     }
 
     const root = rootRes.rows[0]
+    const isAdmin = session.role === "admin"
 
     // Verify access
-    const isAdmin = session.role === "admin"
     if (!isAdmin) {
       const hasAccess =
         root.is_broadcast ||
@@ -67,7 +125,6 @@ export async function GET(
         : null
       : session.user_id
 
-    // Fetch replies
     let repliesRes
     if (root.is_broadcast) {
       if (targetCustomerId) {
@@ -93,7 +150,6 @@ export async function GET(
           [root.id, targetCustomerId],
         )
       } else {
-        // Admin viewing all broadcast replies without specific customer filter
         repliesRes = await pool.query(
           `
           SELECT
@@ -116,7 +172,8 @@ export async function GET(
         )
       }
     } else {
-      // Direct message thread
+      // Direct message thread: fetch all messages in thread including root
+      const threadTargetId = root.thread_id || root.id
       repliesRes = await pool.query(
         `
         SELECT
@@ -132,10 +189,24 @@ export async function GET(
         FROM inbox_messages m
         LEFT JOIN users u ON u.id = (CASE WHEN m.sender_role = 'customer' THEN m.sender_id ELSE m.recipient_id END)
         LEFT JOIN customers cust ON cust.user_id = u.id
-        WHERE (m.parent_id = $1 OR (m.thread_id = $2 AND m.id != $1))
+        WHERE m.thread_id = $1 OR m.id = $1 OR m.parent_id = $1
         ORDER BY m.created_at ASC
         `,
-        [root.id, root.thread_id || root.id],
+        [threadTargetId],
+      )
+
+      // Mark unread messages in this thread as read for current user
+      const unreadRole = isAdmin ? "customer" : "admin"
+      await pool.query(
+        `
+        INSERT INTO inbox_read_receipts (message_id, user_id)
+        SELECT m.id, $2
+        FROM inbox_messages m
+        WHERE (m.thread_id = $1 OR m.id = $1 OR m.parent_id = $1)
+          AND m.sender_role = $3
+        ON CONFLICT (user_id, message_id) DO NOTHING
+        `,
+        [threadTargetId, session.user_id, unreadRole],
       )
     }
 

@@ -42,7 +42,7 @@ export const PACKAGES_QUICK_LINKS: PackagesQuickLink[] = [
   },
   {
     id: "incoming",
-    label: "Awaiting warehouse",
+    label: "Not received",
     href: "/customer/waiting_to_be_stored",
     icon: IconInbox,
   },

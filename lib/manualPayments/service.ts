@@ -59,9 +59,11 @@ export async function assertShipmentPayable(
 ) {
   const res = await client.query(
     `
-    SELECT id, amount, status, user_id, shipment_tracking_number
+    SELECT id, amount, status, user_id, shipment_tracking_number, transaction_ref
     FROM payments
-    WHERE transaction_ref = $1
+    WHERE transaction_ref = $1 OR shipment_tracking_number = $1
+    ORDER BY created_at DESC
+    LIMIT 1
     FOR UPDATE
     `,
     [reference]
@@ -141,7 +143,7 @@ export async function markShipmentAwaitingConfirmation(
     UPDATE payments
     SET status = 'awaiting_confirmation',
         channel = 'bank_transfer'
-    WHERE transaction_ref = $1
+    WHERE transaction_ref = $1 OR shipment_tracking_number = $1
     `,
     [reference]
   )

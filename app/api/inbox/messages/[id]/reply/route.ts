@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 /**
  * POST /api/inbox/messages/[id]/reply
- * Sends a reply to an existing message thread.
+ * Sends a message or reply in a conversation thread.
  *
  * Body: { body: string, recipient_id?: number }
  */
@@ -25,27 +25,107 @@ export async function POST(
 
     if (!text) {
       return NextResponse.json(
-        { success: false, message: "Reply message cannot be empty" },
+        { success: false, message: "Message cannot be empty" },
         { status: 400 },
       )
     }
 
-    // Fetch the root message
-    const rootRes = await pool.query(
-      `
-      SELECT id, title, is_broadcast, sender_id, recipient_id, thread_id
-      FROM inbox_messages
-      WHERE id = $1
-      `,
-      [id],
-    )
-
-    if (rootRes.rows.length === 0) {
-      return NextResponse.json({ success: false, message: "Message not found" }, { status: 404 })
-    }
-
-    const root = rootRes.rows[0]
     const isAdmin = session.role === "admin"
+    let root: any = null
+
+    if (id === "support-chat") {
+      // Find customer's existing direct root message
+      const existingRes = await pool.query(
+        `
+        SELECT id, title, is_broadcast, sender_id, recipient_id, thread_id
+        FROM inbox_messages
+        WHERE is_broadcast = FALSE
+          AND (recipient_id = $1 OR sender_id = $1)
+          AND parent_id IS NULL
+        ORDER BY created_at ASC
+        LIMIT 1
+        `,
+        [session.user_id],
+      )
+
+      if (existingRes.rows.length > 0) {
+        root = existingRes.rows[0]
+      } else {
+        // First message initiated by this customer
+        const insertRes = await pool.query(
+          `
+          INSERT INTO inbox_messages (
+            sender_id,
+            recipient_id,
+            sender_role,
+            title,
+            body,
+            is_broadcast
+          ) VALUES ($1, NULL, 'customer', 'Support Chat', $2, false)
+          RETURNING id, body, sender_role, sender_id, recipient_id, created_at
+          `,
+          [session.user_id, text],
+        )
+
+        const created = insertRes.rows[0]
+        await pool.query(
+          `UPDATE inbox_messages SET thread_id = id WHERE id = $1`,
+          [created.id],
+        )
+
+        await pool.query(
+          `
+          INSERT INTO inbox_read_receipts (message_id, user_id)
+          VALUES ($1, $2)
+          ON CONFLICT (user_id, message_id) DO NOTHING
+          `,
+          [created.id, session.user_id],
+        )
+
+        const userRes = await pool.query(
+          `SELECT u.first_name, u.last_name, cust.code
+           FROM users u
+           LEFT JOIN customers cust ON cust.user_id = u.id
+           WHERE u.id = $1`,
+          [session.user_id],
+        )
+        const author = userRes.rows[0]
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            id: String(created.id),
+            body: created.body,
+            senderRole: "customer",
+            senderId: session.user_id,
+            senderName: author?.first_name
+              ? `${author.first_name} ${author.last_name ?? ""}`.trim()
+              : "Customer",
+            customerCode: author?.code || null,
+            createdAt: new Date(created.created_at).toISOString(),
+          },
+        })
+      }
+    } else {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+      if (!isUuid) {
+        return NextResponse.json({ success: false, message: "Invalid message ID" }, { status: 400 })
+      }
+
+      const rootRes = await pool.query(
+        `
+        SELECT id, title, is_broadcast, sender_id, recipient_id, thread_id
+        FROM inbox_messages
+        WHERE id = $1
+        `,
+        [id],
+      )
+
+      if (rootRes.rows.length === 0) {
+        return NextResponse.json({ success: false, message: "Message not found" }, { status: 404 })
+      }
+      root = rootRes.rows[0]
+    }
 
     if (!isAdmin) {
       // Customer access check
@@ -67,8 +147,8 @@ export async function POST(
     if (isAdmin) {
       if (targetRecipientId) {
         recipientId = targetRecipientId
-      } else if (!root.is_broadcast && root.recipient_id) {
-        recipientId = root.recipient_id
+      } else if (!root.is_broadcast) {
+        recipientId = root.sender_role === "customer" ? root.sender_id : root.recipient_id
       } else {
         return NextResponse.json(
           { success: false, message: "Recipient customer is required for admin reply" },
@@ -76,8 +156,7 @@ export async function POST(
         )
       }
     } else {
-      // Customer replying: recipient is null (treated as DHEIR admin desk) or root sender
-      recipientId = root.sender_id || null
+      recipientId = root.sender_role === "admin" ? root.sender_id : (root.recipient_id || null)
     }
 
     const title = root.title.startsWith("Re: ") ? root.title : `Re: ${root.title}`

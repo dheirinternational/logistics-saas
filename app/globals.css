@@ -6226,6 +6226,10 @@ a.portal-packages__card--link:focus-visible {
 }
 
 .portal-account__header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
     margin-bottom: 24px;
 }
 

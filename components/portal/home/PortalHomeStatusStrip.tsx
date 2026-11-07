@@ -7,7 +7,7 @@ type PortalHomeStatusStripProps = {
 
 const STATUS_ITEMS = [
   {
-    label: "Awaiting warehouse",
+    label: "Not received",
     countKey: "waiting_to_be_stored" as const,
     href: "/customer/waiting_to_be_stored",
   },

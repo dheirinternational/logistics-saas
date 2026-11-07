@@ -8,7 +8,9 @@ export async function fulfillShipmentPayment(
     `
     SELECT *
     FROM payments
-    WHERE transaction_ref = $1
+    WHERE transaction_ref = $1 OR shipment_tracking_number = $1
+    ORDER BY created_at DESC
+    LIMIT 1
     FOR UPDATE
     `,
     [paymentReference]
@@ -31,7 +33,7 @@ export async function fulfillShipmentPayment(
         paid_at = NOW()
     WHERE transaction_ref = $1
     `,
-    [paymentReference]
+    [payment.transaction_ref]
   )
 
   await client.query(

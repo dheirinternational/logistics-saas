@@ -13,16 +13,26 @@ import Link from "next/link"
 import { IconBuildingBank } from "@tabler/icons-react"
 import { PortalMediaGalleryModal } from "@/components/portal/PortalMediaGalleryModal"
 import { PortalShipmentTimeline } from "@/components/portal/packages/PortalShipmentTimeline"
+import PaystackPaymentButton from "@/components/base/PaystackPaymentBtn"
+import type { User } from "@/types/entityTypeDef"
 
 export default function TrackShipmentsPage() {
   const [search, setSearch] = useState("")
   const [shipments, setShipments] = useState<Shipment[]>([])
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [activeImages, setActiveImages] = useState<any[]>([])
 
   useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.data) setUser(data.data)
+      })
+      .catch(() => {})
+
     fetch("/api/shipments/user", { credentials: "include" })
       .then(async (res) => {
         const result = await res.json()
@@ -223,14 +233,24 @@ export default function TrackShipmentsPage() {
                   <p style={{ margin: 0, fontSize: "13px", color: "var(--color-dheir-muted)" }}>
                     Pay freight bill to release this shipment.
                   </p>
-                  <Link
-                    href={`/customer/payments/transfer/shipment/${encodeURIComponent(s.tracking_number)}`}
-                    className="portal-payments__pay-btn portal-payments__pay-btn--bank dheir-btn-primary"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "6px", width: "auto", textDecoration: "none" }}
-                  >
-                    <IconBuildingBank size={18} stroke={1.5} />
-                    Pay by transfer
-                  </Link>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                    <PaystackPaymentButton
+                      amount={Number(s.total_cost || 0)}
+                      customerEmail={user?.email ?? ""}
+                      customerName={user ? `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() : ""}
+                      paymentReference={s.tracking_number}
+                      className="portal-payments__pay-btn dheir-btn-primary"
+                      disabled={!user?.email}
+                    />
+                    <Link
+                      href={`/customer/payments/transfer/shipment/${encodeURIComponent(s.tracking_number)}`}
+                      className="portal-payments__pay-btn portal-payments__pay-btn--bank dheir-btn-primary"
+                      style={{ display: "inline-flex", alignItems: "center", gap: "6px", width: "auto", textDecoration: "none" }}
+                    >
+                      <IconBuildingBank size={18} stroke={1.5} />
+                      Pay by transfer
+                    </Link>
+                  </div>
                 </div>
               )}
 

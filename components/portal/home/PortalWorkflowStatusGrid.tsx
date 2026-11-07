@@ -40,7 +40,7 @@ export function PortalWorkflowStatusGrid({ counts }: PortalWorkflowStatusGridPro
     },
     {
       id: "to_be_received",
-      label: "Awaiting warehouse",
+      label: "Not received",
       href: "/customer/waiting_to_be_stored",
       icon: IconInbox,
       count: counts.waiting_to_be_stored,

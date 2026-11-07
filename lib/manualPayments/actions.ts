@@ -247,32 +247,67 @@ export async function getManualPaymentContextForUser(
       `
       SELECT transaction_ref, amount, status, shipment_tracking_number
       FROM payments
-      WHERE transaction_ref = $1 AND user_id = $2
+      WHERE (transaction_ref = $1 OR shipment_tracking_number = $1)
+        AND user_id = $2
+      ORDER BY created_at DESC
       LIMIT 1
       `,
       [reference, userId]
     )
 
-    if (res.rowCount === 0) return null
+    let payment = res.rows[0]
 
-    const payment = res.rows[0]
+    if (!payment) {
+      const shipRes = await pool.query(
+        `
+        SELECT tracking_number, total_cost, paid_for, customer_code
+        FROM shipments
+        WHERE tracking_number = $1 AND user_id = $2
+        LIMIT 1
+        `,
+        [reference, userId]
+      )
+
+      if (shipRes.rowCount === 0) return null
+
+      const shipment = shipRes.rows[0]
+      const amount = Number(shipment.total_cost || 0)
+      const newRef = reference.startsWith("TRK-") ? `SHIP-${reference}` : reference
+
+      await pool.query(
+        `
+        INSERT INTO payments (transaction_ref, shipment_tracking_number, user_id, customer_code, amount, channel, status)
+        VALUES ($1, $2, $3, $4, $5, 'bank_transfer', $6)
+        ON CONFLICT (transaction_ref) DO UPDATE SET amount = EXCLUDED.amount
+        `,
+        [newRef, shipment.tracking_number, userId, shipment.customer_code, amount, shipment.paid_for ? 'paid' : 'pending']
+      )
+
+      payment = {
+        transaction_ref: newRef,
+        amount,
+        status: shipment.paid_for ? 'paid' : 'pending',
+        shipment_tracking_number: shipment.tracking_number,
+      }
+    }
+
     const submission = await pool.query(
       `
       SELECT id, status, created_at, admin_note
       FROM manual_payment_submissions
       WHERE payment_type = 'shipment'
-        AND reference = $1
+        AND (reference = $1 OR reference = $2 OR reference = $3)
       ORDER BY created_at DESC
       LIMIT 1
       `,
-      [reference]
+      [payment.transaction_ref, reference, payment.shipment_tracking_number]
     )
 
     return {
       paymentType,
-      reference,
+      reference: payment.transaction_ref,
       amount: Number(payment.amount),
-      label: payment.shipment_tracking_number,
+      label: payment.shipment_tracking_number || payment.transaction_ref,
       status: payment.status,
       latestSubmission: submission.rows[0] ?? null,
     }

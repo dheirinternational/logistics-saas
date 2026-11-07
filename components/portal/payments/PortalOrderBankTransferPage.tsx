@@ -231,7 +231,7 @@ export function PortalOrderBankTransferPage() {
 
   return (
     <div className="portal-account portal-payments portal-bank-transfer">
-      <header className="portal-account__header">
+      <header className="portal-account__header" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "8px" }}>
         <PortalPageBack href="/customer/marketplace/cart" label="Cart" />
         <h1 className="portal-account__title">Pay by bank transfer</h1>
         <p className="portal-account__subtitle">

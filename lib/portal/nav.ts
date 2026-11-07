@@ -2,13 +2,14 @@ import type { TablerIcon } from "@tabler/icons-react"
 import {
   IconCalculator,
   IconMail,
+  IconMessageDots,
   IconPackage,
   IconClipboardList,
   IconTruckDelivery,
   IconUser,
 } from "@tabler/icons-react"
 
-export type PortalNavId = "home" | "packages" | "quote" | "shop" | "account" | "procurement" | "inbox"
+export type PortalNavId = "home" | "packages" | "quote" | "shop" | "account" | "procurement" | "inbox" | "chat"
 
 export type PortalNavItem = {
   id: PortalNavId
@@ -17,7 +18,7 @@ export type PortalNavItem = {
   icon: TablerIcon
 }
 
-/** Primary sidebar navigation - see plan.md §9 */
+/** Primary sidebar navigation */
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { id: "home", label: "Logistics", href: "/customer", icon: IconTruckDelivery },
   {
@@ -29,6 +30,7 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { id: "procurement", label: "Procurement", href: "/customer/procurement", icon: IconClipboardList },
   { id: "quote", label: "Quote", href: "/customer/estimate", icon: IconCalculator },
   { id: "inbox", label: "Inbox", href: "/customer/inbox", icon: IconMail },
+  { id: "chat", label: "Chat with Admin", href: "/customer/chat", icon: IconMessageDots },
   { id: "account", label: "Account", href: "/customer/profile", icon: IconUser },
 ]
 
@@ -77,13 +79,6 @@ function matchesAnyPrefix(
 
 /**
  * Highlights the correct sidebar tab on nested portal routes.
- *
- * Route map (all `/customer` pages):
- * - home (Logistics): `/customer`, `/customer/announcements/*`
- * - quote: `/customer/estimate`
- * - shop: `/customer/shop`, `/customer/marketplace/*`, `/customer/orders/*`, `/customer/verify_order_payment`
- * - packages: packages hub, add/request/track flows, shipment payments
- * - account: profile, edit profile, delivery address
  */
 export function resolvePortalNavId(pathname: string): PortalNavId {
   if (pathname === "/customer" || pathname.startsWith("/customer/announcements")) {
@@ -96,6 +91,10 @@ export function resolvePortalNavId(pathname: string): PortalNavId {
 
   if (pathname.startsWith("/customer/procurement")) {
     return "procurement"
+  }
+
+  if (pathname.startsWith("/customer/chat")) {
+    return "chat"
   }
 
   if (pathname.startsWith("/customer/inbox")) {

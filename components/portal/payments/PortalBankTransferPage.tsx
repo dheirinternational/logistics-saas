@@ -6,6 +6,8 @@ import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { LOGISTICS_SHIPPING_POLICY } from "@/lib/portal/customerPolicies"
 import { formatPaymentAmount } from "@/lib/portal/paymentDisplay"
 import { useCartStore } from "@/store/cartStore"
+import PaystackPaymentButton from "@/components/base/PaystackPaymentBtn"
+import type { User } from "@/types/entityTypeDef"
 import { IconBuildingBank, IconCopy, IconUpload } from "@tabler/icons-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -53,6 +55,7 @@ export function PortalBankTransferPage({
 
   const [bank, setBank] = useState<BankDetails | null>(null)
   const [context, setContext] = useState<TransferContext | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [transferReference, setTransferReference] = useState("")
@@ -100,6 +103,13 @@ export function PortalBankTransferPage({
   }, [apiBase])
 
   useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.data) setUser(data.data)
+      })
+      .catch(() => {})
+
     load()
   }, [load])
 
@@ -169,9 +179,9 @@ export function PortalBankTransferPage({
 
   return (
     <div className="portal-account portal-payments portal-bank-transfer">
-      <header className="portal-account__header">
+      <header className="portal-account__header" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "8px" }}>
         <PortalPageBack href={backHref} label={backLabel} />
-        <h1 className="portal-account__title">
+        <h1 className="portal-account__title" style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           Pay by bank transfer
           {paymentType === "shipment" ? (
             <PortalPolicyInfoButton
@@ -192,23 +202,44 @@ export function PortalBankTransferPage({
       ) : !bank || !context ? (
         <div className="portal-payments__empty portal-home__panel">
           <p>Transfer details are unavailable.</p>
-          <Link className="portal-cart__link" href={backHref}>
-            Go back
-          </Link>
+          <div style={{ display: "flex", gap: "10px", marginTop: "12px", alignItems: "center", flexWrap: "wrap" }}>
+            <Link className="portal-cart__link" href={backHref}>
+              Go back
+            </Link>
+          </div>
         </div>
       ) : (
         <>
           <section className="portal-home__panel portal-bank-transfer__summary">
-            <p className="portal-payments__summary-label">
-              {paymentType === "shipment" ? "Shipment" : "Order"}
-            </p>
-            <p className="portal-bank-transfer__reference">{context.label}</p>
-            <p className="portal-payments__summary-value tabular-nums">
-              {formatPaymentAmount(context.amount)}
-            </p>
-            <p className="portal-payments__summary-hint">
-              Use this exact amount - partial transfers cannot be confirmed.
-            </p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
+              <div>
+                <p className="portal-payments__summary-label">
+                  {paymentType === "shipment" ? "Shipment" : "Order"}
+                </p>
+                <p className="portal-bank-transfer__reference">{context.label}</p>
+                <p className="portal-payments__summary-value tabular-nums">
+                  {formatPaymentAmount(context.amount)}
+                </p>
+                <p className="portal-payments__summary-hint">
+                  Use this exact amount - partial transfers cannot be confirmed.
+                </p>
+              </div>
+              {paymentType === "shipment" && !isPaid && !isAwaiting && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "12px", color: "var(--color-dheir-muted)" }}>
+                    Prefer to pay online?
+                  </span>
+                  <PaystackPaymentButton
+                    amount={context.amount}
+                    customerEmail={user?.email ?? ""}
+                    customerName={user ? `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() : ""}
+                    paymentReference={context.reference}
+                    className="portal-payments__pay-btn dheir-btn-primary"
+                    disabled={!user?.email}
+                  />
+                </div>
+              )}
+            </div>
           </section>
 
           {isPaid ? (
