@@ -47,6 +47,27 @@ export default function Page(){
 
     // Loading States
     const [isFetchingMoneyExchangeRates, setIsFetchingMoneyExchangeRates] = useState(true)
+    const [syncingRate, setSyncingRate] = useState(false)
+
+    const handleSyncLiveRate = async () => {
+        setSyncingRate(true)
+        try {
+            const res = await fetch("/api/money-exchange-rate", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ force_sync: true }),
+            })
+            const result = await res.json()
+            if (!res.ok) throw new Error(result.message)
+            setMoneyExhangeRate(result.data)
+            toast.success("Live exchange rate synced from open API")
+        } catch (err: any) {
+            toast.error(err.message || "Could not sync exchange rate")
+        } finally {
+            setSyncingRate(false)
+        }
+    }
 
 
     // Fetch Money exchange rates
@@ -124,13 +145,28 @@ export default function Page(){
                                 className={`portal-home__btn ${
                                     currency === "Naira" ? "portal-home__btn--primary" : "portal-home__btn--secondary"
                                 }`}
-                onClick={() => {
-                    setCurrency("Naira")
-                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_two)
-                }}
-                >
-                    Naira
-                </button>
+                                onClick={() => {
+                                    setCurrency("Naira")
+                                    setCurrentSelectedCurrencyValue(moneyExchangeRate[0].currency_two)
+                                }}
+                            >
+                                Naira
+                            </button>
+
+                            <button
+                                type="button"
+                                disabled={syncingRate}
+                                className="portal-home__btn portal-home__btn--secondary"
+                                onClick={handleSyncLiveRate}
+                            >
+                                {syncingRate ? "Syncing..." : "Sync live rate now"}
+                            </button>
+
+                            {moneyExchangeRate[0]?.currency_two != null && (
+                                <span style={{ fontSize: "13px", color: "var(--color-dheir-muted)", marginLeft: "auto" }}>
+                                    Current rate: $1 = ₦{Number(moneyExchangeRate[0].currency_two).toLocaleString()}
+                                </span>
+                            )}
 
                             <p className="portal-home__section-sub" style={{ margin: 0, maxWidth: 820 }}>
                                 <span style={{ color: "var(--color-dheir-red)", fontWeight: 600, marginRight: 8 }}>

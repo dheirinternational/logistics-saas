@@ -10,3 +10,4 @@ export default async function CustomerChatPage() {
   const messages = await getPortalInboxMessages(session.user_id)
   return <PortalInboxPage messages={messages} defaultChatOpen={true} />
 }
+

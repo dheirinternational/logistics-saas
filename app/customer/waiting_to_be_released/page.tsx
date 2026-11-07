@@ -12,8 +12,10 @@ import { toast } from "@/lib/ui/toast"
 export default function ShipmentRequestsPage() {
   const [requests, setRequests] = useState<ShippingRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
 
-  useEffect(() => {
+  const loadRequests = () => {
+    setLoading(true)
     fetch("/api/shipment-requests/user", { credentials: "include" })
       .then(async (res) => {
         const result = await res.json()
@@ -32,7 +34,29 @@ export default function ShipmentRequestsPage() {
       })
       .catch(() => toast.error("Could not load shipment requests"))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadRequests()
   }, [])
+
+  const handleCancelRequest = async (id: string) => {
+    setCancellingId(id)
+    try {
+      const res = await fetch(`/api/shipment-requests/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.message || "Failed to cancel request")
+      toast.success("Shipment request cancelled. Packages returned to warehouse storage.")
+      setRequests((prev) => prev.filter((r) => r.id !== id))
+    } catch (err: any) {
+      toast.error(err.message || "Could not cancel request")
+    } finally {
+      setCancellingId(null)
+    }
+  }
 
   return (
     <div className="portal-packages">
@@ -136,9 +160,29 @@ export default function ShipmentRequestsPage() {
                   <span className="portal-packages__card-meta">
                     {formatShippingQuantity(req.total_weight, req.channel)}
                   </span>
-                  <time dateTime={req.created_at}>
-                    {new Date(req.created_at).toLocaleDateString()}
-                  </time>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    {req.status === "pending" && (
+                      <button
+                        type="button"
+                        disabled={cancellingId === req.id}
+                        onClick={() => handleCancelRequest(req.id)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "var(--color-dheir-red)",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          cursor: cancellingId === req.id ? "not-allowed" : "pointer",
+                          opacity: cancellingId === req.id ? 0.5 : 1,
+                        }}
+                      >
+                        {cancellingId === req.id ? "Cancelling..." : "Cancel request"}
+                      </button>
+                    )}
+                    <time dateTime={req.created_at}>
+                      {new Date(req.created_at).toLocaleDateString()}
+                    </time>
+                  </div>
                 </div>
               </article>
             )
