@@ -29,11 +29,23 @@ export default function AddPackagePage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.data?.length) {
-          setWarehouses(data.data)
-          setPackageInformation((prev) => ({
-            ...prev,
-            warehouse_id: data.data[0].id,
-          }))
+          const list = (data.data as Warehouse[]).filter(
+            (w) => w.country === "CN" && w.name.toLowerCase().includes("guangzhou")
+          )
+          list.sort((a, b) => {
+            const aIsAir = a.name.toLowerCase().includes("air")
+            const bIsAir = b.name.toLowerCase().includes("air")
+            if (aIsAir && !bIsAir) return -1
+            if (!aIsAir && bIsAir) return 1
+            return 0
+          })
+          setWarehouses(list)
+          if (list.length > 0) {
+            setPackageInformation((prev) => ({
+              ...prev,
+              warehouse_id: list[0].id,
+            }))
+          }
         }
       })
       .catch(console.error)
@@ -93,7 +105,7 @@ export default function AddPackagePage() {
       toast.success(`Registered ${packageInformation.declared_item_name}`)
       setPackageInformation({
         incoming_tracking_number: "",
-        warehouse_id: warehouses[0]?.id ?? 1,
+        warehouse_id: warehouses[0]?.id ?? 8,
         declared_item_name: "",
         declared_item_quantity: 1,
         customer_note: "",

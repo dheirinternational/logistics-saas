@@ -42,7 +42,7 @@ export default function WarehouseAddressPage() {
       .then(([whRes, userRes]) => {
         if (whRes.data?.length) {
           const list = (whRes.data as Warehouse[]).filter(
-            (w) => w.country === "CN" && !w.name.toLowerCase().includes("foshan")
+            (w) => w.country === "CN" && w.name.toLowerCase().includes("guangzhou")
           )
           list.sort((a, b) => {
             const aIsAir = a.name.toLowerCase().includes("air")
