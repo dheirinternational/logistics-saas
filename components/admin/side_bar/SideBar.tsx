@@ -123,7 +123,7 @@ export const SideBar = ({ staffRole }: SideBarProps) => {
         aria-label="Admin navigation"
       >
         <div className="admin-sidebar__head">
-          <Link href="/admin" className="admin-sidebar__brand">
+          <Link href="/admin" className="admin-sidebar__brand" onClick={closeSideBar}>
             <Image
               src="/DHEIR colored.png"
               alt=""

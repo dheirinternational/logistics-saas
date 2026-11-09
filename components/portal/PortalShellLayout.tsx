@@ -120,7 +120,11 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
         aria-label="Primary navigation"
       >
         <div className="portal-sidebar__head">
-          <Link href="/customer" className="portal-sidebar__brand">
+          <Link
+            href="/customer"
+            className="portal-sidebar__brand"
+            onClick={() => setMobileOpen(false)}
+          >
             <Image
               src="/DHEIR colored.png"
               alt=""
@@ -153,6 +157,7 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
                 href={item.href}
                 className={`portal-sidebar__link${item.isActive ? " is-active" : ""}`}
                 aria-current={item.isActive ? "page" : undefined}
+                onClick={() => setMobileOpen(false)}
               >
                 <Icon size={22} stroke={1.5} aria-hidden />
                 <span>{item.label}</span>
