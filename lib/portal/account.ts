@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db/db"
+import { ensureCustomerCode } from "@/lib/customer/customerCode"
 import type { Address } from "@/types/entityTypeDef"
 
 export type PortalAccountData = {
@@ -21,7 +22,7 @@ export async function getPortalAccountData(
       `
       SELECT u.first_name, u.last_name, u.email, u.profile_img, c.code
       FROM users u
-      JOIN customers c ON u.id = c.user_id
+      LEFT JOIN customers c ON u.id = c.user_id
       WHERE u.id = $1
       `,
       [userId],
@@ -38,12 +39,17 @@ export async function getPortalAccountData(
   ])
 
   const user = userRes.rows[0]
+  let memberCode = user?.code?.trim() || ""
+  if (!memberCode && user?.id) {
+    memberCode = await ensureCustomerCode(user.id, user.first_name)
+  }
+
   const address = addressRes.rows[0] as PortalAccountData["address"] | undefined
 
   return {
     firstName: user?.first_name?.trim() ?? "",
     lastName: user?.last_name?.trim() ?? "",
-    memberCode: user?.code ?? "",
+    memberCode,
     profileImg: user?.profile_img ?? null,
     email: user?.email ?? "",
     address: address ?? null,

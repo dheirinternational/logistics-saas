@@ -46,7 +46,7 @@ export async function GET(){
                   )
                 ) AS full_address
             FROM users u
-            JOIN customers c ON u.id = c.user_id
+            LEFT JOIN customers c ON u.id = c.user_id
             LEFT JOIN addresses a ON a.user_id = u.id
             WHERE u.id != $1
             ORDER BY u.created_at DESC;

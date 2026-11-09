@@ -1,6 +1,7 @@
 "use client"
 
 import { IconCopy } from "@tabler/icons-react"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "@/lib/ui/toast"
 
@@ -9,6 +10,7 @@ type PortalHomeWarehouseCardProps = {
   copyText: string
   onCopyClick?: () => void
   copiedTrigger?: number
+  showFullAddressLink?: boolean
 }
 
 export function PortalHomeWarehouseCard({
@@ -16,6 +18,7 @@ export function PortalHomeWarehouseCard({
   copyText,
   onCopyClick,
   copiedTrigger,
+  showFullAddressLink,
 }: PortalHomeWarehouseCardProps) {
   const [copied, setCopied] = useState(false)
 
@@ -65,6 +68,16 @@ export function PortalHomeWarehouseCard({
         </button>
       </div>
       <p className="portal-home__warehouse-preview">{copyText}</p>
+      {showFullAddressLink && (
+        <div style={{ marginTop: "10px" }}>
+          <Link
+            href="/customer/warehouse_address"
+            className="portal-home__text-link"
+          >
+            View full address breakdown and other warehouses →
+          </Link>
+        </div>
+      )}
     </section>
   )
 }

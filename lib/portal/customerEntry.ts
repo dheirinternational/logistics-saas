@@ -1,5 +1,5 @@
 /** Default destination after public sign-in and account entry from marketing. */
-export const CUSTOMER_PORTAL_ENTRY = "/customer/shop" as const
+export const CUSTOMER_PORTAL_ENTRY = "/customer" as const
 
 const ADMIN_PREFIX = "/admin"
 

@@ -3,7 +3,7 @@
 import { ADMIN_PORTAL_ENTRY, isAdminRole } from "@/lib/auth/postAuthRedirect"
 import { CUSTOMER_PORTAL_ENTRY } from "@/lib/portal/customerEntry"
 import { useNavbarStore } from "@/store/navBarStore"
-import { IconLayoutDashboard, IconShoppingBag } from "@tabler/icons-react"
+import { IconLayoutDashboard, IconTruckDelivery } from "@tabler/icons-react"
 import Link from "next/link"
 
 type PortalViewSwitchProps = {
@@ -41,8 +41,9 @@ export function PortalViewSwitch({
           href={CUSTOMER_PORTAL_ENTRY}
           className={linkClass}
           onClick={handleNavigate}
+          prefetch={false}
         >
-          <IconShoppingBag size={22} stroke={1.5} aria-hidden />
+          <IconTruckDelivery size={22} stroke={1.5} aria-hidden />
           <span>Switch to customer</span>
         </Link>
       </div>
@@ -55,6 +56,7 @@ export function PortalViewSwitch({
         href={ADMIN_PORTAL_ENTRY}
         className={linkClass}
         onClick={handleNavigate}
+        prefetch={false}
       >
         <IconLayoutDashboard size={22} stroke={1.5} aria-hidden />
         <span>Switch to admin</span>

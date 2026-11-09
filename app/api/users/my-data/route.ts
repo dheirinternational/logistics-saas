@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/db/session";
 import { pool } from "@/lib/db/db";
+import { ensureCustomerCode } from "@/lib/customer/customerCode";
 
 export async function GET(){
     try{
@@ -10,18 +11,16 @@ export async function GET(){
             return NextResponse.json({
                 success: false,
                 message: "Unauthorized"
-            })
+            }, { status: 401 })
         }
 
         const res = await pool.query(`
             SELECT u.id, u.email, u.first_name, u.last_name, u.phone, u.role, u.profile_img, u.created_at, u.email_verified, c.code 
             FROM users u
-            JOIN customers c ON u.id = c.user_id
+            LEFT JOIN customers c ON u.id = c.user_id
             WHERE u.id = $1
             LIMIT 1    
         `, [session.user_id])
-
-        console.log(res)
 
         if (res.rows.length === 0){
             return NextResponse.json({
@@ -30,18 +29,23 @@ export async function GET(){
             }, {status: 404})
         }
 
+        const userData = res.rows[0]
+        if (!userData.code?.trim()) {
+            userData.code = await ensureCustomerCode(userData.id, userData.first_name)
+        }
+
         return NextResponse.json({
             success: true,
             message: "Successfully retrieved user details",
-            data: res.rows[0]            
-        }, {status: 201})
+            data: userData            
+        }, {status: 200})
     }
     catch(err){
         console.error("ERROR FETCHING USER DATA", err)
         return NextResponse.json({
             success: false,
             message: "Error fetching user Data"
-        })
+        }, { status: 500 })
     }
 }
 

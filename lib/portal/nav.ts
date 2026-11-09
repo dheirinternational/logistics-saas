@@ -2,6 +2,7 @@ import type { TablerIcon } from "@tabler/icons-react"
 import {
   IconCalculator,
   IconMail,
+  IconMapPin,
   IconMessageDots,
   IconPackage,
   IconClipboardList,
@@ -9,7 +10,7 @@ import {
   IconUser,
 } from "@tabler/icons-react"
 
-export type PortalNavId = "home" | "packages" | "quote" | "shop" | "account" | "procurement" | "inbox" | "chat"
+export type PortalNavId = "home" | "warehouse" | "packages" | "quote" | "shop" | "account" | "procurement" | "inbox" | "chat"
 
 export type PortalNavItem = {
   id: PortalNavId
@@ -21,6 +22,12 @@ export type PortalNavItem = {
 /** Primary sidebar navigation */
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { id: "home", label: "Logistics", href: "/customer", icon: IconTruckDelivery },
+  {
+    id: "warehouse",
+    label: "Warehouse Address",
+    href: "/customer/warehouse_address",
+    icon: IconMapPin,
+  },
   {
     id: "packages",
     label: "Packages",
@@ -83,6 +90,10 @@ function matchesAnyPrefix(
 export function resolvePortalNavId(pathname: string): PortalNavId {
   if (pathname === "/customer" || pathname.startsWith("/customer/announcements")) {
     return "home"
+  }
+
+  if (pathname.startsWith("/customer/warehouse_address")) {
+    return "warehouse"
   }
 
   if (pathname.startsWith("/customer/estimate")) {

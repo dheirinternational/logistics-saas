@@ -12,6 +12,7 @@ import { PortalMobileUserCard } from "@/components/portal/home/PortalMobileUserC
 import { PortalWorkflowStatusGrid } from "@/components/portal/home/PortalWorkflowStatusGrid"
 import { PortalHomeTrackingSnippet } from "@/components/portal/home/PortalHomeTrackingSnippet"
 import { PortalAnnouncementTicker } from "@/components/portal/home/PortalAnnouncementTicker"
+import { PortalHomeWarehouseCard } from "@/components/portal/home/PortalHomeWarehouseCard"
 import type { PortalDashboardData } from "@/lib/portal/dashboard"
 import {
   PORTAL_HOME_PRIORITY_ACTIONS,
@@ -92,6 +93,14 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
         </p>
       </div>
 
+      {data.warehouse ? (
+        <PortalHomeWarehouseCard
+          warehouseName={data.warehouse.name}
+          copyText={data.warehouse.copyText}
+          showFullAddressLink
+        />
+      ) : null}
+
       <div className="hidden md:block">
         <PortalHomeToolbar activeTab={tab} onTabChange={onTabChange} />
       </div>
@@ -107,7 +116,7 @@ export function PortalHomeClient({ data }: PortalHomeClientProps) {
             <PortalHomeActivityTable rows={data.recentActivity} />
           </div>
 
-          <div className="hidden md:grid portal-home__split portal-home__split--actions">
+          <div className="grid portal-home__split portal-home__split--actions">
             <PortalHomeActionGrid
               title="Start here"
               subtitle="Mostly used"

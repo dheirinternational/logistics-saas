@@ -1,4 +1,6 @@
 import { pool } from "@/lib/db/db"
+import { ensureCustomerCode } from "@/lib/customer/customerCode"
+import { formatWarehouseCopyText } from "@/lib/portal/warehouseAddress"
 
 export type PortalDashboardCounts = {
   waiting_to_be_stored: number
@@ -9,6 +11,12 @@ export type PortalDashboardCounts = {
   pending_payments_total: number
   delivered_shipments: number
   total_shipments: number
+}
+
+export type PortalDashboardWarehouse = {
+  id: number
+  name: string
+  copyText: string
 }
 
 export type PortalDashboardShipment = {
@@ -66,6 +74,7 @@ export type PortalDashboardData = {
   counts: PortalDashboardCounts
   activeShipments: PortalDashboardShipment[]
   recentActivity: PortalDashboardActivityRow[]
+  warehouse?: PortalDashboardWarehouse | null
 }
 
 function safeIsoDate(val: any): string | undefined {
@@ -90,12 +99,12 @@ function warehouseLabel(
 export async function getPortalDashboardData(
   userId: number,
 ): Promise<PortalDashboardData> {
-  const [userRes, countsRes, shipmentsRes, activityRes] = await Promise.all([
+  const [userRes, countsRes, shipmentsRes, activityRes, warehouseRes] = await Promise.all([
     pool.query(
       `
       SELECT u.first_name, u.last_name, u.phone, u.profile_img, c.code
       FROM users u
-      JOIN customers c ON u.id = c.user_id
+      LEFT JOIN customers c ON u.id = c.user_id
       WHERE u.id = $1
       `,
       [userId],
@@ -224,10 +233,33 @@ export async function getPortalDashboardData(
       `,
       [userId],
     ),
+    pool.query(
+      `
+      SELECT id, name, country, province, city, district, street, building, phone, postal_code
+      FROM warehouses
+      WHERE country = 'CN' AND name NOT ILIKE '%foshan%'
+      ORDER BY
+        CASE WHEN name ILIKE '%air%' THEN 0 ELSE 1 END,
+        id ASC
+      LIMIT 1
+      `,
+    ),
   ])
 
   const user = userRes.rows[0] ?? {}
+  let memberCode = user?.code?.trim() || ""
+  if (!memberCode && userId) {
+    memberCode = await ensureCustomerCode(userId, user?.first_name)
+  }
   const counts = countsRes.rows[0] ?? {}
+  const warehouseRow = warehouseRes.rows[0]
+  const warehouse: PortalDashboardWarehouse | null = warehouseRow && memberCode
+    ? {
+        id: Number(warehouseRow.id),
+        name: warehouseRow.name,
+        copyText: formatWarehouseCopyText(warehouseRow, memberCode),
+      }
+    : null
 
   const shipmentIds = shipmentsRes.rows.map((r) => Number(r.id)).filter(Boolean)
   let imagesMap: Record<number, { imageUrl: string; mediaType: string }[]> = {}
@@ -317,7 +349,7 @@ export async function getPortalDashboardData(
   return {
     firstName: user?.first_name?.trim() || "",
     lastName: user?.last_name?.trim() || "",
-    memberCode: user?.code ?? "",
+    memberCode,
     phone: user?.phone?.trim() || undefined,
     profileImg: user?.profile_img || undefined,
     counts: {
@@ -332,5 +364,6 @@ export async function getPortalDashboardData(
     },
     activeShipments,
     recentActivity,
+    warehouse,
   }
 }
