@@ -83,3 +83,23 @@ export function isStaffAllowedRoute(subRole: StaffSubRole | undefined, pathname:
   const allowed = getStaffAllowedRoutes(subRole)
   return allowed.some((route) => pathname === route || pathname.startsWith(`${route}/`))
 }
+
+export function isAdminOrStaff(
+  session: { role?: string | null; staff_role?: string | null } | null | undefined
+): boolean {
+  if (!session) return false
+  return session.role === "admin" || session.role === "staff" || Boolean(session.staff_role)
+}
+
+export function hasStaffPermission(
+  session: { role?: string | null; staff_role?: string | null } | null | undefined,
+  permission: StaffPermission
+): boolean {
+  if (!session) return false
+  if (session.role === "admin") return true
+  const subRole = session.staff_role as StaffSubRole | undefined
+  if (!subRole) return false
+  if (subRole === "super_admin") return true
+  const perms = STAFF_PERMISSIONS[subRole]
+  return Boolean(perms && perms.includes(permission))
+}

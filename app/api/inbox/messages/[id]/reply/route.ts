@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
 /**
@@ -30,7 +31,7 @@ export async function POST(
       )
     }
 
-    const isAdmin = session.role === "admin"
+    const isAdmin = isAdminOrStaff(session)
     let root: any = null
 
     if (id === "support-chat") {

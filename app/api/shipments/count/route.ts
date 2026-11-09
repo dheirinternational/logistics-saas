@@ -1,5 +1,6 @@
 import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextResponse } from "next/server"
 
 export async function GET() {
@@ -10,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized", success: false }, { status: 401 })
     }
 
-    if (session.role !== "admin") {
+    if (!isAdminOrStaff(session)) {
       return NextResponse.json({ message: "Forbidden", success: false }, { status: 403 })
     }
 

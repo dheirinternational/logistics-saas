@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
 
@@ -44,11 +45,11 @@ export async function POST(req: NextRequest){
             }, {status: 401})
         }
 
-        if(session.role !== "admin"){
+        if(!isAdminOrStaff(session)){
             return NextResponse.json({
                 success: false,
                 message: "Forbidden"
-            })
+            }, {status: 403})
         }
 
         const {title, message} = await req.json()
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest){
         `, [title, message])
 
         return NextResponse.json({
-            success: false,
+            success: true,
             message: "Announcement Successfully Added to Database"
         })
 
@@ -86,11 +87,11 @@ export async function PUT(req: NextRequest){
             }, {status: 401})
         }
 
-        if(session.role !== "admin"){
+        if(!isAdminOrStaff(session)){
             return NextResponse.json({
                 success: false,
                 message: "Forbidden"
-            })
+            }, {status: 403})
         }
 
         const {id, title, message} = await req.json()
@@ -104,7 +105,7 @@ export async function PUT(req: NextRequest){
         `, [title, message, id])
 
         return NextResponse.json({
-            sucess: true,
+            success: true,
             message: "Successfully edited Announcement data"
         })
 
@@ -131,11 +132,11 @@ export async function DELETE(req: NextRequest){
             }, {status: 401})
         }
 
-        if(session.role !== "admin"){
+        if(!isAdminOrStaff(session)){
             return NextResponse.json({
                 success: false,
                 message: "Forbidden"
-            })
+            }, {status: 403})
         }
 
 

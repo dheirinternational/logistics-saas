@@ -3,6 +3,7 @@ export const revalidate = 0
 
 import { databaseErrorResponse, pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
+import { isAdminOrStaff } from "@/lib/rbac/permissions";
 import { generateTrackingNumber } from "@/lib/generators/generateTrackingNumber";
 import { linkMediaAssetsToShipment } from "@/lib/media/mediaAssets";
 import { NextRequest, NextResponse } from "next/server";
@@ -317,7 +318,7 @@ export async function GET(){
             }, {status: 401})
         }
 
-        if(session.role !== "admin"){
+        if(!isAdminOrStaff(session)){
             return NextResponse.json({
                 success: false,
                 message: "Forbidden"

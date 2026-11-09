@@ -1,11 +1,12 @@
 import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
     const session = await getSession()
-    if (!session || session.role !== "admin") {
+    if (!session || !isAdminOrStaff(session)) {
       return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
     }
 

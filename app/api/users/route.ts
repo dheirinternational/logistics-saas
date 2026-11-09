@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
+import { isAdminOrStaff } from "@/lib/rbac/permissions";
 import { NextResponse } from "next/server";
 import { PUT } from "./my-data/route";
 
@@ -15,7 +16,7 @@ export async function GET(){
             }, {status: 401})
         }
 
-        if(session.role !== "admin"){
+        if(!isAdminOrStaff(session)){
             return NextResponse.json({
                 success: false,
                 message: "Forbidden"

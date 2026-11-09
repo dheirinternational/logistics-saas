@@ -1,6 +1,7 @@
 import { pool } from "@/lib/db/db"
 import { deleteUserCascade, UserDeleteError } from "@/lib/db/deleteUserCascade"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextResponse } from "next/server"
 import type { DatabaseError, PoolClient } from "pg"
 
@@ -18,7 +19,7 @@ export async function GET(
       )
     }
 
-    if (session.role !== "admin") {
+    if (!isAdminOrStaff(session)) {
       return NextResponse.json(
         { success: false, message: "Forbidden" },
         { status: 403 }

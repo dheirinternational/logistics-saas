@@ -3,6 +3,7 @@ export const revalidate = 0
 
 import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
@@ -11,7 +12,7 @@ export async function GET(
 ) {
   try {
     const session = await getSession()
-    if (!session || session.role !== "admin") {
+    if (!session || !isAdminOrStaff(session)) {
       return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
     }
 
@@ -84,7 +85,7 @@ export async function PUT(
 ) {
   try {
     const session = await getSession()
-    if (!session || session.role !== "admin") {
+    if (!session || !isAdminOrStaff(session)) {
       return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
     }
 
