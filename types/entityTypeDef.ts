@@ -199,6 +199,14 @@ export type ShippingRequest = {
     packaging: string
     rejection_note?: string
     admin_reply?: string
+    packages?: {
+        id: number
+        incoming_package_id: string
+        package_name: string
+        weight: number
+        weight_unit: string
+        status: string
+    }[]
 }
 
 

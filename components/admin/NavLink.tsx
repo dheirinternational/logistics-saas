@@ -29,7 +29,7 @@ export default function NavLink({ name, path, icon: Icon, badgeCount }: NavLinkP
       {(name === "Inbox" || name === "Procurement") && (
         <span className="sidebar-beta-badge">Beta</span>
       )}
-      {badgeCount !== undefined ? (
+      {typeof badgeCount === "number" && badgeCount > 0 ? (
         <span className="admin-sidebar__badge" aria-label={`${badgeCount} pending`}>
           {badgeCount > 99 ? "99+" : badgeCount}
         </span>

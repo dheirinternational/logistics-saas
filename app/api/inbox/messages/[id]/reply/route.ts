@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { notifyTelegramCustomerMessage } from "@/lib/notifications/telegram"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -32,6 +33,12 @@ export async function POST(
     }
 
     const isAdmin = isAdminOrStaff(session)
+    const referer = req.headers.get("referer") || ""
+    const isCustomerContext =
+      !isAdmin ||
+      Boolean(json?.as_customer) ||
+      json?.sender_role === "customer" ||
+      referer.includes("/customer/")
     let root: any = null
 
     if (id === "support-chat") {
@@ -74,14 +81,16 @@ export async function POST(
           [created.id],
         )
 
-        await pool.query(
-          `
-          INSERT INTO inbox_read_receipts (message_id, user_id)
-          VALUES ($1, $2)
-          ON CONFLICT (user_id, message_id) DO NOTHING
-          `,
-          [created.id, session.user_id],
-        )
+        if (!isAdmin || !isCustomerContext) {
+          await pool.query(
+            `
+            INSERT INTO inbox_read_receipts (message_id, user_id)
+            VALUES ($1, $2)
+            ON CONFLICT (user_id, message_id) DO NOTHING
+            `,
+            [created.id, session.user_id],
+          )
+        }
 
         const userRes = await pool.query(
           `SELECT u.first_name, u.last_name, cust.code
@@ -91,6 +100,13 @@ export async function POST(
           [session.user_id],
         )
         const author = userRes.rows[0]
+
+        notifyTelegramCustomerMessage({
+          customerName: author?.first_name ? `${author.first_name} ${author.last_name ?? ""}`.trim() : null,
+          customerCode: author?.code || null,
+          title: "Support Chat Inquiry",
+          body: text,
+        }).catch(() => undefined)
 
         return NextResponse.json({
           success: true,
@@ -139,13 +155,13 @@ export async function POST(
       }
     }
 
-    const senderRole = isAdmin ? "admin" : "customer"
+    const senderRole = isCustomerContext ? "customer" : "admin"
     const senderId = session.user_id
     const threadId = root.thread_id || root.id
 
     // Determine recipient
     let recipientId: number | null = null
-    if (isAdmin) {
+    if (!isCustomerContext) {
       if (targetRecipientId) {
         recipientId = targetRecipientId
       } else if (!root.is_broadcast) {
@@ -157,6 +173,7 @@ export async function POST(
         )
       }
     } else {
+      // Replying as customer
       recipientId = root.sender_role === "admin" ? root.sender_id : (root.recipient_id || null)
     }
 
@@ -189,15 +206,17 @@ export async function POST(
 
     const reply = insertRes.rows[0]
 
-    // Mark as read by the author immediately
-    await pool.query(
-      `
-      INSERT INTO inbox_read_receipts (message_id, user_id)
-      VALUES ($1, $2)
-      ON CONFLICT (user_id, message_id) DO NOTHING
-      `,
-      [reply.id, session.user_id],
-    )
+    // Mark as read by the author immediately (unless admin is testing as customer)
+    if (!isAdmin || !isCustomerContext) {
+      await pool.query(
+        `
+        INSERT INTO inbox_read_receipts (message_id, user_id)
+        VALUES ($1, $2)
+        ON CONFLICT (user_id, message_id) DO NOTHING
+        `,
+        [reply.id, session.user_id],
+      )
+    }
 
     // Fetch author details
     const userRes = await pool.query(
@@ -208,6 +227,15 @@ export async function POST(
       [session.user_id],
     )
     const author = userRes.rows[0]
+
+    if (reply.sender_role === "customer") {
+      notifyTelegramCustomerMessage({
+        customerName: author?.first_name ? `${author.first_name} ${author.last_name ?? ""}`.trim() : null,
+        customerCode: author?.code || null,
+        title,
+        body: text,
+      }).catch(() => undefined)
+    }
 
     return NextResponse.json({
       success: true,

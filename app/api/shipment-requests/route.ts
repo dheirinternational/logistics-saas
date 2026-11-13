@@ -1,5 +1,7 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { notifyTelegramShipmentRequest } from "@/lib/notifications/telegram"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 
@@ -144,6 +146,14 @@ export async function POST(req: NextRequest){
             }
         }
 
+        notifyTelegramShipmentRequest({
+            requestId: res.rows[0]?.id,
+            customerCode: customer_code,
+            channel,
+            packageCount: package_ids?.length || 1,
+            paymentTiming: payment_time,
+        }).catch(() => undefined)
+
         return NextResponse.json({
             success: true,
             message: res.rows[0]    
@@ -166,19 +176,39 @@ export async function GET(){
         if(!session){
             return NextResponse.json({
                 success: false,
-                messgae: "Unauthorized"
+                message: "Unauthorized"
             }, {status: 401})
         }
 
-        if(session.role !== "admin"){
+        if(!isAdminOrStaff(session)){
             return NextResponse.json({
                 success: false,
-                messgae: "Forbidden"
+                message: "Forbidden"
             }, {status: 403})
         }
 
         const res = await pool.query(`
-            SELECT * FROM shipment_requests ORDER BY id DESC
+            SELECT 
+                sr.*,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', p.id,
+                                'incoming_package_id', p.incoming_package_id,
+                                'package_name', p.package_name,
+                                'weight', p.weight,
+                                'weight_unit', p.weight_unit,
+                                'status', p.status
+                            )
+                        )
+                        FROM packages p
+                        WHERE p.id = ANY(sr.package_ids)
+                    ),
+                    '[]'::json
+                ) AS packages
+            FROM shipment_requests sr 
+            ORDER BY sr.id DESC
         `)
 
         return NextResponse.json({

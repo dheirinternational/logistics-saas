@@ -1,12 +1,16 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
 /**
  * POST /api/shipment-requests/[id]/vet
- * Admin only. Vets a shipment request.
- * Action can be 'accept' (changes status to 'vetted') or 'reject' (changes status to 'rejected',
- * sets rejection_note, and reverts package statuses back to 'stored').
+ * Admin/Staff only. Vets a shipment request or rejects an individual package.
+ * Actions:
+ * - 'accept': changes status to 'vetted'
+ * - 'reject': changes status to 'rejected', sets rejection_note, and reverts all packages to 'stored'
+ * - 'reject_package': rejects and detaches a single package from the request, restores it to 'stored',
+ *   and notifies the customer with the explanation reason.
  */
 export async function POST(
   req: NextRequest,
@@ -22,7 +26,7 @@ export async function POST(
       )
     }
 
-    if (session.role !== "admin") {
+    if (!isAdminOrStaff(session)) {
       return NextResponse.json(
         { success: false, message: "Forbidden" },
         { status: 403 }
@@ -31,11 +35,11 @@ export async function POST(
 
     const { id } = await params
     const body = await req.json()
-    const { action, rejection_note, admin_reply } = body
+    const { action, rejection_note, admin_reply, package_id, reason } = body
 
-    if (!["accept", "reject"].includes(action)) {
+    if (!["accept", "reject", "reject_package"].includes(action)) {
       return NextResponse.json(
-        { success: false, message: "Invalid action. Must be 'accept' or 'reject'." },
+        { success: false, message: "Invalid action. Must be 'accept', 'reject', or 'reject_package'." },
         { status: 400 }
       )
     }
@@ -57,6 +61,74 @@ export async function POST(
     const client = await pool.connect()
     try {
       await client.query("BEGIN")
+
+      if (action === "reject_package") {
+        const pkgIdNum = Number(package_id)
+        if (!pkgIdNum) {
+          throw new Error("package_id is required for reject_package action")
+        }
+
+        const pkgRes = await client.query(
+          "SELECT id, incoming_package_id, package_name, weight, weight_unit FROM packages WHERE id = $1",
+          [pkgIdNum]
+        )
+        const pkg = pkgRes.rows[0] || {
+          incoming_package_id: String(pkgIdNum),
+          package_name: "Package",
+          weight: 0,
+          weight_unit: "kg",
+        }
+
+        // Restore package status to 'stored'
+        await client.query(
+          "UPDATE packages SET status = 'stored' WHERE id = $1",
+          [pkgIdNum]
+        )
+
+        // Remove package from request package_ids array
+        const currentIds: number[] = Array.isArray(packageIds) ? packageIds.map(Number) : []
+        const remainingIds = currentIds.filter((p) => p !== pkgIdNum)
+
+        if (remainingIds.length === 0) {
+          await client.query(
+            "UPDATE shipment_requests SET package_ids = $1, status = 'rejected', rejection_note = $2 WHERE id = $3",
+            [remainingIds, reason || "All packages in request were rejected or restored.", id]
+          )
+        } else {
+          await client.query(
+            "UPDATE shipment_requests SET package_ids = $1 WHERE id = $2",
+            [remainingIds, id]
+          )
+        }
+
+        // Notify customer via inbox
+        if (customerUserId) {
+          const noteText = [
+            `Package: ${pkg.package_name} (${pkg.incoming_package_id})`,
+            `Weight: ${pkg.weight || 0} ${pkg.weight_unit || "kg"}`,
+            `Reason: ${reason || "Notice from China warehouse: item cannot be dispatched."}`,
+            "Status: Restored to your available warehouse inventory. You can view it in your Packages section.",
+          ].join("\n")
+
+          await client.query(
+            `INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
+             VALUES ($1, $2, $3, $4, false)`,
+            [
+              session.user_id,
+              customerUserId,
+              `Package ${pkg.incoming_package_id} Restored to Inventory`,
+              noteText,
+            ]
+          )
+        }
+
+        await client.query("COMMIT")
+        return NextResponse.json({
+          success: true,
+          message: `Package ${pkg.incoming_package_id} removed from shipment request and restored to customer inventory.`,
+          remainingCount: remainingIds.length,
+        })
+      }
 
       if (action === "accept") {
         await client.query(

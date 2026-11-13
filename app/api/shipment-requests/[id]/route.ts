@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest, {params} : {params: Promise<{id: string}>}){
@@ -16,8 +17,27 @@ export async function GET(req: NextRequest, {params} : {params: Promise<{id: str
         const {id} = await params 
 
         const res = await pool.query(`
-            SELECT * FROM shipment_requests
-                WHERE id = $1 
+            SELECT 
+                sr.*,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', p.id,
+                                'incoming_package_id', p.incoming_package_id,
+                                'package_name', p.package_name,
+                                'weight', p.weight,
+                                'weight_unit', p.weight_unit,
+                                'status', p.status
+                            )
+                        )
+                        FROM packages p
+                        WHERE p.id = ANY(sr.package_ids)
+                    ),
+                    '[]'::json
+                ) AS packages
+            FROM shipment_requests sr
+            WHERE sr.id = $1 
         `, [id])
 
         if (res.rows.length === 0) {
@@ -25,7 +45,7 @@ export async function GET(req: NextRequest, {params} : {params: Promise<{id: str
         }
 
         const request = res.rows[0]
-        if (session.role !== "admin" && session.user_id !== request.user_id) {
+        if (!isAdminOrStaff(session) && session.user_id !== request.user_id) {
             return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
         }
 

@@ -178,7 +178,7 @@ export function PortalInboxPage({ messages: initial, defaultChatOpen = false }: 
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: trimmed }),
+        body: JSON.stringify({ body: trimmed, sender_role: "customer", as_customer: true }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.message || "Failed to send message")

@@ -164,7 +164,7 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
                 {(item.key === "inbox" || item.key === "procurement") && (
                   <span className="sidebar-beta-badge">Beta</span>
                 )}
-                {item.badgeCount !== undefined ? (
+                {typeof item.badgeCount === "number" && item.badgeCount > 0 ? (
                   <span
                     className="portal-sidebar__badge"
                     aria-label={`${item.badgeCount} pending`}

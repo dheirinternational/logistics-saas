@@ -214,6 +214,58 @@ const Page: NextPage = () => {
         }
     }
 
+    const handleRejectSinglePackage = async (packageId: number, trackingNumber: string) => {
+        if (!modalSelectedRequest) return
+        const reason = window.prompt(
+            `Reason for rejecting tracking number ${trackingNumber} and restoring to customer inventory:`,
+            "Item cannot be dispatched from warehouse / unverified tracking number"
+        )
+        if (reason === null) return
+        const trimmedReason = reason.trim() || "Item cannot be dispatched from warehouse"
+
+        setIsCreatingShipmentData(true)
+        try {
+            const res = await fetch(`/api/shipment-requests/${modalSelectedRequest.id}/vet`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "reject_package",
+                    package_id: packageId,
+                    reason: trimmedReason,
+                }),
+            })
+            const result = await res.json()
+            if (!res.ok || !result.success) {
+                toast.error(result.message || "Failed to reject package")
+                return
+            }
+
+            toast.success(`Package ${trackingNumber} restored to customer inventory`)
+
+            const updatedPackages = (modalSelectedRequest.packages || []).filter((p) => p.id !== packageId)
+            const updatedPackageIds = (modalSelectedRequest.package_ids || []).filter((pid) => Number(pid) !== packageId)
+
+            if (updatedPackageIds.length === 0) {
+                setIsModalActive(false)
+                setModalSelectedRequest(null)
+            } else {
+                setModalSelectedRequest({
+                    ...modalSelectedRequest,
+                    packages: updatedPackages,
+                    package_ids: updatedPackageIds,
+                })
+            }
+
+            fetchShipmentData()
+        } catch (err: any) {
+            toast.error("Failed to reject package")
+            console.error(err)
+        } finally {
+            setIsCreatingShipmentData(false)
+        }
+    }
+
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
@@ -582,13 +634,60 @@ const Page: NextPage = () => {
                       </p>
                     </div>
 
-                    <div className="portal-packages__field">
+                    <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>
                       <span className="portal-packages__field-label">
-                        Package IDs ({modalSelectedRequest?.package_ids?.length ?? 0})
+                        Requested Packages ({modalSelectedRequest?.package_ids?.length ?? 0})
                       </span>
-                      <p className="portal-home__empty tabular-nums" style={{ color: "var(--color-dheir-ink)" }}>
-                        {(modalSelectedRequest?.package_ids ?? []).join(", ") || "-"}
-                      </p>
+                      {modalSelectedRequest?.packages && modalSelectedRequest.packages.length > 0 ? (
+                        <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                          {modalSelectedRequest.packages.map((pkg) => (
+                            <div
+                              key={pkg.id}
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                padding: "8px 12px",
+                                background: "#f8fafc",
+                                border: "1px solid #e2e8f0",
+                                borderRadius: "6px",
+                                fontSize: "13px",
+                              }}
+                            >
+                              <div>
+                                <div style={{ fontWeight: 600, color: "var(--color-dheir-ink)" }}>
+                                  {pkg.incoming_package_id}
+                                </div>
+                                <div style={{ fontSize: "12px", color: "var(--color-dheir-muted)" }}>
+                                  {pkg.package_name || "Package"} : {pkg.weight || 0} {pkg.weight_unit || "kg"}
+                                </div>
+                              </div>
+                              {["pending", "vetted"].includes(modalSelectedRequest.status) && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRejectSinglePackage(pkg.id, pkg.incoming_package_id)}
+                                  className="portal-home__btn"
+                                  style={{
+                                    fontSize: "12px",
+                                    padding: "4px 10px",
+                                    color: "var(--color-dheir-red)",
+                                    border: "1px solid var(--color-dheir-red)",
+                                    background: "#fff",
+                                    cursor: "pointer",
+                                    borderRadius: "4px",
+                                  }}
+                                >
+                                  Reject / Restore
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="portal-home__empty tabular-nums" style={{ color: "var(--color-dheir-ink)" }}>
+                          {(modalSelectedRequest?.package_ids ?? []).join(", ") || "-"}
+                        </p>
+                      )}
                     </div>
 
                     <div className="portal-packages__field" style={{ gridColumn: "1 / -1" }}>

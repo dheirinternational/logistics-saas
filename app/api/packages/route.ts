@@ -3,6 +3,7 @@ export const revalidate = 0
 
 import { databaseErrorResponse, dbQuery, pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
+import { notifyTelegramPackageInbound } from "@/lib/notifications/telegram";
 import { linkPackageMediaAssets, parsePackageMediaAssetIds } from "@/lib/packages/linkPackageMedia";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
@@ -175,6 +176,14 @@ export async function POST(req: NextRequest){
         }
 
 
+
+        notifyTelegramPackageInbound({
+            trackingNumber: String(data.incoming_package_id || ""),
+            customerCode: data.customer_code ? String(data.customer_code) : null,
+            packageName: data.package_name ? String(data.package_name) : null,
+            weight: Number(data.weight),
+            weightUnit: data.weight_unit ? String(data.weight_unit) : "kg",
+        }).catch(() => undefined)
 
         return NextResponse.json({
             success: true,

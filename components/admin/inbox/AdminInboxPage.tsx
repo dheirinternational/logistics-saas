@@ -795,7 +795,11 @@ export function AdminInboxPage() {
                               </span>
                               <span className="admin-inbox-sent-read">
                                 <IconCheck size={12} stroke={2} style={{ display: "inline", marginRight: "3px" }} aria-hidden />
-                                {msg.readCount} read
+                                {msg.isBroadcast
+                                  ? `${msg.readCount} read`
+                                  : msg.readCount > 0
+                                    ? "Read by customer"
+                                    : "Delivered (Unread)"}
                               </span>
                             </div>
                           </div>
