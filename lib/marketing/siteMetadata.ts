@@ -121,8 +121,14 @@ export function buildRootMetadata(overrides?: Partial<Metadata>): Metadata {
       images: [ogImage.url],
     },
     icons: {
-      icon: "/DHEIR colored.png",
-      apple: "/DHEIR colored.png",
+      icon: [
+        { url: "/favicon-48x48.png", type: "image/png", sizes: "48x48" },
+        { url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+        { url: "/favicon-192x192.png", type: "image/png", sizes: "192x192" },
+      ],
+      apple: [
+        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      ],
     },
     ...overrides,
   }
@@ -189,7 +195,7 @@ export function buildOrganizationJsonLd() {
         "@id": `${siteUrl}/#organization`,
         name: SITE_NAME,
         url: siteUrl,
-        logo: `${siteUrl}/DHEIR%20colored.png`,
+        logo: `${siteUrl}/dheir-logo-square.png`,
         email: SITE_CONTACT.email,
         telephone: SITE_CONTACT.phones[0].label,
         areaServed: ["NG", "CN"],
