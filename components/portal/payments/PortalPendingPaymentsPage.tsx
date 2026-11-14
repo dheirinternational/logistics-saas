@@ -164,10 +164,16 @@ export function PortalPendingPaymentsPage() {
       ) : (
         <ul className="portal-payments__list">
           {filtered.map((payment) => {
+            const channelLower = (
+              (payment as any).shipment_channel ||
+              payment.channel ||
+              ""
+            ).toLowerCase()
+            const isExpress = channelLower.includes("express")
             const isAir =
-              !payment.channel ||
-              payment.channel.toLowerCase().includes("air") ||
-              payment.channel.toLowerCase().includes("skyjet") ||
+              !channelLower ||
+              channelLower.includes("air") ||
+              channelLower.includes("skyjet") ||
               Boolean((payment as any).air_gz_weight || (payment as any).air_hk_weight)
             const isPolicyAccepted = Boolean(acceptedPolicies[payment.id])
 
@@ -348,7 +354,9 @@ export function PortalPendingPaymentsPage() {
                             style={{ marginTop: "2px", cursor: "pointer" }}
                           />
                           <span>
-                            {isAir
+                            {isExpress
+                              ? "I confirm that Express shipping is strictly prepaid before departure"
+                              : isAir
                               ? "I confirm that Air shipping is prepaid before departure and minimum billing weight is 1kg"
                               : "I accept the shipping policy and confirm payment to release this shipment"}
                           </span>

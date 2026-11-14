@@ -43,7 +43,7 @@ export async function GET(
         LEFT JOIN inbox_read_receipts r
           ON r.message_id = m.id AND r.user_id = $1
         WHERE m.is_broadcast = FALSE
-          AND (m.recipient_id = $1 OR m.sender_id = $1)
+          AND (m.recipient_id = $1 OR (m.sender_id = $1 AND m.sender_role = 'customer'))
           AND m.parent_id IS NULL
         ORDER BY m.created_at ASC
         LIMIT 1
@@ -106,14 +106,20 @@ export async function GET(
     }
 
     const root = rootRes.rows[0]
-    const isAdmin = isAdminOrStaff(session)
+    const scopeParam = searchParams.get("scope")
+    const referer = req.headers.get("referer") ?? ""
+    const isCustomerView =
+      !isAdminOrStaff(session) ||
+      scopeParam === "customer" ||
+      (scopeParam !== "admin" && referer.includes("/customer"))
+    const isAdmin = !isCustomerView
 
     // Verify access
     if (!isAdmin) {
       const hasAccess =
         root.is_broadcast ||
         root.recipient_id === session.user_id ||
-        root.sender_id === session.user_id
+        (root.sender_id === session.user_id && root.sender_role === "customer")
       if (!hasAccess) {
         return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
       }

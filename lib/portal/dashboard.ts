@@ -116,7 +116,7 @@ export async function getPortalDashboardData(
         (SELECT COUNT(*)::int FROM incoming_packages
           WHERE status != 'stored' AND user_id = $1) AS waiting_to_be_stored,
         (SELECT COUNT(*)::int FROM packages
-          WHERE status != 'assigned_to_shipment' AND user_id = $1) AS total_packages,
+          WHERE status IN ('stored', 'requested_for') AND user_id = $1) AS total_packages,
         (SELECT COUNT(*)::int FROM shipment_requests
           WHERE status != 'accepted' AND user_id = $1) AS request_mail,
         (SELECT COUNT(*)::int FROM shipments

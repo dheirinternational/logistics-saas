@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
+import { syncPackagesForShipmentStatus } from "@/lib/shipments/syncShipmentPackages";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
@@ -35,11 +36,29 @@ export async function PUT(req: NextRequest){
         }
 
 
-        await pool.query(`
-            UPDATE shipments
-                SET status = $1
-                WHERE id = $2
-        `, [status, Number(id)])
+        const client = await pool.connect();
+        try {
+            await client.query("BEGIN");
+            const updateRes = await client.query(`
+                UPDATE shipments
+                    SET status = $1
+                    WHERE id = $2
+                RETURNING status, package_ids
+            `, [status, Number(id)]);
+            if (updateRes.rows.length > 0) {
+                await syncPackagesForShipmentStatus(
+                    client,
+                    updateRes.rows[0].package_ids,
+                    updateRes.rows[0].status,
+                );
+            }
+            await client.query("COMMIT");
+        } catch (txErr) {
+            await client.query("ROLLBACK").catch(() => undefined);
+            throw txErr;
+        } finally {
+            client.release();
+        }
 
 
          // Get shipment + customer info

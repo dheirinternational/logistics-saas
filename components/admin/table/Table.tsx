@@ -8,7 +8,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { DHEIRConfirmDialog } from "@/components/ui/DHEIRConfirmDialog"
 
 type TableProps<T> = {
@@ -19,6 +19,7 @@ type TableProps<T> = {
     getRowId?: (row: T) => string
     enableRowSelection?: boolean
     onDeleteSelected?: (rows: T[]) => Promise<void> | void
+    selectionActions?: (rows: T[], resetSelection: () => void) => ReactNode
 }   
 
 export function Table <T,>({
@@ -29,6 +30,7 @@ export function Table <T,>({
   getRowId,
   enableRowSelection = false,
   onDeleteSelected,
+  selectionActions,
 }: TableProps<T>){
     const data = useMemo(() => importedData, [importedData]) 
     const columns = useMemo(() => {
@@ -167,6 +169,12 @@ export function Table <T,>({
               · Page {pageIndex + 1} of {pageCount}
             </span>
             <div className="portal-home__table-pagination-actions">
+              {enableRowSelection && selectionActions && selectedCount > 0
+                ? selectionActions(
+                    selectedRows.map((r) => r.original),
+                    () => table.resetRowSelection(),
+                  )
+                : null}
               {enableRowSelection && onDeleteSelected && selectedCount > 0 ? (
                 <button
                   type="button"

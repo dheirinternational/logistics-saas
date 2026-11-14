@@ -1,4 +1,4 @@
-import { pool } from "@/lib/db/db"
+import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextResponse } from "next/server"
@@ -101,7 +101,7 @@ export async function GET() {
       ORDER BY c.latest_created_at DESC
     `
 
-    const res = await pool.query(query, [session.user_id])
+    const res = await dbQuery(query, [session.user_id])
 
     const data = res.rows
       .filter((row) => row.root_id) // ensure root_id exists

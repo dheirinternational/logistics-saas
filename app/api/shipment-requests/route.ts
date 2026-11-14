@@ -22,6 +22,9 @@ export async function POST(req: NextRequest){
 
         const {customer_code, package_ids, channel, wrapping, payment_time, customer_note, packaging, total_weight, total_weight_unit, admin_created_for_user_id} = body
 
+        const effectivePaymentTime =
+            channel === "air" || channel === "express" ? "pay_before_shipment" : payment_time
+
         const inferredUnit = channel === "sea" ? "cbm" : "kg"
         const unit = (total_weight_unit ?? inferredUnit) as string
         if (!["kg", "cbm"].includes(unit)) {
@@ -49,7 +52,7 @@ export async function POST(req: NextRequest){
                 $1, $2, $3, $4, $5, $6, $7, $8, $9
             )
             RETURNING *     
-        `, [user_id, customer_code, package_ids, channel, payment_time, customer_note, packaging, total_weight ?? null, unit])
+        `, [user_id, customer_code, package_ids, channel, effectivePaymentTime, customer_note, packaging, total_weight ?? null, unit])
 
         await pool.query(`
             UPDATE packages
@@ -109,7 +112,7 @@ export async function POST(req: NextRequest){
 
                                     <p>
                                         <strong>Payment Time:</strong>
-                                        ${payment_time}
+                                        ${effectivePaymentTime}
                                     </p>
 
                                     ${
@@ -151,7 +154,7 @@ export async function POST(req: NextRequest){
             customerCode: customer_code,
             channel,
             packageCount: package_ids?.length || 1,
-            paymentTiming: payment_time,
+            paymentTiming: effectivePaymentTime,
         }).catch(() => undefined)
 
         return NextResponse.json({

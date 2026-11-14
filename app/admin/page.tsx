@@ -157,7 +157,7 @@ const Page: NextPage = () => {
           gap: "14px",
         }}
       >
-        <Link href="/admin/shipments" className="portal-home__stat-card" role="listitem">
+        <Link href="/admin/shipments/accepted_shipments?status=processing" className="portal-home__stat-card" role="listitem">
           <span className="portal-home__stat-card-icon" aria-hidden>
             <IconLoader2 size={22} stroke={1.5} />
           </span>
@@ -170,7 +170,7 @@ const Page: NextPage = () => {
           </span>
         </Link>
 
-        <Link href="/admin/shipments" className="portal-home__stat-card" role="listitem">
+        <Link href="/admin/shipments/accepted_shipments?channel=air_gz" className="portal-home__stat-card" role="listitem">
           <span className="portal-home__stat-card-icon" aria-hidden>
             <IconTruck size={22} stroke={1.5} />
           </span>
@@ -185,7 +185,7 @@ const Page: NextPage = () => {
           </span>
         </Link>
 
-        <Link href="/admin/shipments" className="portal-home__stat-card" role="listitem">
+        <Link href="/admin/shipments/accepted_shipments?channel=air_hk" className="portal-home__stat-card" role="listitem">
           <span className="portal-home__stat-card-icon" aria-hidden>
             <IconTruck size={22} stroke={1.5} />
           </span>
@@ -215,7 +215,7 @@ const Page: NextPage = () => {
           </span>
         </Link>
 
-        <Link href="/admin/orders" className="portal-home__stat-card" role="listitem">
+        <Link href="/admin/shipments/accepted_shipments?status=shipped" className="portal-home__stat-card" role="listitem">
           <span className="portal-home__stat-card-icon" aria-hidden>
             <IconPackage size={22} stroke={1.5} />
           </span>
@@ -228,7 +228,7 @@ const Page: NextPage = () => {
           </span>
         </Link>
 
-        <Link href="/admin/shipments/accepted_shipments" className="portal-home__stat-card" role="listitem">
+        <Link href="/admin/shipments/accepted_shipments?status=delivered" className="portal-home__stat-card" role="listitem">
           <span className="portal-home__stat-card-icon" aria-hidden>
             <IconChecks size={22} stroke={1.5} />
           </span>

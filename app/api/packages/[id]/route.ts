@@ -42,6 +42,15 @@ export async function PUT(
     const rawStoredAt = String(formData.get("stored_at") ?? "").trim()
     const received_at = rawReceivedAt || null
     const stored_at = rawStoredAt || null
+    const rawStatus = formData.get("status")
+    const status = typeof rawStatus === "string" && rawStatus.trim() ? rawStatus.trim() : null
+
+    if (
+      status &&
+      !["stored", "requested_for", "assigned_to_shipment", "delivered"].includes(status)
+    ) {
+      return NextResponse.json({ success: false, message: "Invalid package status" }, { status: 400 })
+    }
 
     if (!package_name || !incoming_package_id || !customer_code) {
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 })
@@ -93,8 +102,9 @@ export async function PUT(
              condition = $8,
              received_at = COALESCE($9, received_at),
              stored_at = COALESCE($10, stored_at),
-             amount = $11
-       WHERE id = $12`,
+             amount = $11,
+             status = COALESCE($12, status)
+       WHERE id = $13`,
       [
         incoming_package_id,
         package_name,
@@ -107,6 +117,7 @@ export async function PUT(
         received_at,
         stored_at,
         amount,
+        status,
         packageId,
       ]
     )

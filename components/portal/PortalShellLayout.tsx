@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation"
 import { ReactNode, useEffect, useMemo, useState } from "react"
 import { IconShoppingCart } from "@tabler/icons-react"
 
-import { ProcurementPolicyModal } from "@/components/portal/procurement/ProcurementPolicyModal"
+import { LogisticsPolicyModal } from "@/components/portal/home/LogisticsPolicyModal"
 import { PortalNotificationBannerModal } from "@/components/portal/notifications/PortalNotificationBannerModal"
 import { PortalMobileBottomNav } from "@/components/portal/PortalMobileBottomNav"
 
@@ -36,13 +36,48 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
   }, [pathname])
 
   useEffect(() => {
+    let active = true
+    const refreshInboxCount = async () => {
+      try {
+        const res = await fetch("/api/inbox/unread-count?scope=customer", {
+          credentials: "include",
+          cache: "no-store",
+        })
+        if (!res.ok) return
+        const json = await res.json()
+        const count = Number(json?.data?.count ?? 0)
+        if (!active) return
+        setBadges((prev) => {
+          const next = { ...prev }
+          if (count > 0) next["/customer/inbox"] = count
+          else delete next["/customer/inbox"]
+          return next
+        })
+      } catch {
+        // best-effort
+      }
+    }
+
+    refreshInboxCount()
+    const timer = setInterval(refreshInboxCount, 15000)
+    window.addEventListener("dheir-inbox-updated", refreshInboxCount)
+    window.addEventListener("focus", refreshInboxCount)
+    return () => {
+      active = false
+      clearInterval(timer)
+      window.removeEventListener("dheir-inbox-updated", refreshInboxCount)
+      window.removeEventListener("focus", refreshInboxCount)
+    }
+  }, [pathname])
+
+  useEffect(() => {
     let isMounted = true
 
     const fetchBadges = async () => {
       try {
         const [ordersRes, inboxRes] = await Promise.all([
           fetch("/api/orders/user/count", { credentials: "include" }),
-          fetch("/api/inbox/unread-count", { credentials: "include" }),
+          fetch("/api/inbox/unread-count?scope=customer", { credentials: "include" }),
         ])
 
         const nextBadges: Record<string, number> = {}
@@ -202,7 +237,9 @@ export function PortalShellLayout({ user, children }: PortalShellLayoutProps) {
       </div>
 
       <PortalMobileBottomNav />
-      <ProcurementPolicyModal memberCode={user.memberCode || undefined} />
+      {pathname === "/customer" && (
+        <LogisticsPolicyModal memberCode={user.memberCode || undefined} />
+      )}
       <PortalNotificationBannerModal />
     </div>
   )

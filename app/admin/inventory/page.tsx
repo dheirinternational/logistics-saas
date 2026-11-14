@@ -268,6 +268,37 @@ const InventoryPage: NextPage = () => {
     }
   }
 
+  const bulkMarkDelivered = async (
+    rows: { id: number | string }[],
+    resetSelection: () => void,
+  ) => {
+    const ids = rows.map((r) => Number(r.id)).filter((n) => Number.isFinite(n))
+    if (ids.length === 0) return
+    try {
+      const res = await fetch("/api/admin/packages/bulk-status", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, status: "delivered" }),
+      })
+      const result = await res.json().catch(() => ({ message: "Update failed" }))
+      if (!res.ok) {
+        toast.error(result.message || "Could not update inventory status")
+        return
+      }
+      setInventory((prev) =>
+        prev.map((item) =>
+          ids.includes(Number(item.id)) ? { ...item, status: "delivered" as any } : item,
+        ),
+      )
+      resetSelection()
+      toast.success(result.message || `${ids.length} item(s) marked delivered.`)
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to update inventory status.")
+    }
+  }
+
   return (
     <div className="portal-home">
       {/* Header matching exact admin greeting styling */}
@@ -289,7 +320,18 @@ const InventoryPage: NextPage = () => {
         <>
           {/* Stat Cards Grid matching exact admin overview styling */}
           <div className="portal-home__stats" role="list" aria-label="Inventory stats">
-            <div className="portal-home__stat-card" role="listitem">
+            <button
+              type="button"
+              className={`portal-home__stat-card portal-home__stat-card--clickable${filterValues.status === "stored" ? " portal-home__stat-card--active" : ""}`}
+              role="listitem"
+              aria-pressed={filterValues.status === "stored"}
+              onClick={() =>
+                setFilterValues((prev) => ({
+                  ...prev,
+                  status: prev.status === "stored" ? "" : "stored",
+                }))
+              }
+            >
               <span className="portal-home__stat-card-icon" aria-hidden>
                 <IconBox size={22} stroke={1.5} />
               </span>
@@ -298,7 +340,7 @@ const InventoryPage: NextPage = () => {
                 <span className="portal-home__stat-card-value">{stats.totalStored}</span>
                 <span className="portal-home__stat-card-hint">In warehouse stock</span>
               </span>
-            </div>
+            </button>
 
             <div className="portal-home__stat-card" role="listitem">
               <span className="portal-home__stat-card-icon" aria-hidden>
@@ -311,7 +353,18 @@ const InventoryPage: NextPage = () => {
               </span>
             </div>
 
-            <div className="portal-home__stat-card" role="listitem">
+            <button
+              type="button"
+              className={`portal-home__stat-card portal-home__stat-card--clickable${filterValues.age === "over_14" ? " portal-home__stat-card--active" : ""}`}
+              role="listitem"
+              aria-pressed={filterValues.age === "over_14"}
+              onClick={() =>
+                setFilterValues((prev) => ({
+                  ...prev,
+                  age: prev.age === "over_14" ? "" : "over_14",
+                }))
+              }
+            >
               <span className="portal-home__stat-card-icon" aria-hidden>
                 <IconClock size={22} stroke={1.5} />
               </span>
@@ -320,7 +373,7 @@ const InventoryPage: NextPage = () => {
                 <span className="portal-home__stat-card-value">{stats.agingOver14}</span>
                 <span className="portal-home__stat-card-hint">Stored over 14 days</span>
               </span>
-            </div>
+            </button>
 
             <div className="portal-home__stat-card" role="listitem">
               <span className="portal-home__stat-card-icon" aria-hidden>
@@ -427,6 +480,15 @@ const InventoryPage: NextPage = () => {
               enableRowSelection
               getRowId={(row) => String(row.id)}
               onDeleteSelected={deleteInventoryItems}
+              selectionActions={(selectedRows, resetSelection) => (
+                <button
+                  type="button"
+                  className="portal-home__btn portal-home__btn--primary"
+                  onClick={() => bulkMarkDelivered(selectedRows, resetSelection)}
+                >
+                  Mark delivered ({selectedRows.length})
+                </button>
+              )}
             />
           </section>
         </>

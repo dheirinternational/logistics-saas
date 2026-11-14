@@ -1,4 +1,4 @@
-import { pool } from "@/lib/db/db"
+import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { NextResponse } from "next/server"
 
@@ -14,7 +14,7 @@ export async function GET() {
     }
 
     // 1. Fetch broadcast announcements
-    const broadcastsRes = await pool.query(
+    const broadcastsRes = await dbQuery(
       `
       SELECT
         m.id,
@@ -34,7 +34,7 @@ export async function GET() {
     )
 
     // 2. Fetch the unified direct support chat for this customer
-    const directRes = await pool.query(
+    const directRes = await dbQuery(
       `
       SELECT
         root.id AS root_id,
@@ -57,7 +57,7 @@ export async function GET() {
         LIMIT 1
       ) latest ON true
       WHERE root.is_broadcast = FALSE
-        AND (root.recipient_id = $1 OR root.sender_id = $1)
+        AND (root.recipient_id = $1 OR (root.sender_id = $1 AND root.sender_role = 'customer'))
         AND root.parent_id IS NULL
       ORDER BY root.created_at ASC
       LIMIT 1

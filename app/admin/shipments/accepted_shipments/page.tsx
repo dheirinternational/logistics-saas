@@ -41,6 +41,19 @@ const Page: NextPage = () => {
         search: "",
         status: ""
     })
+    const [channelFilter, setChannelFilter] = useState<string>("")
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const initialStatus = params.get("status")?.trim() || ""
+        const initialChannel = params.get("channel")?.trim() || ""
+        if (initialStatus) {
+            setFilterValues((prev) => ({ ...prev, status: initialStatus }))
+        }
+        if (initialChannel) {
+            setChannelFilter(initialChannel)
+        }
+    }, [])
 
 
     const [isModalActive, setIsModalActive] = useState(false)
@@ -223,9 +236,15 @@ const Page: NextPage = () => {
         }
     }
 
-    const data = shipments.filter((x) =>
-        matchesStatusFilter(x.status, filterValues.status)
-    )
+    const data = shipments.filter((x) => {
+        const statusOk = matchesStatusFilter(x.status, filterValues.status)
+        if (!statusOk) return false
+        if (!channelFilter) return true
+        const ch = (x.channel || "").toLowerCase()
+        if (channelFilter === "air_gz") return ch.includes("gz") || ch === "air"
+        if (channelFilter === "air_hk") return ch.includes("hk")
+        return ch === channelFilter.toLowerCase()
+    })
 
 
   return (
@@ -237,77 +256,41 @@ const Page: NextPage = () => {
       ) : (
         <>
           <div className="portal-home__stats" role="list" aria-label="Shipments status">
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconPackage size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Processing</span>
-                <span className="portal-home__stat-card-value">
-                  {shipments.filter((x) => x.status === "processing").length}
-                </span>
-              </span>
-            </div>
-
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconPlane size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Shipped</span>
-                <span className="portal-home__stat-card-value">
-                  {shipments.filter((x) => x.status === "shipped").length}
-                </span>
-              </span>
-            </div>
-
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconTruck size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">In transit</span>
-                <span className="portal-home__stat-card-value">
-                  {shipments.filter((x) => x.status === "in_transit").length}
-                </span>
-              </span>
-            </div>
-
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconInbox size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Arrived</span>
-                <span className="portal-home__stat-card-value">
-                  {shipments.filter((x) => x.status === "arrived").length}
-                </span>
-              </span>
-            </div>
-
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconTruck size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Out for delivery</span>
-                <span className="portal-home__stat-card-value">
-                  {shipments.filter((x) => x.status === "out_for_delivery").length}
-                </span>
-              </span>
-            </div>
-
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconChecks size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Delivered</span>
-                <span className="portal-home__stat-card-value">
-                  {shipments.filter((x) => x.status === "delivered").length}
-                </span>
-              </span>
-            </div>
+            {[
+              { key: "processing", label: "Processing", Icon: IconPackage },
+              { key: "shipped", label: "Shipped", Icon: IconPlane },
+              { key: "in_transit", label: "In transit", Icon: IconTruck },
+              { key: "arrived", label: "Arrived", Icon: IconInbox },
+              { key: "out_for_delivery", label: "Out for delivery", Icon: IconTruck },
+              { key: "delivered", label: "Delivered", Icon: IconChecks },
+            ].map(({ key, label, Icon }) => {
+              const isSelected = filterValues.status === key
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`portal-home__stat-card portal-home__stat-card--clickable${isSelected ? " portal-home__stat-card--active" : ""}`}
+                  role="listitem"
+                  aria-pressed={isSelected}
+                  onClick={() =>
+                    setFilterValues((prev) => ({
+                      ...prev,
+                      status: prev.status === key ? "" : key,
+                    }))
+                  }
+                >
+                  <span className="portal-home__stat-card-icon" aria-hidden>
+                    <Icon size={22} stroke={1.5} />
+                  </span>
+                  <span className="portal-home__stat-card-body">
+                    <span className="portal-home__stat-card-label">{label}</span>
+                    <span className="portal-home__stat-card-value">
+                      {shipments.filter((x) => x.status === key).length}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
           <section className="portal-home__panel" aria-label="Filters">
@@ -315,6 +298,15 @@ const Page: NextPage = () => {
               <div>
                 <h2 className="portal-home__section-title">Filters</h2>
               </div>
+              {channelFilter ? (
+                <button
+                  type="button"
+                  className="portal-home__btn portal-home__btn--secondary"
+                  onClick={() => setChannelFilter("")}
+                >
+                  Channel: {channelFilter.replaceAll("_", " ").toUpperCase()} (Clear)
+                </button>
+              ) : null}
             </div>
             <SearchComponent state={filterValues} setState={setFilterValues} />
           </section>

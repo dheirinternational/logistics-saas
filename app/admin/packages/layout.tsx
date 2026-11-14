@@ -594,6 +594,23 @@ const PackageEditComponent = () => {
                         required
                     />
                 </label>
+
+                {isEditing && (
+                    <label className="portal-packages__field">
+                        <span className="portal-packages__field-label">Status</span>
+                        <DHEIRSelect
+                            name="status"
+                            value={selectedPackage.status ?? "stored"}
+                            onChange={handleSelectedPackageSelect}
+                            required
+                        >
+                            <option value="stored">stored</option>
+                            <option value="requested_for">requested_for</option>
+                            <option value="assigned_to_shipment">assigned_to_shipment</option>
+                            <option value="delivered">delivered</option>
+                        </DHEIRSelect>
+                    </label>
+                )}
             </div>
 
             <div className="admin-uploader" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

@@ -2,7 +2,8 @@
 
 import { IconBell, IconCheck, IconX } from "@tabler/icons-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 type InboxMessage = {
   id: string
@@ -13,51 +14,105 @@ type InboxMessage = {
   createdAt: string
 }
 
+const DISMISSED_SIGNATURES_KEY = "dheir_customer_popup_dismissed_signatures"
+
+function getMessageSignature(msg: InboxMessage): string {
+  return `${msg.id}:${msg.createdAt}`
+}
+
+function getDismissedSignatures(): Set<string> {
+  try {
+    const raw = sessionStorage.getItem(DISMISSED_SIGNATURES_KEY)
+    return raw ? new Set(JSON.parse(raw)) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+function saveDismissedSignature(sig: string) {
+  try {
+    const set = getDismissedSignatures()
+    set.add(sig)
+    sessionStorage.setItem(DISMISSED_SIGNATURES_KEY, JSON.stringify(Array.from(set).slice(-50)))
+  } catch {
+    // ignore storage errors
+  }
+}
+
 export function PortalNotificationBannerModal() {
+  const pathname = usePathname()
   const [unreadMessages, setUnreadMessages] = useState<InboxMessage[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
+  const lastSignatureRef = useRef<string>("")
 
-  useEffect(() => {
-    let isMounted = true
+  const isOnInboxOrChat =
+    pathname?.startsWith("/customer/inbox") || pathname?.startsWith("/customer/chat")
 
-    const fetchUnread = async () => {
-      try {
-        const res = await fetch("/api/inbox/messages", { credentials: "include" })
-        if (!res.ok) return
-        const result = await res.json()
-        if (!result.success || !Array.isArray(result.data)) return
+  const fetchUnread = useCallback(async () => {
+    if (isOnInboxOrChat) {
+      setIsOpen(false)
+      return
+    }
+    try {
+      const res = await fetch("/api/inbox/messages?scope=customer", {
+        credentials: "include",
+        cache: "no-store",
+      })
+      if (!res.ok) return
+      const result = await res.json()
+      if (!result.success || !Array.isArray(result.data)) return
 
-        const unread = result.data.filter((msg: InboxMessage) => !msg.isRead)
-        if (isMounted && unread.length > 0) {
+      const dismissed = getDismissedSignatures()
+      const unread = (result.data as InboxMessage[]).filter(
+        (msg) => !msg.isRead && !dismissed.has(getMessageSignature(msg)),
+      )
+
+      if (unread.length > 0) {
+        const nextSig = unread.map(getMessageSignature).join("|")
+        if (nextSig !== lastSignatureRef.current) {
+          lastSignatureRef.current = nextSig
           setUnreadMessages(unread)
           setCurrentIndex(0)
-          // Small delay for smooth pop animation
-          setTimeout(() => setIsOpen(true), 500)
+          setIsOpen(true)
         }
-      } catch (err) {
-        console.error("Error fetching unread notifications for banner popup:", err)
+      } else {
+        setUnreadMessages([])
+        setIsOpen(false)
+        lastSignatureRef.current = ""
       }
+    } catch (err) {
+      console.error("Error fetching unread notifications for banner popup:", err)
     }
+  }, [isOnInboxOrChat])
 
-    fetchUnread()
+  useEffect(() => {
+    const initTimer = setTimeout(fetchUnread, 400)
+    const pollTimer = setInterval(fetchUnread, 15000)
+    window.addEventListener("focus", fetchUnread)
+    window.addEventListener("dheir-inbox-updated", fetchUnread)
 
     return () => {
-      isMounted = false
+      clearTimeout(initTimer)
+      clearInterval(pollTimer)
+      window.removeEventListener("focus", fetchUnread)
+      window.removeEventListener("dheir-inbox-updated", fetchUnread)
     }
-  }, [])
+  }, [fetchUnread])
 
-  if (!isOpen || unreadMessages.length === 0) return null
+  if (!isOpen || unreadMessages.length === 0 || isOnInboxOrChat) return null
 
   const currentMsg = unreadMessages[currentIndex]
   if (!currentMsg) return null
 
   const handleMarkAsRead = async () => {
+    saveDismissedSignature(getMessageSignature(currentMsg))
     try {
-      await fetch(`/api/inbox/messages/${currentMsg.id}/read`, {
+      await fetch(`/api/inbox/messages/${currentMsg.id}/read?scope=customer`, {
         method: "POST",
         credentials: "include",
       })
+      window.dispatchEvent(new Event("dheir-inbox-updated"))
     } catch (err) {
       console.error("Failed to mark notification as read:", err)
     }
@@ -71,7 +126,12 @@ export function PortalNotificationBannerModal() {
   }
 
   const handleClose = () => {
-    handleMarkAsRead()
+    saveDismissedSignature(getMessageSignature(currentMsg))
+    if (currentIndex < unreadMessages.length - 1) {
+      setCurrentIndex((prev) => prev + 1)
+    } else {
+      setIsOpen(false)
+    }
   }
 
   return (

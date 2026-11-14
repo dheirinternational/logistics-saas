@@ -8,12 +8,28 @@ const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000
 
 type ProcurementPolicyModalProps = {
   memberCode?: string
+  requireAgreement?: boolean
+  open?: boolean
+  onAgree?: () => void
+  onCancel?: () => void
 }
 
-export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export function ProcurementPolicyModal({
+  memberCode,
+  requireAgreement = false,
+  open,
+  onAgree,
+  onCancel,
+}: ProcurementPolicyModalProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isOpen = open !== undefined ? open : internalOpen
 
   useEffect(() => {
+    if (open !== undefined) return
+    if (requireAgreement) {
+      setInternalOpen(true)
+      return
+    }
     try {
       const storageKey = memberCode ? `${POPUP_DISMISSED_KEY}_${memberCode}` : POPUP_DISMISSED_KEY
       const dismissedAtStr = localStorage.getItem(storageKey)
@@ -29,24 +45,33 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
 
       // Show popup after slight delay for visual smoothness
       const timer = setTimeout(() => {
-        setIsOpen(true)
+        setInternalOpen(true)
       }, 600)
 
       return () => clearTimeout(timer)
     } catch {
       // If localStorage is unavailable, default to showing
-      setIsOpen(true)
+      setInternalOpen(true)
     }
-  }, [memberCode])
+  }, [memberCode, open, requireAgreement])
 
-  const handleClose = () => {
-    setIsOpen(false)
+  const handleAgree = () => {
+    if (open === undefined) setInternalOpen(false)
     try {
       const storageKey = memberCode ? `${POPUP_DISMISSED_KEY}_${memberCode}` : POPUP_DISMISSED_KEY
       localStorage.setItem(storageKey, Date.now().toString())
     } catch {
       // Ignore storage write errors
     }
+    onAgree?.()
+  }
+
+  const handleDismiss = () => {
+    if (requireAgreement) {
+      onCancel?.()
+      return
+    }
+    handleAgree()
   }
 
   if (!isOpen) return null
@@ -66,7 +91,7 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
         WebkitBackdropFilter: "blur(4px)",
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) handleClose()
+        if (!requireAgreement && e.target === e.currentTarget) handleDismiss()
       }}
     >
       <div
@@ -90,8 +115,8 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
         >
           <button
             type="button"
-            onClick={handleClose}
-            aria-label="Close"
+            onClick={handleDismiss}
+            aria-label={requireAgreement ? "Go back to Logistics" : "Close"}
             style={{
               position: "absolute",
               top: "16px",
@@ -304,7 +329,7 @@ export function ProcurementPolicyModal({ memberCode }: ProcurementPolicyModalPro
           {/* Action Button */}
           <button
             type="button"
-            onClick={handleClose}
+            onClick={handleAgree}
             style={{
               width: "100%",
               padding: "12px",

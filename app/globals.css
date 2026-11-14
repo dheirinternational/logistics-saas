@@ -3597,6 +3597,18 @@ a{
     border-color: color-mix(in srgb, var(--color-dheir-blue) 35%, var(--color-dheir-border));
 }
 
+.portal-home__stat-card--clickable {
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+}
+
+.portal-home__stat-card--active {
+    border-color: var(--color-dheir-blue);
+    background: var(--color-dheir-blue-muted);
+}
+
 .portal-home__stat-card.is-alert {
     border-color: color-mix(in srgb, var(--color-dheir-red) 35%, var(--color-dheir-border));
     background: color-mix(in srgb, var(--color-dheir-red) 6%, var(--color-dheir-surface));

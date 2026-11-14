@@ -25,8 +25,9 @@ export async function POST(
         INSERT INTO inbox_read_receipts (message_id, user_id)
         SELECT m.id, $1
         FROM inbox_messages m
-        WHERE (m.recipient_id = $1 OR m.sender_id = $1)
+        WHERE (m.recipient_id = $1 OR (m.sender_id = $1 AND m.sender_role = 'customer'))
           AND m.is_broadcast = FALSE
+          AND m.sender_role = 'admin'
         ON CONFLICT (user_id, message_id) DO NOTHING
         `,
         [session.user_id],
@@ -44,9 +45,13 @@ export async function POST(
       INSERT INTO inbox_read_receipts (message_id, user_id)
       SELECT m.id, $2
       FROM inbox_messages m
-      WHERE m.id = $1 
-         OR m.parent_id = $1 
-         OR m.thread_id = (SELECT COALESCE(thread_id, id) FROM inbox_messages WHERE id = $1 LIMIT 1)
+      WHERE m.sender_role = 'admin'
+        AND (m.recipient_id = $2 OR m.is_broadcast = TRUE)
+        AND (
+          m.id = $1
+          OR m.parent_id = $1
+          OR m.thread_id = (SELECT COALESCE(thread_id, id) FROM inbox_messages WHERE id = $1 LIMIT 1)
+        )
       ON CONFLICT (user_id, message_id) DO NOTHING
       `,
       [id, session.user_id],

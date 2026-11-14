@@ -33,22 +33,24 @@ export async function POST(
     }
 
     const isAdmin = isAdminOrStaff(session)
+    const scopeParam = req.nextUrl?.searchParams?.get("scope")
     const referer = req.headers.get("referer") || ""
     const isCustomerContext =
       !isAdmin ||
+      scopeParam === "customer" ||
       Boolean(json?.as_customer) ||
       json?.sender_role === "customer" ||
-      referer.includes("/customer/")
+      (scopeParam !== "admin" && referer.includes("/customer"))
     let root: any = null
 
     if (id === "support-chat") {
       // Find customer's existing direct root message
       const existingRes = await pool.query(
         `
-        SELECT id, title, is_broadcast, sender_id, recipient_id, thread_id
+        SELECT id, title, is_broadcast, sender_id, sender_role, recipient_id, thread_id
         FROM inbox_messages
         WHERE is_broadcast = FALSE
-          AND (recipient_id = $1 OR sender_id = $1)
+          AND (recipient_id = $1 OR (sender_id = $1 AND sender_role = 'customer'))
           AND parent_id IS NULL
         ORDER BY created_at ASC
         LIMIT 1
@@ -81,16 +83,7 @@ export async function POST(
           [created.id],
         )
 
-        if (!isAdmin || !isCustomerContext) {
-          await pool.query(
-            `
-            INSERT INTO inbox_read_receipts (message_id, user_id)
-            VALUES ($1, $2)
-            ON CONFLICT (user_id, message_id) DO NOTHING
-            `,
-            [created.id, session.user_id],
-          )
-        }
+        // Wait: customer messages are read by admin when opened; do not self-insert admin read receipts
 
         const userRes = await pool.query(
           `SELECT u.first_name, u.last_name, cust.code
@@ -131,7 +124,7 @@ export async function POST(
 
       const rootRes = await pool.query(
         `
-        SELECT id, title, is_broadcast, sender_id, recipient_id, thread_id
+        SELECT id, title, is_broadcast, sender_id, sender_role, recipient_id, thread_id
         FROM inbox_messages
         WHERE id = $1
         `,
@@ -144,12 +137,12 @@ export async function POST(
       root = rootRes.rows[0]
     }
 
-    if (!isAdmin) {
+    if (!isAdmin || isCustomerContext) {
       // Customer access check
       const hasAccess =
         root.is_broadcast ||
         root.recipient_id === session.user_id ||
-        root.sender_id === session.user_id
+        (root.sender_id === session.user_id && root.sender_role === "customer")
       if (!hasAccess) {
         return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
       }
@@ -206,17 +199,7 @@ export async function POST(
 
     const reply = insertRes.rows[0]
 
-    // Mark as read by the author immediately (unless admin is testing as customer)
-    if (!isAdmin || !isCustomerContext) {
-      await pool.query(
-        `
-        INSERT INTO inbox_read_receipts (message_id, user_id)
-        VALUES ($1, $2)
-        ON CONFLICT (user_id, message_id) DO NOTHING
-        `,
-        [reply.id, session.user_id],
-      )
-    }
+    // Unread counts only track messages from the opposite role, so do not auto-insert a receipt for sender
 
     // Fetch author details
     const userRes = await pool.query(

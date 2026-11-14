@@ -96,7 +96,7 @@ export function PortalRequestMailConfirmDialog({
         <div className="portal-request-mail__dialog-body">
           {step === "policy" ? (
             <article className="portal-request-mail__policy">
-              {shippingMethod === "air" && (
+              {(shippingMethod === "air" || shippingMethod === "express") && (
                 <div style={{
                   padding: "12px 14px",
                   borderRadius: "8px",
@@ -107,11 +107,23 @@ export function PortalRequestMailConfirmDialog({
                   gap: "8px"
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--color-dheir-orange, #c2410c)", fontWeight: 600, fontSize: "13px" }}>
-                    <span>Important Air Shipping Requirements</span>
+                    <span>
+                      {shippingMethod === "express"
+                        ? "Important Express Shipping Requirements"
+                        : "Important Air Shipping Requirements"}
+                    </span>
                   </div>
                   <p style={{ margin: 0, fontSize: "12px", color: "#9a3412", lineHeight: 1.5 }}>
-                    Minimum weight: The minimum acceptable billing weight for Air cargo is 1kg.<br />
-                    Strictly Prepaid: Air shipping is prepaid, which means you must pay the shipping fee before your goods are shipped out from China.
+                    {shippingMethod === "air" ? (
+                      <>
+                        Minimum weight: The minimum acceptable billing weight for Air cargo is 1kg.<br />
+                        Strictly Prepaid: Air shipping is prepaid, which means you must pay the shipping fee before your goods are shipped out from China.
+                      </>
+                    ) : (
+                      <>
+                        Strictly Prepaid: Express shipping is prepaid, which means you must pay the shipping fee before your goods are shipped out from China.
+                      </>
+                    )}
                   </p>
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#7c2d12", fontWeight: 600, cursor: "pointer", marginTop: "4px" }}>
                     <input
@@ -120,7 +132,11 @@ export function PortalRequestMailConfirmDialog({
                       onChange={(e) => setAirAcknowledged(e.target.checked)}
                       style={{ width: "16px", height: "16px", cursor: "pointer" }}
                     />
-                    <span>I understand that Air shipping is strictly prepaid and minimum weight is 1kg</span>
+                    <span>
+                      {shippingMethod === "express"
+                        ? "I understand that Express shipping is strictly prepaid"
+                        : "I understand that Air shipping is strictly prepaid and minimum weight is 1kg"}
+                    </span>
                   </label>
                 </div>
               )}
@@ -213,13 +229,15 @@ export function PortalRequestMailConfirmDialog({
                 type="button"
                 className="portal-packages__btn-primary"
                 onClick={() => {
-                  if (shippingMethod === "air" && !airAcknowledged) {
-                    toast.error("Please acknowledge the Air shipping requirements to continue")
+                  if ((shippingMethod === "air" || shippingMethod === "express") && !airAcknowledged) {
+                    toast.error(
+                      `Please acknowledge the ${shippingMethod === "express" ? "Express" : "Air"} shipping requirements to continue`,
+                    )
                     return
                   }
                   setStep("confirm")
                 }}
-                disabled={submitting || (shippingMethod === "air" && !airAcknowledged)}
+                disabled={submitting || ((shippingMethod === "air" || shippingMethod === "express") && !airAcknowledged)}
               >
                 Continue
               </button>

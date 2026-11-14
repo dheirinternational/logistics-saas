@@ -172,6 +172,36 @@ const Page: NextPage = () => {
     }
   }
 
+  const bulkUpdatePackageStatus = async (
+    rows: Package[],
+    nextStatus: PackageStatus,
+    resetSelection: () => void,
+  ) => {
+    const ids = rows.map((row) => Number(row.id)).filter((n) => Number.isFinite(n))
+    if (ids.length === 0) return
+    try {
+      const res = await fetch("/api/admin/packages/bulk-status", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, status: nextStatus }),
+      })
+      const result = await res.json().catch(() => ({ message: "Update failed" }))
+      if (!res.ok) {
+        toast.error(result.message || "Could not update package status")
+        return
+      }
+      setPackages((prev) =>
+        prev.map((pkg) => (ids.includes(Number(pkg.id)) ? { ...pkg, status: nextStatus } : pkg)),
+      )
+      resetSelection()
+      toast.success(result.message || `${ids.length} package(s) updated.`)
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to update selected packages.")
+    }
+  }
+
   return (
     <div className="portal-home">
       <header className="portal-home__greeting">
@@ -217,7 +247,18 @@ const Page: NextPage = () => {
       ) : (
         <>
           <div className="portal-home__stats" role="list" aria-label="Packages stats">
-            <div className="portal-home__stat-card" role="listitem">
+            <button
+              type="button"
+              className={`portal-home__stat-card portal-home__stat-card--clickable${filterValues.status === "stored" ? " portal-home__stat-card--active" : ""}`}
+              role="listitem"
+              aria-pressed={filterValues.status === "stored"}
+              onClick={() =>
+                setFilterValues((prev) => ({
+                  ...prev,
+                  status: prev.status === "stored" ? "" : "stored",
+                }))
+              }
+            >
               <span className="portal-home__stat-card-icon" aria-hidden>
                 <IconBox size={22} stroke={1.5} />
               </span>
@@ -226,9 +267,20 @@ const Page: NextPage = () => {
                 <span className="portal-home__stat-card-value">{stats.stored}</span>
                 <span className="portal-home__stat-card-hint">At warehouse</span>
               </span>
-            </div>
+            </button>
 
-            <div className="portal-home__stat-card" role="listitem">
+            <button
+              type="button"
+              className={`portal-home__stat-card portal-home__stat-card--clickable${filterValues.status === "requested_for" ? " portal-home__stat-card--active" : ""}`}
+              role="listitem"
+              aria-pressed={filterValues.status === "requested_for"}
+              onClick={() =>
+                setFilterValues((prev) => ({
+                  ...prev,
+                  status: prev.status === "requested_for" ? "" : "requested_for",
+                }))
+              }
+            >
               <span className="portal-home__stat-card-icon" aria-hidden>
                 <IconLoader2 size={22} stroke={1.5} />
               </span>
@@ -237,9 +289,20 @@ const Page: NextPage = () => {
                 <span className="portal-home__stat-card-value">{stats.requested}</span>
                 <span className="portal-home__stat-card-hint">Ready to move</span>
               </span>
-            </div>
+            </button>
 
-            <div className="portal-home__stat-card" role="listitem">
+            <button
+              type="button"
+              className={`portal-home__stat-card portal-home__stat-card--clickable${filterValues.status === "assigned_to_shipment" ? " portal-home__stat-card--active" : ""}`}
+              role="listitem"
+              aria-pressed={filterValues.status === "assigned_to_shipment"}
+              onClick={() =>
+                setFilterValues((prev) => ({
+                  ...prev,
+                  status: prev.status === "assigned_to_shipment" ? "" : "assigned_to_shipment",
+                }))
+              }
+            >
               <span className="portal-home__stat-card-icon" aria-hidden>
                 <IconPackage size={22} stroke={1.5} />
               </span>
@@ -248,9 +311,20 @@ const Page: NextPage = () => {
                 <span className="portal-home__stat-card-value">{stats.assigned}</span>
                 <span className="portal-home__stat-card-hint">In shipment</span>
               </span>
-            </div>
+            </button>
 
-            <div className="portal-home__stat-card" role="listitem">
+            <button
+              type="button"
+              className={`portal-home__stat-card portal-home__stat-card--clickable${filterValues.status === "delivered" ? " portal-home__stat-card--active" : ""}`}
+              role="listitem"
+              aria-pressed={filterValues.status === "delivered"}
+              onClick={() =>
+                setFilterValues((prev) => ({
+                  ...prev,
+                  status: prev.status === "delivered" ? "" : "delivered",
+                }))
+              }
+            >
               <span className="portal-home__stat-card-icon" aria-hidden>
                 <IconChecks size={22} stroke={1.5} />
               </span>
@@ -259,7 +333,7 @@ const Page: NextPage = () => {
                 <span className="portal-home__stat-card-value">{stats.delivered}</span>
                 <span className="portal-home__stat-card-hint">Completed</span>
               </span>
-            </div>
+            </button>
           </div>
 
           <section className="portal-home__panel" aria-label="Package filters">
@@ -342,6 +416,24 @@ const Page: NextPage = () => {
                 enableRowSelection
                 getRowId={(row) => String(row.id)}
                 onDeleteSelected={deletePackages}
+                selectionActions={(selectedRows, resetSelection) => (
+                  <>
+                    <button
+                      type="button"
+                      className="portal-home__btn portal-home__btn--primary"
+                      onClick={() => bulkUpdatePackageStatus(selectedRows, "delivered", resetSelection)}
+                    >
+                      Mark delivered ({selectedRows.length})
+                    </button>
+                    <button
+                      type="button"
+                      className="portal-home__btn portal-home__btn--secondary"
+                      onClick={() => bulkUpdatePackageStatus(selectedRows, "stored", resetSelection)}
+                    >
+                      Mark stored ({selectedRows.length})
+                    </button>
+                  </>
+                )}
               />
             )}
           </section>

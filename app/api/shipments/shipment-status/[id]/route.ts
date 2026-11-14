@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
+import { syncPackagesForShipmentStatus } from "@/lib/shipments/syncShipmentPackages";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
@@ -29,22 +30,34 @@ export async function PUT(
         const body = await req.json();
         const { id } = await params;
 
-        // ✅ Update shipment status
-        const updateRes = await pool.query(`
-            UPDATE shipments
-            SET status = $1
-            WHERE id = $2
-            RETURNING *
-        `, [body.status, id]);
+        const client = await pool.connect();
+        let shipment: any;
+        try {
+            await client.query("BEGIN");
+            const updateRes = await client.query(`
+                UPDATE shipments
+                SET status = $1
+                WHERE id = $2
+                RETURNING *
+            `, [body.status, id]);
 
-        if (updateRes.rows.length < 1) {
-            return NextResponse.json({
-                success: false,
-                message: "Shipment not found"
-            }, { status: 404 });
+            if (updateRes.rows.length < 1) {
+                await client.query("ROLLBACK");
+                return NextResponse.json({
+                    success: false,
+                    message: "Shipment not found"
+                }, { status: 404 });
+            }
+
+            shipment = updateRes.rows[0];
+            await syncPackagesForShipmentStatus(client, shipment.package_ids, shipment.status);
+            await client.query("COMMIT");
+        } catch (txErr) {
+            await client.query("ROLLBACK").catch(() => undefined);
+            throw txErr;
+        } finally {
+            client.release();
         }
-
-        const shipment = updateRes.rows[0];
 
         // ✅ Get user email
         const userRes = await pool.query(`

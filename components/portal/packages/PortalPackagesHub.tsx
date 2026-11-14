@@ -30,6 +30,13 @@ export function PortalPackagesHub() {
   useEffect(() => {
     const q = searchParams.get("search")?.trim()
     if (q) setSearch(q)
+    const tab = searchParams.get("tab")?.trim()
+    const st = searchParams.get("status")?.trim()
+    if (st) {
+      setStatus(st)
+    } else if (tab === "incoming") {
+      setStatus("expected")
+    }
   }, [searchParams])
 
   useEffect(() => {

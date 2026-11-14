@@ -83,18 +83,22 @@ export function PortalBankTransferPage({
       const bankJson = await bankRes.json()
       const contextJson = await contextRes.json()
 
-      if (!bankRes.ok) {
-        toast.error(bankJson.message ?? "Bank transfer is unavailable")
-        return
+      if (bankRes.ok) {
+        setBank(bankJson.data)
+      } else {
+        setBank(null)
       }
 
       if (!contextRes.ok) {
+        setContext(null)
         toast.error(contextJson.message ?? "Payment not found")
         return
       }
 
-      setBank(bankJson.data)
       setContext(contextJson.data)
+      if (!bankRes.ok) {
+        toast.info(bankJson.message ?? "Bank transfer details unavailable; you can still pay online.")
+      }
     } catch {
       toast.error("Could not load transfer details")
     } finally {
@@ -103,10 +107,11 @@ export function PortalBankTransferPage({
   }, [apiBase])
 
   useEffect(() => {
-    fetch("/api/auth/me", { credentials: "include" })
+    fetch("/api/users/my-data", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.data) setUser(data.data)
+        const profile = data?.data ?? data?.user ?? null
+        if (profile) setUser(profile)
       })
       .catch(() => {})
 
@@ -199,7 +204,7 @@ export function PortalBankTransferPage({
         <div className="portal-packages__loading flex justify-center py-16">
           <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
         </div>
-      ) : !bank || !context ? (
+      ) : !context ? (
         <div className="portal-payments__empty portal-home__panel">
           <p>Transfer details are unavailable.</p>
           <div style={{ display: "flex", gap: "10px", marginTop: "12px", alignItems: "center", flexWrap: "wrap" }}>
@@ -257,6 +262,12 @@ export function PortalBankTransferPage({
               <p className="portal-bank-transfer__notice-text">
                 We received your transfer proof and are verifying it. This usually
                 takes a short while during business hours.
+              </p>
+            </div>
+          ) : !bank ? (
+            <div className="portal-home__panel portal-bank-transfer__notice">
+              <p className="portal-bank-transfer__notice-text">
+                Bank transfer details are currently unavailable. You can use online payment above or contact support.
               </p>
             </div>
           ) : (

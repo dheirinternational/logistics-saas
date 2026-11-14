@@ -9,6 +9,7 @@ import {
   shipmentDeleteErrorMessage,
 } from "@/lib/shipments/deleteShipment"
 import { linkMediaAssetsToShipment } from "@/lib/media/mediaAssets"
+import { syncPackagesForShipmentStatus } from "@/lib/shipments/syncShipmentPackages"
 import { NextResponse } from "next/server"
 
 export async function DELETE(
@@ -118,7 +119,7 @@ export async function PUT(
       const validDest = (parsedDest && Number.isFinite(parsedDest) && parsedDest >= 8) ? parsedDest : null
 
       // Update basic fields
-      await client.query(
+      const updatedRes = await client.query<{ status: string; package_ids: number[] | string | null }>(
         `
         UPDATE shipments
         SET
@@ -136,6 +137,7 @@ export async function PUT(
           shipment_note = COALESCE($12, shipment_note),
           admin_reply = COALESCE($13, admin_reply)
         WHERE id = $14
+        RETURNING status, package_ids
         `,
         [
           tracking_number || null,
@@ -154,6 +156,14 @@ export async function PUT(
           shipmentId,
         ]
       )
+
+      if (updatedRes.rows.length > 0) {
+        await syncPackagesForShipmentStatus(
+          client,
+          updatedRes.rows[0].package_ids,
+          updatedRes.rows[0].status,
+        )
+      }
 
       // Notify customer if admin reply changed
       if (admin_reply !== undefined && admin_reply.trim() !== oldReply.trim() && customerUserId) {

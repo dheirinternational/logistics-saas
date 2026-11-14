@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
 
     await pool.query(
       `
-      INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO inbox_messages (sender_id, sender_role, recipient_id, title, body, is_broadcast)
+      VALUES ($1, 'admin', $2, $3, $4, $5)
       `,
       [
         session.user_id,
@@ -80,10 +80,12 @@ export async function GET() {
         u.first_name,
         u.last_name,
         u.email AS recipient_email,
-        COUNT(r.id) AS read_count
+        COUNT(DISTINCT r.user_id) AS read_count
       FROM inbox_messages m
       LEFT JOIN users u ON u.id = m.recipient_id
       LEFT JOIN inbox_read_receipts r ON r.message_id = m.id
+      WHERE m.sender_role = 'admin'
+        AND m.parent_id IS NULL
       GROUP BY m.id, u.first_name, u.last_name, u.email
       ORDER BY m.created_at DESC
     `)

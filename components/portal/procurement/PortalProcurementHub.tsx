@@ -1,17 +1,21 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { IconClipboardCheck, IconSearch, IconBuildingFactory2, IconHistory } from "@tabler/icons-react"
 import { PortalProcurementBuyForMe } from "./PortalProcurementBuyForMe"
 import { PortalProcurementSourcing } from "./PortalProcurementSourcing"
 import { PortalProcurementVerification } from "./PortalProcurementVerification"
 import { PortalProcurementOrderList } from "./PortalProcurementOrderList"
+import { ProcurementPolicyModal } from "./ProcurementPolicyModal"
 
 export type ProcurementTab = "procurement" | "sourcing" | "verification" | "orders"
 
 export function PortalProcurementHub() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<ProcurementTab>("procurement")
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [policyAgreed, setPolicyAgreed] = useState(false)
 
   const handleCreated = () => {
     setRefreshTrigger((prev) => prev + 1)
@@ -81,10 +85,32 @@ export function PortalProcurementHub() {
       </div>
 
       {/* Tab Panels */}
-      {activeTab === "procurement" && <PortalProcurementBuyForMe onSuccess={handleCreated} />}
-      {activeTab === "sourcing" && <PortalProcurementSourcing onSuccess={handleCreated} />}
-      {activeTab === "verification" && <PortalProcurementVerification onSuccess={handleCreated} />}
-      {activeTab === "orders" && <PortalProcurementOrderList refreshKey={refreshTrigger} />}
+      {policyAgreed ? (
+        <>
+          {activeTab === "procurement" && <PortalProcurementBuyForMe onSuccess={handleCreated} />}
+          {activeTab === "sourcing" && <PortalProcurementSourcing onSuccess={handleCreated} />}
+          {activeTab === "verification" && <PortalProcurementVerification onSuccess={handleCreated} />}
+          {activeTab === "orders" && <PortalProcurementOrderList refreshKey={refreshTrigger} />}
+        </>
+      ) : (
+        <div className="portal-packages__empty">
+          <p>Please read and accept the Procurement &amp; Sourcing Policy to continue.</p>
+          <button
+            type="button"
+            className="portal-packages__btn-primary"
+            onClick={() => setPolicyAgreed(false)}
+          >
+            Review Policy
+          </button>
+        </div>
+      )}
+
+      <ProcurementPolicyModal
+        open={!policyAgreed}
+        requireAgreement
+        onAgree={() => setPolicyAgreed(true)}
+        onCancel={() => router.push("/customer")}
+      />
     </div>
   )
 }

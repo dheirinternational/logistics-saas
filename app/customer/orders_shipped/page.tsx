@@ -4,7 +4,8 @@ import { PortalPackagesPageHeader } from "@/components/portal/packages/PortalPac
 import { PortalPackagesToolbar } from "@/components/portal/packages/PortalPackagesToolbar"
 import { PortalPackageStatusBadge } from "@/components/portal/packages/PortalPackageStatusBadge"
 import type { Shipment } from "@/types/entityTypeDef"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { DHEIRLoader } from "@/components/ui/DHEIRLoader"
 import { toast } from "@/lib/ui/toast"
 import Image from "next/image"
@@ -16,8 +17,12 @@ import { PortalShipmentTimeline } from "@/components/portal/packages/PortalShipm
 import PaystackPaymentButton from "@/components/base/PaystackPaymentBtn"
 import type { User } from "@/types/entityTypeDef"
 
-export default function TrackShipmentsPage() {
+function TrackShipmentsContent() {
+  const searchParams = useSearchParams()
+  const initialStatusParam = searchParams.get("status") === "delivered" ? "delivered" : "active"
+
   const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState<"active" | "delivered" | "all">(initialStatusParam)
   const [shipments, setShipments] = useState<Shipment[]>([])
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -26,10 +31,22 @@ export default function TrackShipmentsPage() {
   const [activeImages, setActiveImages] = useState<any[]>([])
 
   useEffect(() => {
-    fetch("/api/auth/me", { credentials: "include" })
+    const paramStatus = searchParams.get("status")
+    if (paramStatus === "delivered") {
+      setStatusFilter("delivered")
+    } else if (paramStatus === "all") {
+      setStatusFilter("all")
+    } else if (paramStatus === "active") {
+      setStatusFilter("active")
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    fetch("/api/users/my-data", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.data) setUser(data.data)
+        const profile = data?.data ?? data?.user ?? null
+        if (profile) setUser(profile)
       })
       .catch(() => {})
 
@@ -40,19 +57,22 @@ export default function TrackShipmentsPage() {
           toast.error(result.message)
           return
         }
-        setShipments(
-          (result.data ?? []).filter(
-            (s: Shipment) => s.status !== "delivered",
-          ),
-        )
+        setShipments(result.data ?? [])
       })
       .catch(() => toast.error("Could not load shipments"))
       .finally(() => setLoading(false))
   }, [])
 
-  const filtered = shipments.filter((s) =>
-    s.tracking_number.toLowerCase().includes(search.toLowerCase()),
-  )
+  const filtered = shipments.filter((s) => {
+    const matchesSearch = s.tracking_number.toLowerCase().includes(search.toLowerCase())
+    const matchesStatus =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "delivered"
+          ? s.status === "delivered"
+          : s.status !== "delivered"
+    return matchesSearch && matchesStatus
+  })
 
   const openGallery = (images: any[], idx: number) => {
     setActiveImages(images)
@@ -63,8 +83,12 @@ export default function TrackShipmentsPage() {
   return (
     <div className="portal-packages">
       <PortalPackagesPageHeader
-        title="Track shipment"
-        description="Active shipments in transit to Nigeria."
+        title={statusFilter === "delivered" ? "Signed & delivered shipments" : "Track shipment"}
+        description={
+          statusFilter === "delivered"
+            ? "Shipments that have arrived and been delivered or signed for."
+            : "Active shipments in transit to Nigeria."
+        }
         backHref="/customer"
         backLabel="Home"
       />
@@ -72,9 +96,13 @@ export default function TrackShipmentsPage() {
       <PortalPackagesToolbar
         search={search}
         onSearchChange={setSearch}
-        status=""
-        onStatusChange={() => {}}
-        statusOptions={[{ value: "", label: "All in progress" }]}
+        status={statusFilter}
+        onStatusChange={(val) => setStatusFilter((val as "active" | "delivered" | "all") || "active")}
+        statusOptions={[
+          { value: "active", label: "In progress" },
+          { value: "delivered", label: "Delivered / Signed" },
+          { value: "all", label: "All shipments" },
+        ]}
         searchPlaceholder="Search by tracking number…"
       />
 
@@ -85,7 +113,11 @@ export default function TrackShipmentsPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="portal-packages__empty">
-            <p>No active shipments found.</p>
+            <p>
+              {statusFilter === "delivered"
+                ? "No delivered shipments found yet."
+                : "No active shipments found."}
+            </p>
           </div>
         ) : (
           filtered.map((s: any) => (
@@ -310,5 +342,19 @@ export default function TrackShipmentsPage() {
         initialIndex={galleryIndex}
       />
     </div>
+  )
+}
+
+export default function TrackShipmentsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="portal-packages portal-packages__loading">
+          <DHEIRLoader color="var(--color-dheir-blue)" size={12} />
+        </div>
+      }
+    >
+      <TrackShipmentsContent />
+    </Suspense>
   )
 }

@@ -480,50 +480,39 @@ const Page: NextPage = () => {
       ) : (
         <>
           <div className="portal-home__stats" role="list" aria-label="Shipment requests status">
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconClock size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Pending</span>
-                <span className="portal-home__stat-card-value">
-                  {shipmentRequests.filter((x) => x.status === "pending").length}
-                </span>
-              </span>
-            </div>
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconFileSearch size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Vetted</span>
-                <span className="portal-home__stat-card-value">
-                  {shipmentRequests.filter((x) => x.status === "vetted").length}
-                </span>
-              </span>
-            </div>
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconCircleX size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Rejected</span>
-                <span className="portal-home__stat-card-value">
-                  {shipmentRequests.filter((x) => x.status === "rejected").length}
-                </span>
-              </span>
-            </div>
-            <div className="portal-home__stat-card" role="listitem">
-              <span className="portal-home__stat-card-icon" aria-hidden>
-                <IconChecks size={22} stroke={1.5} />
-              </span>
-              <span className="portal-home__stat-card-body">
-                <span className="portal-home__stat-card-label">Accepted</span>
-                <span className="portal-home__stat-card-value">
-                  {shipmentRequests.filter((x) => x.status === "accepted").length}
-                </span>
-              </span>
-            </div>
+            {[
+              { key: "pending", label: "Pending", Icon: IconClock },
+              { key: "vetted", label: "Vetted", Icon: IconFileSearch },
+              { key: "rejected", label: "Rejected", Icon: IconCircleX },
+              { key: "accepted", label: "Accepted", Icon: IconChecks },
+            ].map(({ key, label, Icon }) => {
+              const isSelected = filterValues.status === key
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`portal-home__stat-card portal-home__stat-card--clickable${isSelected ? " portal-home__stat-card--active" : ""}`}
+                  role="listitem"
+                  aria-pressed={isSelected}
+                  onClick={() =>
+                    setFilterValues((prev) => ({
+                      ...prev,
+                      status: prev.status === key ? "" : key,
+                    }))
+                  }
+                >
+                  <span className="portal-home__stat-card-icon" aria-hidden>
+                    <Icon size={22} stroke={1.5} />
+                  </span>
+                  <span className="portal-home__stat-card-body">
+                    <span className="portal-home__stat-card-label">{label}</span>
+                    <span className="portal-home__stat-card-value">
+                      {shipmentRequests.filter((x) => x.status === key).length}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
           <section className="portal-home__panel" aria-label="Filters">

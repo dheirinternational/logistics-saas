@@ -297,6 +297,7 @@ export function AdminInboxPage() {
             : inq,
         ),
       )
+      window.dispatchEvent(new Event("dheir-inbox-updated"))
     } catch (err: any) {
       toast.error(err.message || "Failed to send reply")
     } finally {
@@ -380,7 +381,10 @@ export function AdminInboxPage() {
                     <li key={`${inq.rootId}-${inq.customerId}`}>
                       <button
                         type="button"
-                        onClick={() => setSelectedInquiry(inq)}
+                        onClick={() => {
+                          setSelectedInquiry(inq)
+                          setTimeout(() => window.dispatchEvent(new Event("dheir-inbox-updated")), 500)
+                        }}
                         style={{
                           width: "100%",
                           textAlign: "left",

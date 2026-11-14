@@ -215,7 +215,12 @@ export function PortalRequestMailPage() {
                 role="tab"
                 aria-selected={shippingMethod === id}
                 className={`portal-request-mail__channel${shippingMethod === id ? " is-active" : ""}`}
-                onClick={() => setShippingMethod(id)}
+                onClick={() => {
+                  setShippingMethod(id)
+                  if (id === "air" || id === "express") {
+                    setShippingPayment("pay_before_shipment")
+                  }
+                }}
               >
                 <Icon size={18} stroke={1.5} aria-hidden />
                 {label}
@@ -227,26 +232,30 @@ export function PortalRequestMailPage() {
         <div>
           <p className="portal-request-mail__label">
             Payment timing
-            {shippingMethod === "air" && (
+            {(shippingMethod === "air" || shippingMethod === "express") && (
               <span style={{ marginLeft: "8px", fontSize: "11px", color: "var(--color-dheir-orange)", fontWeight: 500 }}>
-                (Air shipping is strictly prepaid)
+                {shippingMethod === "express"
+                  ? "(Express shipping is strictly prepaid)"
+                  : "(Air & Express shipping are strictly prepaid)"}
               </span>
             )}
           </p>
           <div className="portal-request-mail__chips">
             {PAYMENT_OPTIONS.map((opt) => {
-              const disabled = shippingMethod === "air" && opt.id === "pay_after_shipment"
+              const isStrictPrepaidChannel = shippingMethod === "air" || shippingMethod === "express"
+              const disabled = isStrictPrepaidChannel && opt.id === "pay_after_shipment"
+              const channelLabel = shippingMethod === "express" ? "Express" : "Air"
               return (
                 <button
                   key={opt.id}
                   type="button"
                   disabled={disabled}
-                  title={disabled ? "Air shipping is strictly prepaid before departure" : undefined}
+                  title={disabled ? `${channelLabel} shipping is strictly prepaid before departure` : undefined}
                   className={`portal-request-mail__chip${shippingPayment === opt.id ? " is-active" : ""}`}
                   style={disabled ? { opacity: 0.45, cursor: "not-allowed" } : undefined}
                   onClick={() => {
                     if (disabled) {
-                      toast.info("Air shipping is strictly prepaid before departure from China.")
+                      toast.info(`${channelLabel} shipping is strictly prepaid before departure from China.`)
                       return
                     }
                     setShippingPayment(opt.id)
@@ -335,7 +344,7 @@ export function PortalRequestMailPage() {
             toast.error("Please click on at least one package in the list above to select it.")
             return
           }
-          if (shippingMethod === "air" && shippingPayment === "pay_after_shipment") {
+          if ((shippingMethod === "air" || shippingMethod === "express") && shippingPayment === "pay_after_shipment") {
             setShippingPayment("pay_before_shipment")
           }
           setConfirmOpen(true)

@@ -190,7 +190,18 @@ const Page: NextPage = () => {
       ) : (
         <>
           <div className="portal-home__stats" role="list" aria-label="Incoming packages stats">
-            <div className="portal-home__stat-card" role="listitem">
+            <button
+              type="button"
+              className={`portal-home__stat-card portal-home__stat-card--clickable${filterValues.status === "expected" ? " portal-home__stat-card--active" : ""}`}
+              role="listitem"
+              aria-pressed={filterValues.status === "expected"}
+              onClick={() =>
+                setFilterValues((prev) => ({
+                  ...prev,
+                  status: prev.status === "expected" ? "" : "expected",
+                }))
+              }
+            >
               <span className="portal-home__stat-card-icon" aria-hidden>
                 <IconTruck size={22} stroke={1.5} />
               </span>
@@ -201,9 +212,20 @@ const Page: NextPage = () => {
                 </span>
                 <span className="portal-home__stat-card-hint">On the way</span>
               </span>
-            </div>
+            </button>
 
-            <div className="portal-home__stat-card" role="listitem">
+            <button
+              type="button"
+              className={`portal-home__stat-card portal-home__stat-card--clickable${filterValues.status === "stored" ? " portal-home__stat-card--active" : ""}`}
+              role="listitem"
+              aria-pressed={filterValues.status === "stored"}
+              onClick={() =>
+                setFilterValues((prev) => ({
+                  ...prev,
+                  status: prev.status === "stored" ? "" : "stored",
+                }))
+              }
+            >
               <span className="portal-home__stat-card-icon" aria-hidden>
                 <IconBox size={22} stroke={1.5} />
               </span>
@@ -214,7 +236,7 @@ const Page: NextPage = () => {
                 </span>
                 <span className="portal-home__stat-card-hint">At warehouse</span>
               </span>
-            </div>
+            </button>
           </div>
 
           <section className="portal-home__panel" aria-label="Shipment filters">
