@@ -6,6 +6,7 @@ import { getSession } from "@/lib/db/session";
 import { isAdminOrStaff } from "@/lib/rbac/permissions";
 import { generateTrackingNumber } from "@/lib/generators/generateTrackingNumber";
 import { linkMediaAssetsToShipment } from "@/lib/media/mediaAssets";
+import { parseShipmentPackageIds } from "@/lib/shipments/syncShipmentPackages";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
@@ -220,11 +221,14 @@ export async function POST(req: NextRequest) {
             data.sea_expected_arrival_date,
         ]);
 
-        await client.query(`
-            UPDATE packages
-            SET status = 'assigned_to_shipment'
-            WHERE id = ANY($1)
-        `, [package_ids]);
+        const parsedPackageIds = parseShipmentPackageIds(data.package_ids);
+        if (parsedPackageIds.length > 0) {
+            await client.query(`
+                UPDATE packages
+                SET status = 'assigned_to_shipment'
+                WHERE id = ANY($1::bigint[])
+            `, [parsedPackageIds]);
+        }
 
         await client.query(`
             INSERT INTO payments (user_id, customer_code, shipment_tracking_number, amount, status, created_at, transaction_ref)

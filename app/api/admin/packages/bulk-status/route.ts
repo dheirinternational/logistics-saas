@@ -1,5 +1,6 @@
 import { dbQuery } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { syncIncomingPackagesForPackageIds } from "@/lib/shipments/syncShipmentPackages"
 import { NextResponse } from "next/server"
 
 const ALLOWED_PACKAGE_STATUSES = new Set([
@@ -43,6 +44,8 @@ export async function POST(req: Request) {
       `UPDATE packages SET status = $1 WHERE id = ANY($2::bigint[]) RETURNING id`,
       [status, ids],
     )
+
+    await syncIncomingPackagesForPackageIds(ids, status)
 
     return NextResponse.json({
       success: true,

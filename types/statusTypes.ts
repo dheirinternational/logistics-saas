@@ -36,6 +36,7 @@ export type IncomingPackageStatus =
     | "received" 
     | "cancelled" 
     | "stored"
+    | "delivered"
 
 
 export type OrderStatus =

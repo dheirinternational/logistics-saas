@@ -4,6 +4,7 @@ import {
   linkPackageMediaAssets,
   parsePackageMediaAssetIds,
 } from "@/lib/packages/linkPackageMedia"
+import { syncIncomingPackagesForPackageIds } from "@/lib/shipments/syncShipmentPackages"
 import { NextResponse } from "next/server"
 import type { DatabaseError } from "pg"
 
@@ -124,6 +125,10 @@ export async function PUT(
 
     if (updateResult.rowCount === 0) {
       return NextResponse.json({ success: false, message: "Package not found" }, { status: 404 })
+    }
+
+    if (status) {
+      await syncIncomingPackagesForPackageIds([packageId], status)
     }
 
     await linkPackageMediaAssets(packageId, mediaAssetIds)

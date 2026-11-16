@@ -114,7 +114,8 @@ export async function POST(req: NextRequest){
             UPDATE incoming_packages
                 SET status = 'stored'
                 WHERE incoming_tracking_number = $1
-        `, [data.incoming_package_id])
+                  AND user_id = $2
+        `, [data.incoming_package_id, userId.rows[0].user_id])
 
 
         

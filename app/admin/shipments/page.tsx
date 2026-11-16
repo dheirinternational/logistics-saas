@@ -124,6 +124,7 @@ const Page: NextPage = () => {
                 let className = "portal-packages__badge"
                 if (status === "expected") className = "portal-packages__badge portal-packages__badge--orange"
                 else if (status === "stored") className = "portal-packages__badge portal-packages__badge--green"
+                else if (status === "delivered") className = "portal-packages__badge portal-packages__badge--neutral"
                 return <span className={className}>{status}</span>
             },
             enableColumnFilter: false
@@ -142,7 +143,7 @@ const Page: NextPage = () => {
                     return "heyyyy"
                 }
 
-                if (item.status === "stored") return null
+                if (item.status === "stored" || item.status === "delivered") return null
 
                 return (
                     <button
@@ -177,7 +178,7 @@ const Page: NextPage = () => {
 
     const data = incomingPackages.filter(
         (x) =>
-            matchesStatusFilter(x.status, filterValues.status) &&
+            (filterValues.status ? matchesStatusFilter(x.status, filterValues.status) : x.status !== "delivered") &&
             matchesWarehouseFilter(x.warehouse_id, filterValues.warehouse_id)
     )
 

@@ -71,9 +71,10 @@ const SearchComponent = <T extends Record<string, InputSafe>>({
         setState={setState}
         select
         selectValues={[
-          { name: "All statuses", value: "" },
+          { name: "Active (Expected & Stored)", value: "" },
           { name: "Expected", value: "expected" },
           { name: "Stored", value: "stored" },
+          { name: "Delivered", value: "delivered" },
         ]}
       />
 

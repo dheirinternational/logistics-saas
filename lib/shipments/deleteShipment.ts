@@ -1,4 +1,5 @@
 import { optionalDelete } from "@/lib/db/optionalDelete"
+import { syncIncomingPackagesForPackageIds } from "@/lib/shipments/syncShipmentPackages"
 import type { PoolClient } from "pg"
 import type { DatabaseError } from "pg"
 
@@ -82,9 +83,10 @@ export async function deleteShipmentById(
 
     const packageIdList = normalizePackageIds(package_ids)
     if (packageIdList.length > 0) {
-      await client.query(`UPDATE packages SET status = 'stored' WHERE id = ANY($1::int[])`, [
+      await client.query(`UPDATE packages SET status = 'stored' WHERE id = ANY($1::bigint[])`, [
         packageIdList,
       ])
+      await syncIncomingPackagesForPackageIds(packageIdList, "stored", client)
     }
 
     const deleteResult = await client.query(`DELETE FROM shipments WHERE id = $1`, [shipmentId])

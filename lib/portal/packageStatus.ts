@@ -27,6 +27,7 @@ const INCOMING_STATUS_LABELS: Record<IncomingPackageStatus, string> = {
   received: "Received",
   cancelled: "Cancelled",
   stored: "Stored",
+  delivered: "Delivered",
 }
 
 const INCOMING_STATUS_VARIANTS: Record<
@@ -37,6 +38,7 @@ const INCOMING_STATUS_VARIANTS: Record<
   received: "blue",
   cancelled: "muted",
   stored: "green",
+  delivered: "green",
 }
 
 export function getPackageStatusLabel(status: string): string {

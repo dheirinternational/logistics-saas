@@ -85,19 +85,25 @@ export function PortalPackagesHub() {
     }
   }, [])
 
+  const activePackages = useMemo(
+    () => packages.filter((p) => p.status !== "delivered"),
+    [packages],
+  )
+
   const filterOptions = useMemo(() => {
     return [
-      { value: "", label: "All packages", count: packages.length + incoming.length },
+      { value: "", label: "Active packages", count: activePackages.length + incoming.length },
       { value: "expected", label: "Not received", count: incoming.length },
       { value: "stored", label: "At warehouse", count: packages.filter((p) => p.status === "stored").length },
       { value: "requested_for", label: "Ready to ship", count: packages.filter((p) => p.status === "requested_for").length },
       { value: "assigned_to_shipment", label: "In shipment", count: packages.filter((p) => p.status === "assigned_to_shipment").length },
       { value: "delivered", label: "Delivered", count: packages.filter((p) => p.status === "delivered").length },
     ]
-  }, [packages, incoming])
+  }, [packages, activePackages, incoming])
 
   const filteredPackages = useMemo(() => {
-    return packages.filter((p) => {
+    const source = status ? packages : activePackages
+    return source.filter((p) => {
       const q = search.toLowerCase()
       const matchesSearch =
         !q ||
@@ -106,7 +112,7 @@ export function PortalPackagesHub() {
       const matchesStatus = !status || p.status === status
       return matchesSearch && matchesStatus
     })
-  }, [packages, search, status])
+  }, [packages, activePackages, search, status])
 
   const filteredIncoming = useMemo(() => {
     return incoming.filter((p) => {
