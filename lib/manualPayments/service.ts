@@ -278,7 +278,11 @@ export async function confirmManualPaymentSubmission(
       }
     }
 
-    const fulfillResult = await fulfillShipmentPayment(client, submission.reference)
+    const fulfillResult = await fulfillShipmentPayment(
+      client,
+      submission.reference,
+      "bank_transfer"
+    )
 
     if (!fulfillResult.ok) {
       return { ok: false as const, reason: fulfillResult.reason }
@@ -345,7 +349,11 @@ export async function confirmManualPaymentSubmission(
       }
     }
 
-    const fulfillResult = await fulfillOrderPayment(client, submission.reference)
+    const fulfillResult = await fulfillOrderPayment(
+      client,
+      submission.reference,
+      "bank_transfer"
+    )
 
     if (!fulfillResult.ok) {
       return { ok: false as const, reason: fulfillResult.reason }

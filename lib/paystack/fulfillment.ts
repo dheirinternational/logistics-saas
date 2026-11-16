@@ -2,7 +2,8 @@ import type { PoolClient } from "pg"
 
 export async function fulfillShipmentPayment(
   client: PoolClient,
-  paymentReference: string
+  paymentReference: string,
+  paymentChannel: "paystack" | "bank_transfer" = "paystack"
 ): Promise<{ ok: true } | { ok: false; reason: string }> {
   const paymentRes = await client.query(
     `
@@ -23,6 +24,16 @@ export async function fulfillShipmentPayment(
   const payment = paymentRes.rows[0]
 
   if (payment.status === "paid") {
+    if (!payment.channel) {
+      await client.query(
+        `
+        UPDATE payments
+        SET channel = $2
+        WHERE transaction_ref = $1 AND channel IS NULL
+        `,
+        [payment.transaction_ref, paymentChannel]
+      )
+    }
     return { ok: true }
   }
 
@@ -30,17 +41,21 @@ export async function fulfillShipmentPayment(
     `
     UPDATE payments
     SET status = 'paid',
-        paid_at = NOW()
+        channel = $2,
+        paid_at = COALESCE(paid_at, NOW())
     WHERE transaction_ref = $1
     `,
-    [payment.transaction_ref]
+    [payment.transaction_ref, paymentChannel]
   )
 
   await client.query(
     `
     UPDATE shipments
     SET paid_for = true,
-        status = 'processing'
+        status = CASE
+          WHEN status IS NULL OR status IN ('pending', 'pending_payment') THEN 'processing'
+          ELSE status
+        END
     WHERE tracking_number = $1
     `,
     [payment.shipment_tracking_number]
@@ -51,7 +66,8 @@ export async function fulfillShipmentPayment(
 
 export async function fulfillOrderPayment(
   client: PoolClient,
-  paymentReference: string
+  paymentReference: string,
+  paymentChannel: "paystack" | "bank_transfer" = "paystack"
 ): Promise<{ ok: true; orderId?: string } | { ok: false; reason: string }> {
   const orderRes = await client.query(
     `
@@ -117,11 +133,12 @@ export async function fulfillOrderPayment(
     `
     UPDATE orders
     SET payment_status = 'paid',
-        paid_at = NOW(),
+        payment_type = COALESCE(NULLIF(payment_type, ''), $2),
+        paid_at = COALESCE(paid_at, NOW()),
         updated_at = NOW()
     WHERE order_id = $1
     `,
-    [order.order_id]
+    [order.order_id, paymentChannel]
   )
 
   return { ok: true, orderId: order.order_id }
