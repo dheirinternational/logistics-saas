@@ -107,6 +107,7 @@ const Page: NextPage = () => {
 
   const columnDef = [
     columnHelper.accessor("package_name", { header: "Name" }),
+    columnHelper.accessor("incoming_package_id", { header: "Tracking ID" }),
     columnHelper.accessor("customer_code", { header: "Customer Code" }),
     columnHelper.accessor("weight", { header: "Weight" }),
     columnHelper.accessor("warehouse_id", { header: "Warehouse" }),

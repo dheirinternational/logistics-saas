@@ -164,10 +164,27 @@ export async function DELETE(
     const packageId = Number(id)
 
     await dbQuery(`DELETE FROM package_images WHERE package_id = $1`, [packageId])
-    const deleteResult = await dbQuery(`DELETE FROM packages WHERE id = $1`, [packageId])
+    const deleteResult = await dbQuery<{
+      user_id: number | null
+      incoming_package_id: string | null
+    }>(
+      `DELETE FROM packages WHERE id = $1 RETURNING user_id, incoming_package_id`,
+      [packageId]
+    )
 
     if (deleteResult.rowCount === 0) {
       return NextResponse.json({ success: false, message: "Package not found" }, { status: 404 })
+    }
+
+    const deletedPkg = deleteResult.rows[0]
+    if (deletedPkg?.user_id && deletedPkg?.incoming_package_id) {
+      await dbQuery(
+        `DELETE FROM incoming_packages
+         WHERE user_id = $1
+           AND incoming_tracking_number = $2
+           AND status = 'stored'`,
+        [deletedPkg.user_id, deletedPkg.incoming_package_id]
+      )
     }
 
     return NextResponse.json({ success: true, message: "Package deleted" })
