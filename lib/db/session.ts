@@ -1,4 +1,4 @@
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { randomUUID } from "crypto"
 import { cache } from "react"
 import { DatabaseUnavailableError, dbQuery, isTransientConnectionError, withDbRetry } from "./db"
@@ -7,6 +7,41 @@ import { redirect } from "next/navigation"
 
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "session"
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 4
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Resolves the active session token from `Authorization: Bearer <token>` (mobile/API)
+ * or falls back to the `session` HTTP-only cookie (web).
+ */
+async function resolveSessionId(): Promise<{
+  sessionId: string | null
+  source: "bearer" | "cookie" | null
+}> {
+  const headerStore = await headers()
+  const authHeader = headerStore.get("authorization")
+  if (authHeader) {
+    const match = authHeader.match(/^Bearer\s+(.+)$/i)
+    const bearerToken = match?.[1]?.trim()
+    if (bearerToken) {
+      return {
+        sessionId: UUID_REGEX.test(bearerToken) ? bearerToken : null,
+        source: "bearer",
+      }
+    }
+  }
+
+  const cookieStore = await cookies()
+  const cookieToken = cookieStore.get(SESSION_COOKIE_NAME)?.value?.trim()
+  if (cookieToken) {
+    return {
+      sessionId: UUID_REGEX.test(cookieToken) ? cookieToken : null,
+      source: "cookie",
+    }
+  }
+
+  return { sessionId: null, source: null }
+}
 
 export async function createSession(userId: number, userRole: string = "customer") {
   const sessionId = randomUUID()
@@ -38,8 +73,7 @@ export async function createSession(userId: number, userRole: string = "customer
 }
 
 export const getSession = cache(async () => {
-  const cookieStore = await cookies()
-  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
+  const { sessionId, source } = await resolveSessionId()
 
   if (!sessionId) return null
 
@@ -86,23 +120,29 @@ export const getSession = cache(async () => {
       "deleteExpiredSession"
     ).catch((err) => console.error("deleteExpiredSession failed:", err))
 
-    cookieStore.set(SESSION_COOKIE_NAME, "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      expires: new Date(0),
-      path: "/",
-    })
+    if (source === "cookie") {
+      try {
+        const cookieStore = await cookies()
+        cookieStore.set(SESSION_COOKIE_NAME, "", {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          expires: new Date(0),
+          path: "/",
+        })
+      } catch {
+        // Ignore cookie mutation when getSession runs inside a Server Component render
+      }
+    }
     return null
   }
 
   return session
 })
 
-/** Clears the session cookie and removes the row from the database. */
+/** Clears the active session (Bearer or cookie) from the database and clears the cookie. */
 export async function clearSession() {
-  const cookieStore = await cookies()
-  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value
+  const { sessionId, source } = await resolveSessionId()
 
   if (sessionId) {
     await pool.query(`DELETE FROM sessions WHERE id = $1`, [sessionId]).catch((err) => {
@@ -110,13 +150,16 @@ export async function clearSession() {
     })
   }
 
-  cookieStore.set(SESSION_COOKIE_NAME, "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    expires: new Date(0),
-    path: "/",
-  })
+  if (source !== "bearer") {
+    const cookieStore = await cookies()
+    cookieStore.set(SESSION_COOKIE_NAME, "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires: new Date(0),
+      path: "/",
+    })
+  }
 }
 
 export async function deleteSession() {

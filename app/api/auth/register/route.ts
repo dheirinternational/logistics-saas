@@ -93,12 +93,14 @@ export async function POST(request: Request) {
       [user.id, `${firstName}-DHI${String(user.id).padStart(4, "0")}`]
     )
 
-    await createSession(user.id, "customer")
+    const { sessionId, expiresAt } = await createSession(user.id, "customer")
 
     return NextResponse.json(
       {
         success: true,
         message: "Successfully created account",
+        token: sessionId,
+        expiresAt: expiresAt.toISOString(),
         data: {
           user: {
             id: user.id,

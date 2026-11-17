@@ -42,10 +42,12 @@ export async function POST(request: Request) {
     }
 
     const role = String(user.role ?? "customer")
-    await createSession(user.id, role)
+    const { sessionId, expiresAt } = await createSession(user.id, role)
 
     return NextResponse.json({
       success: true,
+      token: sessionId,
+      expiresAt: expiresAt.toISOString(),
       user: {
         id: user.id,
         email: user.email,
