@@ -114,11 +114,11 @@ export async function getPortalDashboardData(
       `
       SELECT
         (SELECT COUNT(*)::int FROM incoming_packages
-          WHERE status != 'stored' AND user_id = $1) AS waiting_to_be_stored,
+          WHERE status = 'expected' AND user_id = $1) AS waiting_to_be_stored,
         (SELECT COUNT(*)::int FROM packages
           WHERE status IN ('stored', 'requested_for') AND user_id = $1) AS total_packages,
         (SELECT COUNT(*)::int FROM shipment_requests
-          WHERE status != 'accepted' AND user_id = $1) AS request_mail,
+          WHERE status IN ('pending', 'vetted') AND user_id = $1) AS request_mail,
         (SELECT COUNT(*)::int FROM shipments
           WHERE status != 'delivered' AND user_id = $1) AS shipment,
         (SELECT COUNT(*)::int FROM payments
@@ -326,9 +326,11 @@ export async function getPortalDashboardData(
       const routeLabel =
         row.kind === "shipment" && row.origin_city
           ? `${origin} → ${dest}`
-          : row.kind === "incoming"
-            ? "Not received"
-            : "At warehouse"
+          : row.status === "delivered"
+            ? "Delivered"
+            : row.kind === "incoming" && row.status === "expected"
+              ? "Not received"
+              : "At warehouse"
 
       return {
         id: String(row.id),
