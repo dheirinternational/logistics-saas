@@ -78,11 +78,15 @@ export function AdminInboxNotificationModal() {
           setUnreadThreads(unread)
           setCurrentIndex(0)
           setIsOpen(true)
+          window.dispatchEvent(new Event("dheir-admin-sidebar-refresh"))
         }
       } else {
         setUnreadThreads([])
         setIsOpen(false)
-        lastSigRef.current = ""
+        if (lastSigRef.current !== "") {
+          lastSigRef.current = ""
+          window.dispatchEvent(new Event("dheir-admin-sidebar-refresh"))
+        }
       }
     } catch (err) {
       console.error("Failed to poll admin inbox notifications:", err)

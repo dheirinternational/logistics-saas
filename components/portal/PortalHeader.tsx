@@ -55,7 +55,7 @@ export function PortalHeader({ onOpenMenu, menuExpanded }: PortalHeaderProps) {
       try {
         const [annRes, inboxRes] = await Promise.all([
           fetch("/api/announcements", { credentials: "include" }),
-          fetch("/api/inbox/messages", { credentials: "include" }),
+          fetch("/api/inbox/messages?scope=customer", { credentials: "include" }),
         ])
 
         const annResult = await annRes.json()

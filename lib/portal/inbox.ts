@@ -60,7 +60,10 @@ export async function getPortalInboxMessages(
       LIMIT 1
     ) latest ON true
     WHERE root.is_broadcast = FALSE
-      AND (root.recipient_id = $1 OR root.sender_id = $1)
+      AND (
+        root.recipient_id = $1
+        OR (root.sender_id = $1 AND root.sender_role = 'customer')
+      )
       AND root.parent_id IS NULL
     ORDER BY root.created_at ASC
     LIMIT 1
@@ -125,7 +128,7 @@ export async function getInboxUnreadCount(userId: number): Promise<number> {
     WHERE (
       (m.is_broadcast = TRUE AND m.parent_id IS NULL)
       OR
-      (m.is_broadcast = FALSE AND m.sender_role = 'admin' AND (m.recipient_id = $1 OR m.sender_id != $1))
+      (m.is_broadcast = FALSE AND m.sender_role = 'admin' AND m.recipient_id = $1)
     )
     AND r.read_at IS NULL
     `,

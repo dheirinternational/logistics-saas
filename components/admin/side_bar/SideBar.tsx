@@ -34,7 +34,10 @@ export const SideBar = ({ staffRole }: SideBarProps) => {
           fetch("/api/orders/count", { credentials: "include" }),
           fetch("/api/shipments/count", { credentials: "include" }),
           fetch("/api/manual-payments/admin/count", { credentials: "include" }),
-          fetch("/api/inbox/unread-count", { credentials: "include" }),
+          fetch("/api/inbox/unread-count?scope=admin", {
+            credentials: "include",
+            cache: "no-store",
+          }),
           fetch("/api/admin/procurement/count", { credentials: "include" }),
         ])
 
@@ -76,11 +79,23 @@ export const SideBar = ({ staffRole }: SideBarProps) => {
       }
     }
 
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchBadges()
+    }
+
     fetchBadges()
-    const interval = window.setInterval(fetchBadges, 30_000)
+    const interval = window.setInterval(fetchBadges, 15_000)
+    window.addEventListener("focus", fetchBadges)
+    document.addEventListener("visibilitychange", onVisible)
+    window.addEventListener("dheir-inbox-updated", fetchBadges)
+    window.addEventListener("dheir-admin-sidebar-refresh", fetchBadges)
     return () => {
       isMounted = false
       window.clearInterval(interval)
+      window.removeEventListener("focus", fetchBadges)
+      document.removeEventListener("visibilitychange", onVisible)
+      window.removeEventListener("dheir-inbox-updated", fetchBadges)
+      window.removeEventListener("dheir-admin-sidebar-refresh", fetchBadges)
     }
   }, [])
 

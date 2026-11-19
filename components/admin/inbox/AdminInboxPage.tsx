@@ -151,10 +151,17 @@ export function AdminInboxPage() {
     setLoadingInquiryThread(true)
 
     // Mark as read for admin
-    fetch(`/api/inbox/messages/${selectedInquiry.rootId}/read`, {
-      method: "POST",
-      credentials: "include",
-    }).catch(() => {})
+    fetch(
+      `/api/inbox/messages/${selectedInquiry.rootId}/read?scope=admin&customer_id=${selectedInquiry.customerId}`,
+      {
+        method: "POST",
+        credentials: "include",
+      },
+    )
+      .then((res) => {
+        if (res.ok) window.dispatchEvent(new Event("dheir-inbox-updated"))
+      })
+      .catch(() => {})
 
     // Update unread count locally in list
     setInquiries((prev) =>
@@ -166,14 +173,15 @@ export function AdminInboxPage() {
     )
 
     fetch(
-      `/api/inbox/messages/${selectedInquiry.rootId}/thread?customer_id=${selectedInquiry.customerId}`,
-      { credentials: "include" },
+      `/api/inbox/messages/${selectedInquiry.rootId}/thread?customer_id=${selectedInquiry.customerId}&scope=admin`,
+      { credentials: "include", cache: "no-store" },
     )
       .then((r) => r.json())
       .then((json) => {
         if (!cancelled && json.success) {
           setInquiryRoot(json.data.root)
           setInquiryReplies(json.data.replies || [])
+          window.dispatchEvent(new Event("dheir-inbox-updated"))
         }
       })
       .catch(() => {})
@@ -267,7 +275,9 @@ export function AdminInboxPage() {
 
     setSendingAdminReply(true)
     try {
-      const res = await fetch(`/api/inbox/messages/${selectedInquiry.rootId}/reply`, {
+      const res = await fetch(
+        `/api/inbox/messages/${selectedInquiry.rootId}/reply?scope=admin`,
+        {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

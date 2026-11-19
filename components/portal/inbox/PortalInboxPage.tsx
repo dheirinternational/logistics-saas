@@ -62,7 +62,7 @@ export function PortalInboxPage({ messages: initial, defaultChatOpen = false }: 
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState !== "visible") return
-      fetch("/api/inbox/messages", { credentials: "include" })
+      fetch("/api/inbox/messages?scope=customer", { credentials: "include", cache: "no-store" })
         .then((r) => r.json())
         .then((json) => {
           if (json.success) setMessages(json.data)
@@ -78,7 +78,7 @@ export function PortalInboxPage({ messages: initial, defaultChatOpen = false }: 
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null
     const shouldOpenChat = defaultChatOpen || urlParams?.get("chat") === "admin"
 
-    if (shouldOpenChat && messages.length > 0) {
+    if (shouldOpenChat) {
       const supportMsg = messages.find((m) => !m.isBroadcast)
       if (supportMsg) {
         setSelectedId(supportMsg.id)
@@ -114,7 +114,7 @@ export function PortalInboxPage({ messages: initial, defaultChatOpen = false }: 
     }
     let cancelled = false
     setLoadingThread(true)
-    fetch(`/api/inbox/messages/${selectedId}/thread`, { credentials: "include" })
+    fetch(`/api/inbox/messages/${selectedId}/thread?scope=customer`, { credentials: "include", cache: "no-store" })
       .then((r) => r.json())
       .then((json) => {
         if (!cancelled && json.success) {
@@ -144,7 +144,7 @@ export function PortalInboxPage({ messages: initial, defaultChatOpen = false }: 
       const msg = messages.find((m) => m.id === id)
       if (msg && !msg.isRead) {
         markingRef.current.add(id)
-        fetch(`/api/inbox/messages/${id}/read`, {
+        fetch(`/api/inbox/messages/${id}/read?scope=customer`, {
           method: "POST",
           credentials: "include",
         })
@@ -152,6 +152,7 @@ export function PortalInboxPage({ messages: initial, defaultChatOpen = false }: 
             setMessages((prev) =>
               prev.map((m) => (m.id === id ? { ...m, isRead: true } : m)),
             )
+            window.dispatchEvent(new Event("dheir-inbox-updated"))
           })
           .catch(() => {})
       }
@@ -174,7 +175,7 @@ export function PortalInboxPage({ messages: initial, defaultChatOpen = false }: 
 
     setSendingReply(true)
     try {
-      const res = await fetch(`/api/inbox/messages/${selectedId}/reply`, {
+      const res = await fetch(`/api/inbox/messages/${selectedId}/reply?scope=customer`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -188,13 +189,25 @@ export function PortalInboxPage({ messages: initial, defaultChatOpen = false }: 
       setReplyText("")
 
       // Update preview in messages list
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === selectedId || (!m.isBroadcast && selectedId === "support-chat")
-            ? { ...m, body: trimmed, createdAt: new Date().toISOString() }
-            : m,
-        ),
-      )
+      if (selectedId === "support-chat") {
+        fetch("/api/inbox/messages?scope=customer", { credentials: "include", cache: "no-store" })
+          .then((r) => r.json())
+          .then((listJson) => {
+            if (listJson.success && Array.isArray(listJson.data)) {
+              setMessages(listJson.data)
+            }
+          })
+          .catch(() => {})
+      } else {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === selectedId
+              ? { ...m, body: trimmed, createdAt: new Date().toISOString() }
+              : m,
+          ),
+        )
+      }
+      window.dispatchEvent(new Event("dheir-inbox-updated"))
 
       toast.success("Message sent")
     } catch (err: any) {

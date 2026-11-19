@@ -226,7 +226,7 @@ export async function getPortalDashboardData(
           ip.created_at,
           NULL, NULL, NULL, NULL
         FROM incoming_packages ip
-        WHERE ip.user_id = $1
+        WHERE ip.user_id = $1 AND ip.status = 'expected'
       )
       ORDER BY created_at DESC
       LIMIT 10

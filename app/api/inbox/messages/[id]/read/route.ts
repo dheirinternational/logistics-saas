@@ -1,13 +1,14 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
 /**
  * POST /api/inbox/messages/[id]/read
- * Marks the given message or direct thread as read for the current user.
+ * Marks the given message or thread as read for the current user (customer or admin).
  */
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -17,8 +18,17 @@ export async function POST(
     }
 
     const { id } = await params
+    const scopeParam = req.nextUrl.searchParams.get("scope")
+    const referer = req.headers.get("referer") ?? ""
+    const isCustomerContext =
+      !isAdminOrStaff(session) ||
+      scopeParam === "customer" ||
+      (scopeParam !== "admin" && referer.includes("/customer"))
 
     if (id === "support-chat") {
+      if (!isCustomerContext) {
+        return NextResponse.json({ success: true })
+      }
       // Mark all direct admin messages for this customer as read
       await pool.query(
         `
@@ -38,6 +48,49 @@ export async function POST(
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
     if (!isUuid) {
       return NextResponse.json({ success: false, message: "Invalid message ID" }, { status: 400 })
+    }
+
+    if (!isCustomerContext) {
+      const customerIdParam = req.nextUrl.searchParams.get("customer_id")
+      const targetCustomerId =
+        customerIdParam && /^\d+$/.test(customerIdParam) ? Number(customerIdParam) : null
+
+      if (targetCustomerId !== null) {
+        await pool.query(
+          `
+          INSERT INTO inbox_read_receipts (message_id, user_id)
+          SELECT m.id, $2
+          FROM inbox_messages m
+          WHERE m.sender_role = 'customer'
+            AND m.sender_id = $3
+            AND (
+              m.id = $1
+              OR m.parent_id = $1
+              OR m.thread_id = (SELECT COALESCE(thread_id, id) FROM inbox_messages WHERE id = $1 LIMIT 1)
+            )
+          ON CONFLICT (user_id, message_id) DO NOTHING
+          `,
+          [id, session.user_id, targetCustomerId],
+        )
+      } else {
+        await pool.query(
+          `
+          INSERT INTO inbox_read_receipts (message_id, user_id)
+          SELECT m.id, $2
+          FROM inbox_messages m
+          WHERE m.sender_role = 'customer'
+            AND (
+              m.id = $1
+              OR m.parent_id = $1
+              OR m.thread_id = (SELECT COALESCE(thread_id, id) FROM inbox_messages WHERE id = $1 LIMIT 1)
+            )
+          ON CONFLICT (user_id, message_id) DO NOTHING
+          `,
+          [id, session.user_id],
+        )
+      }
+
+      return NextResponse.json({ success: true })
     }
 
     await pool.query(

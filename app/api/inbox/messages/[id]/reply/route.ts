@@ -140,10 +140,11 @@ export async function POST(
 
     if (!isAdmin || isCustomerContext) {
       // Customer access check
+      const currentUserId = Number(session.user_id)
       const hasAccess =
-        root.is_broadcast ||
-        root.recipient_id === session.user_id ||
-        (root.sender_id === session.user_id && root.sender_role === "customer")
+        Boolean(root.is_broadcast) ||
+        (root.recipient_id != null && Number(root.recipient_id) === currentUserId) ||
+        (Number(root.sender_id) === currentUserId && root.sender_role === "customer")
       if (!hasAccess) {
         return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
       }

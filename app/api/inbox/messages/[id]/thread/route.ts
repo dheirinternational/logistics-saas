@@ -116,10 +116,11 @@ export async function GET(
 
     // Verify access
     if (!isAdmin) {
+      const currentUserId = Number(session.user_id)
       const hasAccess =
-        root.is_broadcast ||
-        root.recipient_id === session.user_id ||
-        (root.sender_id === session.user_id && root.sender_role === "customer")
+        Boolean(root.is_broadcast) ||
+        (root.recipient_id != null && Number(root.recipient_id) === currentUserId) ||
+        (Number(root.sender_id) === currentUserId && root.sender_role === "customer")
       if (!hasAccess) {
         return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 })
       }
@@ -177,6 +178,35 @@ export async function GET(
           `,
           [root.id],
         )
+      }
+
+      if (isAdmin) {
+        if (targetCustomerId) {
+          await pool.query(
+            `
+            INSERT INTO inbox_read_receipts (message_id, user_id)
+            SELECT m.id, $2
+            FROM inbox_messages m
+            WHERE m.parent_id = $1
+              AND m.sender_role = 'customer'
+              AND m.sender_id = $3
+            ON CONFLICT (user_id, message_id) DO NOTHING
+            `,
+            [root.id, session.user_id, targetCustomerId],
+          )
+        } else {
+          await pool.query(
+            `
+            INSERT INTO inbox_read_receipts (message_id, user_id)
+            SELECT m.id, $2
+            FROM inbox_messages m
+            WHERE m.parent_id = $1
+              AND m.sender_role = 'customer'
+            ON CONFLICT (user_id, message_id) DO NOTHING
+            `,
+            [root.id, session.user_id],
+          )
+        }
       }
     } else {
       // Direct message thread: fetch all messages in thread including root
