@@ -2,6 +2,7 @@ import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { sendPushToUsers } from "@/lib/notifications/push"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
+import { parseShipmentPackageIds } from "@/lib/shipments/syncShipmentPackages"
 import { NextRequest, NextResponse } from "next/server"
 
 /**
@@ -81,9 +82,9 @@ export async function POST(
           weight_unit: "kg",
         }
 
-        // Restore package status to 'stored'
+        // Restore package status to 'stored' unless already delivered
         await client.query(
-          "UPDATE packages SET status = 'stored' WHERE id = $1",
+          "UPDATE packages SET status = 'stored' WHERE id = $1 AND status <> 'delivered'",
           [pkgIdNum]
         )
 
@@ -181,11 +182,12 @@ export async function POST(
           "UPDATE shipment_requests SET status = 'rejected', rejection_note = $2, admin_reply = $3 WHERE id = $1",
           [id, rejection_note || "Request rejected by admin.", admin_reply || null]
         )
-        // Revert packages back to 'stored'
-        if (packageIds && packageIds.length > 0) {
+        // Revert packages back to 'stored' unless already shipped/delivered
+        const packageIdList = parseShipmentPackageIds(packageIds)
+        if (packageIdList.length > 0) {
           await client.query(
-            "UPDATE packages SET status = 'stored' WHERE id = ANY($1)",
-            [packageIds]
+            "UPDATE packages SET status = 'stored' WHERE id = ANY($1::bigint[]) AND status NOT IN ('assigned_to_shipment', 'delivered')",
+            [packageIdList]
           )
         }
 

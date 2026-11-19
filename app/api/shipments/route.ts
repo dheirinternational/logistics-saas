@@ -88,7 +88,8 @@ export async function POST(req: NextRequest) {
             sea_expected_arrival_date: formData.get("sea_expected_arrival_date") ? String(formData.get("sea_expected_arrival_date")) : null,
         }
 
-        const package_ids = data.package_ids?.toString().split(",")
+        const parsedPackageIds = parseShipmentPackageIds(data.package_ids);
+        const package_ids = parsedPackageIds.map(String);
 
         if (Number(data.price) < 1 || Number(data.total_weight) < 0.01) {
             return NextResponse.json({
@@ -222,12 +223,12 @@ export async function POST(req: NextRequest) {
             data.sea_expected_arrival_date,
         ]);
 
-        const parsedPackageIds = parseShipmentPackageIds(data.package_ids);
         if (parsedPackageIds.length > 0) {
             await client.query(`
                 UPDATE packages
                 SET status = 'assigned_to_shipment'
                 WHERE id = ANY($1::bigint[])
+                  AND status <> 'delivered'
             `, [parsedPackageIds]);
         }
 

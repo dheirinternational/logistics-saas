@@ -2,6 +2,7 @@ import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { notifyTelegramShipmentRequest } from "@/lib/notifications/telegram"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
+import { parseShipmentPackageIds } from "@/lib/shipments/syncShipmentPackages"
 import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 
@@ -54,11 +55,14 @@ export async function POST(req: NextRequest){
             RETURNING *     
         `, [user_id, customer_code, package_ids, channel, effectivePaymentTime, customer_note, packaging, total_weight ?? null, unit])
 
+        const normalizedPkgIds = parseShipmentPackageIds(package_ids)
+
         await pool.query(`
             UPDATE packages
                 SET status = 'requested_for'
-                WHERE id = ANY($1)  
-        `, [package_ids])
+                WHERE id = ANY($1::bigint[])
+                  AND status NOT IN ('assigned_to_shipment', 'delivered')
+        `, [normalizedPkgIds])
 
 
         const userRes = await pool.query(
@@ -159,7 +163,8 @@ export async function POST(req: NextRequest){
 
         return NextResponse.json({
             success: true,
-            message: res.rows[0]    
+            data: res.rows[0],
+            message: res.rows[0],
         })
     }
     catch(err){

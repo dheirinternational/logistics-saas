@@ -77,7 +77,7 @@ export async function PUT(
     }
 
     const existingIdentifier = await dbQuery(
-      `SELECT id FROM packages WHERE incoming_package_id = $1 AND id <> $2 LIMIT 1`,
+      `SELECT id FROM packages WHERE TRIM(incoming_package_id) = $1 AND id <> $2 LIMIT 1`,
       [incoming_package_id, packageId]
     )
 
@@ -186,8 +186,8 @@ export async function DELETE(
       await dbQuery(
         `DELETE FROM incoming_packages
          WHERE user_id = $1
-           AND incoming_tracking_number = $2
-           AND status = 'stored'`,
+           AND TRIM(incoming_tracking_number) = TRIM($2)
+           AND status <> 'expected'`,
         [deletedPkg.user_id, deletedPkg.incoming_package_id]
       )
     }

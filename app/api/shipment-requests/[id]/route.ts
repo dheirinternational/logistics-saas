@@ -1,6 +1,7 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
+import { parseShipmentPackageIds } from "@/lib/shipments/syncShipmentPackages"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest, {params} : {params: Promise<{id: string}>}){
@@ -95,12 +96,18 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
             return NextResponse.json({ success: false, message: "Only pending requests can be cancelled" }, { status: 400 })
         }
 
-        // Restore packages to 'stored' so user can ship them again
-        if (request.package_ids && request.package_ids.length > 0) {
-            await pool.query(
-                `UPDATE packages SET status = 'stored' WHERE id = ANY($1)`,
-                [request.package_ids]
-            )
+        // Restore packages to 'stored' only if the request was not already converted to a shipment
+        if (request.status !== "accepted") {
+            const packageIdList = parseShipmentPackageIds(request.package_ids)
+            if (packageIdList.length > 0) {
+                await pool.query(
+                    `UPDATE packages
+                     SET status = 'stored'
+                     WHERE id = ANY($1::bigint[])
+                       AND status NOT IN ('assigned_to_shipment', 'delivered')`,
+                    [packageIdList]
+                )
+            }
         }
 
         await pool.query(`DELETE FROM shipment_requests WHERE id = $1`, [id])

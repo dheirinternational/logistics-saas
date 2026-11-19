@@ -32,7 +32,7 @@ export async function syncIncomingPackagesForPackageIds(
      SET status = $1
      FROM packages p
      WHERE p.id = ANY($2::bigint[])
-       AND i.incoming_tracking_number = p.incoming_package_id
+       AND TRIM(i.incoming_tracking_number) = TRIM(p.incoming_package_id)
        AND i.user_id = p.user_id
        AND i.status <> 'expected'
        AND i.status IS DISTINCT FROM $1`

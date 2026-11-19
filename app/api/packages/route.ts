@@ -47,10 +47,10 @@ export async function POST(req: NextRequest){
         }
 
         const data = {
-            package_name: formData.get("package_name"),
-            incoming_package_id: formData.get("incoming_package_id"),
+            package_name: String(formData.get("package_name") ?? "").trim(),
+            incoming_package_id: String(formData.get("incoming_package_id") ?? "").trim(),
             // user_id: Number(formData.get("user_id")),
-            customer_code: formData.get("customer_code"),
+            customer_code: String(formData.get("customer_code") ?? "").trim(),
             warehouse_id: Number(formData.get("warehouse_id")),
             weight: Number(formData.get("weight")),
             weight_unit: String(formData.get("weight_unit") ?? "kg"),
@@ -60,6 +60,13 @@ export async function POST(req: NextRequest){
             stored_at: rawStoredAt,
             inp_status: formData.get("inp_status"),
             amount: Number(formData.get("amount"))
+        }
+
+        if (!data.package_name || !data.incoming_package_id || !data.customer_code) {
+            return NextResponse.json(
+                { success: false, message: "Package name, tracking ID, and customer code are required." },
+                { status: 400 }
+            )
         }
 
         if (!["kg", "cbm"].includes(data.weight_unit)) {
@@ -88,7 +95,7 @@ export async function POST(req: NextRequest){
 
 
         const existingPackage = await client.query(
-            `SELECT id FROM packages WHERE incoming_package_id = $1 LIMIT 1`,
+            `SELECT id FROM packages WHERE TRIM(incoming_package_id) = $1 LIMIT 1`,
             [data.incoming_package_id]
         )
 
@@ -114,7 +121,7 @@ export async function POST(req: NextRequest){
         await client.query(`
             UPDATE incoming_packages
                 SET status = 'stored'
-                WHERE incoming_tracking_number = $1
+                WHERE TRIM(incoming_tracking_number) = $1
                   AND user_id = $2
         `, [data.incoming_package_id, userId.rows[0].user_id])
 

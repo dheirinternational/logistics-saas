@@ -29,8 +29,9 @@ export async function deleteShipmentById(
     id: number
     tracking_number: string
     package_ids: number[] | string | null
+    status: string | null
   }>(
-    `SELECT id, tracking_number, package_ids FROM shipments WHERE id = $1 LIMIT 1`,
+    `SELECT id, tracking_number, package_ids, status FROM shipments WHERE id = $1 LIMIT 1`,
     [shipmentId]
   )
 
@@ -38,7 +39,7 @@ export async function deleteShipmentById(
     throw new ShipmentDeleteError("Shipment not found", 404)
   }
 
-  const { tracking_number, package_ids } = shipmentRes.rows[0]
+  const { tracking_number, package_ids, status } = shipmentRes.rows[0]
 
   await client.query("BEGIN")
 
@@ -83,10 +84,28 @@ export async function deleteShipmentById(
 
     const packageIdList = normalizePackageIds(package_ids)
     if (packageIdList.length > 0) {
-      await client.query(`UPDATE packages SET status = 'stored' WHERE id = ANY($1::bigint[])`, [
-        packageIdList,
-      ])
-      await syncIncomingPackagesForPackageIds(packageIdList, "stored", client)
+      if (status === "delivered") {
+        // Keep already-delivered goods out of warehouse inventory when an archived delivered shipment is deleted.
+        await client.query(
+          `UPDATE packages
+           SET status = 'delivered'
+           WHERE id = ANY($1::bigint[])
+             AND status <> 'delivered'`,
+          [packageIdList]
+        )
+        await syncIncomingPackagesForPackageIds(packageIdList, "delivered", client)
+      } else {
+        const revertedRes = await client.query<{ id: number }>(
+          `UPDATE packages
+           SET status = 'stored'
+           WHERE id = ANY($1::bigint[])
+             AND status <> 'delivered'
+           RETURNING id`,
+          [packageIdList]
+        )
+        const revertedIds = revertedRes.rows.map((r) => Number(r.id)).filter(Boolean)
+        await syncIncomingPackagesForPackageIds(revertedIds, "stored", client)
+      }
     }
 
     const deleteResult = await client.query(`DELETE FROM shipments WHERE id = $1`, [shipmentId])
