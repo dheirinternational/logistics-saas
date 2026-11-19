@@ -3,6 +3,7 @@ export const revalidate = 0
 
 import { databaseErrorResponse, dbQuery, pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
+import { sendPushToUsers } from "@/lib/notifications/push";
 import { notifyTelegramPackageInbound } from "@/lib/notifications/telegram";
 import { linkPackageMediaAssets, parsePackageMediaAssetIds } from "@/lib/packages/linkPackageMedia";
 import { NextRequest, NextResponse } from "next/server";
@@ -185,6 +186,18 @@ export async function POST(req: NextRequest){
             weight: Number(data.weight),
             weightUnit: data.weight_unit ? String(data.weight_unit) : "kg",
         }).catch(() => undefined)
+
+        if (userId.rows[0]?.user_id) {
+            await sendPushToUsers([userId.rows[0].user_id], {
+                title: "Package Received at Warehouse",
+                body: `${data.package_name || "Your package"} (${data.incoming_package_id}) is now safely stored.`,
+                data: {
+                    route: "/(tabs)/packages",
+                    type: "package_received",
+                    trackingNumber: String(data.incoming_package_id || ""),
+                },
+            })
+        }
 
         return NextResponse.json({
             success: true,

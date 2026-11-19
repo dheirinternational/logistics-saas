@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { sendPushToUsers } from "@/lib/notifications/push"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -58,6 +59,7 @@ export async function POST(
 
     const { user_id: customerUserId, package_ids: packageIds } = requestRes.rows[0]
 
+    let pendingPush: { title: string; body: string; route: string; type: string } | null = null
     const client = await pool.connect()
     try {
       await client.query("BEGIN")
@@ -102,27 +104,37 @@ export async function POST(
         }
 
         // Notify customer via inbox
-        if (customerUserId) {
-          const noteText = [
-            `Package: ${pkg.package_name} (${pkg.incoming_package_id})`,
-            `Weight: ${pkg.weight || 0} ${pkg.weight_unit || "kg"}`,
-            `Reason: ${reason || "Notice from China warehouse: item cannot be dispatched."}`,
-            "Status: Restored to your available warehouse inventory. You can view it in your Packages section.",
-          ].join("\n")
+        const rejectPkgTitle = `Package ${pkg.incoming_package_id} Restored to Inventory`
+        const noteText = [
+          `Package: ${pkg.package_name} (${pkg.incoming_package_id})`,
+          `Weight: ${pkg.weight || 0} ${pkg.weight_unit || "kg"}`,
+          `Reason: ${reason || "Notice from China warehouse: item cannot be dispatched."}`,
+          "Status: Restored to your available warehouse inventory. You can view it in your Packages section.",
+        ].join("\n")
 
+        if (customerUserId) {
           await client.query(
             `INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
              VALUES ($1, $2, $3, $4, false)`,
             [
               session.user_id,
               customerUserId,
-              `Package ${pkg.incoming_package_id} Restored to Inventory`,
+              rejectPkgTitle,
               noteText,
             ]
           )
         }
 
         await client.query("COMMIT")
+
+        if (customerUserId) {
+          await sendPushToUsers([customerUserId], {
+            title: rejectPkgTitle,
+            body: noteText,
+            data: { route: "/notifications", type: "vet_reject_package", requestId: String(id) },
+          })
+        }
+
         return NextResponse.json({
           success: true,
           message: `Package ${pkg.incoming_package_id} removed from shipment request and restored to customer inventory.`,
@@ -137,16 +149,31 @@ export async function POST(
         )
 
         if (admin_reply && admin_reply.trim() && customerUserId) {
+          const acceptTitle = `Shipment Request #${id} Vetted & Accepted`
+          const acceptBody = admin_reply.trim()
           await client.query(
             `INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
              VALUES ($1, $2, $3, $4, false)`,
             [
               session.user_id,
               customerUserId,
-              `Shipment Request #${id} Vetted & Accepted`,
-              admin_reply.trim(),
+              acceptTitle,
+              acceptBody,
             ]
           )
+          pendingPush = {
+            title: acceptTitle,
+            body: acceptBody,
+            route: "/notifications",
+            type: "vet_accepted",
+          }
+        } else if (customerUserId) {
+          pendingPush = {
+            title: `Shipment Request #${id} Accepted`,
+            body: "Your shipment request has been vetted and accepted.",
+            route: "/notifications",
+            type: "vet_accepted",
+          }
         }
       } else {
         // reject
@@ -163,6 +190,7 @@ export async function POST(
         }
 
         if (customerUserId) {
+          const rejectTitle = `Shipment Request #${id} Rejected`
           const reasonText = [
             rejection_note ? `Reason: ${rejection_note.trim()}` : "",
             admin_reply ? `Note: ${admin_reply.trim()}` : "",
@@ -170,16 +198,24 @@ export async function POST(
             .filter(Boolean)
             .join("\n")
 
+          const rejectBody = reasonText || "Your shipment request was rejected by admin."
+
           await client.query(
             `INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
              VALUES ($1, $2, $3, $4, false)`,
             [
               session.user_id,
               customerUserId,
-              `Shipment Request #${id} Rejected`,
-              reasonText || "Your shipment request was rejected by admin.",
+              rejectTitle,
+              rejectBody,
             ]
           )
+          pendingPush = {
+            title: rejectTitle,
+            body: rejectBody,
+            route: "/notifications",
+            type: "vet_rejected",
+          }
         }
       }
 
@@ -189,6 +225,14 @@ export async function POST(
       throw txErr
     } finally {
       client.release()
+    }
+
+    if (customerUserId && pendingPush) {
+      await sendPushToUsers([customerUserId], {
+        title: pendingPush.title,
+        body: pendingPush.body,
+        data: { route: pendingPush.route, type: pendingPush.type, requestId: String(id) },
+      })
     }
 
     return NextResponse.json({

@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { sendPushToUsers } from "@/lib/notifications/push"
 import { notifyTelegramCustomerMessage } from "@/lib/notifications/telegram"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
@@ -218,6 +219,17 @@ export async function POST(
         title,
         body: text,
       }).catch(() => undefined)
+    } else if (reply.sender_role === "admin" && recipientId) {
+      await sendPushToUsers([recipientId], {
+        title,
+        body: text,
+        data: {
+          route: "/inbox",
+          type: "inbox_reply",
+          messageId: String(reply.id),
+          threadId: String(threadId),
+        },
+      })
     }
 
     return NextResponse.json({

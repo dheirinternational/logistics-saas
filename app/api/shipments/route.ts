@@ -6,6 +6,7 @@ import { getSession } from "@/lib/db/session";
 import { isAdminOrStaff } from "@/lib/rbac/permissions";
 import { generateTrackingNumber } from "@/lib/generators/generateTrackingNumber";
 import { linkMediaAssetsToShipment } from "@/lib/media/mediaAssets";
+import { sendPushToUsers } from "@/lib/notifications/push";
 import { parseShipmentPackageIds } from "@/lib/shipments/syncShipmentPackages";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
@@ -258,6 +259,21 @@ export async function POST(req: NextRequest) {
 
         // Commit if everything works
         await client.query("COMMIT");
+
+        if (data.user_id) {
+            const cleanReply = data.admin_reply?.trim() || "";
+            await sendPushToUsers([data.user_id], {
+                title: `Shipment Created (${tracking_number})`,
+                body: cleanReply
+                    ? cleanReply
+                    : `Your shipment ${tracking_number} has been created and is now being processed.`,
+                data: {
+                    route: cleanReply ? "/notifications" : "/orders-shipped",
+                    type: "shipment_created",
+                    trackingNumber: tracking_number,
+                },
+            });
+        }
 
         // Send email AFTER commit
         if (userEmail) {

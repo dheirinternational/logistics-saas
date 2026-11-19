@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db";
 import { getSession } from "@/lib/db/session";
+import { sendPushToUsers } from "@/lib/notifications/push";
 import { syncPackagesForShipmentStatus } from "@/lib/shipments/syncShipmentPackages";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
@@ -103,6 +104,18 @@ export async function PUT(
                 `
             }).catch(err => {
                 console.error("Email failed:", err);
+            });
+        }
+
+        if (shipment?.user_id) {
+            await sendPushToUsers([shipment.user_id], {
+                title: `Shipment Status: ${body.status}`,
+                body: `Tracking #${shipment.tracking_number} is now ${body.status}.`,
+                data: {
+                    route: "/orders-shipped",
+                    type: "shipment_status",
+                    trackingNumber: String(shipment.tracking_number || ""),
+                },
             });
         }
 

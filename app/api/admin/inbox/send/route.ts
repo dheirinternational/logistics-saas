@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { sendPushToAllCustomers, sendPushToUsers } from "@/lib/notifications/push"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -35,19 +36,39 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    await pool.query(
+    const cleanTitle = title.trim()
+    const cleanBody = body.trim()
+
+    const insertedRes = await pool.query<{ id: string }>(
       `
       INSERT INTO inbox_messages (sender_id, sender_role, recipient_id, title, body, is_broadcast)
       VALUES ($1, 'admin', $2, $3, $4, $5)
+      RETURNING id
       `,
       [
         session.user_id,
         is_broadcast ? null : recipient_id,
-        title.trim(),
-        body.trim(),
+        cleanTitle,
+        cleanBody,
         Boolean(is_broadcast),
       ],
     )
+
+    const insertedId = insertedRes.rows[0]?.id ? String(insertedRes.rows[0].id) : undefined
+
+    if (is_broadcast) {
+      await sendPushToAllCustomers({
+        title: cleanTitle,
+        body: cleanBody,
+        data: { route: "/notifications", type: "inbox_broadcast", messageId: insertedId },
+      })
+    } else if (recipient_id) {
+      await sendPushToUsers([recipient_id], {
+        title: cleanTitle,
+        body: cleanBody,
+        data: { route: "/inbox", type: "inbox_direct", messageId: insertedId },
+      })
+    }
 
     return NextResponse.json({ success: true, message: "Message sent successfully" })
   } catch (err) {

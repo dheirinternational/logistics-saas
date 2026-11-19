@@ -9,6 +9,7 @@ import {
   shipmentDeleteErrorMessage,
 } from "@/lib/shipments/deleteShipment"
 import { linkMediaAssetsToShipment } from "@/lib/media/mediaAssets"
+import { sendPushToUsers } from "@/lib/notifications/push"
 import { syncPackagesForShipmentStatus } from "@/lib/shipments/syncShipmentPackages"
 import { NextResponse } from "next/server"
 
@@ -166,10 +167,13 @@ export async function PUT(
       }
 
       // Notify customer if admin reply changed
+      let pendingNotePush: { userId: number; title: string; body: string } | null = null
       if (admin_reply !== undefined && admin_reply.trim() !== oldReply.trim() && customerUserId) {
         try {
           const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [customerUserId])
           if (userCheck.rows.length > 0) {
+            const noteTitle = `Shipment Note Update (${trackingNo || tracking_number})`
+            const noteBody = admin_reply.trim()
             await client.query(
               `
               INSERT INTO inbox_messages (sender_id, recipient_id, title, body, is_broadcast)
@@ -178,10 +182,15 @@ export async function PUT(
               [
                 session.user_id,
                 customerUserId,
-                `Shipment Note Update (${trackingNo || tracking_number})`,
-                admin_reply.trim(),
+                noteTitle,
+                noteBody,
               ]
             )
+            pendingNotePush = {
+              userId: customerUserId,
+              title: noteTitle,
+              body: noteBody,
+            }
           }
         } catch (inboxErr) {
           console.warn("Failed to send inbox notification for shipment note update:", inboxErr)
@@ -229,6 +238,19 @@ export async function PUT(
       }
 
       await client.query("COMMIT")
+
+      if (pendingNotePush) {
+        await sendPushToUsers([pendingNotePush.userId], {
+          title: pendingNotePush.title,
+          body: pendingNotePush.body,
+          data: {
+            route: "/notifications",
+            type: "shipment_note",
+            shipmentId: String(shipmentId),
+          },
+        })
+      }
+
       return NextResponse.json({ success: true, message: "Shipment updated successfully" })
     } catch (err) {
       await client.query("ROLLBACK")

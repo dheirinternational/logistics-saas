@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
+import { sendPushToAllCustomers } from "@/lib/notifications/push"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -54,10 +55,21 @@ export async function POST(req: NextRequest){
 
         const {title, message} = await req.json()
 
-        await pool.query(`
+        const inserted = await pool.query<{ id: number }>(`
             INSERT INTO announcements (title, message)
             VALUES ($1, $2)
+            RETURNING id
         `, [title, message])
+
+        await sendPushToAllCustomers({
+            title: String(title || "New Announcement"),
+            body: String(message || ""),
+            data: {
+                route: "/notifications",
+                type: "announcement",
+                announcementId: inserted.rows[0]?.id ? String(inserted.rows[0].id) : undefined,
+            },
+        })
 
         return NextResponse.json({
             success: true,
