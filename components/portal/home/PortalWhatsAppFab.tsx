@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { IconBrandWhatsapp, IconX, IconMessageDots } from "@tabler/icons-react"
+import { IconBrandTelegram, IconBrandWhatsapp, IconX } from "@tabler/icons-react"
 
-const WHATSAPP_CHINA = "https://wa.link/68r8i8" // Lucy - China Warehouse
+const TELEGRAM_CHINA = "https://t.me/+2348173216304" // Lucy - China Warehouse
 const WHATSAPP_NIGERIA = "https://wa.link/68r8i8" // Grace - Nigeria Clearing
 
 export function PortalWhatsAppFab() {
@@ -14,12 +14,12 @@ export function PortalWhatsAppFab() {
       {open && (
         <div className="mb-3 flex flex-col gap-2 items-end">
           <a
-            href={WHATSAPP_CHINA}
+            href={TELEGRAM_CHINA}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-full bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors"
+            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-full bg-sky-500 text-white text-xs font-semibold hover:bg-sky-600 transition-colors"
           >
-            <IconBrandWhatsapp size={18} stroke={1.5} />
+            <IconBrandTelegram size={18} stroke={1.5} />
             <span>Lucy (China Warehouse Support)</span>
           </a>
           <a
@@ -38,7 +38,7 @@ export function PortalWhatsAppFab() {
         type="button"
         onClick={() => setOpen(!open)}
         className="w-12 h-12 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center transition-transform hover:scale-105"
-        aria-label="WhatsApp Support"
+        aria-label="Customer Support"
       >
         {open ? (
           <IconX size={24} stroke={2} />
