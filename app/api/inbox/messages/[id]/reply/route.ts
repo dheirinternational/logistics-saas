@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db/db"
 import { getSession } from "@/lib/db/session"
-import { sendPushToUsers } from "@/lib/notifications/push"
+import { sendPushToAdmins, sendPushToUsers } from "@/lib/notifications/push"
 import { notifyTelegramCustomerMessage } from "@/lib/notifications/telegram"
 import { isAdminOrStaff } from "@/lib/rbac/permissions"
 import { NextRequest, NextResponse } from "next/server"
@@ -214,12 +214,28 @@ export async function POST(
     const author = userRes.rows[0]
 
     if (reply.sender_role === "customer") {
-      notifyTelegramCustomerMessage({
-        customerName: author?.first_name ? `${author.first_name} ${author.last_name ?? ""}`.trim() : null,
-        customerCode: author?.code || null,
-        title,
-        body: text,
-      }).catch(() => undefined)
+      const senderLabel = author?.first_name
+        ? `${author.first_name} ${author.last_name ?? ""}`.trim()
+        : "Customer"
+
+      await Promise.allSettled([
+        notifyTelegramCustomerMessage({
+          customerName: author?.first_name ? `${author.first_name} ${author.last_name ?? ""}`.trim() : null,
+          customerCode: author?.code || null,
+          title,
+          body: text,
+        }),
+        sendPushToAdmins({
+          title: `New message from ${senderLabel}${author?.code ? ` (${author.code})` : ""}`,
+          body: text,
+          data: {
+            route: "/notifications",
+            type: "customer_inbox_message",
+            threadId: String(threadId),
+            messageId: String(reply.id),
+          },
+        }),
+      ])
     } else if (reply.sender_role === "admin" && recipientId) {
       await sendPushToUsers([recipientId], {
         title,

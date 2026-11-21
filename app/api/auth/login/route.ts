@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     const result = await pool.query(
       `
-            SELECT id, email, password, salt, role FROM users
+            SELECT id, email, password, salt, role, staff_role, first_name, last_name FROM users
             WHERE email = $1
             LIMIT 1
         `,
@@ -52,6 +52,9 @@ export async function POST(request: Request) {
         id: user.id,
         email: user.email,
         role,
+        staff_role: user.staff_role ?? null,
+        first_name: user.first_name ?? null,
+        last_name: user.last_name ?? null,
       },
     })
   } catch (error) {

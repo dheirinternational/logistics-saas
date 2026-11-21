@@ -288,3 +288,26 @@ export async function sendPushToAllCustomers(
     return { attempted: 0, sent: 0, failed: 0, pruned: 0 }
   }
 }
+
+/**
+ * Sends a push notification to all registered admin and staff devices.
+ */
+export async function sendPushToAdmins(
+  payload: PushPayload,
+): Promise<PushDispatchResult> {
+  try {
+    await ensurePushTokensTable()
+    const res = await pool.query<{ token: string }>(`
+      SELECT t.token
+      FROM public.user_push_tokens t
+      JOIN public.users u ON u.id = t.user_id
+      WHERE LOWER(COALESCE(u.role, '')) IN ('admin', 'staff')
+         OR u.staff_role IS NOT NULL
+    `)
+    const tokens = res.rows.map((r) => r.token)
+    return await sendToTokens(tokens, payload)
+  } catch (err) {
+    console.warn("sendPushToAdmins failed:", err)
+    return { attempted: 0, sent: 0, failed: 0, pruned: 0 }
+  }
+}

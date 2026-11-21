@@ -16,6 +16,10 @@ export async function GET() {
         id: session.user_id,
         email: session.email,
         role: session.role,
+        staff_role: session.staff_role ?? null,
+        first_name: session.first_name ?? null,
+        last_name: session.last_name ?? null,
+        profile_img: session.profile_img ?? null,
       },
     })
   } catch (err) {
