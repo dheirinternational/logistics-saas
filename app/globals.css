@@ -9785,6 +9785,65 @@ input[type="number"] {
     }
 }
 
+@media (min-width: 1025px) {
+    .admin-inbox-thread-panel {
+        position: sticky;
+        top: 24px;
+        max-height: calc(100dvh - 48px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        margin-bottom: 0;
+    }
+}
+
+.admin-inbox-thread-btn {
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: background-color 150ms, border-color 150ms;
+}
+
+.admin-inbox-thread-btn:hover {
+    background-color: color-mix(in srgb, var(--color-dheir-blue) 4%, transparent);
+    border-color: var(--color-dheir-border);
+}
+
+.admin-inbox-thread-btn.is-active {
+    background-color: var(--color-dheir-page);
+    border-color: color-mix(in srgb, var(--color-dheir-blue) 35%, var(--color-dheir-border));
+}
+
+.admin-inbox-thread-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.admin-inbox-thread-caret {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-dheir-muted);
+    transition: transform 150ms, color 150ms;
+}
+
+.admin-inbox-thread-btn:hover .admin-inbox-thread-caret,
+.admin-inbox-thread-btn.is-active .admin-inbox-thread-caret {
+    color: var(--color-dheir-blue);
+    transform: translateX(2px);
+}
+
 .admin-inbox-card {
     background: var(--color-dheir-surface);
     border: 1px solid var(--color-dheir-border);
@@ -9918,6 +9977,20 @@ input[type="number"] {
     font-weight: 700;
     font-size: 12px;
     flex-shrink: 0;
+}
+
+.admin-inbox-sent-caret {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-dheir-muted);
+    transition: color 150ms;
+}
+
+.admin-inbox-sent-card:hover .admin-inbox-sent-caret,
+.admin-inbox-sent-card[aria-expanded="true"] .admin-inbox-sent-caret {
+    color: var(--color-dheir-blue);
 }
 
 .admin-inbox-sent-details {

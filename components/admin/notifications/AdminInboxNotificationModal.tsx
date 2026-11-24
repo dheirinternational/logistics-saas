@@ -254,7 +254,11 @@ export function AdminInboxNotificationModal() {
 
           <div style={{ display: "flex", gap: "10px" }}>
             <Link
-              href="/admin/inbox"
+              href={
+                current.rootId
+                  ? `/admin/inbox?rootId=${encodeURIComponent(current.rootId)}&customerId=${current.customerId}`
+                  : `/admin/inbox?customerId=${current.customerId}`
+              }
               onClick={() => {
                 saveDismissedSig(getThreadSig(current))
                 setIsOpen(false)

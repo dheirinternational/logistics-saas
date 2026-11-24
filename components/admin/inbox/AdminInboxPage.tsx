@@ -5,6 +5,7 @@ import {
   IconBroadcast,
   IconCheck,
   IconChevronDown,
+  IconChevronRight,
   IconChevronUp,
   IconMail,
   IconMessage,
@@ -102,15 +103,31 @@ export function AdminInboxPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const threadPanelRef = useRef<HTMLElement>(null)
 
   const didFetch = useRef(false)
+
+  const refreshThreads = async () => {
+    try {
+      const inquiriesRes = await fetch("/api/admin/inbox/threads", {
+        credentials: "include",
+        cache: "no-store",
+      })
+      const inquiriesJson = await inquiriesRes.json()
+      if (inquiriesJson.success && Array.isArray(inquiriesJson.data)) {
+        setInquiries(inquiriesJson.data)
+      }
+    } catch {
+      // ignore background poll failures
+    }
+  }
 
   const loadData = async () => {
     try {
       const [customersRes, sentRes, inquiriesRes] = await Promise.all([
         fetch("/api/users", { credentials: "include" }),
         fetch("/api/admin/inbox/send", { credentials: "include" }),
-        fetch("/api/admin/inbox/threads", { credentials: "include" }),
+        fetch("/api/admin/inbox/threads", { credentials: "include", cache: "no-store" }),
       ])
       const customersJson = await customersRes.json()
       const sentJson = await sentRes.json()
@@ -136,11 +153,31 @@ export function AdminInboxPage() {
         toast.error(customersJson?.message || "Could not load customers list")
       }
       if (sentJson.success) setSent(sentJson.data)
-      if (inquiriesJson.success) {
+      if (inquiriesJson.success && Array.isArray(inquiriesJson.data)) {
         setInquiries(inquiriesJson.data)
-        // If there are inquiries, default to inquiries tab; if none, default to compose
         if (inquiriesJson.data.length > 0) {
           setActiveTab("inquiries")
+        }
+
+        const params = new URLSearchParams(window.location.search)
+        const targetCustomerId = Number(params.get("customerId"))
+        const targetRootId = params.get("rootId")
+        if (Number.isFinite(targetCustomerId) && targetCustomerId > 0) {
+          const matched =
+            (targetRootId
+              ? inquiriesJson.data.find(
+                  (inq: AdminInquiryThread) =>
+                    inq.customerId === targetCustomerId && inq.rootId === targetRootId,
+                )
+              : null) ??
+            inquiriesJson.data.find(
+              (inq: AdminInquiryThread) => inq.customerId === targetCustomerId,
+            ) ??
+            null
+          if (matched) {
+            setActiveTab("inquiries")
+            setSelectedInquiry(matched)
+          }
         }
       }
     } catch {
@@ -156,6 +193,15 @@ export function AdminInboxPage() {
     loadData()
   }, [])
 
+  useEffect(() => {
+    const timer = setInterval(refreshThreads, 30000)
+    window.addEventListener("focus", refreshThreads)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener("focus", refreshThreads)
+    }
+  }, [])
+
   // Load inquiry thread when selected
   useEffect(() => {
     if (!selectedInquiry) {
@@ -163,6 +209,13 @@ export function AdminInboxPage() {
       setInquiryReplies([])
       setAdminReplyText("")
       return
+    }
+
+    if (threadPanelRef.current) {
+      threadPanelRef.current.scrollTop = 0
+      if (window.innerWidth <= 1024) {
+        threadPanelRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" })
+      }
     }
 
     let cancelled = false
@@ -196,13 +249,21 @@ export function AdminInboxPage() {
     )
       .then((r) => r.json())
       .then((json) => {
-        if (!cancelled && json.success) {
-          setInquiryRoot(json.data.root)
-          setInquiryReplies(json.data.replies || [])
-          window.dispatchEvent(new Event("dheir-inbox-updated"))
+        if (!cancelled) {
+          if (json.success && json.data) {
+            setInquiryRoot(json.data.root)
+            setInquiryReplies(json.data.replies || [])
+            window.dispatchEvent(new Event("dheir-inbox-updated"))
+          } else {
+            toast.error(json?.message || "Failed to load conversation thread")
+          }
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) {
+          toast.error("Failed to load conversation thread")
+        }
+      })
       .finally(() => {
         if (!cancelled) setLoadingInquiryThread(false)
       })
@@ -410,51 +471,46 @@ export function AdminInboxPage() {
                     <li key={`${inq.rootId}-${inq.customerId}`}>
                       <button
                         type="button"
+                        aria-pressed={isSelected}
+                        className={`admin-inbox-thread-btn${isSelected ? " is-active" : ""}`}
                         onClick={() => {
-                          setSelectedInquiry(inq)
+                          setSelectedInquiry({ ...inq })
                           setTimeout(() => window.dispatchEvent(new Event("dheir-inbox-updated")), 500)
                         }}
-                        style={{
-                          width: "100%",
-                          textAlign: "left",
-                          padding: "12px 14px",
-                          borderRadius: "8px",
-                          border: "none",
-                          backgroundColor: isSelected ? "var(--color-dheir-page)" : "transparent",
-                          cursor: "pointer",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "4px",
-                        }}
                       >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
-                            {inq.customerName} {inq.customerCode ? `(${inq.customerCode})` : ""}
+                        <span className="admin-inbox-thread-main">
+                          <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
+                              {inq.customerName} {inq.customerCode ? `(${inq.customerCode})` : ""}
+                            </span>
+                            <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", flexShrink: 0 }}>
+                              {formatDate(inq.latestCreatedAt)}
+                            </span>
                           </span>
-                          <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)" }}>
-                            {formatDate(inq.latestCreatedAt)}
+                          <span style={{ fontSize: "12px", color: "var(--color-dheir-blue)", fontWeight: 500 }}>
+                            {inq.rootTitle}
                           </span>
-                        </div>
-                        <div style={{ fontSize: "12px", color: "var(--color-dheir-blue)", fontWeight: 500 }}>
-                          {inq.rootTitle}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "var(--color-dheir-muted)",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {inq.latestSenderRole === "customer" ? "Customer: " : "Admin: "}
-                          {inq.latestBody}
-                        </div>
-                        {inq.unreadCount > 0 && (
-                          <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-blue)" }}>
-                            {inq.unreadCount} unread
-                          </div>
-                        )}
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "var(--color-dheir-muted)",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {inq.latestSenderRole === "customer" ? "Customer: " : "Admin: "}
+                            {inq.latestBody}
+                          </span>
+                          {inq.unreadCount > 0 && (
+                            <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-blue)" }}>
+                              {inq.unreadCount} unread
+                            </span>
+                          )}
+                        </span>
+                        <span className="admin-inbox-thread-caret" aria-hidden>
+                          <IconChevronRight size={16} stroke={1.75} />
+                        </span>
                       </button>
                     </li>
                   )
@@ -464,7 +520,11 @@ export function AdminInboxPage() {
           </section>
 
           {/* Inquiry Thread Details & Reply Form */}
-          <section className="portal-home__panel" aria-label="Conversation thread">
+          <section
+            ref={threadPanelRef}
+            className="portal-home__panel admin-inbox-thread-panel"
+            aria-label="Conversation thread"
+          >
             {!selectedInquiry ? (
               <div style={{ textAlign: "center", padding: "40px 16px", color: "var(--color-dheir-muted)", fontSize: "13px" }}>
                 Select a customer inquiry to view conversation and reply.
@@ -882,6 +942,13 @@ export function AdminInboxPage() {
                             </div>
                           </div>
                           <div className="admin-inbox-sent-avatar">{initials}</div>
+                          <span className="admin-inbox-sent-caret" aria-hidden>
+                            {isOpen ? (
+                              <IconChevronUp size={18} stroke={1.75} />
+                            ) : (
+                              <IconChevronDown size={18} stroke={1.75} />
+                            )}
+                          </span>
                         </button>
 
                         {isOpen && (
