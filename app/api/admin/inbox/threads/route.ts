@@ -91,8 +91,8 @@ export async function GET() {
             FROM inbox_messages unread_m
             LEFT JOIN inbox_read_receipts r ON r.message_id = unread_m.id AND r.user_id = $1
             WHERE unread_m.parent_id = root.id
-              AND (unread_m.sender_id = b_pair.customer_id OR unread_m.recipient_id = b_pair.customer_id)
               AND unread_m.sender_role = 'customer'
+              AND unread_m.sender_id = b_pair.customer_id
               AND r.read_at IS NULL
           ) AS unread_count
         FROM (
@@ -106,7 +106,10 @@ export async function GET() {
           SELECT body, sender_role, created_at
           FROM inbox_messages
           WHERE parent_id = root.id
-            AND (sender_id = b_pair.customer_id OR recipient_id = b_pair.customer_id)
+            AND (
+              (sender_role = 'customer' AND sender_id = b_pair.customer_id)
+              OR (sender_role = 'admin' AND recipient_id = b_pair.customer_id)
+            )
           ORDER BY created_at DESC
           LIMIT 1
         ) latest ON true
