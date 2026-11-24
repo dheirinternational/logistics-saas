@@ -212,7 +212,7 @@ export async function GET(
         }
       }
     } else if (isAdmin && targetCustomerId && Number.isFinite(targetCustomerId)) {
-      // Unified direct chat view for admin: show all non-broadcast messages belonging to targetCustomerId
+      // Unified direct chat view for admin: show all direct messages (excluding broadcast replies) belonging to targetCustomerId
       repliesRes = await pool.query(
         `
         SELECT
@@ -233,6 +233,11 @@ export async function GET(
             (m.sender_role = 'customer' AND m.sender_id = $1)
             OR (m.sender_role = 'admin' AND m.recipient_id = $1)
           )
+          AND NOT EXISTS (
+            SELECT 1 FROM inbox_messages br
+            WHERE br.is_broadcast = TRUE
+              AND (br.id = m.parent_id OR br.id = m.thread_id)
+          )
         ORDER BY m.created_at ASC
         `,
         [targetCustomerId],
@@ -246,6 +251,11 @@ export async function GET(
         WHERE m.is_broadcast = FALSE
           AND m.sender_role = 'customer'
           AND m.sender_id = $1
+          AND NOT EXISTS (
+            SELECT 1 FROM inbox_messages br
+            WHERE br.is_broadcast = TRUE
+              AND (br.id = m.parent_id OR br.id = m.thread_id)
+          )
         ON CONFLICT (user_id, message_id) DO NOTHING
         `,
         [targetCustomerId, session.user_id],

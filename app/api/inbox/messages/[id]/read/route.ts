@@ -80,7 +80,7 @@ export async function POST(
             [id, session.user_id, targetCustomerId],
           )
         } else {
-          // Unified direct chat: mark all direct messages from this customer as read for the admin
+          // Unified direct chat: mark all direct messages (excluding broadcast replies) from this customer as read for the admin
           await pool.query(
             `
             INSERT INTO inbox_read_receipts (message_id, user_id)
@@ -89,6 +89,11 @@ export async function POST(
             WHERE m.is_broadcast = FALSE
               AND m.sender_role = 'customer'
               AND m.sender_id = $2
+              AND NOT EXISTS (
+                SELECT 1 FROM inbox_messages br
+                WHERE br.is_broadcast = TRUE
+                  AND (br.id = m.parent_id OR br.id = m.thread_id)
+              )
             ON CONFLICT (user_id, message_id) DO NOTHING
             `,
             [session.user_id, targetCustomerId],

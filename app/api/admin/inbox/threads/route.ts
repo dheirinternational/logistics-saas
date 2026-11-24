@@ -19,27 +19,32 @@ export async function GET() {
 
     const query = `
       WITH all_conversations AS (
-        -- Direct chat: 1 per customer
+        -- Direct chat: 1 per customer (excluding broadcast replies)
         SELECT
           COALESCE(
             (
-              SELECT id FROM inbox_messages
-              WHERE is_broadcast = FALSE
+              SELECT m.id FROM inbox_messages m
+              WHERE m.is_broadcast = FALSE
                 AND (
-                  (sender_role = 'customer' AND sender_id = cust_user.id)
-                  OR (sender_role = 'admin' AND recipient_id = cust_user.id)
+                  (m.sender_role = 'customer' AND m.sender_id = cust_user.id)
+                  OR (m.sender_role = 'admin' AND m.recipient_id = cust_user.id)
                 )
-                AND parent_id IS NULL
-              ORDER BY created_at ASC LIMIT 1
+                AND m.parent_id IS NULL
+              ORDER BY m.created_at ASC LIMIT 1
             ),
             (
-              SELECT id FROM inbox_messages
-              WHERE is_broadcast = FALSE
+              SELECT m.id FROM inbox_messages m
+              WHERE m.is_broadcast = FALSE
                 AND (
-                  (sender_role = 'customer' AND sender_id = cust_user.id)
-                  OR (sender_role = 'admin' AND recipient_id = cust_user.id)
+                  (m.sender_role = 'customer' AND m.sender_id = cust_user.id)
+                  OR (m.sender_role = 'admin' AND m.recipient_id = cust_user.id)
                 )
-              ORDER BY created_at ASC LIMIT 1
+                AND NOT EXISTS (
+                  SELECT 1 FROM inbox_messages br
+                  WHERE br.is_broadcast = TRUE
+                    AND (br.id = m.parent_id OR br.id = m.thread_id)
+                )
+              ORDER BY m.created_at ASC LIMIT 1
             )
           ) AS root_id,
           'Support Chat'::text AS root_title,
@@ -56,21 +61,36 @@ export async function GET() {
               AND unread_m.sender_role = 'customer'
               AND unread_m.sender_id = cust_user.id
               AND r.read_at IS NULL
+              AND NOT EXISTS (
+                SELECT 1 FROM inbox_messages br
+                WHERE br.is_broadcast = TRUE
+                  AND (br.id = unread_m.parent_id OR br.id = unread_m.thread_id)
+              )
           ) AS unread_count
         FROM (
-          SELECT DISTINCT (CASE WHEN sender_role = 'customer' THEN sender_id ELSE recipient_id END) AS id
-          FROM inbox_messages
-          WHERE is_broadcast = FALSE
+          SELECT DISTINCT (CASE WHEN m.sender_role = 'customer' THEN m.sender_id ELSE m.recipient_id END) AS id
+          FROM inbox_messages m
+          WHERE m.is_broadcast = FALSE
+            AND NOT EXISTS (
+              SELECT 1 FROM inbox_messages br
+              WHERE br.is_broadcast = TRUE
+                AND (br.id = m.parent_id OR br.id = m.thread_id)
+            )
         ) cust_user
         JOIN LATERAL (
-          SELECT body, sender_role, created_at
-          FROM inbox_messages
-          WHERE is_broadcast = FALSE
+          SELECT m.body, m.sender_role, m.created_at
+          FROM inbox_messages m
+          WHERE m.is_broadcast = FALSE
             AND (
-              (sender_role = 'customer' AND sender_id = cust_user.id)
-              OR (sender_role = 'admin' AND recipient_id = cust_user.id)
+              (m.sender_role = 'customer' AND m.sender_id = cust_user.id)
+              OR (m.sender_role = 'admin' AND m.recipient_id = cust_user.id)
             )
-          ORDER BY created_at DESC
+            AND NOT EXISTS (
+              SELECT 1 FROM inbox_messages br
+              WHERE br.is_broadcast = TRUE
+                AND (br.id = m.parent_id OR br.id = m.thread_id)
+            )
+          ORDER BY m.created_at DESC
           LIMIT 1
         ) latest ON true
         WHERE cust_user.id IS NOT NULL
