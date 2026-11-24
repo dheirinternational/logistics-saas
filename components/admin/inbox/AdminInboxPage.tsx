@@ -466,13 +466,16 @@ export function AdminInboxPage() {
                   const isSelected =
                     selectedInquiry?.rootId === inq.rootId &&
                     selectedInquiry?.customerId === inq.customerId
+                  const isUnread = inq.unreadCount > 0
 
                   return (
                     <li key={`${inq.rootId}-${inq.customerId}`}>
                       <button
                         type="button"
                         aria-pressed={isSelected}
-                        className={`admin-inbox-thread-btn${isSelected ? " is-active" : ""}`}
+                        className={`admin-inbox-thread-btn${isSelected ? " is-active" : ""}${
+                          isUnread ? " is-unread" : ""
+                        }`}
                         onClick={() => {
                           setSelectedInquiry({ ...inq })
                           setTimeout(() => window.dispatchEvent(new Event("dheir-inbox-updated")), 500)
@@ -480,8 +483,16 @@ export function AdminInboxPage() {
                       >
                         <span className="admin-inbox-thread-main">
                           <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
-                            <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-dheir-ink)" }}>
-                              {inq.customerName} {inq.customerCode ? `(${inq.customerCode})` : ""}
+                            <span className="admin-inbox-thread-name">
+                              {isUnread && (
+                                <span
+                                  className="admin-inbox-unread-dot"
+                                  aria-label={`${inq.unreadCount} unread`}
+                                />
+                              )}
+                              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {inq.customerName} {inq.customerCode ? `(${inq.customerCode})` : ""}
+                              </span>
                             </span>
                             <span style={{ fontSize: "11px", color: "var(--color-dheir-muted)", flexShrink: 0 }}>
                               {formatDate(inq.latestCreatedAt)}
@@ -490,21 +501,15 @@ export function AdminInboxPage() {
                           <span style={{ fontSize: "12px", color: "var(--color-dheir-blue)", fontWeight: 500 }}>
                             {inq.rootTitle}
                           </span>
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "var(--color-dheir-muted)",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
+                          <span className="admin-inbox-thread-preview">
                             {inq.latestSenderRole === "customer" ? "Customer: " : "Admin: "}
                             {inq.latestBody}
                           </span>
-                          {inq.unreadCount > 0 && (
-                            <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-dheir-blue)" }}>
-                              {inq.unreadCount} unread
+                          {isUnread && (
+                            <span>
+                              <span className="admin-inbox-unread-pill">
+                                {inq.unreadCount} unread
+                              </span>
                             </span>
                           )}
                         </span>
