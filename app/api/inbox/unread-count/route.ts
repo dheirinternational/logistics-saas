@@ -32,6 +32,7 @@ export async function GET(req: Request) {
         `
         SELECT COUNT(*) AS count
         FROM inbox_messages m
+        INNER JOIN users u ON u.id = m.sender_id
         LEFT JOIN inbox_read_receipts r
           ON r.message_id = m.id AND r.user_id = $1
         WHERE m.sender_role = 'customer'

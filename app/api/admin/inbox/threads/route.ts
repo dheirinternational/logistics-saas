@@ -21,12 +21,26 @@ export async function GET() {
       WITH all_conversations AS (
         -- Direct chat: 1 per customer
         SELECT
-          (
-            SELECT id FROM inbox_messages
-            WHERE is_broadcast = FALSE 
-              AND (recipient_id = cust_user.id OR sender_id = cust_user.id)
-              AND parent_id IS NULL
-            ORDER BY created_at ASC LIMIT 1
+          COALESCE(
+            (
+              SELECT id FROM inbox_messages
+              WHERE is_broadcast = FALSE
+                AND (
+                  (sender_role = 'customer' AND sender_id = cust_user.id)
+                  OR (sender_role = 'admin' AND recipient_id = cust_user.id)
+                )
+                AND parent_id IS NULL
+              ORDER BY created_at ASC LIMIT 1
+            ),
+            (
+              SELECT id FROM inbox_messages
+              WHERE is_broadcast = FALSE
+                AND (
+                  (sender_role = 'customer' AND sender_id = cust_user.id)
+                  OR (sender_role = 'admin' AND recipient_id = cust_user.id)
+                )
+              ORDER BY created_at ASC LIMIT 1
+            )
           ) AS root_id,
           'Support Chat'::text AS root_title,
           false AS is_broadcast,
@@ -39,8 +53,8 @@ export async function GET() {
             FROM inbox_messages unread_m
             LEFT JOIN inbox_read_receipts r ON r.message_id = unread_m.id AND r.user_id = $1
             WHERE unread_m.is_broadcast = FALSE
-              AND (unread_m.sender_id = cust_user.id OR unread_m.recipient_id = cust_user.id)
               AND unread_m.sender_role = 'customer'
+              AND unread_m.sender_id = cust_user.id
               AND r.read_at IS NULL
           ) AS unread_count
         FROM (
@@ -52,7 +66,10 @@ export async function GET() {
           SELECT body, sender_role, created_at
           FROM inbox_messages
           WHERE is_broadcast = FALSE
-            AND (sender_id = cust_user.id OR recipient_id = cust_user.id)
+            AND (
+              (sender_role = 'customer' AND sender_id = cust_user.id)
+              OR (sender_role = 'admin' AND recipient_id = cust_user.id)
+            )
           ORDER BY created_at DESC
           LIMIT 1
         ) latest ON true

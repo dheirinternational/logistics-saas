@@ -152,7 +152,10 @@ export async function GET(
           LEFT JOIN users u ON u.id = (CASE WHEN m.sender_role = 'customer' THEN m.sender_id ELSE m.recipient_id END)
           LEFT JOIN customers cust ON cust.user_id = u.id
           WHERE m.parent_id = $1
-            AND (m.sender_id = $2 OR m.recipient_id = $2)
+            AND (
+              (m.sender_role = 'customer' AND m.sender_id = $2)
+              OR (m.sender_role = 'admin' AND m.recipient_id = $2)
+            )
           ORDER BY m.created_at ASC
           `,
           [root.id, targetCustomerId],
@@ -208,6 +211,45 @@ export async function GET(
           )
         }
       }
+    } else if (isAdmin && targetCustomerId && Number.isFinite(targetCustomerId)) {
+      // Unified direct chat view for admin: show all non-broadcast messages belonging to targetCustomerId
+      repliesRes = await pool.query(
+        `
+        SELECT
+          m.id,
+          m.body,
+          m.sender_role,
+          m.sender_id,
+          m.recipient_id,
+          m.created_at,
+          u.first_name,
+          u.last_name,
+          cust.code AS customer_code
+        FROM inbox_messages m
+        LEFT JOIN users u ON u.id = (CASE WHEN m.sender_role = 'customer' THEN m.sender_id ELSE m.recipient_id END)
+        LEFT JOIN customers cust ON cust.user_id = u.id
+        WHERE m.is_broadcast = FALSE
+          AND (
+            (m.sender_role = 'customer' AND m.sender_id = $1)
+            OR (m.sender_role = 'admin' AND m.recipient_id = $1)
+          )
+        ORDER BY m.created_at ASC
+        `,
+        [targetCustomerId],
+      )
+
+      await pool.query(
+        `
+        INSERT INTO inbox_read_receipts (message_id, user_id)
+        SELECT m.id, $2
+        FROM inbox_messages m
+        WHERE m.is_broadcast = FALSE
+          AND m.sender_role = 'customer'
+          AND m.sender_id = $1
+        ON CONFLICT (user_id, message_id) DO NOTHING
+        `,
+        [targetCustomerId, session.user_id],
+      )
     } else {
       // Direct message thread: fetch all messages in thread including root
       const threadTargetId = root.thread_id || root.id

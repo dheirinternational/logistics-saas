@@ -56,22 +56,44 @@ export async function POST(
         customerIdParam && /^\d+$/.test(customerIdParam) ? Number(customerIdParam) : null
 
       if (targetCustomerId !== null) {
-        await pool.query(
-          `
-          INSERT INTO inbox_read_receipts (message_id, user_id)
-          SELECT m.id, $2
-          FROM inbox_messages m
-          WHERE m.sender_role = 'customer'
-            AND m.sender_id = $3
-            AND (
-              m.id = $1
-              OR m.parent_id = $1
-              OR m.thread_id = (SELECT COALESCE(thread_id, id) FROM inbox_messages WHERE id = $1 LIMIT 1)
-            )
-          ON CONFLICT (user_id, message_id) DO NOTHING
-          `,
-          [id, session.user_id, targetCustomerId],
+        const targetRes = await pool.query<{ is_broadcast: boolean }>(
+          `SELECT is_broadcast FROM inbox_messages WHERE id = $1 LIMIT 1`,
+          [id],
         )
+        const isBroadcastRoot = Boolean(targetRes.rows[0]?.is_broadcast)
+
+        if (isBroadcastRoot) {
+          await pool.query(
+            `
+            INSERT INTO inbox_read_receipts (message_id, user_id)
+            SELECT m.id, $2
+            FROM inbox_messages m
+            WHERE m.sender_role = 'customer'
+              AND m.sender_id = $3
+              AND (
+                m.id = $1
+                OR m.parent_id = $1
+                OR m.thread_id = (SELECT COALESCE(thread_id, id) FROM inbox_messages WHERE id = $1 LIMIT 1)
+              )
+            ON CONFLICT (user_id, message_id) DO NOTHING
+            `,
+            [id, session.user_id, targetCustomerId],
+          )
+        } else {
+          // Unified direct chat: mark all direct messages from this customer as read for the admin
+          await pool.query(
+            `
+            INSERT INTO inbox_read_receipts (message_id, user_id)
+            SELECT m.id, $1
+            FROM inbox_messages m
+            WHERE m.is_broadcast = FALSE
+              AND m.sender_role = 'customer'
+              AND m.sender_id = $2
+            ON CONFLICT (user_id, message_id) DO NOTHING
+            `,
+            [session.user_id, targetCustomerId],
+          )
+        }
       } else {
         await pool.query(
           `
