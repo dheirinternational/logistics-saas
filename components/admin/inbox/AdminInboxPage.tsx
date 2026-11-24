@@ -341,58 +341,54 @@ export function AdminInboxPage() {
   const totalUnreadInquiries = inquiries.reduce((sum, inq) => sum + inq.unreadCount, 0)
 
   return (
-    <div className="admin-page">
-      <header className="portal-account__header">
-        <h1 className="portal-account__title">Inbox</h1>
-        <p className="portal-account__subtitle">
-          Manage announcements, broadcast notifications, and customer inquiries.
-        </p>
-
-        {/* View Switcher Tabs */}
-        <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
-          <button
-            type="button"
-            onClick={() => setActiveTab("inquiries")}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "8px",
-              border: "none",
-              backgroundColor: activeTab === "inquiries" ? "var(--color-dheir-blue)" : "var(--color-dheir-page)",
-              color: activeTab === "inquiries" ? "#fff" : "var(--color-dheir-ink)",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Customer Inquiries {totalUnreadInquiries > 0 ? `(${totalUnreadInquiries})` : ""}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("compose")}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "8px",
-              border: "none",
-              backgroundColor: activeTab === "compose" ? "var(--color-dheir-blue)" : "var(--color-dheir-page)",
-              color: activeTab === "compose" ? "#fff" : "var(--color-dheir-ink)",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Compose and Sent Log
-          </button>
+    <div className="portal-home">
+      <header className="portal-home__greeting">
+        <div>
+          <p className="portal-home__greeting-label">Admin</p>
+          <h1 className="portal-home__greeting-title">Inbox</h1>
+          <p className="portal-home__greeting-sub">
+            Manage announcements, broadcast notifications, and customer inquiries.
+          </p>
         </div>
       </header>
 
+      {/* View Switcher Tabs */}
+      <div className="admin-inbox-tabs" role="tablist" aria-label="Inbox sections">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "inquiries"}
+          className={`admin-inbox-tab${activeTab === "inquiries" ? " is-active" : ""}`}
+          onClick={() => setActiveTab("inquiries")}
+        >
+          Customer Inquiries {totalUnreadInquiries > 0 ? `(${totalUnreadInquiries})` : ""}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "compose"}
+          className={`admin-inbox-tab${activeTab === "compose" ? " is-active" : ""}`}
+          onClick={() => setActiveTab("compose")}
+        >
+          Compose and Sent Log
+        </button>
+      </div>
+
       {/* VIEW 1: Customer Inquiries / Replies */}
       {activeTab === "inquiries" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: "24px", alignItems: "start" }}>
+        <div className="admin-inbox-grid admin-inbox-grid--inquiries">
           {/* Inquiries List */}
-          <section className="portal-home__panel" style={{ padding: "20px" }}>
-            <h2 className="portal-home__section-title" style={{ marginBottom: "16px" }}>
-              Customer Threads ({inquiries.length})
-            </h2>
+          <section className="portal-home__panel" aria-label="Customer threads">
+            <div className="portal-home__panel-head">
+              <div>
+                <h2 className="portal-home__section-title">
+                  Customer Threads ({inquiries.length})
+                </h2>
+                <p className="portal-home__section-sub">
+                  Select a conversation to read and respond.
+                </p>
+              </div>
+            </div>
 
             {loading ? (
               <div style={{ display: "flex", gap: "8px", alignItems: "center", padding: "16px 0" }}>
@@ -468,7 +464,7 @@ export function AdminInboxPage() {
           </section>
 
           {/* Inquiry Thread Details & Reply Form */}
-          <section className="portal-home__panel" style={{ padding: "20px" }}>
+          <section className="portal-home__panel" aria-label="Conversation thread">
             {!selectedInquiry ? (
               <div style={{ textAlign: "center", padding: "40px 16px", color: "var(--color-dheir-muted)", fontSize: "13px" }}>
                 Select a customer inquiry to view conversation and reply.
@@ -573,41 +569,18 @@ export function AdminInboxPage() {
                       <textarea
                         id="admin-reply-input"
                         rows={3}
+                        className="dheir-input"
                         placeholder="Write your response to the customer..."
                         value={adminReplyText}
                         onChange={(e) => setAdminReplyText(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          borderRadius: "8px",
-                          border: "none",
-                          backgroundColor: "var(--color-dheir-page)",
-                          color: "var(--color-dheir-ink)",
-                          fontSize: "13px",
-                          lineHeight: 1.5,
-                          fontFamily: "inherit",
-                          resize: "vertical",
-                          outline: "none",
-                        }}
+                        style={{ resize: "vertical" }}
                       />
                       <div style={{ display: "flex", justifyContent: "flex-end" }}>
                         <button
                           type="submit"
+                          className="portal-home__btn portal-home__btn--primary"
                           disabled={sendingAdminReply || !adminReplyText.trim()}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            padding: "8px 16px",
-                            borderRadius: "8px",
-                            border: "none",
-                            backgroundColor: "var(--color-dheir-blue)",
-                            color: "#fff",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            cursor: sendingAdminReply || !adminReplyText.trim() ? "not-allowed" : "pointer",
-                            opacity: sendingAdminReply || !adminReplyText.trim() ? 0.6 : 1,
-                          }}
+                          style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                         >
                           {sendingAdminReply ? (
                             <DHEIRLoader size={6} color="#fff" />

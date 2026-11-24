@@ -9733,6 +9733,40 @@ input[type="number"] {
 
 /* ——— Redesigned Admin Inbox Layout ——— */
 
+.admin-inbox-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px;
+    margin-bottom: 24px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-dheir-ink) 5%, var(--color-dheir-surface));
+    border: 1px solid var(--color-dheir-border);
+}
+
+.admin-inbox-tab {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--color-dheir-muted);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms, color 150ms, box-shadow 150ms;
+}
+
+.admin-inbox-tab:hover {
+    color: var(--color-dheir-ink);
+}
+
+.admin-inbox-tab.is-active {
+    background: var(--color-dheir-surface);
+    color: var(--color-dheir-blue);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
 .admin-inbox-grid {
     display: grid;
     grid-template-columns: 1fr 1.25fr;
@@ -9740,8 +9774,13 @@ input[type="number"] {
     align-items: start;
 }
 
+.admin-inbox-grid--inquiries {
+    grid-template-columns: 1fr 1.5fr;
+}
+
 @media (max-width: 1024px) {
-    .admin-inbox-grid {
+    .admin-inbox-grid,
+    .admin-inbox-grid--inquiries {
         grid-template-columns: 1fr;
     }
 }
