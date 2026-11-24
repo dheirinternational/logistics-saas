@@ -116,7 +116,25 @@ export function AdminInboxPage() {
       const sentJson = await sentRes.json()
       const inquiriesJson = await inquiriesRes.json()
 
-      if (customersJson.success) setCustomers(customersJson.data)
+      if (customersJson.success && Array.isArray(customersJson.data)) {
+        const seen = new Set<number>()
+        const deduped: Customer[] = []
+        for (const raw of customersJson.data) {
+          const cid = Number(raw?.id)
+          if (!Number.isFinite(cid) || cid <= 0 || seen.has(cid)) continue
+          seen.add(cid)
+          deduped.push({
+            id: cid,
+            email: raw?.email ?? "",
+            first_name: raw?.first_name ?? "",
+            last_name: raw?.last_name ?? "",
+            code: raw?.code ?? "",
+          })
+        }
+        setCustomers(deduped)
+      } else {
+        toast.error(customersJson?.message || "Could not load customers list")
+      }
       if (sentJson.success) setSent(sentJson.data)
       if (inquiriesJson.success) {
         setInquiries(inquiriesJson.data)
@@ -205,11 +223,16 @@ export function AdminInboxPage() {
     return () => document.removeEventListener("mousedown", handleOutsideClick)
   }, [])
 
+  const selectedCustomer = useMemo(
+    () => customers.find((c) => Number(c.id) === Number(recipientId)) ?? null,
+    [customers, recipientId],
+  )
+
   const filteredCustomers = useMemo(() => {
     if (!searchQuery.trim()) return customers
-    const term = searchQuery.toLowerCase()
+    const term = searchQuery.toLowerCase().trim()
     return customers.filter((c) => {
-      const fullName = `${c.first_name} ${c.last_name}`.toLowerCase()
+      const fullName = `${c.first_name || ""} ${c.last_name || ""}`.toLowerCase()
       const memberCode = (c.code || "").toLowerCase()
       const email = (c.email || "").toLowerCase()
       const custId = String(c.id)
@@ -607,7 +630,7 @@ export function AdminInboxPage() {
       {activeTab === "compose" && (
         <div className="admin-inbox-grid">
           {/* Left Column: Compose Form */}
-          <section className="portal-home__panel" aria-label="Compose new message">
+          <section className="portal-home__panel admin-inbox-compose-panel" aria-label="Compose new message">
             <div className="portal-home__panel-head">
               <div>
                 <h2 className="portal-home__section-title">Send a Message</h2>
@@ -615,30 +638,36 @@ export function AdminInboxPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSend} className="admin-inbox-form" style={{ padding: "24px" }}>
+            <form onSubmit={handleSend} className="admin-inbox-form">
               {/* Message Type Toggle */}
               <div className="admin-inbox-toggle-group">
                 <span className="admin-inbox-label">Recipient Mode</span>
-                <div className="admin-inbox-toggles">
+                <div className="admin-inbox-toggles" role="group" aria-label="Recipient Mode">
                   <button
                     type="button"
+                    aria-pressed={isBroadcast}
                     className={`admin-inbox-toggle-btn${isBroadcast ? " is-active" : ""}`}
                     onClick={() => {
                       setIsBroadcast(true)
                       setRecipientId("")
                       setSearchQuery("")
+                      setDropdownOpen(false)
                     }}
                   >
                     <IconBroadcast size={18} stroke={1.5} aria-hidden />
-                    Broadcast to All Customers
+                    <span>Broadcast to All Customers</span>
                   </button>
                   <button
                     type="button"
+                    aria-pressed={!isBroadcast}
                     className={`admin-inbox-toggle-btn${!isBroadcast ? " is-active" : ""}`}
-                    onClick={() => setIsBroadcast(false)}
+                    onClick={() => {
+                      setIsBroadcast(false)
+                      setDropdownOpen(true)
+                    }}
                   >
                     <IconUser size={18} stroke={1.5} aria-hidden />
-                    Specific Customer
+                    <span>Specific Customer</span>
                   </button>
                 </div>
               </div>
@@ -646,36 +675,43 @@ export function AdminInboxPage() {
               {/* Specific Customer Autocomplete Search Picker */}
               {!isBroadcast && (
                 <div className="portal-packages__field">
-                  <span className="portal-packages__field-label">Target Customer</span>
+                  <label htmlFor="admin-inbox-customer-search" className="portal-packages__field-label">
+                    Target Customer
+                  </label>
                   <div className="admin-inbox-search-container" ref={containerRef}>
                     <div style={{ position: "relative" }}>
                       <input
+                        id="admin-inbox-customer-search"
                         type="text"
                         className="dheir-input"
-                        style={{ paddingRight: "40px" }}
+                        style={{ paddingRight: "64px" }}
                         placeholder="Search by customer name, code, email..."
                         value={searchQuery}
                         autoComplete="off"
+                        role="combobox"
+                        aria-expanded={dropdownOpen}
+                        aria-controls="admin-inbox-customer-listbox"
+                        aria-autocomplete="list"
                         onChange={(e) => {
                           setSearchQuery(e.target.value)
                           setDropdownOpen(true)
-                          if (!e.target.value) {
-                            setRecipientId("")
-                          }
+                          setRecipientId("")
                         }}
                         onFocus={() => setDropdownOpen(true)}
+                        onClick={() => setDropdownOpen(true)}
                       />
                       {searchQuery && (
                         <button
                           type="button"
+                          aria-label="Clear selected customer"
                           onClick={() => {
                             setSearchQuery("")
                             setRecipientId("")
-                            setDropdownOpen(false)
+                            setDropdownOpen(true)
                           }}
                           style={{
                             position: "absolute",
-                            right: "12px",
+                            right: "36px",
                             top: "50%",
                             transform: "translateY(-50%)",
                             background: "transparent",
@@ -685,36 +721,91 @@ export function AdminInboxPage() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            padding: 0,
+                            padding: "4px",
                           }}
                         >
                           <IconX size={16} />
                         </button>
                       )}
+                      <button
+                        type="button"
+                        aria-label={dropdownOpen ? "Hide customer list" : "Show customer list"}
+                        onClick={() => setDropdownOpen((prev) => !prev)}
+                        style={{
+                          position: "absolute",
+                          right: "10px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "var(--color-dheir-muted)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: "4px",
+                        }}
+                      >
+                        {dropdownOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+                      </button>
                     </div>
 
+                    {selectedCustomer && (
+                      <div className="admin-inbox-selected-pill">
+                        <span>
+                          Selected: {`${selectedCustomer.first_name} ${selectedCustomer.last_name}`.trim()}
+                          {selectedCustomer.code ? ` (${selectedCustomer.code})` : ""}
+                        </span>
+                        <IconCheck size={15} stroke={2} aria-hidden />
+                      </div>
+                    )}
+
                     {dropdownOpen && (
-                      <ul className="admin-inbox-search-results">
-                        {filteredCustomers.length === 0 ? (
+                      <ul
+                        id="admin-inbox-customer-listbox"
+                        role="listbox"
+                        className="admin-inbox-search-results"
+                      >
+                        {loading ? (
+                          <li className="admin-inbox-search-btn" style={{ color: "var(--color-dheir-muted)", cursor: "default" }}>
+                            Loading customers...
+                          </li>
+                        ) : filteredCustomers.length === 0 ? (
                           <li className="admin-inbox-search-btn" style={{ color: "var(--color-dheir-muted)", cursor: "default" }}>
                             No customers found
                           </li>
                         ) : (
-                          filteredCustomers.map((c) => (
-                            <li key={c.id} className="admin-inbox-search-item">
-                              <button
-                                type="button"
-                                className="admin-inbox-search-btn"
-                                onClick={() => {
-                                  setRecipientId(c.id)
-                                  setSearchQuery(`${c.first_name} ${c.last_name} (${c.code}) : ${c.email}`)
-                                  setDropdownOpen(false)
-                                }}
-                              >
-                                {c.first_name} {c.last_name} ({c.code}) : {c.email}
-                              </button>
-                            </li>
-                          ))
+                          filteredCustomers.map((c) => {
+                            const fullName = `${c.first_name} ${c.last_name}`.trim() || c.email
+                            const isPicked = Number(recipientId) === Number(c.id)
+                            return (
+                              <li key={c.id} className="admin-inbox-search-item" role="option" aria-selected={isPicked}>
+                                <button
+                                  type="button"
+                                  className={`admin-inbox-search-btn${isPicked ? " is-selected" : ""}`}
+                                  onClick={() => {
+                                    setRecipientId(c.id)
+                                    setSearchQuery(
+                                      c.code
+                                        ? `${fullName} (${c.code}) : ${c.email}`
+                                        : `${fullName} : ${c.email}`,
+                                    )
+                                    setDropdownOpen(false)
+                                  }}
+                                >
+                                  <span style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+                                    <span style={{ fontWeight: 600, color: "var(--color-dheir-ink)" }}>
+                                      {fullName} {c.code ? `(${c.code})` : ""}
+                                    </span>
+                                    <span style={{ fontSize: "12px", color: "var(--color-dheir-muted)" }}>
+                                      {c.email}
+                                    </span>
+                                  </span>
+                                  {isPicked && <IconCheck size={16} stroke={2} style={{ color: "var(--color-dheir-blue)", flexShrink: 0 }} />}
+                                </button>
+                              </li>
+                            )
+                          })
                         )}
                       </ul>
                     )}
@@ -774,7 +865,7 @@ export function AdminInboxPage() {
               </div>
             </div>
 
-            <div style={{ padding: "24px" }}>
+            <div>
               {loading ? (
                 <div className="admin-inbox__loading" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                   <DHEIRLoader size={8} color="var(--color-dheir-blue)" />

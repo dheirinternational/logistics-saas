@@ -9219,6 +9219,70 @@ input[type="number"] {
 }
 
 /* ——— Searchable Recipient Select ——— */
+.portal-home__panel.admin-inbox-compose-panel {
+    overflow: visible;
+}
+
+.admin-inbox-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.admin-inbox-toggle-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-inbox-label {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-dheir-ink);
+}
+
+.admin-inbox-toggles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+@media (max-width: 520px) {
+    .admin-inbox-toggles {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-inbox-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--color-dheir-border);
+    background: var(--color-dheir-bg);
+    color: var(--color-dheir-ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms, border-color 150ms, color 150ms;
+}
+
+.admin-inbox-toggle-btn:hover {
+    border-color: var(--color-dheir-blue);
+    background: color-mix(in srgb, var(--color-dheir-blue) 4%, var(--color-dheir-surface));
+}
+
+.admin-inbox-toggle-btn.is-active {
+    background: var(--color-dheir-blue-muted);
+    border-color: var(--color-dheir-blue);
+    color: var(--color-dheir-blue);
+}
+
 .admin-inbox-search-container {
     position: relative;
     width: 100%;
@@ -9229,14 +9293,15 @@ input[type="number"] {
     top: 100%;
     left: 0;
     right: 0;
-    z-index: 10;
-    max-height: 240px;
+    z-index: 40;
+    max-height: 260px;
     overflow-y: auto;
     background: var(--color-dheir-surface);
     border: 1px solid var(--color-dheir-border);
-    border-radius: 8px;
-    padding: 4px 0;
-    margin-top: 4px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-dheir-lift);
+    padding: 4px;
+    margin: 6px 0 0;
     list-style: none;
 }
 
@@ -9246,7 +9311,12 @@ input[type="number"] {
 
 .admin-inbox-search-btn {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     padding: 10px 12px;
+    border-radius: 8px;
     font-family: var(--font-sans);
     font-size: 13.5px;
     text-align: left;
@@ -9257,8 +9327,24 @@ input[type="number"] {
     transition: background 150ms;
 }
 
-.admin-inbox-search-btn:hover {
-    background: color-mix(in srgb, var(--color-dheir-blue) 6%, transparent);
+.admin-inbox-search-btn:hover,
+.admin-inbox-search-btn.is-selected {
+    background: color-mix(in srgb, var(--color-dheir-blue) 8%, transparent);
+}
+
+.admin-inbox-selected-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--color-dheir-blue-muted);
+    color: var(--color-dheir-blue);
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 600;
 }
 
 
